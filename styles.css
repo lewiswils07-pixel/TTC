@@ -434,6 +434,11 @@
     background:radial-gradient(circle at 36% 30%, #bfe6e8 0%, #6fa9c9 48%, #2c5f85 78%, #1d3f5c 100%);
     box-shadow:inset 0 0 0 1px rgba(0,0,0,.08), inset -18px -20px 50px rgba(0,0,0,.35), inset 12px 12px 26px rgba(255,255,255,.16), 0 24px 52px -16px rgba(0,0,0,.4)}
   .map-svg{position:absolute;inset:0;width:100%;height:100%}
+  /* 3D globe (matches.html): the sphere is drawn on the canvas; routes and
+     tethers sit in an SVG overlay whose viewBox is set in px by the script. */
+  .globe-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .globe-routes .route-shadow{stroke-width:4.5}
+  .globe-routes .route-line{stroke-width:2.5;stroke-dasharray:6 5}
   .map-svg .route-shadow{fill:none;stroke:rgba(0,0,0,.3);stroke-width:1;stroke-linecap:round;opacity:0;transition:opacity .4s ease}
   .map-svg .route-shadow.on{opacity:1}
   .map-svg .route-line{fill:none;stroke-width:.65;stroke-linecap:round;stroke-dasharray:1.6 1.8;opacity:0;transition:opacity .4s ease}
@@ -449,6 +454,14 @@
   .globe-pin.on{opacity:1;font-size:10px;pointer-events:auto;z-index:5}
   .globe-pin:hover{filter:brightness(1.1)}
   .globe-pin:focus-visible{outline:2px solid var(--on-accent);outline-offset:2px}
+  /* Exact home-town marker; the member's initials badge sits beside it,
+     joined by a tether line (.pin-tether), so badges can be spread apart
+     without moving the true location. */
+  .home-dot{position:absolute;top:0;left:0;width:10px;height:10px;margin:-5px;border-radius:50%;background:#F8F4EC;border:2px solid #21201E;
+    box-shadow:0 1px 4px rgba(0,0,0,.5);opacity:0;pointer-events:none;z-index:3;transition:opacity .4s ease}
+  .home-dot.on{opacity:1}
+  .map-svg .pin-tether{stroke:rgba(248,244,236,.9);stroke-width:1.25;vector-effect:non-scaling-stroke;opacity:0;transition:opacity .4s ease}
+  .map-svg .pin-tether.on{opacity:1}
   .dest-pin{position:absolute;top:0;left:0;width:13px;height:13px;margin:-6.5px;border:2px solid rgba(255,255,255,.95);border-radius:3px;
     background:#21201E;transform:rotate(45deg) scale(0);opacity:0;pointer-events:none;
     box-shadow:0 2px 8px rgba(0,0,0,.4);
@@ -477,20 +490,23 @@
   .cluster-cards{display:grid;grid-template-columns:1fr;gap:16px;align-content:start}
   /* Member cards (after 21st.dev "Testimonial Card", shadcnui-blocks):
      rounded card with a soft layered shadow; avatar + name + handle as a
-     header row, the quote full-width beneath, a large quote-mark
-     watermark in the corner, and the match note as a tinted footer.
+     header row, the quote full-width beneath, and the match note as a
+     tinted footer.
      The markup is built by the page script, so the header row is made
      with CSS grid + display:contents rather than new wrapper elements. */
-  .ccard{position:relative;overflow:hidden;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px 0;
+  .ccard{position:relative;overflow:hidden;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;
     display:grid;grid-template-columns:44px minmax(0,1fr);grid-template-rows:auto auto auto 1fr auto;column-gap:14px;align-items:center;
     box-shadow:0 1px 2px rgba(33,32,30,.05), 0 10px 28px -16px rgba(33,32,30,.22);
     transition:transform .25s var(--ease-out), box-shadow .25s var(--ease-out);
     animation:rise .5s var(--ease-out) both}
-  .ccard:nth-child(2){animation-delay:.07s}
-  .ccard:nth-child(3){animation-delay:.14s}
+  .ccard:nth-child(2){animation-delay:.08s}
+  .ccard:nth-child(3){animation-delay:.16s}
+  /* Outgoing state while the matches page swaps to the next trip (see
+     swapCards in matches.html); the new cards then run the rise-in above. */
+  .cluster-cards.is-leaving .ccard{animation:none;opacity:0;transform:translateY(-8px);transition:opacity .2s ease, transform .2s ease}
+  .cluster-head{transition:opacity .2s ease}
+  .cluster-head.is-leaving{opacity:0}
   .ccard:hover{transform:translateY(-2px);box-shadow:0 1px 2px rgba(33,32,30,.05), 0 18px 36px -18px rgba(33,32,30,.3)}
-  .ccard::after{content:"\201C" / "";position:absolute;top:0;right:16px;font-family:var(--font-display);font-size:120px;line-height:1;
-    color:var(--terracotta);opacity:.12;pointer-events:none}
   .ccard-copy{display:contents}
   .ccard-stamp{grid-column:1;grid-row:1 / span 2;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
     font-family:var(--font-display);font-style:italic;font-weight:500;font-size:15px;color:var(--on-accent);
@@ -501,23 +517,52 @@
   .ccard-chips{grid-column:1 / -1;display:flex;flex-wrap:wrap;align-content:flex-start;align-self:start;gap:6px;margin:16px 0 0}
   .ccard-chips .chip{height:26px;padding:0 10px;font-size:11px;cursor:default;background:var(--paper)}
   .ccard-chips .chip-shared{background:var(--terracotta);border-color:var(--terracotta);color:var(--on-accent);font-weight:600}
-  .ccard-note{grid-column:1 / -1;align-self:end;font-size:12px;color:var(--muted);margin:20px -24px 0;padding:12px 24px;background:var(--paper-tint);border-top:1px solid var(--line)}
-  .ccard-note b{color:var(--ink);font-weight:600}
+
+  /* Trust badges (badges.js): a quiet row of small line icons + labels
+     under the member's name, not stickers. Icons take the terracotta
+     accent; labels stay in the muted ink so the row reads as metadata. */
+  .ccard{grid-template-rows:auto auto auto auto 1fr}
+  .tbadges{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:6px 14px;list-style:none;margin:14px 0 0;padding:0}
+  .tbadge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;letter-spacing:.1px;color:var(--ink-soft);white-space:nowrap}
+  .tbadge svg{width:14px;height:14px;flex:none;color:var(--terracotta)}
+
+  .ccard-age{font-family:var(--font-body);font-size:14px;font-weight:500;color:var(--muted);margin-left:2px}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+  /* Wide cards: interests move up alongside the name/badges/quote column
+     instead of stacking beneath it, so each card is roughly half as tall.
+     Keyed to the card list's own width (container query), so the narrow
+     3-up tablet row and phones keep the stacked layout. */
+  .cluster-cards{container-type:inline-size}
+  /* (Skipped for 640–879px, where the list is a 3-up row of narrow cards.) */
+  @media (max-width:639px), (min-width:880px){
+  @container (min-width:600px){
+    .ccard{grid-template-columns:44px minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto auto 1fr;column-gap:14px}
+    .ccard .ccard-chips{grid-column:3;grid-row:1 / span 4;align-self:start;margin:4px 0 0;padding-left:22px;border-left:1px solid var(--line)}
+    .ccard .ccard-bio{grid-column:1 / span 2;grid-row:4;margin-top:14px}
+    .ccard .tbadges{grid-column:1 / span 2;grid-row:3}
+  }
+  }
 
   /* Below 880px: still one column, but wide enough to lay the three cards
      out side by side instead of stacked. */
   @media (min-width:640px) and (max-width:879px){
     .cluster-cards{grid-template-columns:repeat(3,1fr)}
-    .ccard{padding:18px 18px 0;align-content:start}
-    .ccard-note{margin:16px -18px 0;padding:10px 18px}
+    .ccard{padding:18px;align-content:start}
     .ccard-bio{font-size:14px}
   }
   /* Globe left, cards right — the cards go back to a single vertical list
      since they're now a narrower sidebar column, not a full-width row. */
   @media (min-width:880px){
-    .globe-postcard{grid-template-columns:300px 1fr;grid-template-areas:"head head" "globe cards";column-gap:36px;align-items:start}
+    /* Globe column takes the spare width (globe up to 380px, centred in
+       it); the cards are capped so they don't stretch across the page. */
+    .globe-postcard{grid-template-columns:minmax(300px,1fr) minmax(0,700px);grid-template-areas:"head head" "globe cards";column-gap:48px;align-items:start}
+    .match-globe-wrap{max-width:380px}
     .cluster-head{text-align:left;max-width:none;margin:0 0 4px}
-    .match-globe-wrap{margin:0}
+    /* Sit level with the middle member card rather than the top one; the
+       top margin (= arrow row + gap) centres the globe itself, not the
+       globe plus its arrows. */
+    .match-globe-wrap{margin:50px auto 0;align-self:center}
   }
   @media (max-width:480px){
     /* Compact header + globe so the pagination dots/arrows always land

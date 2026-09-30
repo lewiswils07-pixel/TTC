@@ -60,15 +60,10 @@
 
       <div class="match-globe-wrap">
         <div class="globe" id="globe">
-          <svg class="map-svg" id="mapSvg" viewBox="0 0 360 180" preserveAspectRatio="none" aria-hidden="true">
-            <!-- A real satellite photo (NASA "Blue Marble"), the whole
-                 world, placed at exactly 1 SVG unit = 1 degree in both
-                 directions — the same scale project() below uses — so it's
-                 never stretched non-uniformly, only cropped/zoomed (see
-                 computeView/viewRect in the script). -->
-            <image href="img/earth-full.jpg" x="0" y="0" width="360" height="180" preserveAspectRatio="none"></image>
-            <g id="routeGroup"></g>
-          </svg>
+          <!-- 3D globe: the Blue Marble photo (img/earth-full.jpg) is
+               projected onto a sphere by the script below and drawn here. -->
+          <canvas class="globe-canvas" id="globeCanvas" aria-hidden="true"></canvas>
+          <svg class="map-svg globe-routes" id="mapSvg" aria-hidden="true"><g id="routeGroup"></g></svg>
           <div class="globe-sheen" aria-hidden="true"></div>
           <div class="globe-pins" id="globePins"></div>
           <div class="dest-label" id="destLabel"></div>
@@ -114,6 +109,7 @@
 </div>
 
 <script src="nav.js"></script>
+<script src="badges.js"></script>
 <script>
 (function(){
   // Full founding-member list — fictional stand-ins only, used to show the
@@ -122,29 +118,29 @@
   // keep their own separate trips and only count towards the "matched with
   // N others" stat on each card.
   var MEMBERS = [
-    { name:"Maya T.", home:"London", dest:"Lisbon, this spring", bio:"Chasing golden hour and good pastries.", interests:["Photography","Coffee culture","Street food","Historic sites","Walking tours","City breaks"] },
-    { name:"Ben O.", home:"Manchester", dest:"Costa Rica, next year", bio:"Will plan a whole trip around one good trail.", interests:["Hiking","Mountains","Adventure sports","Wildlife","Road trips"] },
-    { name:"Priya S.", home:"Bristol", dest:"Kyoto, next spring", bio:"Always the one who finds the hole-in-the-wall restaurant.", interests:["Food tours","Cultural immersion","Museums","Historic sites","Art galleries","Walking tours"] },
-    { name:"Tom H.", home:"Edinburgh", dest:"Croatia, this summer", bio:"Boat, book, repeat.", interests:["Beaches","Water sports","Cruises","Wine tasting","Live music"] },
-    { name:"Aisha K.", home:"Leeds", dest:"Lisbon, this spring", bio:"Collects markets the way other people collect stamps.", interests:["Local markets","Cultural immersion","Street food","Photography","Architecture"] },
-    { name:"Sam R.", home:"Cardiff", dest:"Costa Rica, next year", bio:"Has a wetsuit for every occasion.", interests:["Water sports","Adventure sports","Wildlife","Hiking","Beaches"] },
-    { name:"Grace L.", home:"Brighton", dest:"Kyoto, next spring", bio:"Will taste-test the region's whole food and drink scene, responsibly.", interests:["Wine tasting","Fine dining","Cooking classes","Historic sites","Cycling"] },
-    { name:"Daniel P.", home:"Glasgow", dest:"Lisbon, this spring", bio:"First stop is always the record shop.", interests:["Live music","Nightlife","Art galleries","Museums","Coffee culture"] },
-    { name:"Ella M.", home:"Bristol", dest:"Bali, next spring", bio:"Yoga mat travels better than most of her clothes.", interests:["Yoga","Wellness retreats","Beaches","Spa","Cultural immersion"] },
-    { name:"Ollie W.", home:"London", dest:"Norway, this winter", bio:"Chases the northern lights more than sleep.", interests:["Stargazing","Road trips","Mountains","Photography","Wildlife"] },
-    { name:"Zara N.", home:"Birmingham", dest:"Seville, this summer", bio:"Plans a trip around a football fixture, every time.", interests:["Football matches","Nightlife","Street food","Local festivals","Architecture"] },
-    { name:"Noah F.", home:"Liverpool", dest:"Provence, this summer", bio:"Will find the best golf course within an hour, guaranteed.", interests:["Golf","Fine dining","Cycling","Historic sites","Wine tasting"] },
-    { name:"Ivy C.", home:"Sheffield", dest:"Kyoto, next spring", bio:"Museum-hops until the gift shop closes.", interests:["Museums","Art galleries","Cultural immersion","Cinema","Coffee culture"] },
-    { name:"Leo D.", home:"Bristol", dest:"Costa Rica, next year", bio:"Runs before breakfast wherever the timezone.", interests:["Fitness","Adventure sports","Wildlife","Beaches","Hiking"] }
+    { name:"Maya T.", age:29, home:"London", dest:"Lisbon, this spring", bio:"Chasing golden hour and good pastries.", interests:["Photography","Coffee culture","Street food","Historic sites","Walking tours","City breaks"], badges:["id","video","social"] },
+    { name:"Ben O.", age:34, home:"New York", dest:"Costa Rica, next year", bio:"Will plan a whole trip around one good trail.", interests:["Hiking","Mountains","Adventure sports","Wildlife","Road trips"], badges:["id","social"] },
+    { name:"Priya S.", age:31, home:"Singapore", dest:"Kyoto, next spring", bio:"Always the one who finds the hole-in-the-wall restaurant.", interests:["Food tours","Cultural immersion","Museums","Historic sites","Art galleries","Walking tours"], badges:["id","video"] },
+    { name:"Tom H.", age:38, home:"Edinburgh", dest:"Croatia, this summer", bio:"Boat, book, repeat.", interests:["Beaches","Water sports","Cruises","Wine tasting","Live music"], badges:["id"] },
+    { name:"Aisha K.", age:27, home:"Toronto", dest:"Lisbon, this spring", bio:"Collects markets the way other people collect stamps.", interests:["Local markets","Cultural immersion","Street food","Photography","Architecture"], badges:["id","social"] },
+    { name:"Sam R.", age:26, home:"Mexico City", dest:"Costa Rica, next year", bio:"Has a wetsuit for every occasion.", interests:["Water sports","Adventure sports","Wildlife","Hiking","Beaches"], badges:["id","video","social"] },
+    { name:"Grace L.", age:42, home:"Hong Kong", dest:"Kyoto, next spring", bio:"Will taste-test the region's whole food and drink scene, responsibly.", interests:["Wine tasting","Fine dining","Cooking classes","Historic sites","Cycling"], badges:["id","video"] },
+    { name:"Daniel P.", age:33, home:"Berlin", dest:"Lisbon, this spring", bio:"First stop is always the record shop.", interests:["Live music","Nightlife","Art galleries","Museums","Coffee culture"], badges:["id","video"] },
+    { name:"Ella M.", age:30, home:"Bristol", dest:"Bali, next spring", bio:"Yoga mat travels better than most of her clothes.", interests:["Yoga","Wellness retreats","Beaches","Spa","Cultural immersion"], badges:["id","social"] },
+    { name:"Ollie W.", age:36, home:"London", dest:"Norway, this winter", bio:"Chases the northern lights more than sleep.", interests:["Stargazing","Road trips","Mountains","Photography","Wildlife"], badges:["id","video","social"] },
+    { name:"Zara N.", age:25, home:"Birmingham", dest:"Seville, this summer", bio:"Plans a trip around a football fixture, every time.", interests:["Football matches","Nightlife","Street food","Local festivals","Architecture"], badges:["id"] },
+    { name:"Noah F.", age:45, home:"Liverpool", dest:"Provence, this summer", bio:"Will find the best golf course within an hour, guaranteed.", interests:["Golf","Fine dining","Cycling","Historic sites","Wine tasting"], badges:["id","social"] },
+    { name:"Ivy C.", age:28, home:"Sydney", dest:"Kyoto, next spring", bio:"Museum-hops until the gift shop closes.", interests:["Museums","Art galleries","Cultural immersion","Cinema","Coffee culture"], badges:["id","video","social"] },
+    { name:"Leo D.", age:32, home:"São Paulo", dest:"Costa Rica, next year", bio:"Runs before breakfast wherever the timezone.", interests:["Fitness","Adventure sports","Wildlife","Beaches","Hiking"], badges:["id"] }
   ];
   function byName(n){ for (var i=0;i<MEMBERS.length;i++) if (MEMBERS[i].name===n) return MEMBERS[i]; }
 
   // Rough real-world lat/lon for each home city and each shared destination —
   // the map is an actual (if simplified) projection, not a decorative ring.
   var HOME_COORDS = {
-    "London":[51.51,-0.13], "Manchester":[53.48,-2.24], "Bristol":[51.45,-2.58],
-    "Leeds":[53.80,-1.55], "Cardiff":[51.48,-3.18], "Brighton":[50.82,-0.14],
-    "Glasgow":[55.86,-4.25], "Sheffield":[53.38,-1.47]
+    "London":[51.51,-0.13], "Toronto":[43.65,-79.38], "Berlin":[52.52,13.40],
+    "Singapore":[1.35,103.82], "Sydney":[-33.87,151.21], "Hong Kong":[22.32,114.17],
+    "Mexico City":[19.43,-99.13], "New York":[40.71,-74.01], "São Paulo":[-23.55,-46.63]
   };
   var DEST_COORDS = {
     "Lisbon, this spring": [38.72,-9.14],
@@ -159,16 +155,16 @@
     { dest:"Costa Rica, next year", names:["Sam R.","Ben O.","Leo D."], note:"All three would have booked this trip alone otherwise." }
   ];
 
-  // 1 unit = 1 degree, matching the <image> above exactly — a uniform scale
-  // in both directions, so cropping/zooming (below) only ever moves and
-  // resizes the view window; it never stretches the photo out of shape the
-  // way normalizing lat and lon independently into a fixed 0–100 square did.
-  var WORLD_W = 360, WORLD_H = 180;
-  var BASE_WINDOW = 170; // window size, in degrees, at zoom 1 (nearly the photo's full height — a wide establishing view)
-
-  function project(lat, lon){
-    return { x: lon + 180, y: 90 - lat };
-  }
+  // ---- 3D globe -------------------------------------------------------
+  // An orthographic sphere: every canvas pixel on the disc is mapped back
+  // to a latitude/longitude and sampled from the equirectangular Blue
+  // Marble photo, with soft top-left lighting so it reads as a lit ball.
+  // Each trip gets its own view (centre + zoom) and the globe spins to it.
+  var DEG = Math.PI / 180;
+  var FIT_R = 0.78;      // every true location sits within 78% of the radius
+  var MAX_ZOOM = 3.2;
+  var SPIN_MS = 1100;
+  var MAX_CANVAS = 720;  // backing-store cap (px) to keep each frame fast
 
   var AVATAR_COLORS = ["terracotta","saffron","turquoise"];
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -186,116 +182,235 @@
   var prevBtn = document.getElementById('globePrev');
   var nextBtn = document.getElementById('globeNext');
   var globeEl = document.getElementById('globe');
+  var canvasEl = document.getElementById('globeCanvas');
   var mapSvgEl = document.getElementById('mapSvg');
   var routeGroup = document.getElementById('routeGroup');
+  var SVG_NS = 'http://www.w3.org/2000/svg';
 
   function initials(name){
     return name.split(' ').map(function(w){ return w[0]; }).join('').slice(0,2).toUpperCase();
   }
 
-  // Precompute each cluster's layout: a jittered home position per member
-  // (real cities are close together, so fan them out a little for clarity)
-  // and one shared destination position they all point to. The jitter radius
-  // is chosen AFTER a first look at how tightly this cluster will be zoomed
-  // (see computeView below) — a wide-zoomed cluster (home towns and
-  // destination far apart) needs a bigger real-world nudge to read as the
-  // same visual separation as a close-zoomed one, or its pins end up
-  // touching on screen even though they looked fine in world coordinates.
+  function toVec(lat, lon){
+    var a = lat * DEG, b = lon * DEG;
+    return [Math.cos(a) * Math.cos(b), Math.cos(a) * Math.sin(b), Math.sin(a)];
+  }
+  function toLatLon(v){
+    var l = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    return { lat: Math.asin(v[2] / l) / DEG, lon: Math.atan2(v[1], v[0]) / DEG };
+  }
+  function dot(a, b){ return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  // Camera basis for a view centred on (lat, lon): east, north, and out
+  // (towards the viewer).
+  function basis(view){
+    var p = view.lat * DEG, l = view.lon * DEG, sp = Math.sin(p), cp = Math.cos(p), sl = Math.sin(l), cl = Math.cos(l);
+    return { e: [-sl, cl, 0], n: [-sp * cl, -sp * sl, cp], o: [cp * cl, cp * sl, sp] };
+  }
+
+  // Each member sits at the true coordinates of the home town on their card.
   CLUSTERS.forEach(function(cluster){
-    cluster.destPos = project(DEST_COORDS[cluster.dest][0], DEST_COORDS[cluster.dest][1]);
-    var bases = cluster.names.map(function(name){
-      return project(HOME_COORDS[byName(name).home][0], HOME_COORDS[byName(name).home][1]);
-    });
-    var roughZoom = computeView({ members: bases.map(function(b){ return { pos: b }; }), destPos: cluster.destPos }).zoom;
-    var jitter = 14.7 / roughZoom;
+    var d = DEST_COORDS[cluster.dest];
+    cluster.destPos = { lat: d[0], lon: d[1] };
     cluster.members = cluster.names.map(function(name, i){
-      var member = byName(name);
-      var angle = i * (360 / cluster.names.length) * Math.PI / 180;
-      var pos = { x: bases[i].x + Math.cos(angle) * jitter, y: bases[i].y + Math.sin(angle) * jitter };
-      return { member: member, pos: pos, color: AVATAR_COLORS[i % AVATAR_COLORS.length] };
+      var member = byName(name), c = HOME_COORDS[member.home];
+      return { member: member, pos: { lat: c[0], lon: c[1] }, color: AVATAR_COLORS[i % AVATAR_COLORS.length] };
     });
     cluster.view = computeView(cluster);
-    // Flip the destination label below its pin when the members themselves
-    // sit above it — otherwise the label prints right over their pins.
-    var avgMemberY = cluster.members.reduce(function(s, m){ return s + m.pos.y; }, 0) / cluster.members.length;
-    cluster.labelBelow = avgMemberY < cluster.destPos.y;
   });
 
-  // Every cluster's home towns and destination sit at very different scales —
-  // three UK cities and Lisbon fit in a tight corner of the world; the same
-  // UK cities and Kyoto span most of it. A single fixed world crop either
-  // strands the near ones in a sliver of the globe or crowds their pins on
-  // top of each other. So each cluster gets its own framing: zoom in close
-  // when everyone's nearby, stay wide when the trip spans continents.
-  //
-  // The window is always SQUARE in degrees (vw === vh, see viewRect) and
-  // project() uses the same degrees-per-unit in both directions, so this
-  // never has to stretch the photo to fill it — only choose how much of it
-  // to show and where to centre that square.
+  // Centre on everyone involved; zoom until the furthest of them sits at
+  // FIT_R of the radius (never below 1, so the sphere always fills the disc).
   function computeView(cluster){
-    var pts = cluster.members.map(function(m){ return m.pos; }).concat([cluster.destPos]);
-    var xs = pts.map(function(p){ return p.x; }), ys = pts.map(function(p){ return p.y; });
-    var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
-    var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
-    var w = maxX - minX, h = maxY - minY;
-    var pad = Math.max(w, h) * 0.55 + 5;
-    var zoom = Math.min(BASE_WINDOW / (w + pad * 2), BASE_WINDOW / (h + pad * 2));
-    zoom = Math.max(1, Math.min(4.5, zoom));
-    return { cx: (minX + maxX) / 2, cy: (minY + maxY) / 2, zoom: zoom };
+    var pts = cluster.members.map(function(m){ return m.pos; }).concat([cluster.destPos]).map(function(p){ return toVec(p.lat, p.lon); });
+    var c = pts.reduce(function(s, v){ return [s[0] + v[0], s[1] + v[1], s[2] + v[2]]; }, [0, 0, 0]);
+    var centre = toLatLon(c), cv = toVec(centre.lat, centre.lon);
+    var far = pts.reduce(function(m, v){ return Math.max(m, Math.acos(Math.max(-1, Math.min(1, dot(v, cv))))); }, 0);
+    var zoom = Math.max(1, Math.min(MAX_ZOOM, FIT_R / Math.sin(Math.min(far, Math.PI / 2))));
+    return { lat: centre.lat, lon: centre.lon, zoom: zoom };
   }
 
-  // The visible window (in the same degree-projected space as the photo) for
-  // a cluster's current zoom/centre — used both to set the SVG viewBox
-  // (which remaps the image and route paths automatically) and to place the
-  // HTML pins and label, which don't know about the SVG's viewBox and need
-  // their left/top percentages recomputed by hand to match it. The window is
-  // clamped to stay fully inside the photo's actual 360×180 coverage —
-  // otherwise panning toward an edge would reveal blank space past where
-  // the image ends.
-  function viewRect(view){
-    var vw = BASE_WINDOW / view.zoom, vh = BASE_WINDOW / view.zoom;
-    var vx = Math.min(Math.max(view.cx - vw / 2, 0), WORLD_W - vw);
-    var vy = Math.min(Math.max(view.cy - vh / 2, 0), WORLD_H - vh);
-    return { vx: vx, vy: vy, vw: vw, vh: vh };
-  }
-  function toScreen(p, r){
-    return { x: (p.x - r.vx) / r.vw * 100, y: (p.y - r.vy) / r.vh * 100 };
+  // Project a lat/lon to on-screen px (W = globe width) for a view;
+  // z <= 0 means it's on the far side of the globe.
+  function projector(view, W){
+    var B = basis(view), R = W / 2 * view.zoom;
+    return function(p){
+      var v = toVec(p.lat, p.lon);
+      return { x: W / 2 + dot(v, B.e) * R, y: W / 2 - dot(v, B.n) * R, z: dot(v, B.o) };
+    };
   }
 
-  // Build every pin and route line once (fixed, real, scattered positions);
-  // only which cluster is visible changes.
+  // ---- sphere rendering ----
+  var tex = null, texW = 0, texH = 0;
+  var ctx = canvasEl.getContext('2d');
+  var grid = null; // per-pixel disc coords, rebuilt when the canvas resizes
+  var img = new Image();
+  img.onload = function(){
+    var c = document.createElement('canvas');
+    c.width = texW = img.naturalWidth; c.height = texH = img.naturalHeight;
+    var x = c.getContext('2d'); x.drawImage(img, 0, 0);
+    tex = x.getImageData(0, 0, texW, texH).data;
+    drawSphere(current);
+  };
+  img.src = 'img/earth-full.jpg';
+
+  function sizeCanvas(){
+    var W = globeEl.offsetWidth || 300;
+    var S = Math.min(MAX_CANVAS, Math.round(W * Math.min(window.devicePixelRatio || 1, 2)));
+    if (canvasEl.width !== S) { canvasEl.width = canvasEl.height = S; grid = null; }
+    if (!grid) {
+      grid = { S: S, u: new Float32Array(S * S), v: new Float32Array(S * S), out: ctx.createImageData(S, S) };
+      for (var y = 0; y < S; y++) for (var x = 0; x < S; x++) {
+        var k = y * S + x;
+        grid.u[k] = (x + 0.5) / S * 2 - 1;
+        grid.v[k] = 1 - (y + 0.5) / S * 2;
+      }
+    }
+    return W;
+  }
+
+  // Light from the upper left, towards the viewer.
+  var LIGHT = (function(){ var l = [-0.45, 0.55, 0.7], n = Math.sqrt(dot(l, l)); return [l[0] / n, l[1] / n, l[2] / n]; })();
+  function drawSphere(view){
+    if (!tex || !grid) return;
+    var S = grid.S, B = basis(view), inv = 1 / view.zoom, d = grid.out.data;
+    var e = B.e, n = B.n, o = B.o;
+    for (var k = 0; k < S * S; k++) {
+      var u = grid.u[k] * inv, v = grid.v[k] * inv, r2 = u * u + v * v, i = k * 4;
+      if (r2 >= 1) { d[i + 3] = 0; continue; }
+      var z = Math.sqrt(1 - r2);
+      var wx = u * e[0] + v * n[0] + z * o[0], wy = u * e[1] + v * n[1] + z * o[1], wz = u * e[2] + v * n[2] + z * o[2];
+      var lat = Math.asin(wz), lon = Math.atan2(wy, wx);
+      var tx = ((lon / Math.PI + 1) * 0.5 * texW) | 0, ty = ((0.5 - lat / Math.PI) * texH) | 0;
+      if (tx >= texW) tx = texW - 1; if (ty >= texH) ty = texH - 1;
+      var t = (ty * texW + tx) * 4;
+      // lambert-ish shading on the *unzoomed* sphere normal, so a zoomed
+      // view keeps its curvature cue at the rim
+      var nd = u * LIGHT[0] + v * LIGHT[1] + z * LIGHT[2];
+      var sh = 0.42 + 0.7 * (nd > 0 ? nd : 0);
+      if (sh > 1.08) sh = 1.08;
+      d[i] = tex[t] * sh; d[i + 1] = tex[t + 1] * sh; d[i + 2] = tex[t + 2] * sh; d[i + 3] = 255;
+    }
+    ctx.putImageData(grid.out, 0, 0);
+  }
+
+  // ---- pins, dots, routes ----
+  // Layout in on-screen pixels (sizes below are CSS px).
+  var AVATAR_R = 12, DOT_R = 5, DEST_R = 9, GAP = 4, TETHER = 24, MERGE_PX = 2 * DOT_R + 2;
+  function layoutPins(cluster, proj, W){
+    var R = W / 2;
+    var dest = proj(cluster.destPos);
+
+    // Location dots: one per home town, merged only where two towns are too
+    // close to draw as separate dots at this zoom.
+    var dots = [];
+    var anchorOf = cluster.members.map(function(entry){
+      var a = proj(entry.pos);
+      for (var k = 0; k < dots.length; k++) {
+        var d = dots[k];
+        if (Math.sqrt((d.x - a.x) * (d.x - a.x) + (d.y - a.y) * (d.y - a.y)) < MERGE_PX) {
+          d.x = (d.x * d.n + a.x) / (d.n + 1); d.y = (d.y * d.n + a.y) / (d.n + 1); d.n++;
+          return k;
+        }
+      }
+      dots.push({ x: a.x, y: a.y, n: 1 });
+      return dots.length - 1;
+    });
+
+    // Initials badges start a tether's length from their dot, on the side
+    // away from the destination, then get pushed apart from each other,
+    // every dot and the destination, kept inside the disc and near their dot.
+    var shareCount = {};
+    var avatars = cluster.members.map(function(entry, i){
+      var a = dots[anchorOf[i]];
+      var vx = a.x - dest.x, vy = a.y - dest.y, len = Math.sqrt(vx * vx + vy * vy) || 1;
+      var base = Math.atan2(vy / len, vx / len);
+      var nth = shareCount[anchorOf[i]] = (shareCount[anchorOf[i]] || 0) + 1;
+      var ang = base + (nth - 1) * 1.1 * (nth % 2 ? 1 : -1);
+      return { x: a.x + Math.cos(ang) * TETHER, y: a.y + Math.sin(ang) * TETHER, a: a };
+    });
+    function keepOut(p, q, min){
+      var dx = p.x - q.x, dy = p.y - q.y, d = Math.sqrt(dx * dx + dy * dy);
+      if (d >= min) return false;
+      if (d < 0.01) { dx = 0; dy = -1; d = 1; }
+      p.x = q.x + dx / d * min; p.y = q.y + dy / d * min;
+      return true;
+    }
+    var maxR = R - AVATAR_R - 3, maxTether = TETHER * 1.8;
+    for (var it = 0; it < 80; it++) {
+      var moved = false;
+      avatars.forEach(function(p, i){
+        for (var j = 0; j < avatars.length; j++) {
+          if (j === i) continue;
+          var q = avatars[j], dx = p.x - q.x, dy = p.y - q.y, d = Math.sqrt(dx * dx + dy * dy), min = 2 * AVATAR_R + GAP;
+          if (d < min) {
+            if (d < 0.01) { dx = 1; dy = 0; d = 1; }
+            var push = (min - d) / 2 / d;
+            p.x += dx * push; p.y += dy * push; q.x -= dx * push; q.y -= dy * push;
+            moved = true;
+          }
+        }
+        dots.forEach(function(d){ if (keepOut(p, d, AVATAR_R + DOT_R + GAP)) moved = true; });
+        if (keepOut(p, dest, AVATAR_R + DEST_R + GAP)) moved = true;
+        var tx = p.x - p.a.x, ty = p.y - p.a.y, tl = Math.sqrt(tx * tx + ty * ty);
+        if (tl > maxTether) { p.x = p.a.x + tx / tl * maxTether; p.y = p.a.y + ty / tl * maxTether; }
+        var cx = p.x - R, cy = p.y - R, cl = Math.sqrt(cx * cx + cy * cy);
+        if (cl > maxR) { p.x = R + cx / cl * maxR; p.y = R + cy / cl * maxR; moved = true; }
+      });
+      if (!moved) break;
+    }
+    return { dest: dest, dots: dots, anchorOf: anchorOf, avatars: avatars };
+  }
+
+  // Great-circle route from a home town to the destination, as an SVG path
+  // in px; the start point is the (possibly merged) dot it hangs from.
+  function routePath(from, to, proj, startPx){
+    var a = toVec(from.lat, from.lon), b = toVec(to.lat, to.lon);
+    var om = Math.acos(Math.max(-1, Math.min(1, dot(a, b)))), so = Math.sin(om) || 1, d = '';
+    for (var i = 0; i <= 48; i++) {
+      var t = i / 48, k1 = Math.sin((1 - t) * om) / so, k2 = Math.sin(t * om) / so;
+      var v = [a[0] * k1 + b[0] * k2, a[1] * k1 + b[1] * k2, a[2] * k1 + b[2] * k2];
+      var q = proj(toLatLon(v));
+      if (i === 0 && startPx) q = startPx;
+      d += (i ? ' L ' : 'M ') + q.x.toFixed(1) + ',' + q.y.toFixed(1);
+    }
+    return d;
+  }
+
+  // Build every pin, dot and line once; only which cluster is visible (and,
+  // after each spin or resize, where things sit) changes.
   CLUSTERS.forEach(function(cluster, ci){
     cluster.pinEls = cluster.members.map(function(entry){
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'globe-pin';
       btn.textContent = initials(entry.member.name);
-      btn.style.left = entry.pos.x + '%';
-      btn.style.top = entry.pos.y + '%';
       btn.style.background = 'var(--' + entry.color + ')';
       btn.setAttribute('aria-label', entry.member.name + ' — ' + entry.member.home + ', headed to ' + cluster.dest);
       btn.addEventListener('click', function(){ goTo(ci, true); });
       pinsEl.appendChild(btn);
       return btn;
     });
-
+    cluster.homeDotEls = cluster.members.map(function(){
+      var d = document.createElement('div');
+      d.className = 'home-dot';
+      pinsEl.appendChild(d);
+      return d;
+    });
     cluster.destPinEl = document.createElement('div');
     cluster.destPinEl.className = 'dest-pin';
-    cluster.destPinEl.style.left = cluster.destPos.x + '%';
-    cluster.destPinEl.style.top = cluster.destPos.y + '%';
     pinsEl.appendChild(cluster.destPinEl);
-
     cluster.routeEls = cluster.members.map(function(entry){
-      var shadow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      var shadow = document.createElementNS(SVG_NS, 'path');
       shadow.setAttribute('class', 'route-shadow');
-      shadow.setAttribute('d', routePath(entry.pos, cluster.destPos));
-      var line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      var line = document.createElementNS(SVG_NS, 'path');
       line.setAttribute('class', 'route-line');
-      line.setAttribute('d', routePath(entry.pos, cluster.destPos));
       line.style.stroke = 'var(--' + entry.color + ')';
+      var tether = document.createElementNS(SVG_NS, 'line');
+      tether.setAttribute('class', 'pin-tether');
       routeGroup.appendChild(shadow);
       routeGroup.appendChild(line);
-      return { shadow: shadow, line: line };
+      routeGroup.appendChild(tether);
+      return { shadow: shadow, line: line, tether: tether };
     });
   });
 
@@ -309,52 +424,98 @@
     return d;
   });
 
-  function routePath(a, b){
-    var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-    var dx = b.x - a.x, dy = b.y - a.y;
-    // bow the line slightly, like a flight path, away from the map centre
-    var cx = mx + dy * 0.18, cy = my - dx * 0.18;
-    return 'M ' + a.x.toFixed(2) + ',' + a.y.toFixed(2) + ' Q ' + cx.toFixed(2) + ',' + cy.toFixed(2) + ' ' + b.x.toFixed(2) + ',' + b.y.toFixed(2);
-  }
-
-  function updateMap(){
-    var cluster = CLUSTERS[active];
-    var r = viewRect(cluster.view);
-
-    // Re-frame the land/routes (the SVG remaps its children to the new
-    // viewBox on its own) and reposition only the active cluster's own pins
-    // to match — inactive clusters' pins stay wherever they last were, which
-    // is invisible and harmless since they're faded out.
-    mapSvgEl.setAttribute('viewBox', r.vx.toFixed(2) + ' ' + r.vy.toFixed(2) + ' ' + r.vw.toFixed(2) + ' ' + r.vh.toFixed(2));
-    cluster.members.forEach(function(entry, i){
-      var s = toScreen(entry.pos, r);
-      cluster.pinEls[i].style.left = s.x + '%';
-      cluster.pinEls[i].style.top = s.y + '%';
-    });
-    var ds = toScreen(cluster.destPos, r);
-    cluster.destPinEl.style.left = ds.x + '%';
-    cluster.destPinEl.style.top = ds.y + '%';
-
+  function showOverlays(on){
     CLUSTERS.forEach(function(c, ci){
-      var on = ci === active;
-      c.pinEls.forEach(function(pin){ pin.classList.toggle('on', on); });
-      c.destPinEl.classList.toggle('on', on);
+      var vis = on && ci === active;
+      c.pinEls.forEach(function(pin){ pin.classList.toggle('on', vis); });
+      c.homeDotEls.forEach(function(el){ el.classList.toggle('on', vis); });
+      c.destPinEl.classList.toggle('on', vis);
       c.routeEls.forEach(function(rt){
-        rt.line.classList.toggle('on', on);
-        rt.shadow.classList.toggle('on', on);
+        rt.line.classList.toggle('on', vis);
+        rt.shadow.classList.toggle('on', vis);
+        rt.tether.classList.toggle('on', vis);
       });
     });
+    destLabelEl.classList.toggle('on', on);
+  }
 
+  // Place the active cluster's overlays for the current (settled) view.
+  function placeOverlays(){
+    var cluster = CLUSTERS[active];
+    var W = globeEl.offsetWidth || 300, proj = projector(cluster.view, W);
+    function pct(v){ return (v / W * 100) + '%'; }
+    mapSvgEl.setAttribute('viewBox', '0 0 ' + W + ' ' + W);
+    var L = layoutPins(cluster, proj, W);
+    cluster.destPinEl.style.left = pct(L.dest.x);
+    cluster.destPinEl.style.top = pct(L.dest.y);
+    cluster.homeDotEls.forEach(function(el, k){
+      var d = L.dots[k];
+      el.hidden = !d;
+      if (d) { el.style.left = pct(d.x); el.style.top = pct(d.y); }
+    });
+    var sumY = 0;
+    cluster.members.forEach(function(entry, i){
+      var av = L.avatars[i], anchor = L.dots[L.anchorOf[i]];
+      sumY += anchor.y;
+      cluster.pinEls[i].style.left = pct(av.x);
+      cluster.pinEls[i].style.top = pct(av.y);
+      var d = routePath(entry.pos, cluster.destPos, proj, anchor);
+      cluster.routeEls[i].line.setAttribute('d', d);
+      cluster.routeEls[i].shadow.setAttribute('d', d);
+      var t = cluster.routeEls[i].tether;
+      t.setAttribute('x1', anchor.x); t.setAttribute('y1', anchor.y);
+      t.setAttribute('x2', av.x); t.setAttribute('y2', av.y);
+    });
+    var dsx = L.dest.x / W * 100;
     destLabelEl.textContent = cluster.dest.split(',')[0];
-    destLabelEl.style.left = ds.x + '%';
-    destLabelEl.style.top = ds.y + '%';
-    // Flip below the pin when members sit above it (see cluster.labelBelow
-    // above), and slide off-centre near either edge of the circle — a
-    // couple of the real destinations (Costa Rica, Kyoto) sit close enough
-    // to the cropped photo's edge that a centred label would clip.
-    destLabelEl.style.setProperty('--ly', cluster.labelBelow ? '45%' : '-170%');
-    destLabelEl.style.setProperty('--lx', ds.x < 20 ? '4%' : ds.x > 80 ? '-104%' : '-50%');
-    destLabelEl.classList.add('on');
+    destLabelEl.style.left = pct(L.dest.x);
+    destLabelEl.style.top = pct(L.dest.y);
+    // Label below the pin when the members sit above it, and slid
+    // off-centre near either edge of the circle so it doesn't clip.
+    destLabelEl.style.setProperty('--ly', sumY / cluster.members.length < L.dest.y ? '45%' : '-170%');
+    destLabelEl.style.setProperty('--lx', dsx < 20 ? '4%' : dsx > 80 ? '-104%' : '-50%');
+  }
+
+  // ---- spinning between trips ----
+  var current = { lat: CLUSTERS[0].view.lat, lon: CLUSTERS[0].view.lon, zoom: CLUSTERS[0].view.zoom };
+  var spinRaf = 0;
+  function ease(t){ return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function flyTo(i){
+    var target = CLUSTERS[i].view;
+    cancelAnimationFrame(spinRaf);
+    showOverlays(false);
+    if (reduceMotion || !tex) {
+      current = { lat: target.lat, lon: target.lon, zoom: target.zoom };
+      drawSphere(current); placeOverlays(); showOverlays(true);
+      return;
+    }
+    var from = { lat: current.lat, lon: current.lon, zoom: current.zoom };
+    var dLon = ((target.lon - from.lon + 540) % 360) - 180; // shortest way round
+    // pull back a little mid-spin so long turns read as a globe turning
+    var dip = Math.min(0.35, Math.abs(dLon) / 400 + Math.abs(target.lat - from.lat) / 400);
+    var t0 = performance.now();
+    (function frame(now){
+      var t = Math.min(1, (now - t0) / SPIN_MS), k = ease(t);
+      var z = Math.exp(Math.log(from.zoom) + (Math.log(target.zoom) - Math.log(from.zoom)) * k);
+      current = { lat: from.lat + (target.lat - from.lat) * k, lon: from.lon + dLon * k,
+                  zoom: Math.max(1, z * (1 - dip * Math.sin(Math.PI * t))) };
+      drawSphere(current);
+      if (t < 1) { spinRaf = requestAnimationFrame(frame); return; }
+      current = { lat: target.lat, lon: target.lon, zoom: target.zoom };
+      drawSphere(current); placeOverlays(); showOverlays(true);
+    })(t0);
+  }
+
+  function initGlobe(){
+    sizeCanvas();
+    drawSphere(current);
+    placeOverlays();
+    showOverlays(true);
+  }
+  function onResize(){
+    sizeCanvas();
+    drawSphere(current);
+    placeOverlays();
   }
 
   // Interests two or more members of the SAME cluster share get highlighted
@@ -367,16 +528,6 @@
     var shared = {};
     Object.keys(tally).forEach(function(k){ if (tally[k] > 1) shared[k] = true; });
     return shared;
-  }
-
-  function matchStats(member){
-    var matchedWith = 0;
-    MEMBERS.forEach(function(other){
-      if (other === member) return;
-      var shared = other.interests.filter(function(int){ return member.interests.indexOf(int) !== -1; });
-      if (shared.length) matchedWith++;
-    });
-    return matchedWith;
   }
 
   function renderCards(){
@@ -392,19 +543,18 @@
     cardsEl.innerHTML = '';
     cluster.members.forEach(function(entry){
       var m = entry.member;
-      var matchedWith = matchStats(m);
       var card = document.createElement('article');
       card.className = 'ccard';
       card.innerHTML =
         '<div class="ccard-stamp" style="background:var(--' + entry.color + ')">' + initials(m.name) + '</div>' +
         '<div class="ccard-copy">' +
-          '<h4 class="ccard-name">' + m.name + '</h4>' +
+          '<h4 class="ccard-name">' + m.name + ' <span class="ccard-age"><span class="sr-only">age </span>' + m.age + '</span></h4>' +
           '<span class="ccard-route">' + m.home + '</span>' +
+          TTCBadges.html(m.badges) +
           '<p class="ccard-bio">“' + m.bio + '”</p>' +
           '<div class="ccard-chips">' + m.interests.map(function(i){
             return '<span class="chip' + (shared[i] ? ' chip-shared' : '') + '">' + i + '</span>';
           }).join('') + '</div>' +
-          '<p class="ccard-note">Matches with <b>' + matchedWith + ' other member' + (matchedWith===1?'':'s') + '</b> on the founding list.</p>' +
         '</div>';
       cardsEl.appendChild(card);
     });
@@ -412,10 +562,35 @@
     dotEls.forEach(function(d, i){ d.classList.toggle('active', i === active); });
   }
 
+  // Swap the heading + cards without a hard cut: fade the current ones
+  // out, hold the column's height while the new ones go in, ease it to
+  // the new height, and let the new cards fade up in sequence (see .ccard
+  // in styles.css). Rapid clicks just restart the swap for the latest trip.
+  var LEAVE_MS = 220, swapTimer = null, heightTimer = null;
+  var clusterHeadEl = clusterDestEl.parentNode;
+  var swapEls = [clusterHeadEl, cardsEl];
+  function clearHeights(){
+    swapEls.forEach(function(el){ el.style.transition = ''; el.style.height = ''; el.style.overflow = ''; });
+  }
+  function swapCards(){
+    if (reduceMotion) { renderCards(); return; }
+    clearTimeout(swapTimer); clearTimeout(heightTimer); clearHeights();
+    swapEls.forEach(function(el){ el.style.height = el.offsetHeight + 'px'; el.classList.add('is-leaving'); });
+    swapTimer = setTimeout(function(){
+      var from = swapEls.map(function(el){ return el.offsetHeight; });
+      renderCards();
+      var to = swapEls.map(function(el){ el.classList.remove('is-leaving'); el.style.height = 'auto'; return el.offsetHeight; });
+      swapEls.forEach(function(el, k){ el.style.height = from[k] + 'px'; el.style.overflow = 'hidden'; });
+      cardsEl.offsetHeight; // commit the start heights before transitioning
+      swapEls.forEach(function(el, k){ el.style.transition = 'height .4s cubic-bezier(.22,1,.36,1), opacity .2s ease'; el.style.height = to[k] + 'px'; });
+      heightTimer = setTimeout(clearHeights, 450);
+    }, LEAVE_MS);
+  }
+
   function goTo(i, userInitiated){
     active = ((i % N) + N) % N;
-    updateMap();
-    renderCards();
+    flyTo(active);
+    swapCards();
     if (userInitiated) pauseThenResume();
   }
 
@@ -445,7 +620,9 @@
   globeEl.addEventListener('focusin', stopAutoplay);
   globeEl.addEventListener('focusout', function(){ if (!reduceMotion) startAutoplay(); });
 
-  updateMap();
+  window.addEventListener('resize', onResize);
+
+  initGlobe();
   renderCards();
   startAutoplay();
 })();
