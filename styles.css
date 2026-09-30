@@ -757,3 +757,47 @@
     .mem-card-body{padding:24px 24px 28px}
     .mem-note{padding:20px}
   }
+
+  /* ───────── Terms & privacy (terms.html) ─────────
+     Two parts on one page with jump links, a sticky contents list on wide
+     screens, and a plain-text placeholder notice at the very top. Anchored
+     sections clear the floating nav via scroll-margin-top. */
+  .legal-page{padding:48px 0 8px}
+  .legal-notice{margin:0 0 40px;padding:16px 20px;border:1px solid color-mix(in srgb, var(--terracotta) 45%, var(--line));
+    border-left:4px solid var(--terracotta);border-radius:12px;background:color-mix(in srgb, var(--terracotta) 7%, var(--paper));
+    color:var(--ink);font-size:15px;line-height:1.65;max-width:80ch}
+  .legal-notice strong{display:block;margin-bottom:2px}
+  .legal-page .swatch{margin-bottom:22px}
+  .legal-page h1{margin:0 0 16px}
+  .legal-intro{color:var(--muted);font-size:18px;line-height:1.7;margin:0 0 24px}
+  .legal-jump{display:flex;flex-wrap:wrap;gap:10px}
+  .legal-body{padding-top:48px}
+  .legal-grid{display:grid;grid-template-columns:1fr;gap:40px}
+  .legal-toc{display:none}
+  .legal-part{scroll-margin-top:100px}
+  .legal-part + .legal-part{margin-top:64px;padding-top:56px;border-top:1px solid var(--line)}
+  .legal-part > h2{margin:0 0 28px}
+  .legal-item{scroll-margin-top:100px;max-width:70ch}
+  .legal-item + .legal-item{margin-top:28px}
+  .legal-item h3{font-family:var(--font-display);font-weight:500;font-size:21px;line-height:1.3;margin:0 0 10px;color:var(--ink)}
+  .legal-n{color:var(--terracotta);font-variant-numeric:tabular-nums;margin-right:4px}
+  .legal-item p{margin:0 0 12px;color:var(--muted);font-size:16px;line-height:1.75}
+  .legal-item p:last-child{margin-bottom:0}
+  .legal-item b{color:var(--ink);font-weight:600}
+  .legal-switch{margin:36px 0 0;font-size:14.5px;color:var(--muted)}
+  .legal-switch a,.legal-toc a{color:var(--terracotta);text-underline-offset:3px}
+  @media (min-width:960px){
+    .legal-grid{grid-template-columns:260px minmax(0,1fr);gap:64px;align-items:start}
+    .legal-toc{display:block;position:sticky;top:104px;font-size:14px}
+    .legal-toc-h{margin:0 0 8px;font-weight:700;font-size:11.5px;letter-spacing:1.4px;text-transform:uppercase}
+    .legal-toc-h a{color:var(--ink);text-decoration:none}
+    .legal-toc ol{margin:0 0 24px;padding-left:20px;color:var(--muted);display:grid;gap:6px}
+    .legal-toc ol a{color:var(--muted);text-decoration:none}
+    .legal-toc ol a:hover{color:var(--terracotta)}
+  }
+  @media (max-width:480px){
+    .legal-page{padding:36px 0 8px}
+    .legal-notice{font-size:14px;padding:14px 16px}
+    .legal-item h3{font-size:19px}
+    .legal-item p{font-size:15px}
+  }
