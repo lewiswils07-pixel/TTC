@@ -319,6 +319,8 @@
   .examples .swatch{color:var(--panel-muted)}
   .examples h2{color:var(--panel-ink)}
   .examples .head p{color:color-mix(in srgb, var(--panel-ink) 72%, var(--panel))}
+  .examples .head{max-width:1000px}
+  .examples .head p{max-width:80ch}
   /* Destination cards (after 21st.dev "Reveal on hover"): the photo
      fills the card and eases up to 1.05 on hover while a frosted caption
      panel sits over it. On hover-capable pointers the meta line is
@@ -433,7 +435,7 @@
   .match-page{padding:40px 0 8px}
   .match-page .swatch{margin-bottom:16px}
   .match-page h1{max-width:18ch;margin:0 0 14px}
-  .match-intro{color:var(--muted);font-size:18px;line-height:1.7;max-width:640px;margin:0 0 4px}
+  .match-intro{color:var(--muted);font-size:18px;line-height:1.7;max-width:880px;margin:0 0 4px}
 
   /* Globe on the left, profile cards on the right from 880px up — a single
      stacked column (heading, then globe, then cards) below that. */
