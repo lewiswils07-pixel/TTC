@@ -21,4 +21,12 @@
     document.addEventListener('keydown', function(e){
       if (e.key === 'Escape') closeMenu();
     });
+
+    // Floating nav bar gains its shadow once the page has scrolled.
+    var nav = document.querySelector('nav');
+    function onScroll(){ nav.classList.toggle('scrolled', window.scrollY > 8); }
+    if (nav) {
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+    }
 })();

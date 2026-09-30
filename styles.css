@@ -19,6 +19,14 @@
     --muted:#5B5854;
     --card:#FFFFFF;
     --on-accent:#fff;
+    /* Shape + motion scale (from the 21st.dev reference components):
+       soft rounded cards, pill controls, and one shared "settle" ease. */
+    --radius-sm:10px;
+    --radius:16px;
+    --radius-lg:24px;
+    --ease-out:cubic-bezier(.22,1,.36,1);
+    --shadow-sm:0 1px 2px rgba(33,32,30,.06), 0 4px 14px -6px rgba(33,32,30,.12);
+    --shadow-lg:0 2px 4px rgba(33,32,30,.04), 0 24px 48px -24px rgba(33,32,30,.28);
     /* Fixed dark-panel palette — used only by the "Our use cases" band and the
        full-screen menu, which are deliberately a constant dark treatment (an
        evening on the Promenade) in both themes, so their text stays legible
@@ -79,23 +87,33 @@
   .swatch.terracotta i{background:var(--terracotta)}
 
   /* Nav */
-  nav{position:sticky;top:0;z-index:40;background:color-mix(in srgb, var(--paper) 88%, transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-  .navrow{display:flex;align-items:center;justify-content:space-between;height:76px;gap:20px}
+  /* Floating pill bar (after 21st.dev "Sticky Header Navbar"): the bar
+     itself is inset from the viewport edges and picks up a shadow once
+     the page scrolls (.scrolled is toggled by nav.js). */
+  nav{position:sticky;top:0;z-index:40;padding:12px 16px 0}
+  nav .navrow{max-width:1272px;height:64px;padding:0 8px 0 22px;border:1px solid var(--line);border-radius:999px;
+    background:color-mix(in srgb, var(--paper) 82%, transparent);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);
+    transition:box-shadow .3s var(--ease-out), background .3s var(--ease-out)}
+  nav.scrolled .navrow{box-shadow:var(--shadow-lg);background:color-mix(in srgb, var(--card) 88%, transparent)}
+  .navrow{display:flex;align-items:center;justify-content:space-between;gap:20px}
   .brand{display:flex;align-items:baseline;gap:2px;text-decoration:none;color:var(--ink)}
   .brand-mark{color:var(--terracotta);font-family:var(--font-display);font-style:italic;font-size:22px;line-height:1}
   .brand-word{font-family:var(--font-display);font-weight:500;font-size:19px;letter-spacing:-.2px;white-space:nowrap}
   .nav-right{display:flex;align-items:center;gap:12px}
 
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 24px;border-radius:2px;background:var(--ink);color:var(--paper);text-decoration:none;font-weight:600;font-size:14px;letter-spacing:.2px;border:1px solid var(--ink);cursor:pointer;font-family:var(--font-body);transition:transform .18s ease, background .18s ease}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 26px;border-radius:999px;background:var(--ink);color:var(--paper);text-decoration:none;font-weight:600;font-size:14px;letter-spacing:.1px;border:1px solid var(--ink);cursor:pointer;font-family:var(--font-body);transition:transform .2s var(--ease-out), background .2s ease, box-shadow .2s ease, border-color .2s ease}
   .btn:hover{transform:translateY(-1px)}
+  .btn:active{transform:translateY(0)}
   .btn.outline{background:transparent;color:var(--ink);border:1px solid var(--line)}
-  .btn.outline:hover{border-color:var(--ink);background:transparent}
-  .btn.terracotta{background:var(--terracotta);border-color:var(--terracotta);color:var(--on-accent)}
-  .btn.terracotta:hover{background:var(--terracotta-deep);border-color:var(--terracotta-deep)}
+  .btn.outline:hover{border-color:var(--ink);background:color-mix(in srgb, var(--ink) 4%, transparent)}
+  .btn.terracotta{background:var(--terracotta);border-color:var(--terracotta);color:var(--on-accent);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 6px 16px -8px color-mix(in srgb, var(--terracotta) 80%, transparent)}
+  .btn.terracotta:hover{background:var(--terracotta-deep);border-color:var(--terracotta-deep);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 10px 22px -10px color-mix(in srgb, var(--terracotta) 90%, transparent)}
   .btn-sm{padding:10px 18px;font-size:13.5px}
 
   /* Menu — single icon button, full-screen overlay panel */
-  .menu-btn{width:44px;height:44px;border-radius:2px;border:1px solid var(--line);background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;flex:none}
+  .menu-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;flex:none}
   .menu-btn span{display:block;width:18px;height:2px;background:var(--ink);transition:transform .25s ease, opacity .2s ease}
   .menu-btn:hover{border-color:var(--terracotta)}
   .menu-btn[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
@@ -106,34 +124,62 @@
   .menu-overlay{position:fixed;inset:0;z-index:50;background:var(--panel);color:var(--panel-ink);display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .32s ease;padding:0}
   .menu-overlay.open{opacity:1;visibility:visible}
   .menu-overlay .wrap{height:100%;display:flex;flex-direction:column}
-  .menu-top{display:flex;align-items:center;justify-content:space-between;height:76px;flex:none}
+  .menu-top{display:flex;align-items:center;justify-content:space-between;height:76px;margin-top:12px;padding:0 8px 0 22px;flex:none}
   .menu-top .brand-word,.menu-top .brand-mark{color:var(--panel-ink)}
-  .menu-close{width:44px;height:44px;border-radius:2px;border:1px solid rgba(248,239,221,.3);background:transparent;color:var(--panel-ink);cursor:pointer;font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center}
+  .menu-close{width:44px;height:44px;border-radius:50%;border:1px solid rgba(248,239,221,.3);background:transparent;color:var(--panel-ink);cursor:pointer;font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center}
   .menu-close:hover{border-color:var(--panel-accent);color:var(--panel-accent)}
   .menu-links{flex:1;display:flex;flex-direction:column;justify-content:center;gap:6px}
   .menu-links a{font-family:var(--font-display);font-size:clamp(32px,7vw,58px);font-weight:500;text-decoration:none;color:var(--panel-ink);padding:10px 0;display:flex;align-items:baseline;gap:18px;opacity:.9;transition:opacity .2s ease, color .2s ease}
   .menu-links a:hover{opacity:1;color:var(--panel-accent)}
+  .menu-links a{transform:translateY(18px);opacity:0;transition:opacity .5s var(--ease-out), transform .5s var(--ease-out), color .2s ease}
+  .menu-overlay.open .menu-links a{transform:none;opacity:.9}
+  .menu-overlay.open .menu-links a:hover{opacity:1}
+  .menu-overlay.open .menu-links a:nth-child(2){transition-delay:.06s,.06s,0s}
+  .menu-overlay.open .menu-links a:nth-child(3){transition-delay:.12s,.12s,0s}
   .menu-links a .mnum{font-family:var(--font-body);font-size:13px;color:var(--panel-muted);letter-spacing:1px}
   .menu-foot{padding:28px 0 36px;font-size:13px;color:var(--panel-muted);flex:none;border-top:1px solid var(--panel-line)}
 
   /* Hero */
-  .hero{padding:52px 0 8px}
-  .hero-top{display:grid;grid-template-columns:1fr;align-items:start}
+  /* Hero (after 21st.dev "Editorial Collage Hero"): a soft colour wash
+     behind the section, headline column + collage column, and a
+     staggered blur-up entrance. */
+  .hero{position:relative;isolation:isolate;padding:64px 0 40px;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:0 0 auto;height:620px;z-index:-1;pointer-events:none;opacity:.75;filter:blur(40px);
+    background:
+      radial-gradient(40% 55% at 78% 30%, color-mix(in srgb, var(--turquoise) 26%, transparent), transparent 70%),
+      radial-gradient(38% 50% at 92% 62%, color-mix(in srgb, var(--terracotta) 22%, transparent), transparent 70%),
+      radial-gradient(30% 40% at 60% 8%, color-mix(in srgb, var(--saffron) 26%, transparent), transparent 70%);
+    -webkit-mask-image:radial-gradient(55% 55% at 75% 50%, #000 35%, transparent 80%);mask-image:radial-gradient(55% 55% at 75% 50%, #000 35%, transparent 80%)}
+  @keyframes rise{from{opacity:0;transform:translateY(12px);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
+  @keyframes rise-media{from{opacity:0;transform:translateY(24px);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+  .hero h1,.hero-copy>*{animation:rise .5s var(--ease-out) both}
+  .hero-copy>.swatch{animation-delay:.15s}
+  .hero-copy>.hero-lead{animation-delay:.25s}
+  .hero-copy>.actions{animation-delay:.35s}
+  .hero-art{animation:rise-media .6s var(--ease-out) .3s both}
+  .hero-top{display:grid;grid-template-columns:1fr;align-items:center}
   .hero-left{display:flex;flex-direction:column}
   .hero-art{display:none}
-  .hero .swatch{margin:18px 0 22px}
-  h1{font-family:var(--font-display);font-weight:500;font-size:clamp(36px,5.4vw,58px);line-height:1.06;letter-spacing:-1.1px;margin:0}
+  .hero .swatch{margin:22px 0 22px;padding:7px 14px 7px 12px;border:1px solid var(--line);border-radius:999px;background:color-mix(in srgb, var(--card) 70%, transparent);color:var(--ink-soft);backdrop-filter:blur(6px)}
+  .hero .swatch i{border-radius:50%}
+  h1{font-family:var(--font-display);font-weight:430;font-size:clamp(38px,5.4vw,60px);line-height:1.05;letter-spacing:-.8px;margin:0}
   h1 em{font-style:italic;color:var(--terracotta)}
   .hero-copy{max-width:700px}
   .hero-lead{font-size:18.5px;color:var(--muted);margin:0 0 32px;max-width:52ch}
-  .actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+  .actions{display:flex;align-items:center;gap:14px 22px;flex-wrap:wrap;margin-bottom:8px}
+  /* Secondary hero CTA reads as a link, as in the reference hero. */
+  .hero .btn.outline{border-color:transparent;padding-left:4px;padding-right:4px;background:none}
+  .hero .btn.outline::after{content:"\2192";transition:transform .2s var(--ease-out)}
+  .hero .btn.outline:hover{border-color:transparent;color:var(--terracotta);background:none}
+  .hero .btn.outline:hover::after{transform:translateX(3px)}
   @media (max-width:480px){
     .actions{flex-wrap:nowrap;gap:10px}
     .actions .btn{flex:1 1 0;padding:13px 10px;font-size:13px;white-space:nowrap}
   }
   @media (min-width:960px){
-    .hero-top{grid-template-columns:minmax(0,820px) 1fr;gap:40px}
-    .hero-art{display:block;width:100%;max-width:360px;margin-left:auto;margin-top:96px;filter:drop-shadow(0 18px 30px rgba(20,18,14,.16))}
+    .hero-top{grid-template-columns:minmax(0,820px) 1fr;gap:48px}
+    .hero-art{display:block;width:100%;max-width:440px;margin-left:auto}
+    .hero-art svg{filter:drop-shadow(0 24px 34px rgba(20,18,14,.18))}
     .hero-art svg{width:100%;height:auto;display:block}
   }
 
@@ -197,7 +243,7 @@
   .section-block{padding:64px 0}
   .head{max-width:660px;margin-bottom:40px}
   .head .swatch{margin-bottom:18px}
-  h2{font-family:var(--font-display);font-weight:500;font-size:clamp(30px,3.6vw,44px);line-height:1.08;letter-spacing:-.7px;margin:0 0 14px}
+  h2{font-family:var(--font-display);font-weight:450;font-size:clamp(30px,3.8vw,46px);line-height:1.08;letter-spacing:-.5px;margin:0 0 14px}
   .head p{color:var(--muted);font-size:17px;margin:0;max-width:54ch}
 
   /* About page (about.html) — its own page rather than a homepage
@@ -258,32 +304,53 @@
   .examples .swatch{color:var(--panel-muted)}
   .examples h2{color:var(--panel-ink)}
   .examples .head p{color:color-mix(in srgb, var(--panel-ink) 72%, var(--panel))}
-  .filmstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
-  .dest{border-radius:3px;overflow:hidden;background:var(--panel-soft);display:flex;flex-direction:column}
-  .dest-art{width:100%;aspect-ratio:4/3;position:relative;overflow:hidden}
-  .dest-art img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease}
-  .dest:hover .dest-art img{transform:scale(1.04)}
-  .dest-tag{padding:16px 16px 18px;display:flex;flex-direction:column;gap:3px}
-  .dest-name{font-family:var(--font-display);font-weight:500;font-size:18px}
-  .dest-meta{font-size:12.5px;letter-spacing:.1px;color:var(--panel-muted);font-weight:600;line-height:1.35;margin-top:1px}
+  /* Destination cards (after 21st.dev "Reveal on hover"): the photo
+     fills the card and eases up to 1.05 on hover while a frosted caption
+     panel sits over it. On hover-capable pointers the meta line is
+     revealed with the hover; on touch it is always shown. */
+  .filmstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+  .dest{position:relative;border-radius:var(--radius);overflow:hidden;background:var(--panel-soft);aspect-ratio:3/4;
+    box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 20px 40px -24px rgba(0,0,0,.6)}
+  .dest-art{position:absolute;inset:0;overflow:hidden}
+  .dest-art::after{content:"";position:absolute;inset:40% 0 0;background:linear-gradient(to top, rgba(8,17,15,.55), transparent)}
+  .dest-art img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease}
+  .dest:hover .dest-art img{transform:scale(1.05)}
+  .dest-tag{position:absolute;left:12px;right:12px;bottom:12px;padding:14px 16px;display:flex;flex-direction:column;gap:2px;
+    border-radius:12px;background:color-mix(in srgb, var(--panel) 62%, transparent);border:1px solid var(--panel-line);
+    backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);transition:transform .5s ease-in-out}
+  .dest-name{font-family:var(--font-display);font-weight:500;font-size:21px;line-height:1.15;color:var(--panel-ink)}
+  .dest-meta{font-size:12.5px;letter-spacing:.1px;color:var(--panel-muted);font-weight:600;line-height:1.35}
+  @media (hover:hover){
+    .dest-meta{max-height:0;opacity:0;overflow:hidden;transition:max-height .5s ease-in-out, opacity .5s ease-in-out, margin .5s ease-in-out}
+    .dest:hover .dest-meta{max-height:3.2em;opacity:1;margin-top:2px}
+  }
 
   /* Join — the intro panel always sits as a full-width band above the
      form (never a side-by-side pair), so it looks the same at any width. */
   .join{background:var(--paper)}
-  .joinbox{max-width:100%;margin:0 auto;background:var(--card);border:1px solid var(--line);padding:0;display:grid;grid-template-columns:1fr}
-  .join-intro{padding:32px 40px;background:var(--paper-tint);color:var(--ink);border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 20px}
+    /* Sign-up card (after 21st.dev "Newsletter Signup Form"): rounded
+     card, filled inputs with a focus ring, and a proper success state. */
+  .joinbox{max-width:100%;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-lg);padding:0;display:grid;grid-template-columns:1fr}
+  .join-intro{position:relative;isolation:isolate;padding:36px 40px;background:var(--paper-tint);color:var(--ink);border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 24px}
+  .join-intro::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+    background:radial-gradient(50% 120% at 100% 0%, color-mix(in srgb, var(--terracotta) 12%, transparent), transparent 70%)}
   .join-intro .swatch{flex-basis:100%;color:var(--muted)}
   .join-intro h2{color:var(--ink);margin:0;font-size:clamp(22px,2.6vw,28px)}
   .join-intro p{color:var(--muted);font-size:15px;margin:0;max-width:56ch}
-  .join-form-wrap{padding:36px 40px}
-  .form{display:grid;grid-template-columns:1fr 1fr;gap:22px 18px}
+  .join-form-wrap{padding:36px 40px 40px}
+  .form{display:grid;grid-template-columns:1fr 1fr;gap:20px 18px}
   .field{display:flex;flex-direction:column;gap:8px}
   .field.full{grid-column:1/-1}
-  .field label{font-size:11.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);font-weight:600}
-  .field input{width:100%;padding:10px 2px;border:none;border-bottom:1.5px solid var(--line);border-radius:0;font:inherit;font-size:15.5px;background:transparent;color:var(--ink)}
-  .field input:focus{border-color:var(--terracotta)}
+  .field label{font-size:13px;color:var(--ink-soft);font-weight:600}
+  .field input{width:100%;height:48px;padding:0 14px;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:15.5px;background:var(--paper);color:var(--ink);
+    transition:border-color .15s ease, box-shadow .15s ease, background .15s ease}
+  .field input::placeholder{color:color-mix(in srgb, var(--muted) 75%, transparent)}
+  .field input:hover{border-color:color-mix(in srgb, var(--ink) 28%, var(--line))}
+  .field input:focus{outline:none;border-color:var(--terracotta);background:var(--card);box-shadow:0 0 0 4px color-mix(in srgb, var(--terracotta) 16%, transparent)}
+  .form .btn{width:100%;height:52px;margin-top:4px;font-size:15px}
   .fine{font-size:12px;color:var(--muted);margin-top:16px;line-height:1.7}
-  #success{background:var(--paper-tint);border:1px solid var(--line);border-radius:2px;padding:14px 16px;font-size:14px;margin-top:18px}
+  #success{border:1px solid color-mix(in srgb, var(--turquoise) 45%, var(--line));background:color-mix(in srgb, var(--turquoise) 10%, var(--card));color:var(--ink);border-radius:12px;padding:14px 16px 14px 48px;font-size:14px;margin-top:18px;position:relative;animation:rise .4s var(--ease-out) both}
+  #success::before{content:"\2713";position:absolute;left:14px;top:13px;width:22px;height:22px;border-radius:50%;background:var(--turquoise-deep);color:var(--card);font-size:12px;font-weight:700;display:grid;place-items:center}
 
   .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
   .chip{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;height:34px;border:1px solid var(--line);border-radius:20px;padding:0 14px;font-size:12.5px;white-space:nowrap;cursor:pointer;background:transparent;color:var(--ink);user-select:none;transition:background .15s ease, color .15s ease, border-color .15s ease}
@@ -295,15 +362,15 @@
   .profile-next{margin-top:36px;padding-top:30px;border-top:1px solid var(--line)}
   .profile-next h3{font-family:var(--font-display);font-weight:500;font-style:italic;font-size:19px;margin:0 0 4px}
   .profile-next .sub{font-size:13.5px;color:var(--muted);margin:0 0 18px}
-  .meter{height:3px;background:var(--line);overflow:hidden;margin-bottom:20px}
+  .meter{height:6px;border-radius:999px;background:var(--paper-tint);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden;margin-bottom:20px}
   .meter-fill{height:100%;width:33%;background:var(--terracotta)}
   .plist{display:flex;flex-direction:column;gap:11px}
   .pstep{display:flex;align-items:center;gap:12px;font-size:14px}
-  .pstep .dot2{width:20px;height:20px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:11px;font-weight:700}
+  .pstep .dot2{width:24px;height:24px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:11px;font-weight:700}
   .pstep.done .dot2{background:var(--ink);color:var(--paper)}
   .pstep.todo .dot2{border:1.5px solid var(--line);color:var(--muted)}
   .pstep.todo{color:var(--muted)}
-  .granularity-note{margin-top:18px;padding:14px 16px;background:var(--paper-tint);border-left:2px solid var(--terracotta);font-size:13px;color:var(--ink)}
+  .granularity-note{margin-top:20px;padding:14px 18px;background:var(--paper-tint);border:1px solid var(--line);border-left:3px solid var(--terracotta);border-radius:12px;font-size:13px;color:var(--ink)}
 
   footer{border-top:1px solid var(--line);padding:40px 0}
   footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px}
@@ -326,11 +393,14 @@
   }
   @media (max-width:480px){
     .nav-cta{display:none}
+    nav{padding:10px 12px 0}
+    nav .navrow{height:58px;padding:0 6px 0 18px}
     .brand-word{font-size:16px}
     .section-block{padding:48px 0}
     .hero{padding:44px 0 8px}
     .connecting{padding:8px 0 56px}
     .filmstrip{grid-template-columns:1fr}
+    .dest{aspect-ratio:4/3}
     .form{grid-template-columns:1fr}
     .join-intro,.join-form-wrap{padding:28px 24px}
     .chips{gap:5px}
