@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About — Together Travel Club</title>
+<meta name="description" content="Why we built Together Travel Club: a verified members' club that connects you with compatible travel companions before you set off.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,ital@9..144,340..600,0..1&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="page-shell">
+
+<nav>
+  <div class="wrap navrow">
+    <a class="brand" href="./">
+      <span class="brand-mark">T</span><span class="brand-word">ogether Travel Club</span>
+    </a>
+    <div class="nav-right">
+      <a class="btn terracotta btn-sm nav-cta" href="./#join">Become a member</a>
+      <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="menuOverlay">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="menu-overlay" id="menuOverlay">
+  <div class="wrap">
+    <div class="menu-top">
+      <a class="brand" href="./" id="menuBrandLink">
+        <span class="brand-mark">T</span><span class="brand-word">ogether Travel Club</span>
+      </a>
+      <button class="menu-close" id="menuClose" aria-label="Close menu">&times;</button>
+    </div>
+    <div class="menu-links">
+      <a href="./"><span class="mnum">01</span> Home</a>
+      <a href="about.html"><span class="mnum">02</span> About us</a>
+      <a href="matches.html"><span class="mnum">03</span> See a match</a>
+    </div>
+    <div class="menu-foot">A members' club for people who travel · Prototype 2026</div>
+  </div>
+</div>
+
+<header class="about-page" id="top">
+  <div class="wrap">
+    <div class="about-hero-grid">
+      <div class="about-copy-col">
+        <span class="swatch terracotta">About us</span>
+        <h1>Travel felt lonelier than it should.</h1>
+        <div class="about-page-copy">
+          <p>We built Together Travel Club because turning up somewhere new on your own still feels harder than it should. Group tours can feel over-organised, dating apps aren't built for finding a hiking partner or a fellow gallery-hopper, and most of us know someone who's quietly cancelled a trip because they didn't want to go alone. We wanted a simple way to find people who are headed to the same place, or who travel the way you do, before you've even left home.</p>
+          <p>The club works more like a members' community than a dating app: every member is verified, profiles are built around interests and travel style rather than photos, and conversations start because you're both going somewhere, not because an algorithm matched you. Whether you've already booked or you're just curious who else feels the pull towards a place, Together Travel Club is where the "who" gets sorted before the "where."</p>
+        </div>
+        <div class="actions">
+          <a class="btn terracotta" href="./#join">Become a member</a>
+          <a class="btn outline" href="./#examples">See example trips</a>
+        </div>
+      </div>
+
+      <!-- Below the text on mobile, to its right from 780px up (see
+           styles.css) — one collage, same photos, in both cases. -->
+      <div class="about-photos-col">
+        <span class="swatch terracotta ac-label">A few places along the way</span>
+        <div class="about-collage" id="collageMaster">
+          <figure class="ac-tile ac-wide"><img src="img/nice-coast.jpg" alt="Aerial view of the Baie des Anges coastline in Nice, France" loading="lazy"></figure>
+          <figure class="ac-tile"><img src="img/eiffel-tower.jpg" alt="The Eiffel Tower seen from the Trocadéro in Paris" loading="lazy"></figure>
+          <figure class="ac-tile ac-tall"><img src="img/ski-alps.jpg" alt="Snow-capped peaks in the French Alps" loading="lazy"></figure>
+          <figure class="ac-tile"><img src="img/moulin-rouge.jpg" alt="The Moulin Rouge lit up at night in Paris" loading="lazy"></figure>
+          <figure class="ac-tile"><img src="img/monaco-marina.jpg" alt="A drink on a terrace overlooking the marina in Monaco" loading="lazy"></figure>
+          <figure class="ac-tile ac-tall"><img src="img/reindeer-snow.jpg" alt="Reindeer roaming a snowy hillside" loading="lazy"></figure>
+          <figure class="ac-tile"><img src="img/amsterdam-rainbow.jpg" alt="A rainbow over the canal houses of Amsterdam" loading="lazy"></figure>
+          <figure class="ac-tile ac-wide"><img src="img/algarve-cliffs.jpg" alt="Sandstone cliffs above a beach in the Algarve, Portugal" loading="lazy"></figure>
+          <figure class="ac-tile"><img src="img/trevi-fountain.jpg" alt="The Trevi Fountain in Rome" loading="lazy"></figure>
+          <figure class="ac-tile"><img src="img/dublin-stadium.jpg" alt="The Aviva Stadium beside the river in Dublin" loading="lazy"></figure>
+          <figure class="ac-tile"><img src="img/temple-bar.jpg" alt="Temple Bar lit up in the evening in Dublin" loading="lazy"></figure>
+          <figure class="ac-tile"><img src="img/croatia-sunset.jpg" alt="Sunset over the Adriatic coast in Croatia" loading="lazy"></figure>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-left">
+      <div class="foot-swatches"><i></i><i></i><i></i></div>
+      <div class="foot-tag">A members' club for people who want to travel more.</div>
+    </div>
+    <div class="foot-links">
+      <a href="about.html">About us</a>
+      <a href="./#examples">Example trips</a>
+      <a href="./#join">Sign up</a>
+    </div>
+    <div class="foot-meta">Prototype · 2026</div>
+  </div>
+</footer>
+
+</div>
+
+<script src="nav.js"></script>
+<script>
+(function(){
+  // Keeps the photo collage the same overall height as the text column
+  // beside it (side-by-side layout only, from 780px up — see styles.css).
+  // A CSS-only percentage-height chain can't do this reliably here (an
+  // indefinite-height loop lets the images balloon to their native size),
+  // so this measures the text column's real rendered height and pins the
+  // collage to match it via a custom property.
+  var copyCol = document.querySelector('.about-copy-col');
+  var collage = document.getElementById('collageMaster');
+  if (!copyCol || !collage) return;
+
+  function sync(){
+    if (window.innerWidth >= 780) {
+      collage.style.setProperty('--collage-h', copyCol.offsetHeight + 'px');
+      collage.classList.add('has-h');
+    } else {
+      collage.classList.remove('has-h');
+      collage.style.removeProperty('--collage-h');
+    }
+  }
+
+  sync();
+  window.addEventListener('resize', sync);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(sync);
+})();
+</script>
+</body>
+</html>
