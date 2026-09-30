@@ -534,3 +534,22 @@
     .globe-pin,.dest-pin,.dest-label,.map-svg .route-line,.map-svg .route-shadow{transition:opacity .3s ease}
     .globe-sheen{display:none}
   }
+
+  /* ───────── Glass & gradient accents ─────────
+     A light layer over the base design: every surface below is tinted with
+     the existing palette tokens, so the warm cream/terracotta look carries
+     through in both themes. */
+
+  /* 1. Glass nav: once the page scrolls, the bar turns to frosted glass
+     (translucent paper tint + heavy blur) with a hairline top highlight and
+     a soft border so it stays legible over photos and the dark band. The
+     tint is denser in dark mode, where light text needs more backing over
+     bright imagery. */
+  :root{--glass-nav-mix:66%;--glass-edge:rgba(255,255,255,.55)}
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--glass-nav-mix:70%;--glass-edge:rgba(255,255,255,.10)} }
+  :root[data-theme="dark"]{--glass-nav-mix:70%;--glass-edge:rgba(255,255,255,.10)}
+  nav.scrolled .navrow{
+    background:color-mix(in srgb, var(--paper) var(--glass-nav-mix), transparent);
+    backdrop-filter:blur(22px) saturate(1.6);-webkit-backdrop-filter:blur(22px) saturate(1.6);
+    border-color:color-mix(in srgb, var(--line) 70%, transparent);
+    box-shadow:inset 0 1px 0 var(--glass-edge), 0 10px 30px -12px rgba(20,18,14,.28)}
