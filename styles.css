@@ -553,3 +553,56 @@
     backdrop-filter:blur(22px) saturate(1.6);-webkit-backdrop-filter:blur(22px) saturate(1.6);
     border-color:color-mix(in srgb, var(--line) 70%, transparent);
     box-shadow:inset 0 1px 0 var(--glass-edge), 0 10px 30px -12px rgba(20,18,14,.28)}
+
+  /* ───────── How it works (how-it-works.html) ─────────
+     The homepage's four steps in depth. A static take on the route visual:
+     numbered terracotta stops joined by a dotted "lit route" rail, with the
+     same passport / cocktail / mountain / suitcase icons (.cs-icon-* above). */
+  .hiw-page{padding:56px 0 8px}
+  .hiw-page .swatch{margin-bottom:22px}
+  .hiw-page h1{max-width:17ch;margin:0 0 24px}
+  .hiw-intro{color:var(--muted);font-size:18px;line-height:1.75;max-width:62ch;margin:0}
+  .hiw-steps{padding-top:56px}
+  .hiw-list{list-style:none;margin:0;padding:0;max-width:880px}
+  .hiw-step{display:grid;grid-template-columns:48px minmax(0,1fr);column-gap:28px;padding-bottom:64px}
+  .hiw-step:last-child{padding-bottom:0}
+  .hiw-rail{position:relative;display:flex;justify-content:center}
+  .hiw-rail::after{content:"";position:absolute;top:58px;bottom:-58px;left:50%;width:4px;margin-left:-2px;
+    background:radial-gradient(circle, var(--terracotta) 1.4px, transparent 1.8px) center top/4px 10px repeat-y}
+  .hiw-step:last-child .hiw-rail::after{display:none}
+  .hiw-num{width:44px;height:44px;border-radius:50%;background:var(--terracotta);color:var(--on-accent);
+    font-family:var(--font-display);font-weight:600;font-size:18px;display:grid;place-items:center;
+    box-shadow:0 0 0 6px var(--paper)}
+  .hiw-head{display:flex;align-items:center;gap:16px;margin:0 0 18px}
+  .hiw-icon{flex:none;width:52px;height:52px;border-radius:14px;background:var(--paper-tint);border:1px solid var(--line);display:grid;place-items:center}
+  .hiw-icon svg{width:30px;height:30px;overflow:visible}
+  .hiw-icon .cs-icon-cut{fill:var(--paper-tint)}
+  .hiw-icon .cs-icon-cut-line{stroke:var(--paper-tint)}
+  .hiw-kicker{font-size:11.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--terracotta);margin:0 0 4px}
+  .hiw-title{font-family:var(--font-display);font-style:italic;font-weight:500;font-size:clamp(26px,3vw,34px);line-height:1.12;letter-spacing:-.3px;margin:0}
+  .hiw-lead{font-size:18px;line-height:1.7;color:var(--ink-soft);margin:0 0 22px;max-width:62ch}
+  .hiw-points{list-style:none;margin:0 0 22px;padding:0;display:grid;gap:14px}
+  .hiw-points li{position:relative;padding-left:24px;color:var(--muted);font-size:16px;line-height:1.65;max-width:64ch}
+  .hiw-points li::before{content:"";position:absolute;left:2px;top:.6em;width:9px;height:9px;border-radius:2px;background:var(--terracotta)}
+  .hiw-points b{color:var(--ink);font-weight:600}
+  .hiw-steps .granularity-note{max-width:64ch;margin:0}
+  .hiw-cta{margin-top:80px;padding:36px 40px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-tint);
+    display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px}
+  .hiw-cta h2{margin:0 0 6px;font-size:clamp(26px,3vw,34px)}
+  .hiw-cta p{margin:0;color:var(--muted)}
+  .hiw-cta .actions{margin:0}
+  @media (max-width:640px){
+    .hiw-step{grid-template-columns:36px minmax(0,1fr);column-gap:16px;padding-bottom:52px}
+    .hiw-num{width:34px;height:34px;font-size:15px;box-shadow:0 0 0 5px var(--paper)}
+    .hiw-rail::after{top:46px;bottom:-46px}
+    .hiw-head{gap:12px}
+    .hiw-icon{width:44px;height:44px;border-radius:12px}
+    .hiw-icon svg{width:26px;height:26px}
+    .hiw-lead{font-size:16.5px}
+    .hiw-points li{font-size:15px}
+    .hiw-cta{padding:28px 24px;margin-top:64px}
+  }
+  @media (max-width:480px){ .hiw-page{padding:44px 0 8px} }
+
+  /* Footer links now span the whole site, so let them wrap. */
+  .foot-links{flex-wrap:wrap;gap:10px 26px}
