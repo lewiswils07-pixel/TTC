@@ -217,8 +217,21 @@
   /* The plane sits on top of the lit (orange) portion of the route once
      scrolled past it, so it's given a contrasting ink fill rather than
      reusing the route's terracotta. */
-  .cs-plane path{fill:var(--ink)}
-  .cs-plane-halo{fill:var(--paper);opacity:.9}
+  /* 3D line-art plane: gradient-shaded cream body (defs in index.html),
+     fine outline, terracotta centre line, and a soft ground shadow. The
+     plane is a physical object, so its colours are the same in both themes. */
+  .cs-plane-part{stroke:#3A3530;stroke-width:.9;stroke-linejoin:round}
+  .cs-plane-wing{fill:url(#csWing)}
+  .cs-plane-fuselage{fill:url(#csFuselage)}
+  .cs-plane-engine{fill:url(#csEngine);stroke:#3A3530;stroke-width:.6}
+  .cs-plane-stripe{fill:none;stroke:var(--terracotta);stroke-width:1.1;stroke-linecap:round}
+  .cs-plane-glint{fill:#fff;opacity:.85}
+  .cs-plane-shadow{fill:#14110D}
+  /* Landing strip at the end of the route: fixed asphalt tones, with a hairline
+     edge so it still reads against the dark theme's background. */
+  .cs-runway-strip{fill:#3B3834;stroke:rgba(255,255,255,.14);stroke-width:.6}
+  .cs-runway-mark rect{fill:#EFE9DE}
+  .cs-runway-centre{stroke:#EFE9DE;stroke-width:1;stroke-dasharray:4 3}
   .cs-icon-main{stroke:none}
   .cs-icon-cut{fill:var(--paper)}
   .cs-icon-cut-line{stroke:var(--paper);stroke-width:1.4;stroke-linecap:round}
