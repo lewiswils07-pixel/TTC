@@ -472,28 +472,43 @@
   .cluster-head h3{font-family:var(--font-display);font-weight:500;font-style:italic;font-size:22px;margin:0 0 6px}
   .cluster-head .sub{font-size:13.5px;color:var(--muted);line-height:1.55}
 
-  .cluster-cards{display:grid;grid-template-columns:1fr;gap:14px;align-content:start}
-  .ccard{position:relative;background:var(--card);border:1px solid var(--line);border-radius:4px;padding:18px;
-    display:flex;gap:14px;align-items:flex-start;box-shadow:0 14px 32px -22px rgba(0,0,0,.35)}
-  .ccard-stamp{flex:none;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  .cluster-cards{display:grid;grid-template-columns:1fr;gap:16px;align-content:start}
+  /* Member cards (after 21st.dev "Testimonial Card", shadcnui-blocks):
+     rounded card with a soft layered shadow; avatar + name + handle as a
+     header row, the quote full-width beneath, a large quote-mark
+     watermark in the corner, and the match note as a tinted footer.
+     The markup is built by the page script, so the header row is made
+     with CSS grid + display:contents rather than new wrapper elements. */
+  .ccard{position:relative;overflow:hidden;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px 0;
+    display:grid;grid-template-columns:44px minmax(0,1fr);grid-template-rows:auto auto auto 1fr auto;column-gap:14px;align-items:center;
+    box-shadow:0 1px 2px rgba(33,32,30,.05), 0 10px 28px -16px rgba(33,32,30,.22);
+    transition:transform .25s var(--ease-out), box-shadow .25s var(--ease-out);
+    animation:rise .5s var(--ease-out) both}
+  .ccard:nth-child(2){animation-delay:.07s}
+  .ccard:nth-child(3){animation-delay:.14s}
+  .ccard:hover{transform:translateY(-2px);box-shadow:0 1px 2px rgba(33,32,30,.05), 0 18px 36px -18px rgba(33,32,30,.3)}
+  .ccard::after{content:"\201C" / "";position:absolute;top:0;right:16px;font-family:var(--font-display);font-size:120px;line-height:1;
+    color:var(--terracotta);opacity:.12;pointer-events:none}
+  .ccard-copy{display:contents}
+  .ccard-stamp{grid-column:1;grid-row:1 / span 2;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
     font-family:var(--font-display);font-style:italic;font-weight:500;font-size:15px;color:var(--on-accent);
-    border:2px dashed rgba(255,255,255,.5)}
-  .ccard-copy{min-width:0;flex:1}
-  .ccard-name{font-family:var(--font-display);font-style:italic;font-weight:500;font-size:17px;margin:0}
-  .ccard-route{font-size:12px;color:var(--muted)}
-  .ccard-bio{font-size:13px;color:var(--muted);font-style:italic;margin:8px 0 0}
-  .ccard-chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
-  .ccard-chips .chip{height:24px;padding:0 9px;font-size:10.5px;cursor:default}
+    box-shadow:0 0 0 2px var(--card), 0 0 0 3.5px var(--line)}
+  .ccard-name{grid-column:2;font-family:var(--font-display);font-style:normal;font-weight:500;font-size:18px;line-height:1.2;margin:0;align-self:end}
+  .ccard-route{grid-column:2;font-size:13px;color:var(--muted);line-height:1.3;align-self:start}
+  .ccard-bio{grid-column:1 / -1;font-size:15px;line-height:1.6;color:var(--ink-soft);font-style:normal;margin:16px 0 0}
+  .ccard-chips{grid-column:1 / -1;display:flex;flex-wrap:wrap;align-content:flex-start;align-self:start;gap:6px;margin:16px 0 0}
+  .ccard-chips .chip{height:26px;padding:0 10px;font-size:11px;cursor:default;background:var(--paper)}
   .ccard-chips .chip-shared{background:var(--terracotta);border-color:var(--terracotta);color:var(--on-accent);font-weight:600}
-  .ccard-note{font-size:11.5px;color:var(--muted);margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+  .ccard-note{grid-column:1 / -1;align-self:end;font-size:12px;color:var(--muted);margin:20px -24px 0;padding:12px 24px;background:var(--paper-tint);border-top:1px solid var(--line)}
   .ccard-note b{color:var(--ink);font-weight:600}
 
   /* Below 880px: still one column, but wide enough to lay the three cards
      out side by side instead of stacked. */
   @media (min-width:640px) and (max-width:879px){
     .cluster-cards{grid-template-columns:repeat(3,1fr)}
-    .ccard{flex-direction:column}
-    .ccard-stamp{margin-bottom:2px}
+    .ccard{padding:18px 18px 0;align-content:start}
+    .ccard-note{margin:16px -18px 0;padding:10px 18px}
+    .ccard-bio{font-size:14px}
   }
   /* Globe left, cards right — the cards go back to a single vertical list
      since they're now a narrower sidebar column, not a full-width row. */
