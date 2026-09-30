@@ -717,3 +717,43 @@
     .faq-a-inner{padding:0 8px 0 2px}
     .faq-a-inner::after{height:22px}
   }
+
+  /* ───────── Membership (membership.html) ─────────
+     One founding-membership card (the head reuses the fixed dark --panel
+     treatment of the Example trips band and the menu), with short notes
+     beside it. No prices or tiers are invented: it's free while founding. */
+  .mem-page{padding:56px 0 8px}
+  .mem-page .swatch{margin-bottom:22px}
+  .mem-page h1{max-width:15ch;margin:0 0 24px}
+  .mem-intro{color:var(--muted);font-size:18px;line-height:1.75;max-width:60ch;margin:0}
+  .mem-body{padding-top:56px}
+  .mem-grid{display:grid;grid-template-columns:1fr;gap:40px}
+  .mem-card{border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;background:var(--card);box-shadow:var(--shadow-lg)}
+  .mem-card-head{background:var(--panel);color:var(--panel-ink);padding:32px 36px}
+  .mem-card-head .swatch{color:var(--panel-muted);margin-bottom:14px}
+  .mem-price{font-family:var(--font-display);font-weight:430;font-size:clamp(48px,6vw,64px);line-height:1;letter-spacing:-1px;margin:0 0 10px}
+  .mem-price-note{margin:0;color:color-mix(in srgb, var(--panel-ink) 72%, var(--panel));font-size:15px;line-height:1.6;max-width:44ch}
+  .mem-card-body{padding:30px 36px 36px}
+  .mem-card-body > h2{font-size:22px;margin:0 0 18px}
+  .mem-features{list-style:none;margin:0 0 28px;padding:0;display:grid;gap:18px}
+  .mem-feature{display:flex;gap:14px;align-items:flex-start}
+  .mem-feature h3{font-family:var(--font-body);font-size:16px;font-weight:600;margin:0 0 2px;color:var(--ink)}
+  .mem-feature p{margin:0;color:var(--muted);font-size:15px;line-height:1.6}
+  .mem-check{flex:none;width:26px;height:26px;border-radius:50%;background:color-mix(in srgb, var(--terracotta) 14%, transparent);display:grid;place-items:center;margin-top:1px}
+  .mem-check svg{width:15px;height:15px;fill:none;stroke:var(--terracotta);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .mem-cta{width:100%;height:52px}
+  .mem-notes{display:grid;gap:14px;align-content:start}
+  .mem-note{padding:24px 26px;border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-tint)}
+  .mem-note h2{font-size:21px;margin:0 0 8px}
+  .mem-note p{margin:0;color:var(--muted);font-size:15.5px;line-height:1.7}
+  .mem-more{margin:10px 0 0;color:var(--muted);font-size:15px}
+  .mem-more a{color:var(--terracotta);text-underline-offset:3px}
+  @media (min-width:960px){
+    .mem-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;align-items:start}
+  }
+  @media (max-width:480px){
+    .mem-page{padding:44px 0 8px}
+    .mem-card-head{padding:26px 24px}
+    .mem-card-body{padding:24px 24px 28px}
+    .mem-note{padding:20px}
+  }
