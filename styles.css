@@ -801,3 +801,8 @@
     .legal-item h3{font-size:19px}
     .legal-item p{font-size:15px}
   }
+
+  /* 404 page (404.html) reuses the How it works page header (.hiw-page). */
+  .nf-page{padding:96px 0 120px}
+  .nf-actions{margin-top:32px}
+  @media (max-width:480px){ .nf-page{padding:56px 0 80px} .nf-actions{flex-wrap:wrap} .nf-actions .btn{flex:1 1 100%} }
