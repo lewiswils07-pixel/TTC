@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<script>
+  // DEMO GUARD: not real access control. If this browser hasn't been marked
+  // "signed in" by demo-auth.js (localStorage flag ttc_signed_in), send the
+  // visitor to the sign-in page before anything renders.
+  try { if (localStorage.getItem('ttc_signed_in') !== 'true') location.replace('signin.html'); }
+  catch (e) { location.replace('signin.html'); }
+</script>
+<title>Your dashboard — Together Travel Club</title>
+<meta name="description" content="Your Together Travel Club member dashboard.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340..600;1,9..144,340..600&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="page-shell">
+
+<nav>
+  <div class="wrap navrow">
+    <a class="brand" href="./">
+      <span class="brand-mark">T</span><span class="brand-word">ogether Travel Club</span>
+    </a>
+    <div class="nav-right">
+      <a class="nav-signin" href="signin.html">Sign in</a>
+      <a class="btn terracotta btn-sm nav-cta" href="./#join">Become a member</a>
+      <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="menuOverlay">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="menu-overlay" id="menuOverlay">
+  <div class="wrap">
+    <div class="menu-top">
+      <a class="brand" href="./" id="menuBrandLink">
+        <span class="brand-mark">T</span><span class="brand-word">ogether Travel Club</span>
+      </a>
+      <button class="menu-close" id="menuClose" aria-label="Close menu">&times;</button>
+    </div>
+    <div class="menu-links">
+      <a href="./"><span class="mnum">01</span> Home</a>
+      <a href="how-it-works.html"><span class="mnum">02</span> How it works</a>
+      <a href="matches.html"><span class="mnum">03</span> See a match</a>
+      <a href="membership.html"><span class="mnum">04</span> Membership</a>
+      <a href="about.html"><span class="mnum">05</span> About us</a>
+      <a href="signin.html"><span class="mnum">06</span> Sign in</a>
+    </div>
+    <div class="menu-foot">A members' club for people who travel</div>
+  </div>
+</div>
+
+<header class="dash-page" id="top">
+  <div class="wrap">
+    <div class="dash-head">
+      <div>
+        <span class="swatch terracotta"><i></i> Member dashboard</span>
+        <h1>Hi <span id="dashName">there</span>.</h1>
+        <p class="dash-sub" id="dashSub">Here's what's happening with your trips.</p>
+      </div>
+      <a class="btn outline btn-sm" href="index.html" id="signOut">Sign out</a>
+    </div>
+  </div>
+</header>
+
+<section class="section-block dash-body">
+  <div class="wrap dash-grid">
+    <div class="dash-main">
+      <div class="dash-section-head">
+        <h2>Your matches</h2>
+        <p>Example profiles while the club is in its founding phase. Interests you share are highlighted.</p>
+      </div>
+      <div class="cluster-cards" id="dashMatches"></div>
+    </div>
+
+    <aside class="dash-side">
+      <div class="dash-panel">
+        <!-- Profile completion: the meter + step list from the homepage join section (.profile-next) -->
+        <div class="profile-next dash-profile">
+          <h3>Your profile, built up over time</h3>
+          <p class="sub" id="dashProgressLabel">1 of 3 steps complete.</p>
+          <div class="meter" role="progressbar" aria-label="Profile completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="33"><div class="meter-fill" style="width:33%"></div></div>
+          <div class="plist">
+            <div class="pstep done"><div class="dot2">&#10003;</div> Your interests, so we can start shortlisting who you'd get on with</div>
+            <div class="pstep todo"><div class="dot2">2</div> Travel style, covering your budget, pace, board basis and how you like to plan a trip</div>
+            <div class="pstep todo"><div class="dot2">3</div> Your next trip, along with any other destinations you're considering</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-panel">
+        <div class="dash-section-head dash-section-head-sm">
+          <h2>Messages</h2>
+          <p>Messaging isn't live yet. These are example conversations.</p>
+        </div>
+        <ul class="dash-msgs" id="dashMessages"></ul>
+      </div>
+
+      <p class="fine dash-fine"><strong>Demo dashboard.</strong> You're "signed in" only in this browser: your name and email are saved in localStorage, nothing is sent to a server, and there's no real account or security. Matches and messages are examples. Sign out to clear it.</p>
+    </aside>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-left">
+      <div class="foot-swatches"><i></i><i></i><i></i></div>
+      <div class="foot-tag">A members' club for people who want to travel more.</div>
+    </div>
+    <div class="foot-links">
+      <a href="how-it-works.html">How it works</a>
+      <a href="membership.html">Membership</a>
+      <a href="faq.html">FAQ</a>
+      <a href="about.html">About us</a>
+      <a href="./#examples">Example trips</a>
+      <a href="./#join">Sign up</a>
+      <a href="terms.html">Terms &amp; privacy</a>
+    </div>
+    <div class="foot-meta">© 2026 Together Travel Club</div>
+  </div>
+</footer>
+
+</div>
+
+<script src="nav.js"></script>
+<script src="demo-auth.js"></script>
+<script src="badges.js"></script>
+<script>
+(function(){
+  // DEMO DASHBOARD: everything below is mock, client-side only. "Signed in"
+  // just means demo-auth.js found its localStorage flag (see the guard in
+  // <head>); the name/email come from what was typed at sign-up or sign-in.
+  var me = TTCDemoAuth.member();
+  var name = (me.name || '').trim();
+  document.getElementById('dashName').textContent = name || 'there';
+  if (me.email) document.getElementById('dashSub').textContent = 'Signed in as ' + me.email + ' (demo). Here\u2019s what\u2019s happening with your trips.';
+
+  document.getElementById('signOut').addEventListener('click', function(e){
+    e.preventDefault();
+    TTCDemoAuth.signOut();
+    window.location.href = 'index.html';
+  });
+
+  // Example matches: the same fictional members (and data shape) as matches.html.
+  var MY_INTERESTS = ["Photography", "Street food", "Coffee culture", "Live music"];
+  var MATCHES = [
+    { name:"Maya T.", age:29, home:"London", dest:"Lisbon, this spring", bio:"Chasing golden hour and good pastries.", interests:["Photography","Coffee culture","Street food","Historic sites","Walking tours","City breaks"], badges:["id","video","social"], color:"terracotta" },
+    { name:"Aisha K.", age:27, home:"Toronto", dest:"Lisbon, this spring", bio:"Collects markets the way other people collect stamps.", interests:["Local markets","Cultural immersion","Street food","Photography","Architecture"], badges:["id","social"], color:"saffron" },
+    { name:"Daniel P.", age:33, home:"Berlin", dest:"Lisbon, this spring", bio:"First stop is always the record shop.", interests:["Live music","Nightlife","Art galleries","Museums","Coffee culture"], badges:["id","video"], color:"turquoise" }
+  ];
+  function initials(n){ return n.split(' ').map(function(w){ return w[0]; }).join('').slice(0,2).toUpperCase(); }
+  var cards = document.getElementById('dashMatches');
+  MATCHES.forEach(function(m){
+    var card = document.createElement('article');
+    card.className = 'ccard';
+    card.innerHTML =
+      '<div class="ccard-stamp" style="background:var(--' + m.color + ')">' + initials(m.name) + '</div>' +
+      '<div class="ccard-copy">' +
+        '<h4 class="ccard-name">' + m.name + ' <span class="ccard-age"><span class="sr-only">age </span>' + m.age + '</span></h4>' +
+        '<span class="ccard-route">' + m.home + ' \u2192 ' + m.dest + '</span>' +
+        TTCBadges.html(m.badges) +
+        '<p class="ccard-bio">\u201c' + m.bio + '\u201d</p>' +
+        '<div class="ccard-chips">' + m.interests.map(function(i){
+          return '<span class="chip' + (MY_INTERESTS.indexOf(i) !== -1 ? ' chip-shared' : '') + '">' + i + '</span>';
+        }).join('') + '</div>' +
+      '</div>';
+    cards.appendChild(card);
+  });
+
+  // Example conversations (no real messaging).
+  var MESSAGES = [
+    { name:"Maya T.", color:"terracotta", text:"Have you found anywhere good for pastries near Alfama yet? I've got a list going.", when:"2h", unread:true },
+    { name:"Aisha K.", color:"saffron", text:"There's a Saturday market in Campo de Ourique if you fancy it.", when:"Yesterday" },
+    { name:"Daniel P.", color:"turquoise", text:"Happy to share my record-shop list for Lisbon whenever.", when:"Mon" }
+  ];
+  var list = document.getElementById('dashMessages');
+  MESSAGES.forEach(function(m){
+    var li = document.createElement('li');
+    li.className = 'dash-msg' + (m.unread ? ' is-unread' : '');
+    li.innerHTML =
+      '<span class="dash-msg-stamp" style="background:var(--' + m.color + ')" aria-hidden="true">' + initials(m.name) + '</span>' +
+      '<div class="dash-msg-copy"><p class="dash-msg-top"><b>' + m.name + '</b><span>' + m.when + '</span></p>' +
+      '<p class="dash-msg-text">' + (m.unread ? '<span class="sr-only">Unread: </span>' : '') + m.text + '</p></div>';
+    list.appendChild(li);
+  });
+})();
+</script>
+</body>
+</html>

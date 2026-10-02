@@ -235,14 +235,16 @@
         <h2>Join the founding community.</h2>
       </div>
       <div class="join-form-wrap">
-        <form class="form" id="joinForm" onsubmit="event.preventDefault(); document.getElementById('success').hidden=false; this.reset();">
+        <form class="form" id="joinForm">
           <div class="field"><label for="fname">First name</label><input id="fname" required placeholder="Your first name"></div>
           <div class="field"><label for="email">Email address</label><input id="email" required type="email" placeholder="you@example.com"></div>
           <div class="field full"><label for="home">Home location</label><input id="home" placeholder="e.g. London"></div>
 
           <div class="field full"><button class="btn terracotta" type="submit">Join the founding community</button></div>
         </form>
-        <div id="success" class="fine" hidden>Thank you, you're on the founding list. We'll be in touch by email when membership opens.</div>
+        <div id="success" class="fine" hidden>Thank you, you're on the founding list. We'll be in touch by email when membership opens.
+          <a class="btn terracotta btn-sm success-cta" href="dashboard.html">Go to your dashboard</a></div>
+        <p class="fine join-demo-note"><strong>Demo:</strong> joining here also "signs you in" to a preview of the member dashboard. Your name and email are saved only in this browser (localStorage), nothing is sent anywhere, and there's no real account or security yet.</p>
 
         <div class="profile-next">
           <h3>Your profile, built up over time</h3>
@@ -260,6 +262,24 @@
   </div>
 </section>
 <script src="nav.js"></script>
+<script src="demo-auth.js"></script>
+<script>
+  // Join form → DEMO sign-in. No backend: on submit we show the thank-you
+  // message and mark this browser as "signed in" via demo-auth.js
+  // (localStorage only), so sign-up and sign-in both lead to dashboard.html.
+  (function(){
+    var form = document.getElementById('joinForm');
+    if (!form) return;
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+      TTCDemoAuth.signIn(document.getElementById('fname').value, document.getElementById('email').value);
+      document.getElementById('success').hidden = false;
+      if (window.TTCRefreshNavSignIn) window.TTCRefreshNavSignIn();
+      form.reset();
+    });
+  })();
+</script>
 <script>
   (function(){
 
