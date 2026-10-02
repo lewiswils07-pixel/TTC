@@ -26,12 +26,12 @@ The sign-in and dashboard on the members branch are a **client-side demo only**
 
 ## Files
 - `index.html`: home page, including the founding-community join form
-- `how-it-works.html`, `matches.html`, `membership.html`, `about.html`: main pages
+- `how-it-works.html`, `connections.html`, `membership.html`, `about.html`: main pages
 - `faq.html`, `terms.html`: footer pages (`terms.html` is placeholder text, not reviewed legal copy)
 - `styles.css`: shared styles for all pages
 - `nav.js`: shared nav/menu behaviour
 - `badges.js`: trust badges on member cards
-- `img/`: photos and the globe texture used on matches.html
+- `img/`: photos and the globe texture used on connections.html
 
 ## Running locally
 Serve the folder with any static server, e.g.:
