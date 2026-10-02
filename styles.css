@@ -157,11 +157,7 @@
   .hero{padding:56px 0 48px;overflow:hidden}
   @keyframes rise{from{opacity:0;transform:translateY(12px);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
   @keyframes rise-media{from{opacity:0;transform:translateY(24px);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
-  .hero h1,.hero-copy>*{animation:rise .5s var(--ease-out) both}
-  .hero-copy>.swatch{animation-delay:.1s}
-  .hero-copy>.hero-lead{animation-delay:.2s}
-  .hero-copy>.actions{animation-delay:.3s}
-  .hero-art{animation:rise-media .6s var(--ease-out) .4s both}
+  /* Entrance choreography: see "Arrival intro and hero opening" at the end. */
   .hero-top{display:flex;flex-direction:column;align-items:center;text-align:center}
   .hero-left{display:flex;flex-direction:column;align-items:center;max-width:880px}
   .hero-copy{display:flex;flex-direction:column;align-items:center;max-width:640px}
@@ -1058,5 +1054,93 @@
     .btn:hover,.btn:active,.chip:active,.menu-btn:active,.menu-close:active,.hw-steps-nav a:hover,.hw-steps-nav a:active,.ccard:hover,
     .ac-tile:hover img,.dest:hover .dest-art img{transform:none !important}
     .menu-links a{transform:none}
-    .hero h1,.hero-copy>*,.hero-art,.ccard{animation:none}
+    .ccard{animation:none}
+  }
+
+  /* ───────── Arrival intro and hero opening (index.html) ─────────
+     First visit of a session (html.intro, set in <head>): a dark panel with
+     the logo and a plane flying a dotted route, then the panel lifts away
+     like a curtain. The hero then plays its own opening: headline lines
+     slide up out of a mask, "travelling" gets a hand-drawn underline, the
+     postcards drop in, and a plane flies the route between them.
+     Timeline (intro): 0 brand rises · .15s route draws + plane (.8s) ·
+     .95s landing ping · 1s panel lifts (.55s) · hero starts at 1.15s.
+     --intro-delay shifts the hero; skip sets it to .25s. Everything here
+     sits behind prefers-reduced-motion: no-preference. */
+  .arrival{display:none}
+  .h1-line{display:block}
+  .swoosh{position:relative;white-space:nowrap}
+  .swoosh svg{position:absolute;left:-1%;width:102%;bottom:-.16em;height:.3em;overflow:visible;pointer-events:none}
+  .swoosh path{fill:none;stroke:var(--saffron);stroke-width:3.2;stroke-linecap:round}
+  .hero-draw,.intro-draw{fill:none;stroke:#fff;stroke-width:14;stroke-linecap:round}
+  .hero-plane{fill:var(--terracotta);opacity:0}
+  .hero-ping{fill:none;stroke:#B34C1C;stroke-width:2;opacity:0}
+
+  html.intro .arrival{display:grid;place-items:center;position:fixed;inset:0;z-index:100;background:var(--panel);color:var(--panel-ink);
+    clip-path:inset(0 0 0 0);
+    animation:introOut .01s linear 3s forwards}             /* fallback if the script never starts it */
+  .intro-inner{display:flex;flex-direction:column;align-items:center;gap:14px;padding:24px;text-align:center}
+  .intro-route{width:min(320px,76vw);height:auto;overflow:visible}
+  .intro-path{fill:none;stroke:var(--panel-accent);stroke-width:2.2;stroke-dasharray:1 7;stroke-linecap:round}
+  .intro-dot{fill:var(--panel-accent)}
+  .intro-ping{fill:none;stroke:var(--panel-accent);stroke-width:2;opacity:0}
+  .intro-plane{fill:var(--panel-ink);opacity:0}
+  .intro-brand{margin:6px 0 0;display:flex;align-items:baseline;gap:2px;font-size:clamp(26px,5vw,34px);line-height:1}
+  .intro-brand .brand-mark{font-size:1.18em;color:var(--terracotta)}
+  :root[data-theme="dark"] .intro-brand .brand-mark{color:var(--terracotta)}
+  .intro-brand .brand-word{font-size:1em;color:var(--panel-ink)}
+  .intro-tag{margin:0;font-size:14px;color:var(--panel-muted);letter-spacing:.1px}
+
+  @keyframes introOut{to{clip-path:inset(0 0 100% 0);visibility:hidden}}
+  @keyframes introRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes introLift{to{opacity:0;transform:translateY(-28px)}}
+  @keyframes drawIn{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+  @keyframes dotPop{0%{transform:scale(0);opacity:0}60%{transform:scale(1.35);opacity:1}100%{transform:scale(1);opacity:1}}
+  @keyframes ping{0%{transform:scale(1);opacity:.7}100%{transform:scale(4);opacity:0}}
+  @keyframes planeLife{0%{opacity:0}12%{opacity:1}82%{opacity:1}100%{opacity:0}}
+  @keyframes lineUp{from{transform:translateY(105%)}to{transform:none}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  @keyframes cardInA{from{opacity:0;transform:translate(-26px,22px) rotate(-5deg)}to{opacity:1;transform:none}}
+  @keyframes cardInB{from{opacity:0;transform:translate(30px,34px) rotate(6deg)}to{opacity:1;transform:none}}
+  @keyframes sunRise{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:.8}}
+
+  @media (prefers-reduced-motion: no-preference){
+    /* Intro panel */
+    html.intro-go .arrival{animation:introOut .55s var(--ease-in-out) 1s forwards}
+    html.intro-skip .arrival{animation:introOut .35s var(--ease-in-out) forwards}
+    html.intro .intro-brand,html.intro .intro-tag,html.intro .intro-route{opacity:0}
+    html.intro-go .intro-route{animation:introRise .4s var(--ease-out) both}
+    html.intro-go .intro-brand{animation:introRise .5s var(--ease-out) .08s both}
+    html.intro-go .intro-tag{animation:introRise .5s var(--ease-out) .18s both}
+    html.intro-go .intro-inner{animation:introLift .45s var(--ease-in-out) 1s forwards}
+    html.intro .intro-draw{stroke-dasharray:1;stroke-dashoffset:1}
+    html.intro-go .intro-draw{animation:drawIn .8s var(--ease-in-out) .15s forwards}
+    .intro-dot,.intro-ping,.hero-dot,.hero-ping{transform-box:fill-box;transform-origin:center}
+    html.intro-go .intro-dot-a{animation:dotPop .35s var(--ease-out) .05s both}
+    html.intro-go .intro-dot-b{animation:dotPop .35s var(--ease-out) .85s both}
+    html.intro-go .intro-ping{animation:ping .7s var(--ease-out) .95s}
+    html.intro-go .intro-plane{animation:planeLife .8s linear .15s both}
+    html.intro-skip .intro-plane{animation:none;opacity:0}
+
+    /* Hero opening (runs on every visit; delayed while the intro plays) */
+    html.hero-wait:not(.hero-go) .hero *{animation-play-state:paused}
+    :root{--intro-delay:0s}
+    html.intro{--intro-delay:1.15s}
+    .h1-line{overflow:hidden;padding-bottom:.22em;margin-bottom:-.22em}
+    .h1-line > span{display:inline-block;animation:lineUp .75s var(--ease-out) both;animation-delay:var(--intro-delay)}
+    .h1-line + .h1-line > span{animation-delay:calc(var(--intro-delay) + .09s)}
+    .swoosh path{stroke-dasharray:1;stroke-dashoffset:1;animation:drawIn .6s var(--ease-in-out) both;animation-delay:calc(var(--intro-delay) + .65s)}
+    .hero-copy>*{animation:fadeUp .6s var(--ease-out) both}
+    .hero-copy>.swatch{animation-delay:calc(var(--intro-delay) + .25s)}
+    .hero-copy>.hero-lead{animation-delay:calc(var(--intro-delay) + .33s)}
+    .hero-copy>.actions{animation-delay:calc(var(--intro-delay) + .41s)}
+    .pc{transform-box:fill-box;transform-origin:center}
+    .pc-a{animation:cardInA .8s var(--ease-out) both;animation-delay:calc(var(--intro-delay) + .2s)}
+    .pc-b{animation:cardInB .8s var(--ease-out) both;animation-delay:calc(var(--intro-delay) + .32s)}
+    .pc-sun{transform-box:fill-box;animation:sunRise .9s var(--ease-out) both;animation-delay:calc(var(--intro-delay) + .55s)}
+    .hero-draw{stroke-dasharray:1;stroke-dashoffset:1;animation:drawIn 1.1s var(--ease-in-out) both;animation-delay:calc(var(--intro-delay) + .7s)}
+    .hero-dot-a{animation:dotPop .35s var(--ease-out) both;animation-delay:calc(var(--intro-delay) + .6s)}
+    .hero-dot-b{animation:dotPop .35s var(--ease-out) both;animation-delay:calc(var(--intro-delay) + 1.7s)}
+    .hero-ping{animation:ping .8s var(--ease-out) forwards;animation-delay:calc(var(--intro-delay) + 1.8s)}
+    .hero-plane{animation:planeLife 1.1s linear both;animation-delay:calc(var(--intro-delay) + .7s)}
   }
