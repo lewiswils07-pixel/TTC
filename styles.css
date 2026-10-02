@@ -540,6 +540,8 @@
   .tbadges{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:6px 14px;list-style:none;margin:14px 0 0;padding:0}
   .tbadge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;letter-spacing:.1px;color:var(--ink-soft);white-space:nowrap}
   .tbadge svg{width:14px;height:14px;flex:none;color:var(--terracotta)}
+  .tbadge-none{color:var(--muted);font-weight:500}
+  .tbadge-none svg{color:var(--muted)}
 
   .ccard-age{font-family:var(--font-body);font-size:14px;font-weight:500;color:var(--muted);margin-left:2px}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
@@ -727,7 +729,6 @@
   .mem-page h1{max-width:15ch;margin:0 0 24px}
   .mem-intro{color:var(--muted);font-size:18px;line-height:1.75;max-width:60ch;margin:0}
   .mem-body{padding-top:56px}
-  .mem-grid{display:grid;grid-template-columns:1fr;gap:40px}
   .mem-card{border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;background:var(--card);box-shadow:var(--shadow-lg)}
   .mem-card-head{background:var(--panel);color:var(--panel-ink);padding:32px 36px}
   .mem-card-head .swatch{color:var(--panel-muted);margin-bottom:14px}
@@ -748,8 +749,28 @@
   .mem-note p{margin:0;color:var(--muted);font-size:15.5px;line-height:1.7}
   .mem-more{margin:10px 0 0;color:var(--muted);font-size:15px}
   .mem-more a{color:var(--terracotta);text-underline-offset:3px}
-  @media (min-width:960px){
-    .mem-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;align-items:start}
+  /* Free vs Club+ plans */
+  .mem-offer{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:0 0 32px;padding:18px 22px;border-radius:var(--radius);
+    background:color-mix(in srgb, var(--saffron) 16%, var(--paper));border:1px solid color-mix(in srgb, var(--saffron) 45%, var(--line))}
+  .mem-offer p{margin:0;font-size:15.5px;line-height:1.6;color:var(--ink-soft);flex:1 1 320px}
+  .mem-offer b{color:var(--ink)}
+  .mem-offer-tag{flex:none;font-size:11.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;padding:6px 12px;border-radius:999px;
+    background:var(--saffron);color:#21201E}
+  .mem-plans{display:grid;grid-template-columns:1fr;gap:24px;align-items:stretch}
+  .mem-plan{display:flex;flex-direction:column}
+  .mem-plan .mem-card-body{flex:1;display:flex;flex-direction:column}
+  .mem-plan .mem-features{flex:1;align-content:start}
+  .mem-head-free{background:var(--paper-tint);color:var(--ink);border-bottom:1px solid var(--line)}
+  .mem-head-free .mem-price-note,.mem-head-free .swatch{color:var(--muted)}
+  .mem-plan:not(.mem-plan-plus){box-shadow:var(--shadow-sm)}
+  .mem-plan-plus{border-color:color-mix(in srgb, var(--panel-accent) 55%, var(--line))}
+  .mem-per{font-family:var(--font-body);font-size:16px;font-weight:500;letter-spacing:0;margin-left:4px;opacity:.8}
+  .mem-plus-lead{margin:0 0 18px;font-weight:600;color:var(--ink)}
+  .mem-notes{grid-template-columns:1fr;margin-top:48px}
+  .mem-body .mem-more{margin-top:20px}
+  @media (min-width:880px){
+    .mem-plans{grid-template-columns:1fr 1fr;gap:28px}
+    .mem-notes{grid-template-columns:repeat(3,1fr);gap:20px}
   }
   @media (max-width:480px){
     .mem-page{padding:44px 0 8px}
