@@ -25,20 +25,13 @@ The sign-in and dashboard on the members branch are a **client-side demo only**
 (`demo-auth.js`, localStorage): no backend, no real accounts, no security.
 
 ## Files
-- `index.html`: home page, with the founding-member sign-up form
-- `how-it-works.html`: the three steps, prices (Free and Club+) and staying safe
-- `about.html`: Lewis's story, what we believe, and a few travel photos
-- `faq.html`: questions and answers
-- `terms.html`: terms of service and privacy policy (placeholder text, not reviewed legal copy)
-- `404.html`: page-not-found
-- `membership.html`, `connections.html`: redirects to `how-it-works.html`, kept so old links still work
-- `styles.css`: the one stylesheet (18px body text, nothing below 15px, light and dark themes)
-- `nav.js`: the phone menu
-- `img/`: photos, favicon and share image
-
-Design notes: the site is written for an older audience first. Keep text
-large and plain, links visible (no icon-only controls), and motion to a
-minimum.
+- `index.html`: home page, including the founding-community join form
+- `how-it-works.html`, `connections.html`, `membership.html`, `about.html`: main pages
+- `faq.html`, `terms.html`: footer pages (`terms.html` is placeholder text, not reviewed legal copy)
+- `styles.css`: shared styles for all pages
+- `nav.js`: shared nav/menu behaviour
+- `badges.js`: trust badges on member cards
+- `img/`: photos and the globe texture used on connections.html
 
 ## Running locally
 Serve the folder with any static server, e.g.:

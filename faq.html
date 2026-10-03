@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Questions · Together Travel Club</title>
-<meta name="description" content="Answers to the questions people most often ask before joining Together Travel Club: safety, cost, cancelling and your details.">
+<title>FAQ · Together Travel Club</title>
+<meta name="description" content="Answers to common questions about Together Travel Club: safety and verification, how connections work, cost, leaving, and how your data is used.">
 <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
 <link rel="icon" type="image/png" sizes="512x512" href="img/favicon-512.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
@@ -15,12 +15,12 @@
      platforms ignore relative image paths. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Together Travel Club">
-<meta property="og:title" content="Questions · Together Travel Club">
-<meta property="og:description" content="Answers to the questions people most often ask before joining Together Travel Club: safety, cost, cancelling and your details.">
+<meta property="og:title" content="FAQ · Together Travel Club">
+<meta property="og:description" content="Answers to common questions about Together Travel Club: safety and verification, how connections work, cost, leaving, and how your data is used.">
 <meta property="og:image" content="img/share.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Together Travel Club: find good company for your next trip.">
+<meta property="og:image:alt" content="Together Travel Club: find your people, wherever you&#x27;re travelling to.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,76 +28,151 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
 
-<header class="site-header">
-  <div class="wrap bar">
-    <a class="brand" href="./" aria-label="Together Travel Club, home">
-      <span class="brand-mark" aria-hidden="true">T</span><span class="brand-word" aria-hidden="true">ogether Travel Club</span>
+<div class="page-shell">
+
+<nav>
+  <div class="wrap navrow">
+    <a class="brand" href="./">
+      <span class="brand-mark">T</span><span class="brand-word">ogether Travel Club</span>
     </a>
-    <nav class="site-nav" aria-label="Main">
-      <a href="how-it-works.html">How it works</a>
-      <a href="about.html">About us</a>
-      <a href="faq.html" aria-current="page">Questions</a>
-    </nav>
-    <a class="btn btn-primary btn-sm head-cta" href="./#join">Join free</a>
-    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="mobileNav">Menu</button>
+    <div class="nav-right">
+      <a class="btn terracotta btn-sm nav-cta" href="./#join">Join free</a>
+      <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="menuOverlay">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
-  <nav class="mobile-nav" id="mobileNav" aria-label="Main" hidden>
-    <a href="./">Home</a>
-    <a href="how-it-works.html">How it works</a>
-    <a href="about.html">About us</a>
-    <a href="faq.html" aria-current="page">Questions</a>
-    <a class="btn btn-primary" href="./#join">Join free</a>
-  </nav>
+</nav>
+
+<div class="menu-overlay" id="menuOverlay">
+  <div class="wrap">
+    <div class="menu-top">
+      <a class="brand" href="./" id="menuBrandLink">
+        <span class="brand-mark">T</span><span class="brand-word">ogether Travel Club</span>
+      </a>
+      <button class="menu-close" id="menuClose" aria-label="Close menu">&times;</button>
+    </div>
+    <div class="menu-links">
+      <a href="./"><span class="mnum">01</span> Home</a>
+      <a href="how-it-works.html"><span class="mnum">02</span> How it works</a>
+      <a href="connections.html"><span class="mnum">03</span> Example connections</a>
+      <a href="membership.html"><span class="mnum">04</span> Membership</a>
+      <a href="about.html"><span class="mnum">05</span> About us</a>
+    </div>
+    <div class="menu-foot">A members' club for people who travel</div>
+  </div>
+</div>
+
+<header class="faq-page" id="top">
+  <div class="wrap faq-grid">
+    <div class="faq-intro">
+      <h1>Questions, answered.</h1>
+      <p>The things people ask most before joining: how we keep the club safe, how connections work, and what happens to your details.</p>
+      <div class="faq-aside">
+        <h2>Still deciding?</h2>
+        <p>See how it works from sign-up to your first message, or join free as a founding member. It takes a minute.</p>
+        <div class="actions">
+          <a class="btn terracotta btn-sm" href="./#join">Join free</a>
+          <a class="btn outline btn-sm" href="how-it-works.html">How it works</a>
+        </div>
+      </div>
+    </div>
+    <div class="faq-list" id="faqList">
+      <div class="faq-item">
+        <h2 class="faq-q"><button type="button" id="faq-q1" aria-expanded="false" aria-controls="faq-a1"><span>Is Together Travel Club safe? Who is verified?</span><i class="faq-icon" aria-hidden="true"></i></button></h2>
+        <div class="faq-a" id="faq-a1" role="region" aria-labelledby="faq-q1"><div class="faq-a-inner">
+          <p>Joining is free, and free members aren't ID-checked. Club+ members verify their identity through a specialist verification provider, and can add a short video introduction and link a social account. Each check shows as a small badge on their profile, so you can always see who has been verified and who hasn't.</p>
+          <p>With Club+ you can also choose to connect only with other verified members.</p>
+          <p>You choose who to message and when, and nothing is shared until you decide to. No one can promise that every meeting goes perfectly, so we'd always suggest meeting somewhere public first and letting a friend know your plans.</p>
+        </div></div>
+      </div>
+      <div class="faq-item">
+        <h2 class="faq-q"><button type="button" id="faq-q2" aria-expanded="false" aria-controls="faq-a2"><span>How are connections made?</span><i class="faq-icon" aria-hidden="true"></i></button></h2>
+        <div class="faq-a" id="faq-a2" role="region" aria-labelledby="faq-q2"><div class="faq-a-inner">
+          <p>We look at where you're going and when, how you like to travel, and what you're into. Members heading to the same place around the same dates rise to the top, and every profile shows exactly what you have in common.</p>
+          <p>No one is introduced automatically. You browse your shortlist and decide who you'd like to say hello to. <a href="how-it-works.html">See how it works</a> for the full picture.</p>
+        </div></div>
+      </div>
+      <div class="faq-item">
+        <h2 class="faq-q"><button type="button" id="faq-q3" aria-expanded="false" aria-controls="faq-a3"><span>Is there a cost?</span><i class="faq-icon" aria-hidden="true"></i></button></h2>
+        <div class="faq-a" id="faq-a3" role="region" aria-labelledby="faq-q3"><div class="faq-a-inner">
+          <p>Joining is free, and free members can build a profile, get connections and chat. Club+ is the paid option: it adds ID verification, more connections and verified-only connections, from £7.99 a month. Founding members get 3 months of Club+ free. <a href="membership.html">Compare Free and Club+</a>.</p>
+        </div></div>
+      </div>
+      <div class="faq-item">
+        <h2 class="faq-q"><button type="button" id="faq-q4" aria-expanded="false" aria-controls="faq-a4"><span>Can I cancel Club+ or leave?</span><i class="faq-icon" aria-hidden="true"></i></button></h2>
+        <div class="faq-a" id="faq-a4" role="region" aria-labelledby="faq-q4"><div class="faq-a-inner">
+          <p>Yes, at any time and for any reason. Cancel Club+ and you'll keep it until the end of the period you've paid for, then carry on as a free member. Close your account and your profile comes off other members' shortlists straight away.</p>
+        </div></div>
+      </div>
+      <div class="faq-item">
+        <h2 class="faq-q"><button type="button" id="faq-q5" aria-expanded="false" aria-controls="faq-a5"><span>What happens if a connection doesn't work out?</span><i class="faq-icon" aria-hidden="true"></i></button></h2>
+        <div class="faq-a" id="faq-a5" role="region" aria-labelledby="faq-q5"><div class="faq-a-inner">
+          <p>That's completely fine, and it happens. Messaging someone never commits you to travelling with them, and you can stop a conversation whenever you like.</p>
+          <p>If someone makes you uncomfortable, let us know and we'll look into it.</p>
+        </div></div>
+      </div>
+      <div class="faq-item">
+        <h2 class="faq-q"><button type="button" id="faq-q6" aria-expanded="false" aria-controls="faq-a6"><span>How is my data used?</span><i class="faq-icon" aria-hidden="true"></i></button></h2>
+        <div class="faq-a" id="faq-a6" role="region" aria-labelledby="faq-q6"><div class="faq-a-inner">
+          <p>Only to run the club: to build your shortlist, verify you if you choose Club+ and let you message other members. We don't sell your data, and identity documents are handled by our verification provider rather than stored on this site.</p>
+        </div></div>
+      </div>
+    </div>
+  </div>
 </header>
 
-<main id="main">
-<section class="page-head">
-  <div class="wrap narrow">
-    <h1>Questions and answers</h1>
-    <p class="lead">The things people most often ask before joining.</p>
-  </div>
-</section>
-
-<section class="section section-top-0">
-  <div class="wrap narrow">
-    <div class="qas">
-      <div class="qa"><h2 id="q1">Who is Together Travel Club for?</h2><p>Anyone over 18 who would like company on a trip, or simply someone to meet when they get there. Many of our members travel on their own.</p></div>
-      <div class="qa"><h2 id="q2">Is it safe?</h2><p>You choose who to talk to, and nobody is introduced to you automatically. Every profile shows whether the member's ID has been checked, and Club+ members can choose to meet verified members only. We always suggest meeting somewhere public first and letting a friend know your plans.</p></div>
-      <div class="qa"><h2 id="q3">How much does it cost?</h2><p>Joining is free. Club+ costs &pound;7.99 a month or &pound;59.99 a year, and adds ID checks, no monthly limit on new people and the option to meet verified members only. Founding members get 3 months of Club+ free. <a href="how-it-works.html#prices">See prices</a>.</p></div>
-      <div class="qa"><h2 id="q4">Do I have to travel with the people I meet?</h2><p>No. You can just chat, meet for a coffee, spend a day together or travel together. It's entirely up to you, and you can stop a conversation at any time.</p></div>
-      <div class="qa"><h2 id="q5">Can I cancel or leave?</h2><p>Yes, at any time. If you cancel Club+, you keep it until the end of the period you've paid for. If you close your account, your profile is removed straight away.</p></div>
-      <div class="qa"><h2 id="q6">What do you do with my details?</h2><p>We only use them to run the club: to show you people going your way, to let you chat, and to check your ID if you choose Club+. We never sell your details. <a href="terms.html#privacy">Read our privacy policy</a>.</p></div>
+<footer>
+  <div class="wrap">
+    <div class="foot-left">
+      <div class="foot-swatches"><i></i><i></i><i></i></div>
+      <div class="foot-tag">A members' club for people who want to travel more.</div>
     </div>
-  </div>
-</section>
-
-<section class="section section-tint">
-  <div class="wrap cta">
-    <h2>Ready to join?</h2>
-    <p class="lead">It's free, and it only takes a minute.</p>
-    <a class="btn btn-primary" href="./#join">Join free</a>
-  </div>
-</section>
-</main>
-
-<footer class="site-footer">
-  <div class="wrap foot">
-    <div>
-      <p class="foot-name">Together Travel Club</p>
-      <p class="foot-tag">Find good company for your next trip.</p>
-    </div>
-    <nav class="foot-links" aria-label="Footer">
+    <div class="foot-links">
       <a href="how-it-works.html">How it works</a>
+      <a href="membership.html">Membership</a>
+      <a href="faq.html">FAQ</a>
       <a href="about.html">About us</a>
-      <a href="faq.html">Questions</a>
+      <a href="./#examples">Example trips</a>
+      <a href="./#join">Sign up</a>
       <a href="terms.html">Terms &amp; privacy</a>
-    </nav>
-    <p class="foot-meta">&copy; 2026 Together Travel Club</p>
+    </div>
+    <div class="foot-meta">© 2026 Together Travel Club</div>
   </div>
 </footer>
 
+</div>
+
 <script src="nav.js"></script>
+<script>
+(function(){
+  // Accessible accordion: each question is a button inside a heading with
+  // aria-expanded / aria-controls; answers are labelled regions. Without JS
+  // every answer simply shows (the collapsed styles only apply once
+  // .is-enhanced is set). Enter/Space toggle (native buttons); Up/Down/
+  // Home/End move between questions.
+  var list = document.getElementById('faqList');
+  if (!list) return;
+  var buttons = Array.prototype.slice.call(list.querySelectorAll('.faq-q button'));
+  list.classList.add('is-enhanced');
+  function setOpen(btn, open){
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.closest('.faq-item').classList.toggle('is-open', open);
+  }
+  buttons.forEach(function(btn, i){
+    btn.addEventListener('click', function(){ setOpen(btn, btn.getAttribute('aria-expanded') !== 'true'); });
+    btn.addEventListener('keydown', function(e){
+      var to = e.key === 'ArrowDown' ? i + 1 : e.key === 'ArrowUp' ? i - 1 : e.key === 'Home' ? 0 : e.key === 'End' ? buttons.length - 1 : null;
+      if (to === null) return;
+      e.preventDefault();
+      buttons[(to + buttons.length) % buttons.length].focus();
+    });
+  });
+  // Open the question a link points at (faq.html#faq-q3) and the first one otherwise.
+  var target = location.hash && document.getElementById(location.hash.slice(1));
+  setOpen(target && target.matches('.faq-q button') ? target : buttons[0], true);
+})();
+</script>
 </body>
 </html>
