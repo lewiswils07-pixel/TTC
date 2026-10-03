@@ -177,8 +177,10 @@
   .hero-art{display:none}
   .hero-art svg{width:100%;height:auto;display:block;filter:drop-shadow(0 24px 34px rgba(20,18,14,.16))}
   @media (max-width:480px){
-    .actions{flex-wrap:nowrap;gap:10px}
-    .actions .btn{flex:1 1 0;padding:13px 10px;font-size:13px;white-space:nowrap}
+    /* Paired buttons share a row when both labels fit, otherwise each
+       takes a full-width row of its own: labels never squeeze or spill. */
+    .actions{flex-wrap:wrap;gap:10px}
+    .actions .btn{flex:1 1 auto;padding:13px 16px;font-size:14px;white-space:nowrap}
     .hero .btn{min-width:0}
     .hero .swatch{font-size:10.5px;letter-spacing:1px}
   }
@@ -202,7 +204,7 @@
   .connecting-grid{display:grid;grid-template-columns:1fr;gap:36px;max-width:760px}
   .csteps{display:flex;flex-direction:column;gap:32px;padding-left:22px}
   .cstep{padding-top:4px}
-  .cstep .cstep-num{font-family:var(--font-body);font-size:11.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--terracotta);margin:0 0 8px;transition:opacity .25s ease}
+  .cstep .cstep-num{font-family:var(--font-body);font-size:12.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--terracotta);margin:0 0 8px;transition:opacity .25s ease}
   .cstep h3{font-family:var(--font-display);font-weight:650;font-size:29px;margin:0 0 10px;letter-spacing:-.3px}
   .cstep p{margin:0;color:var(--muted);font-size:17px;max-width:60ch}
   .cstep{opacity:.45;transition:opacity .35s ease}
@@ -405,7 +407,7 @@
   .meter-fill{height:100%;width:33%;background:var(--terracotta)}
   .plist{display:flex;flex-direction:column;gap:11px}
   .pstep{display:flex;align-items:center;gap:12px;font-size:14px}
-  .pstep .dot2{width:24px;height:24px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:11px;font-weight:700}
+  .pstep .dot2{width:24px;height:24px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:12.5px;font-weight:700}
   .pstep.done .dot2{background:var(--ink);color:var(--paper)}
   .pstep.todo .dot2{border:1.5px solid var(--line);color:var(--muted)}
   .pstep.todo{color:var(--muted)}
@@ -442,7 +444,7 @@
     .form{grid-template-columns:1fr}
     .join-intro,.join-form-wrap{padding:28px 24px}
     .chips{gap:5px}
-    .chip{height:30px;padding:0 10px;font-size:11.5px}
+    .chip{height:30px;padding:0 10px;font-size:12px}
     footer .wrap{flex-direction:column;align-items:flex-start}
     .menu-links a{font-size:34px}
   }
@@ -507,7 +509,7 @@
   /* Fixed (non-theme) colours, like the rest of the globe illustration —
      this label sits on a constant ocean-blue backdrop in both themes. */
   .dest-label{position:absolute;top:0;left:0;--lx:-50%;--ly:-170%;transform:translate(var(--lx),var(--ly));
-    background:#21201E;color:#F8F4EC;font-size:11px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;
+    background:#21201E;color:#F8F4EC;font-size:12px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;
     padding:4px 9px;border-radius:3px;white-space:nowrap;opacity:0;pointer-events:none;z-index:6;
     transition:opacity .3s ease .25s, left .5s ease, top .5s ease, transform .5s ease}
   .dest-label.on{opacity:1}
@@ -551,7 +553,7 @@
   .ccard-route{grid-column:2;font-size:13px;color:var(--muted);line-height:1.3;align-self:start}
   .ccard-bio{grid-column:1 / -1;font-size:15px;line-height:1.6;color:var(--ink-soft);font-style:normal;margin:16px 0 0}
   .ccard-chips{grid-column:1 / -1;display:flex;flex-wrap:wrap;align-content:flex-start;align-self:start;gap:6px;margin:16px 0 0}
-  .ccard-chips .chip{height:26px;padding:0 10px;font-size:11px;cursor:default;background:var(--paper)}
+  .ccard-chips .chip{height:28px;padding:0 10px;font-size:12px;cursor:default;background:var(--paper)}
   .ccard-chips .chip-shared{background:var(--terracotta);border-color:var(--terracotta);color:var(--on-accent);font-weight:600}
 
   /* Trust badges (badges.js): a quiet row of small line icons + labels
@@ -559,7 +561,7 @@
      accent; labels stay in the muted ink so the row reads as metadata. */
   .ccard{grid-template-rows:auto auto auto auto 1fr}
   .tbadges{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:6px 14px;list-style:none;margin:14px 0 0;padding:0}
-  .tbadge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;letter-spacing:.1px;color:var(--ink-soft);white-space:nowrap}
+  .tbadge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;letter-spacing:.1px;color:var(--ink-soft);white-space:nowrap}
   .tbadge svg{width:14px;height:14px;flex:none;color:var(--terracotta)}
   .tbadge-none{color:var(--muted);font-weight:500}
   .tbadge-none svg{color:var(--muted)}
@@ -610,9 +612,9 @@
     .globe-postcard{gap:12px;margin-top:12px}
     .match-globe-wrap{max-width:162px;gap:8px}
     .cluster-head h3{font-size:17px;margin:0 0 2px}
-    .cluster-head .sub{font-size:11.5px;line-height:1.32}
+    .cluster-head .sub{font-size:13px;line-height:1.4}
     .globe-nav{gap:8px}
-    .globe-arrow{width:26px;height:26px;font-size:12px}
+    .globe-arrow{width:44px;height:44px;font-size:15px}
   }
   @media (prefers-reduced-motion: reduce){
     .globe-pin,.dest-pin,.dest-label,.map-svg .route-line,.map-svg .route-shadow{transition:opacity .3s ease}
@@ -710,7 +712,7 @@
   .hw-steps{padding-top:40px}
   .hw-step{display:grid;grid-template-columns:1fr;gap:36px;align-items:center;scroll-margin-top:100px}
   .hw-step + .hw-step{margin-top:72px}
-  .hw-kicker{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-size:11.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--terracotta)}
+  .hw-kicker{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-size:12.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--terracotta)}
   #step-4 .hw-kicker span{background:var(--panel);color:var(--panel-accent)}
   .hw-text h2{font-size:clamp(30px,3.4vw,42px);margin:0 0 16px}
   .hw-lead{font-size:17px;line-height:1.6;color:var(--ink-soft);margin:0 0 22px;max-width:52ch}
@@ -960,7 +962,7 @@
     background:color-mix(in srgb, var(--saffron) 16%, var(--paper))}
   .mem-offer p{margin:0;font-size:15.5px;line-height:1.6;color:var(--ink-soft);flex:1 1 320px}
   .mem-offer b{color:var(--ink)}
-  .mem-offer-tag{flex:none;font-size:11.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;padding:6px 12px;border-radius:999px;
+  .mem-offer-tag{flex:none;font-size:12.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;padding:6px 12px;border-radius:999px;
     background:var(--saffron);color:#21201E}
   .mem-plans{display:grid;grid-template-columns:1fr;gap:24px;align-items:stretch}
   .mem-plan{display:flex;flex-direction:column}
@@ -1248,3 +1250,37 @@
     nav.scrolled .navrow{background:var(--card);-webkit-backdrop-filter:none;backdrop-filter:none}
     .dest-label{background:#21201E;-webkit-backdrop-filter:none;backdrop-filter:none}
   }
+
+  /* ───────── Phone sizing fixes (from the phone-fit audit) ───────── */
+  /* Globe dots and pins: keep the small visuals, give each a 44px tap area */
+  .globe-dots{gap:4px}
+  .globe-dot{position:relative;background-clip:content-box;padding:18px 9px;width:26px;height:44px;border-radius:0;background:none}
+  .globe-dot::before{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--line)}
+  .globe-dot.active{width:38px;background:none;border-radius:0}
+  .globe-dot.active::before{width:20px;margin-left:-10px;border-radius:5px;background:var(--terracotta)}
+  .globe-pin::after{content:"";position:absolute;inset:-10px;border-radius:50%}
+  /* FAQ: the +/- icon's rotated bars made the question row 5px too wide */
+  .faq-icon{overflow:hidden}
+  .faq-q button span{min-width:0}
+  /* How it works step bar: 44px tall tap targets */
+  .hw-steps-nav a{min-height:44px}
+  /* Boarding pass: let long rows shrink instead of widening the page */
+  .hw-pass{min-width:0;max-width:100%}
+  .hw-pass-people li > div{min-width:0;flex:1}
+  .hw-pass-people b,.hw-pass-people small{overflow-wrap:anywhere}
+
+  @media (max-width:480px){
+    /* Hero buttons: share the full width instead of shrinking to their text */
+    .hero .actions{width:100%}
+  }
+  @media (max-width:480px){
+    /* Every paired-button row (hero, How it works CTA, About...) fills the width */
+    .actions{width:100%}
+    /* the tilted card behind the boarding pass stays inside the screen */
+    .hw-pass-wrap::before{inset:10px -4px -10px 12px;transform:rotate(-3deg)}
+    /* small labels: nothing under 12px on phones */
+    .example-note{font-size:12.5px}
+    .hw-th small{font-size:12.5px}
+  }
+  .swatch{font-size:12px}
+  .hw-hero{overflow-x:clip}
