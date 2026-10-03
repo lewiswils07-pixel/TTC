@@ -1,0 +1,79 @@
+# Task list: members platform
+
+The order follows the plan in `tasks/plan.md`. Each task names its module id from the spec's
+capability map. Sizes: S = 1–2 files · M = 3–5 files. Anything larger gets split before starting.
+Unless a task says otherwise, every task is verified with
+`npm run lint && npm test && npm run build` (in `app/`) plus `npx supabase test db`.
+
+## Lewis's checklist (week 0: start now, these have outside waits)
+- [ ] Supabase: upgrade the project to **Pro**, then send me the project URL and anon key
+      (never the service-role key).
+- [ ] Apple Developer Program. **If you're using a company, request a D-U-N-S number today.** Then
+      sign the paid-apps agreement and fill in the tax and bank forms.
+- [ ] Google Play Console account ($25), plus the payments profile.
+- [ ] Stripe account: business details, then switch on Stripe Identity.
+- [ ] RevenueCat account (free tier).
+- [ ] Twilio account, for SMS phone checks.
+- [ ] Anthropic API account. Set a monthly spend limit in the console.
+- [ ] Resend account, then verify the domain for sending email.
+- [ ] Domain decided; add `app.` as a second Netlify site.
+- [ ] Answer the open questions in spec §15.
+
+## Week 1: foundation (5–9 Oct)
+- [ ] **T1 `app-shell`: Scaffold the app.** Vite + React + TS strict, router, Duke Street tokens,
+      Figtree, light and dark. Netlify config, plus CI running lint, build and test. (M)
+  - Acceptance: the app builds; a placeholder home screen passes axe and fits the phone at 320 px.
+- [ ] **T2 `app-shell`: Capacitor wrapper.** iOS and Android projects, safe areas, status bar,
+      keyboard handling. iPhone builds on GitHub's Mac machines with fastlane, if no Mac. (M)
+  - Acceptance: the app runs in the Android emulator and the iPhone simulator.
+- [ ] **T3 `identity`: Supabase project setup, migrations folder, and the `profiles` table with row-level security.** Email-code sign-in. (M)
+  - Acceptance: sign in with an email code on the web; pgTAP proves a member reads only their own private fields.
+- [ ] **T4 `identity`: Phone check** (Twilio Verify) and one account per number. (S)
+- [ ] **T5 `profiles`: Profile onboarding**, 4 steps: name, birth year and home city; photo (private storage bucket, location data removed); interests; preferences. (M)
+  - Acceptance: a new member gets from email to finished profile in under 3 minutes; works with a screen reader.
+- [ ] **T6 `profiles`: Seed data.** The ~40 interests, GeoNames cities (UK and Europe first), and 200 demo members for local testing. (S)
+- [ ] **Checkpoint 9 Oct:** Lewis signs in on his phone and builds a profile.
+
+## Week 2: trips, matching, connections (12–16 Oct)
+- [ ] **T7 `trips`: Add, edit and delete trips**, plus wishlist cities, shown on the dashboard. (M)
+- [ ] **T8 `matching`: `suggest_for_trip`**: hard filters, the mutual age and gender rule, scoring, and "why you'd get on" reasons. pgTAP fixtures check the order. (M)
+- [ ] **T9 `matching`: `suggest_by_interests`**, plus the dashboard switch between "For my trip" and "Plan something new". (M)
+- [ ] **T10 `matching`: Filters.** Basic filters for everyone. Club+ filters are locked unless the member has Club+ (checked on the server). (S)
+- [ ] **T11 `connections`: Send, accept, decline and withdraw requests**, with monthly limits enforced in SQL and a "requests" inbox. (M)
+- [ ] **T12 `matching`: Performance check.** 10,000 seeded members; suggestions return in under 300 ms. (S)
+- [ ] **Checkpoint 16 Oct:** two test accounts with overlapping trips see each other in the right order and connect.
+
+## Week 3: chat and safety (19–23 Oct)
+- [ ] **T13 `chat`: Conversations, messages and live updates**, unread counts and the chat screen; pgTAP proves you can't message without an accepted connection. (M)
+- [ ] **T14 `safety`: Block** (applies both ways, everywhere) **and report**, from profiles and messages. (M)
+- [ ] **T15 `safety`: Scam guard.** Pattern checker on the server, flagged messages, and a warning card for the recipient. Unit tests on 30+ example messages. (S)
+- [ ] **T16 `safety`: `/admin` moderation page** (admins only): actions, an action log, and the 3-report automatic pause. (M)
+- [ ] **T17 `safety`: Meeting-up guidance, trusted-contact share link, and the "Did you meet?" prompt.** (M)
+- [ ] **T18 `notifications`: Email nudges** (new request, accepted, unread message after 30 min), with unsubscribe settings. (S)
+- [ ] **T19 `identity`: Delete account and download my data** (Edge Functions). (S)
+- [ ] **Checkpoint 23 Oct:** a full conversation, including a scam warning and a report visible on `/admin`.
+
+## Week 4: groups and trip planner (26–30 Oct)
+- [ ] **T20 `groups`: Create a group from connections** (max 6), invite, leave, remove a member, group chat; blocks respected. (M)
+- [ ] **T21 `trip-planner`: `planner` Edge Function.** Claude API with web search, structured output checked before saving, caching, limits, spend cap. (M)
+- [ ] **T22 `trip-planner`: Planner screens.** Request form, day-by-day cards, "change something" follow-ups. (M)
+- [ ] **T23 `trip-planner`: Shared plan board.** Add, vote, tick off; works in one-to-one chats and groups. (S)
+- [ ] **T24 `trip-planner`: Hand-picked activity lists** for the top 15 destinations, so the agent prefers our own picks. (S)
+- [ ] **T25: Full end-to-end Playwright path** (join → … → plan → block/report) in CI. (M)
+- [ ] **Checkpoint 30 Oct:** a group of 3 plans a trip. **Beta invites go out** (web, TestFlight, Play internal testing).
+
+## Week 5: Club+, verification, apps (2–6 Nov)
+- [ ] **T26 `billing`: Stripe Checkout, Customer Portal and `stripe-webhook`** writing to `entitlements`. (M)
+- [ ] **T27 `billing`: RevenueCat**: Apple and Google products, `revenuecat-webhook`, restore purchases. (M)
+- [ ] **T28 `verification`: Stripe Identity flow, `identity-webhook`, verified badge**, and the verified-only filter working. (M)
+- [ ] **T29 `notifications`: Push notifications in the apps** (requests, messages). (M)
+- [ ] **T30 `app-shell`: Store listings**: icons, splash screens, screenshots, privacy labels. **Submit both apps.** (M)
+- [ ] **Checkpoint 6 Nov:** Club+ works on web, iPhone and Android sandbox; apps submitted.
+
+## Week 6: launch (9–13 Nov)
+- [ ] **T31: Security review** (security-and-hardening skill), plus a re-check of all row-level-security policies. (S)
+- [ ] **T32: Launch check**: axe, phone fit, contrast, CSP, performance across all app screens. (S)
+- [ ] **T33: Beta fixes**: work through the beta feedback list. (varies)
+- [ ] **T34: Marketing site links** to `app.<domain>`, "App coming soon" or store badges, final legal pages. (S)
+- [ ] **T35: Go live.** Production keys, Sentry alerts, rollback plan tested, keep-awake check removed (Pro doesn't pause). (S)
+- [ ] **Checkpoint 13 Nov:** spec §14 all green → launch.
