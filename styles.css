@@ -1,3 +1,7 @@
+  /* Fonts: self-hosted (see fonts/README.md) */
+  @font-face{font-family:"Figtree";src:url(fonts/figtree-latin.woff2) format("woff2");font-weight:400 800;font-style:normal;font-display:swap}
+  @font-face{font-family:"Fraunces";src:url(fonts/fraunces-italic-latin.woff2) format("woff2");font-weight:340 600;font-style:italic;font-display:swap}
+
   :root{
     /* Neutral product base (near-white paper, charcoal ink, cool grey
        text) with terracotta as the single functional accent colour used
@@ -212,8 +216,8 @@
   .cstep .cstep-num{font-family:var(--font-body);font-size:12.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--terracotta);margin:0 0 8px;transition:opacity .25s ease}
   .cstep h3{font-family:var(--font-display);font-weight:650;font-size:29px;margin:0 0 10px;letter-spacing:-.3px}
   .cstep p{margin:0;color:var(--muted);font-size:17px;max-width:60ch}
-  .cstep{opacity:.45;transition:opacity .35s ease}
-  .cstep.active{opacity:1}
+  .cstep h3{transition:opacity .35s ease}
+  .cstep:not(.active) h3{opacity:.7}
   /* Route-visual styling applies at every width the visual can appear at
      (desktop sidebar and the mobile summary card below), so it lives
      outside any single breakpoint. */
@@ -1125,8 +1129,9 @@
   html.rv .rv-i.rv-in{animation:rvIn .45s var(--ease-out) backwards;animation-delay:calc(var(--rv-i, 0) * 60ms)}
 
   /* Initials on saffron/turquoise fills: dark text keeps 4.5:1+ (white was ~2.3:1) */
-  .ccard-stamp[style*="--saffron"],.ccard-stamp[style*="--turquoise"],
-  .globe-pin[style*="--saffron"],.globe-pin[style*="--turquoise"]{color:#21201E}
+  .ccard-stamp[style*="--saffron"],.globe-pin[style*="--saffron"]{color:#21201E}
+  /* slate (the old turquoise token) is dark in light mode and light in dark mode */
+  .ccard-stamp[style*="--turquoise"],.globe-pin[style*="--turquoise"]{color:var(--on-accent)}
 
   /* Numbered principles (How it works safety tips, About values): an
      editorial list with hairline rules instead of icon cards. */
@@ -1226,3 +1231,25 @@
   .mem-check{background:color-mix(in srgb, var(--saffron) 30%, transparent)}
   .hw-tr .yes::before{background-color:color-mix(in srgb, var(--saffron) 30%, transparent)}
   .about-quote p{text-decoration:underline;text-decoration-color:var(--saffron);text-decoration-thickness:3px;text-underline-offset:8px}
+
+  /* Connections page: reserve room for the example cards, which the page
+     script inserts after load, so the footer doesn't jump (layout shift).
+     Heights sit just under the real card heights at each width. */
+  .cluster-cards:empty{min-height:760px}
+  @media (min-width:640px) and (max-width:879px){ .cluster-cards:empty{min-height:430px} }
+  @media (min-width:880px) and (max-width:1099px){ .cluster-cards:empty{min-height:700px} }
+  @media (min-width:1100px){ .cluster-cards:empty{min-height:520px} }
+
+  /* Join form: spam trap kept out of sight (not display:none, which some bots skip) */
+  .hp{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+  .form-privacy{margin:12px 0 0;text-align:center;font-size:13px}
+  .form-privacy a{color:var(--terracotta)}
+
+  /* Membership plan names are real headings (h2) styled as small labels */
+  h2.swatch{font-family:var(--font-body);margin:0 0 14px;line-height:1.2}
+  /* Connections trip name: an h2 (was h3, which skipped a level) */
+  h2#clusterDest{font-family:var(--font-display);font-weight:650;font-size:22px;margin:0 0 6px;letter-spacing:normal}
+  @media (max-width:480px){ h2#clusterDest{font-size:17px;margin:0 0 2px} }
+  /* About photo strip: keyboard-scrollable on phones */
+  .journal:focus-visible{outline:3px solid var(--terracotta);outline-offset:4px}
+

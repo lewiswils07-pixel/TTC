@@ -22,9 +22,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Together Travel Club: find your people, wherever you&#x27;re travelling to.">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,500&family=Figtree:wght@400..800&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/figtree-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 <script>
   // Arrival intro: once per browser session, skipped for deep links
@@ -102,6 +100,7 @@
   </div>
 </div>
 
+<main id="main">
 <header class="hero" id="top">
   <div class="wrap">
     <div class="hero-top">
@@ -164,19 +163,19 @@
       <div class="filmstrip">
         <div class="dest">
           <div class="dest-art"><img src="img/dest-berlin.jpg" width="960" height="720" alt="The Brandenburg Gate lit up at night in Berlin" loading="lazy"></div>
-          <div class="dest-tag"><div class="dest-name">Berlin</div><div class="dest-meta">12 connections travelling in the next month</div></div>
+          <div class="dest-tag"><div class="dest-name">Berlin</div><div class="dest-meta">Example destination</div></div>
         </div>
         <div class="dest">
           <div class="dest-art"><img src="img/dest-rome.jpg" width="960" height="720" alt="The Colosseum lit up at dusk in Rome" loading="lazy"></div>
-          <div class="dest-tag"><div class="dest-name">Rome</div><div class="dest-meta">16 connections travelling in the next month</div></div>
+          <div class="dest-tag"><div class="dest-name">Rome</div><div class="dest-meta">Example destination</div></div>
         </div>
         <div class="dest">
           <div class="dest-art"><img src="img/dest-algarve.jpg" width="960" height="720" alt="Red sandstone cliffs above a beach in the Algarve" loading="lazy"></div>
-          <div class="dest-tag"><div class="dest-name">Algarve</div><div class="dest-meta">11 connections travelling in the next month</div></div>
+          <div class="dest-tag"><div class="dest-name">Algarve</div><div class="dest-meta">Example destination</div></div>
         </div>
         <div class="dest">
           <div class="dest-art"><img src="img/dest-paris.jpg" width="960" height="720" alt="The Eiffel Tower seen from a Paris side street" loading="lazy"></div>
-          <div class="dest-tag"><div class="dest-name">Paris</div><div class="dest-meta">19 connections travelling in the next month</div></div>
+          <div class="dest-tag"><div class="dest-name">Paris</div><div class="dest-meta">Example destination</div></div>
         </div>
       </div>
     </div>
@@ -301,12 +300,15 @@
         <h2>Join free as a founding member.</h2>
       </div>
       <div class="join-form-wrap">
-        <form class="form" id="joinForm" onsubmit="event.preventDefault(); document.getElementById('success').hidden=false; this.reset();">
-          <div class="field"><label for="fname">First name</label><input id="fname" required placeholder="Your first name"></div>
-          <div class="field"><label for="email">Email address</label><input id="email" required type="email" placeholder="you@example.com"></div>
-          <div class="field full"><label for="home">Home location</label><input id="home" placeholder="e.g. London"></div>
+        <form class="form" id="joinForm" onsubmit="event.preventDefault(); if (this.website.value) return; document.getElementById('success').hidden=false; this.reset();">
+          <div class="field"><label for="fname">First name</label><input id="fname" name="first_name" required autocomplete="given-name" maxlength="80" placeholder="Your first name"></div>
+          <div class="field"><label for="email">Email address</label><input id="email" name="email" required type="email" autocomplete="email" maxlength="254" placeholder="you@example.com"></div>
+          <div class="field full"><label for="home">Home location</label><input id="home" name="home" autocomplete="address-level2" maxlength="120" placeholder="e.g. London"></div>
 
-          <div class="field full"><button class="btn terracotta" type="submit">Join free</button></div>
+          <!-- Spam trap: hidden from people, but bots fill it in; submissions with it set are ignored. -->
+          <div class="hp" aria-hidden="true"><label for="website">Leave this empty</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
+          <div class="field full"><button class="btn terracotta" type="submit">Join free</button>
+            <p class="fine form-privacy">We'll only use your details to tell you about the club. You can unsubscribe at any time. <a href="terms.html#privacy">Privacy policy</a>.</p></div>
         </form>
         <div id="success" class="fine" hidden>Thank you, you're on the founding list. We'll email you when the club opens, along with your founding offer of 3 months of Club+ free.</div>
 
@@ -483,6 +485,8 @@
 
   })();
 </script>
+
+</main>
 
 <footer>
   <div class="wrap">

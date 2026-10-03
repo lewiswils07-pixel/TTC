@@ -22,9 +22,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Together Travel Club: find your people, wherever you&#x27;re travelling to.">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,500&family=Figtree:wght@400..800&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/figtree-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -64,6 +62,7 @@
   </div>
 </div>
 
+<main id="main">
 <header class="match-page" id="top">
   <div class="wrap">
     <h1>People who ended up on the same trip.</h1>
@@ -71,8 +70,10 @@
 
     <div class="globe-postcard">
       <div class="cluster-head">
-        <h3 id="clusterDest"></h3>
-        <p class="sub" id="clusterSub"></p>
+        <!-- Pre-filled with the first trip so the space is reserved before the
+             script runs (otherwise the globe jumps down as it fills in). -->
+        <h2 id="clusterDest">Lisbon, this spring</h2>
+        <p class="sub" id="clusterSub">Three members, three different home towns, one trip already booked. In common: Photography, Coffee culture, Street food.</p>
         <p class="example-note">Example profiles: these members are illustrative, not real people.</p>
       </div>
 
@@ -97,6 +98,8 @@
     </div>
   </div>
 </header>
+
+</main>
 
 <footer>
   <div class="wrap">
@@ -559,7 +562,7 @@
       card.innerHTML =
         '<div class="ccard-stamp" style="background:var(--' + entry.color + ')">' + initials(m.name) + '</div>' +
         '<div class="ccard-copy">' +
-          '<h4 class="ccard-name">' + m.name + ' <span class="ccard-age"><span class="sr-only">age </span>' + m.age + '</span></h4>' +
+          '<h3 class="ccard-name">' + m.name + ' <span class="ccard-age"><span class="sr-only">age </span>' + m.age + '</span></h3>' +
           '<span class="ccard-route">' + m.home + '</span>' +
           TTCBadges.html(m.badges) +
           '<p class="ccard-bio">“' + m.bio + '”</p>' +
