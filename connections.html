@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>See a match — Together Travel Club</title>
-<meta name="description" content="How Together Travel Club matches travellers: small groups of example members booked on the same trip, and the interests that brought them together.">
+<title>Example connections — Together Travel Club</title>
+<meta name="description" content="How Together Travel Club connects travellers: small groups of example members booked on the same trip, and the interests that brought them together.">
 <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
 <link rel="icon" type="image/png" sizes="512x512" href="img/favicon-512.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
@@ -15,8 +15,8 @@
      platforms ignore relative image paths. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Together Travel Club">
-<meta property="og:title" content="See a match — Together Travel Club">
-<meta property="og:description" content="How Together Travel Club matches travellers: small groups of example members booked on the same trip, and the interests that brought them together.">
+<meta property="og:title" content="Example connections — Together Travel Club">
+<meta property="og:description" content="How Together Travel Club connects travellers: small groups of example members booked on the same trip, and the interests that brought them together.">
 <meta property="og:image" content="img/share.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -24,7 +24,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340..600;1,9..144,340..600&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,500&family=Figtree:wght@400..800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -38,7 +38,7 @@
     </a>
     <div class="nav-right">
       <a class="nav-signin" href="signin.html">Sign in</a>
-      <a class="btn terracotta btn-sm nav-cta" href="./#join">Become a member</a>
+      <a class="btn terracotta btn-sm nav-cta" href="./#join">Join free</a>
       <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="menuOverlay">
         <span></span><span></span><span></span>
       </button>
@@ -57,7 +57,7 @@
     <div class="menu-links">
       <a href="./"><span class="mnum">01</span> Home</a>
       <a href="how-it-works.html"><span class="mnum">02</span> How it works</a>
-      <a href="matches.html"><span class="mnum">03</span> See a match</a>
+      <a href="connections.html"><span class="mnum">03</span> Example connections</a>
       <a href="membership.html"><span class="mnum">04</span> Membership</a>
       <a href="about.html"><span class="mnum">05</span> About us</a>
       <a href="signin.html"><span class="mnum">06</span> Sign in</a>
@@ -68,9 +68,9 @@
 
 <header class="match-page" id="top">
   <div class="wrap">
-    <span class="swatch terracotta"><i></i> Matching, illustrated</span>
+    <span class="swatch terracotta"><i></i> Connections, illustrated</span>
     <h1>People who ended up on the same trip.</h1>
-    <p class="match-intro">Each stop below is an example trip: one destination with a few members booked on it, from different home towns, converging on the same place. Let the globe turn, or step through them yourself, then see what actually got them matched.</p>
+    <p class="match-intro">Each stop below is an example trip: one destination with a few members booked on it, from different home towns, converging on the same place. Let the globe turn, or step through them yourself, then see what actually connected them.</p>
 
     <div class="globe-postcard">
       <div class="cluster-head">
@@ -129,23 +129,23 @@
   // Full founding-member list — fictional stand-ins only, used to show the
   // logic. A handful share a destination on purpose, so the globe can show
   // people converging from different home towns on the same trip; the rest
-  // keep their own separate trips and only count towards the "matched with
+  // keep their own separate trips and only count towards the "connected with
   // N others" stat on each card.
   var MEMBERS = [
     { name:"Maya T.", age:29, home:"London", dest:"Lisbon, this spring", bio:"Chasing golden hour and good pastries.", interests:["Photography","Coffee culture","Street food","Historic sites","Walking tours","City breaks"], badges:["id","video","social"] },
     { name:"Ben O.", age:34, home:"New York", dest:"Costa Rica, next year", bio:"Will plan a whole trip around one good trail.", interests:["Hiking","Mountains","Adventure sports","Wildlife","Road trips"], badges:["id","social"] },
     { name:"Priya S.", age:31, home:"Singapore", dest:"Kyoto, next spring", bio:"Always the one who finds the hole-in-the-wall restaurant.", interests:["Food tours","Cultural immersion","Museums","Historic sites","Art galleries","Walking tours"], badges:["id","video"] },
-    { name:"Tom H.", age:38, home:"Edinburgh", dest:"Croatia, this summer", bio:"Boat, book, repeat.", interests:["Beaches","Water sports","Cruises","Wine tasting","Live music"], badges:["id"] },
+    { name:"Tom H.", age:38, home:"Edinburgh", dest:"Croatia, this summer", bio:"Boat, book, repeat.", interests:["Beaches","Water sports","Cruises","Wine tasting","Live music"], badges:[] },
     { name:"Aisha K.", age:27, home:"Toronto", dest:"Lisbon, this spring", bio:"Collects markets the way other people collect stamps.", interests:["Local markets","Cultural immersion","Street food","Photography","Architecture"], badges:["id","social"] },
     { name:"Sam R.", age:26, home:"Mexico City", dest:"Costa Rica, next year", bio:"Has a wetsuit for every occasion.", interests:["Water sports","Adventure sports","Wildlife","Hiking","Beaches"], badges:["id","video","social"] },
     { name:"Grace L.", age:42, home:"Hong Kong", dest:"Kyoto, next spring", bio:"Will taste-test the region's whole food and drink scene, responsibly.", interests:["Wine tasting","Fine dining","Cooking classes","Historic sites","Cycling"], badges:["id","video"] },
     { name:"Daniel P.", age:33, home:"Berlin", dest:"Lisbon, this spring", bio:"First stop is always the record shop.", interests:["Live music","Nightlife","Art galleries","Museums","Coffee culture"], badges:["id","video"] },
     { name:"Ella M.", age:30, home:"Bristol", dest:"Bali, next spring", bio:"Yoga mat travels better than most of her clothes.", interests:["Yoga","Wellness retreats","Beaches","Spa","Cultural immersion"], badges:["id","social"] },
     { name:"Ollie W.", age:36, home:"London", dest:"Norway, this winter", bio:"Chases the northern lights more than sleep.", interests:["Stargazing","Road trips","Mountains","Photography","Wildlife"], badges:["id","video","social"] },
-    { name:"Zara N.", age:25, home:"Birmingham", dest:"Seville, this summer", bio:"Plans a trip around a football fixture, every time.", interests:["Football matches","Nightlife","Street food","Local festivals","Architecture"], badges:["id"] },
+    { name:"Zara N.", age:25, home:"Birmingham", dest:"Seville, this summer", bio:"Plans a trip around a football fixture, every time.", interests:["Football matches","Nightlife","Street food","Local festivals","Architecture"], badges:[] },
     { name:"Noah F.", age:45, home:"Liverpool", dest:"Provence, this summer", bio:"Will find the best golf course within an hour, guaranteed.", interests:["Golf","Fine dining","Cycling","Historic sites","Wine tasting"], badges:["id","social"] },
     { name:"Ivy C.", age:28, home:"Sydney", dest:"Kyoto, next spring", bio:"Museum-hops until the gift shop closes.", interests:["Museums","Art galleries","Cultural immersion","Cinema","Coffee culture"], badges:["id","video","social"] },
-    { name:"Leo D.", age:32, home:"São Paulo", dest:"Costa Rica, next year", bio:"Runs before breakfast wherever the timezone.", interests:["Fitness","Adventure sports","Wildlife","Beaches","Hiking"], badges:["id"] }
+    { name:"Leo D.", age:32, home:"São Paulo", dest:"Costa Rica, next year", bio:"Runs before breakfast wherever the timezone.", interests:["Fitness","Adventure sports","Wildlife","Beaches","Hiking"], badges:[] }
   ];
   function byName(n){ for (var i=0;i<MEMBERS.length;i++) if (MEMBERS[i].name===n) return MEMBERS[i]; }
 
@@ -165,7 +165,7 @@
   // without crowding the map or the card row.
   var CLUSTERS = [
     { dest:"Lisbon, this spring", names:["Maya T.","Aisha K.","Daniel P."], note:"Three members, three different home towns, one trip already booked." },
-    { dest:"Kyoto, next spring", names:["Priya S.","Ivy C.","Grace L."], note:"Matched partly on museums and galleries before travel style even came into it." },
+    { dest:"Kyoto, next spring", names:["Priya S.","Ivy C.","Grace L."], note:"Connected partly on museums and galleries before travel style even came into it." },
     { dest:"Costa Rica, next year", names:["Sam R.","Ben O.","Leo D."], note:"All three would have booked this trip alone otherwise." }
   ];
 
