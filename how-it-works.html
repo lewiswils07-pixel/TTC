@@ -102,18 +102,18 @@
     </div>
   </div>
 
+</header>
+
+<section class="section-block hw-steps">
   <div class="wrap">
-    <nav class="hw-steps-nav" aria-label="The four steps">
+    <!-- Sticky step bar: sits under the main nav while you read the steps,
+         frosted over the content scrolling beneath, current step highlighted. -->
+    <nav class="hw-steps-nav" id="stepsNav" aria-label="The four steps">
       <a href="#step-1"><span>1</span> Tell us about you</a>
       <a href="#step-2"><span>2</span> Get your connections</a>
       <a href="#step-3"><span>3</span> Chat, then meet</a>
       <a href="#step-4"><span>4</span> Go Club+ for verified</a>
     </nav>
-  </div>
-</header>
-
-<section class="section-block hw-steps">
-  <div class="wrap">
 
     <article class="hw-step" id="step-1">
       <div class="hw-text">
@@ -322,6 +322,31 @@
 <script>
   // Fade each step's illustration in as it scrolls into view. Content is
   // fully visible without JS, and reduced-motion users skip the animation.
+  // Step bar: highlight the step in view, and mark the bar as stuck once
+  // it's pinned under the main nav (that's when it turns to glass).
+  (function(){
+    var bar = document.getElementById('stepsNav'); if (!bar) return;
+    var links = bar.querySelectorAll('a');
+    var steps = Array.prototype.map.call(links, function(a){ return document.querySelector(a.getAttribute('href')); });
+    var stickTop = parseFloat(getComputedStyle(bar).top) || 0;
+    function update(){
+      bar.classList.toggle('is-stuck', Math.abs(bar.getBoundingClientRect().top - stickTop) < 1.5);
+      var mid = innerHeight * 0.45, current = -1;
+      steps.forEach(function(st, i){ if (st && st.getBoundingClientRect().top < mid) current = i; });
+      var last = steps[steps.length - 1];
+      if (last && last.getBoundingClientRect().bottom < 0) current = -1;   // past the steps
+      links.forEach(function(a, i){
+        if (i === current) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current');
+      });
+      if (current >= 0 && bar.scrollWidth > bar.clientWidth) {
+        var a = links[current], want = a.offsetLeft - (bar.clientWidth - a.offsetWidth) / 2;
+        if (Math.abs(bar.scrollLeft - want) > 4) bar.scrollTo({ left: want, behavior: 'smooth' });
+      }
+    }
+    addEventListener('scroll', update, { passive: true });
+    addEventListener('resize', function(){ stickTop = parseFloat(getComputedStyle(bar).top) || 0; update(); });
+    update();
+  })();
   (function(){
     var els = document.querySelectorAll('.hw-step, .hw-pass');
     if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
