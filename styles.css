@@ -22,6 +22,7 @@
     --line:#DCD2C0;
     --muted:#5E5550;
     --card:#FFFDF8;
+    --gold-ink:#7D5C0B;                    /* gold for text on cream (5.6:1) */
     --on-accent:#fff;
     /* Shape + motion scale (from the 21st.dev reference components):
        soft rounded cards, pill controls, and one shared "settle" ease. */
@@ -58,7 +59,7 @@
       --turquoise:#A5AEB5; --turquoise-deep:#C4CCD2;
       --paper:#1D1716; --paper-tint:#271F1E;
       --line:#403532; --muted:#B4A8A3;
-      --card:#271F1E; --on-accent:#1D1716;
+      --card:#271F1E; --on-accent:#1D1716; --gold-ink:#E8BF4F;
       color-scheme: dark;
     }
   }
@@ -70,7 +71,7 @@
     --turquoise:#A5AEB5; --turquoise-deep:#C4CCD2;
     --paper:#1D1716; --paper-tint:#271F1E;
     --line:#403532; --muted:#B4A8A3;
-    --card:#271F1E; --on-accent:#1D1716;
+    --card:#271F1E; --on-accent:#1D1716; --gold-ink:#E8BF4F;
     color-scheme: dark;
   }
 
@@ -1190,3 +1191,38 @@
   }
   .swatch{font-size:12px}
   .hw-hero{overflow-x:clip}
+
+  /* ───────── Mustard, throughout (Duke Street colourway) ─────────
+     Gold appears as the sign uses it: lettering on the burgundy fascia
+     (footer, bands), plus gold-washed panels, markers and rules. Gold text
+     on cream uses --gold-ink so it stays readable. */
+  :root{--gold-wash:color-mix(in srgb, var(--saffron) 20%, var(--paper))}
+
+  /* Footer: a burgundy fascia with gold lettering, on every page */
+  footer{background:var(--panel);border-top:4px solid var(--saffron);color:var(--panel-ink)}
+  footer .foot-tag{color:var(--panel-accent);font-weight:600}
+  footer .foot-links a{color:var(--panel-ink)}
+  footer .foot-links a:hover{color:var(--panel-accent)}
+  footer .foot-meta{color:var(--panel-muted)}
+  footer .foot-swatches i:nth-child(1){background:var(--panel-ink)}
+
+  /* Outline buttons: a gold border */
+  .btn.outline{border:1.5px solid var(--saffron)}
+  .btn.outline:hover{border-color:var(--saffron-deep);background:var(--gold-wash)}
+
+  /* Gold-washed panels */
+  .hiw-cta,.join-intro,.mem-head-free,.mem-offer{background:var(--gold-wash)}
+  .hiw-cta{border-color:color-mix(in srgb, var(--saffron) 45%, var(--line))}
+  .hw-visual,#step-1 .hw-visual,#step-3 .hw-visual{background:var(--gold-wash)}
+  #step-4 .hw-visual{background:color-mix(in srgb, var(--saffron) 32%, var(--paper))}
+
+  /* Gold markers */
+  .hw-kicker span{background:var(--saffron);color:#241F1E}
+  .hw-kicker{color:var(--gold-ink)}
+  .cstep .cstep-num{color:var(--gold-ink)}
+  .tenets li{border-top:2px solid var(--saffron)}
+  .tenet-n{color:var(--gold-ink)}
+  .pstep.done .dot2{background:var(--saffron);color:#241F1E}
+  .mem-check{background:color-mix(in srgb, var(--saffron) 30%, transparent)}
+  .hw-tr .yes::before{background-color:color-mix(in srgb, var(--saffron) 30%, transparent)}
+  .about-quote p{text-decoration:underline;text-decoration-color:var(--saffron);text-decoration-thickness:3px;text-underline-offset:8px}
