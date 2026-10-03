@@ -1139,3 +1139,25 @@
   .tenets p{margin:0;color:var(--muted);font-size:15.5px;line-height:1.6;max-width:44ch}
   @media (min-width:760px){ .tenets{grid-template-columns:repeat(2,minmax(0,1fr))} }
   @media (min-width:1100px){ .hw-safety .tenets{grid-template-columns:repeat(3,minmax(0,1fr))} }
+
+  /* ───────── Glass, used sparingly ─────────
+     Only where an element floats over content that moves or varies
+     beneath it, so the frost keeps it readable without hiding what's
+     behind: (1) the nav bar once the page scrolls under it, (2) the
+     destination label riding on the spinning globe. Static cards on plain
+     backgrounds stay solid. Browsers without backdrop-filter, and people
+     who ask their system for less transparency, get the solid version. */
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+    nav.scrolled .navrow{
+      background:color-mix(in srgb, var(--card) 86%, transparent);
+      -webkit-backdrop-filter:blur(28px) saturate(1.5);backdrop-filter:blur(28px) saturate(1.5);
+      border-color:color-mix(in srgb, var(--line) 80%, transparent)}
+    .dest-label{
+      background:rgba(20,22,20,.55);
+      -webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);border-radius:6px}
+  }
+  @media (prefers-reduced-transparency: reduce){
+    nav.scrolled .navrow{background:var(--card);-webkit-backdrop-filter:none;backdrop-filter:none}
+    .dest-label{background:#21201E;-webkit-backdrop-filter:none;backdrop-filter:none}
+  }
