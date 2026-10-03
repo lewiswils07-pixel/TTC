@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How it works — Together Travel Club</title>
+<title>How it works · Together Travel Club</title>
 <meta name="description" content="How Together Travel Club works: join free, tell us about your trips, get connections with people travelling your way, chat and meet. Club+ adds ID verification and verified-only connections.">
 <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
 <link rel="icon" type="image/png" sizes="512x512" href="img/favicon-512.png">
@@ -15,7 +15,7 @@
      platforms ignore relative image paths. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Together Travel Club">
-<meta property="og:title" content="How it works — Together Travel Club">
+<meta property="og:title" content="How it works · Together Travel Club">
 <meta property="og:description" content="How Together Travel Club works: join free, tell us about your trips, get connections with people travelling your way, chat and meet. Club+ adds ID verification and verified-only connections.">
 <meta property="og:image" content="img/share.jpg">
 <meta property="og:image:width" content="1200">
@@ -69,7 +69,6 @@
 <header class="hw-hero" id="top">
   <div class="wrap hw-hero-grid">
     <div class="hw-hero-copy">
-      <span class="swatch terracotta"><i></i> How it works</span>
       <h1>From a trip idea to a travel <em>companion</em>.</h1>
       <p class="hw-intro">Join free, tell us where you're heading, and we'll connect you with people travelling the same way. Chat, meet if you'd like to, and upgrade to Club+ whenever you'd rather connect with verified members only.</p>
       <div class="actions">
@@ -105,18 +104,18 @@
     </div>
   </div>
 
+</header>
+
+<section class="section-block hw-steps">
   <div class="wrap">
-    <nav class="hw-steps-nav" aria-label="The four steps">
+    <!-- Sticky step bar: sits under the main nav while you read the steps,
+         frosted over the content scrolling beneath, current step highlighted. -->
+    <nav class="hw-steps-nav" id="stepsNav" aria-label="The four steps">
       <a href="#step-1"><span>1</span> Tell us about you</a>
       <a href="#step-2"><span>2</span> Get your connections</a>
       <a href="#step-3"><span>3</span> Chat, then meet</a>
       <a href="#step-4"><span>4</span> Go Club+ for verified</a>
     </nav>
-  </div>
-</header>
-
-<section class="section-block hw-steps">
-  <div class="wrap">
 
     <article class="hw-step" id="step-1">
       <div class="hw-text">
@@ -256,7 +255,6 @@
 <section class="section-block hw-plans" id="plans">
   <div class="wrap">
     <div class="head">
-      <span class="swatch terracotta"><i></i> Free vs Club+</span>
       <h2>Start free. Upgrade if you want to.</h2>
       <p>Everyone can connect and chat for free. Club+ is for verified members, more connections, and the option to connect with verified people only.</p>
     </div>
@@ -280,26 +278,13 @@
 <section class="section-block hw-safety">
   <div class="wrap">
     <div class="head">
-      <span class="swatch"><i style="background:var(--turquoise)"></i> Travelling safely</span>
       <h2>Good habits, whichever version you're on.</h2>
     </div>
-    <div class="hw-safe-grid">
-      <div class="hw-safe">
-        <span class="hw-safe-icon"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
-        <h3>Check the badges</h3>
-        <p>Every profile shows whether someone is ID verified. Free members aren't, so take that into account.</p>
-      </div>
-      <div class="hw-safe">
-        <span class="hw-safe-icon"><svg viewBox="0 0 24 24"><path d="M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6"/></svg></span>
-        <h3>Meet in public first</h3>
-        <p>A café or a busy square is the right place for a first hello, before any shared plans.</p>
-      </div>
-      <div class="hw-safe">
-        <span class="hw-safe-icon"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></span>
-        <h3>Tell a friend</h3>
-        <p>Let someone know who you're meeting and where. And if anyone makes you uncomfortable, tell us.</p>
-      </div>
-    </div>
+    <ol class="tenets">
+      <li><span class="tenet-n">01</span><h3>Check the badges</h3><p>Every profile shows whether someone is ID verified. Free members aren't, so take that into account.</p></li>
+      <li><span class="tenet-n">02</span><h3>Meet in public first</h3><p>A café or a busy square is the right place for a first hello, before any shared plans.</p></li>
+      <li><span class="tenet-n">03</span><h3>Tell a friend</h3><p>Let someone know who you're meeting and where. And if anyone makes you uncomfortable, tell us.</p></li>
+    </ol>
 
     <div class="hiw-cta">
       <div>
@@ -339,6 +324,31 @@
 <script>
   // Fade each step's illustration in as it scrolls into view. Content is
   // fully visible without JS, and reduced-motion users skip the animation.
+  // Step bar: highlight the step in view, and mark the bar as stuck once
+  // it's pinned under the main nav (that's when it turns to glass).
+  (function(){
+    var bar = document.getElementById('stepsNav'); if (!bar) return;
+    var links = bar.querySelectorAll('a');
+    var steps = Array.prototype.map.call(links, function(a){ return document.querySelector(a.getAttribute('href')); });
+    var stickTop = parseFloat(getComputedStyle(bar).top) || 0;
+    function update(){
+      bar.classList.toggle('is-stuck', Math.abs(bar.getBoundingClientRect().top - stickTop) < 1.5);
+      var mid = innerHeight * 0.45, current = -1;
+      steps.forEach(function(st, i){ if (st && st.getBoundingClientRect().top < mid) current = i; });
+      var last = steps[steps.length - 1];
+      if (last && last.getBoundingClientRect().bottom < 0) current = -1;   // past the steps
+      links.forEach(function(a, i){
+        if (i === current) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current');
+      });
+      if (current >= 0 && bar.scrollWidth > bar.clientWidth) {
+        var a = links[current], want = a.offsetLeft - (bar.clientWidth - a.offsetWidth) / 2;
+        if (Math.abs(bar.scrollLeft - want) > 4) bar.scrollTo({ left: want, behavior: 'smooth' });
+      }
+    }
+    addEventListener('scroll', update, { passive: true });
+    addEventListener('resize', function(){ stickTop = parseFloat(getComputedStyle(bar).top) || 0; update(); });
+    update();
+  })();
   (function(){
     var els = document.querySelectorAll('.hw-step, .hw-pass');
     if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
