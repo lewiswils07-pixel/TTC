@@ -324,30 +324,68 @@
 <script>
   // Fade each step's illustration in as it scrolls into view. Content is
   // fully visible without JS, and reduced-motion users skip the animation.
-  // Step bar: highlight the step in view, and mark the bar as stuck once
-  // it's pinned under the main nav (that's when it turns to glass).
+  // Step bar: a highlight slides between the four steps in step with the
+  // page scroll (it rests on the step you're reading and glides to the next
+  // one as you reach it), rather than jumping. On phones the bar's own
+  // sideways scroll follows the highlight the same way. The bar is marked
+  // stuck once it's pinned under the main nav (that's when it turns to glass).
+  // All updates are batched into one per animation frame.
   (function(){
     var bar = document.getElementById('stepsNav'); if (!bar) return;
-    var links = bar.querySelectorAll('a');
-    var steps = Array.prototype.map.call(links, function(a){ return document.querySelector(a.getAttribute('href')); });
+    var links = Array.prototype.slice.call(bar.querySelectorAll('a'));
+    var steps = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+    var ind = document.createElement('span');
+    ind.className = 'hw-steps-ind'; ind.setAttribute('aria-hidden', 'true');
+    bar.insertBefore(ind, bar.firstChild);
     var stickTop = parseFloat(getComputedStyle(bar).top) || 0;
-    function update(){
+    var queued = false, lastCurrent = null;
+
+    function lerp(a, b, t){ return a + (b - a) * t; }
+    // ease in and out of each hand-over so the highlight settles on a step
+    function ease(t){ return t * t * (3 - 2 * t); }
+
+    function frame(){
+      queued = false;
       bar.classList.toggle('is-stuck', Math.abs(bar.getBoundingClientRect().top - stickTop) < 1.5);
-      var mid = innerHeight * 0.45, current = -1;
-      steps.forEach(function(st, i){ if (st && st.getBoundingClientRect().top < mid) current = i; });
-      var last = steps[steps.length - 1];
-      if (last && last.getBoundingClientRect().bottom < 0) current = -1;   // past the steps
-      links.forEach(function(a, i){
-        if (i === current) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current');
-      });
-      if (current >= 0 && bar.scrollWidth > bar.clientWidth) {
-        var a = links[current], want = a.offsetLeft - (bar.clientWidth - a.offsetWidth) / 2;
-        if (Math.abs(bar.scrollLeft - want) > 4) bar.scrollTo({ left: want, behavior: 'smooth' });
+      var line = innerHeight * 0.45;                        // the reading line
+      var tops = steps.map(function(st){ return st.getBoundingClientRect().top; });
+      var i = -1;
+      tops.forEach(function(t, k){ if (t <= line) i = k; });
+      var lastBottom = steps[steps.length - 1].getBoundingClientRect().bottom;
+      var visible = i >= 0 && lastBottom > 0;
+      ind.style.opacity = visible ? 1 : 0;
+      if (i < 0) i = 0;
+
+      // progress towards the next step: hold for the first half of a step,
+      // then glide across during the second half
+      var f = 0;
+      if (i < steps.length - 1) {
+        var span = tops[i + 1] - tops[i];
+        var t = span > 0 ? (line - tops[i]) / span : 0;
+        f = ease(Math.min(1, Math.max(0, (t - 0.5) / 0.5)));
+      }
+      var a = links[i], n = links[Math.min(i + 1, links.length - 1)];
+      var x = lerp(a.offsetLeft, n.offsetLeft, f), w = lerp(a.offsetWidth, n.offsetWidth, f);
+      ind.style.transform = 'translateX(' + x + 'px)';
+      ind.style.width = w + 'px';
+
+      var current = visible ? (f > 0.5 ? i + 1 : i) : -1;
+      if (current !== lastCurrent) {
+        links.forEach(function(l, k){
+          if (k === current) l.setAttribute('aria-current', 'step'); else l.removeAttribute('aria-current');
+        });
+        lastCurrent = current;
+      }
+      // phones: keep the highlight centred by moving the bar with the page
+      if (visible && bar.scrollWidth > bar.clientWidth) {
+        bar.scrollLeft = x + w / 2 - bar.clientWidth / 2;
       }
     }
-    addEventListener('scroll', update, { passive: true });
-    addEventListener('resize', function(){ stickTop = parseFloat(getComputedStyle(bar).top) || 0; update(); });
-    update();
+    function queue(){ if (!queued) { queued = true; requestAnimationFrame(frame); } }
+    addEventListener('scroll', queue, { passive: true });
+    addEventListener('resize', function(){ stickTop = parseFloat(getComputedStyle(bar).top) || 0; queue(); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(queue);
+    frame();
   })();
   (function(){
     var els = document.querySelectorAll('.hw-step, .hw-pass');

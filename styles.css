@@ -699,7 +699,11 @@
     border:1.5px solid currentColor;transition:background .2s ease, color .2s ease, border-color .2s ease}
   .hw-steps-nav a:active{transform:scale(.97)}
   @media (hover:hover) and (pointer:fine){ .hw-steps-nav a:hover{color:var(--ink);background:var(--paper-tint)} }
-  .hw-steps-nav a[aria-current="step"]{color:var(--ink);background:color-mix(in srgb, var(--terracotta) 12%, transparent)}
+  .hw-steps-nav a{position:relative;z-index:1}
+  .hw-steps-nav a[aria-current="step"]{color:var(--ink)}
+  /* sliding highlight behind the links, positioned by the page script */
+  .hw-steps-ind{position:absolute;top:5px;bottom:5px;left:0;width:0;border-radius:10px;pointer-events:none;
+    background:color-mix(in srgb, var(--terracotta) 13%, transparent);opacity:0;transition:opacity .25s ease;will-change:transform,width}
   .hw-steps-nav a[aria-current="step"] span{background:var(--terracotta);border-color:var(--terracotta);color:var(--on-accent)}
   .hw-steps-nav.is-stuck{box-shadow:var(--shadow-lg)}
   @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
