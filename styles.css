@@ -5,19 +5,23 @@
        turquoise, drawn from Vieux Nice's ochre facades and shutters, are
        kept only for the destination illustrations and the dark "use
        cases" panel, not mixed in as interchangeable decoration. */
-    --ink:#21201E;
-    --ink-soft:#4A4744;
-    --terracotta:#B34C1C;
-    --terracotta-deep:#8F3B14;
-    --saffron:#DCA23A;
-    --saffron-deep:#B9852B;
-    --turquoise:#4FA39B;
-    --turquoise-deep:#367E77;
-    --paper:#F7F5F1;
-    --paper-tint:#EFEDE8;
-    --line:#DEDAD2;
-    --muted:#5B5854;
-    --card:#FFFFFF;
+    /* Colourway: Duke Street shopfront: burgundy fascia, gold lettering,
+       cream painted brick, charcoal trim. (Token names kept from the
+       original palette: --terracotta is now the burgundy, --saffron the
+       gold, --turquoise the charcoal-slate.) */
+    --ink:#241F1E;
+    --ink-soft:#4A4240;
+    --terracotta:#8E1B2B;
+    --terracotta-deep:#6C1320;
+    --saffron:#D9A92E;
+    --saffron-deep:#A57A12;
+    --turquoise:#5A6168;
+    --turquoise-deep:#3B4147;
+    --paper:#F5F0E6;
+    --paper-tint:#ECE5D7;
+    --line:#DCD2C0;
+    --muted:#5E5550;
+    --card:#FFFDF8;
     --on-accent:#fff;
     /* Shape + motion scale (from the 21st.dev reference components):
        soft rounded cards, pill controls, and one shared "settle" ease. */
@@ -35,12 +39,12 @@
        full-screen menu, which are deliberately a constant dark treatment (an
        evening on the Promenade) in both themes, so their text stays legible
        whichever theme the page is in. */
-    --panel:#122624;
-    --panel-soft:#1E3B38;
-    --panel-ink:#F8EFDD;
-    --panel-muted:#7FC4BC;
-    --panel-line:rgba(248,239,221,.16);
-    --panel-accent:#E8B15C;
+    --panel:#7A1826;
+    --panel-soft:#94283A;
+    --panel-ink:#FBF3E2;
+    --panel-muted:#F2D0C6;
+    --panel-line:rgba(251,243,226,.22);
+    --panel-accent:#EBC24C;
     --font-display:"Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --font-body:"Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --font-brand:"Fraunces", Georgia, "Times New Roman", serif; /* logo "T" only, matches the favicon */
@@ -48,25 +52,25 @@
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --ink:#EDEAE4; --ink-soft:#C9C4BC;
-      --terracotta:#E3814C; --terracotta-deep:#EEA06C;
-      --saffron:#EAB65C; --saffron-deep:#F0C67E;
-      --turquoise:#6FBFB6; --turquoise-deep:#8ED0C8;
-      --paper:#1B1A18; --paper-tint:#232220;
-      --line:#38352F; --muted:#A8A29A;
-      --card:#232220; --on-accent:#1B1A18;
+      --ink:#F1EBE3; --ink-soft:#D2C8C0;
+      --terracotta:#E8BF4F; --terracotta-deep:#F2D06F;   /* dark mode: gold lettering is the accent */
+      --saffron:#D9922E; --saffron-deep:#E8A94B;
+      --turquoise:#A5AEB5; --turquoise-deep:#C4CCD2;
+      --paper:#1D1716; --paper-tint:#271F1E;
+      --line:#403532; --muted:#B4A8A3;
+      --card:#271F1E; --on-accent:#1D1716;
       color-scheme: dark;
     }
   }
   @media (max-width:480px){ :root{--space-top:28px} }
   :root[data-theme="dark"]{
-    --ink:#EDEAE4; --ink-soft:#C9C4BC;
-    --terracotta:#E3814C; --terracotta-deep:#EEA06C;
-    --saffron:#EAB65C; --saffron-deep:#F0C67E;
-    --turquoise:#6FBFB6; --turquoise-deep:#8ED0C8;
-    --paper:#1B1A18; --paper-tint:#232220;
-    --line:#38352F; --muted:#A8A29A;
-    --card:#232220; --on-accent:#1B1A18;
+    --ink:#F1EBE3; --ink-soft:#D2C8C0;
+    --terracotta:#E8BF4F; --terracotta-deep:#F2D06F;   /* dark mode: gold lettering is the accent */
+    --saffron:#D9922E; --saffron-deep:#E8A94B;
+    --turquoise:#A5AEB5; --turquoise-deep:#C4CCD2;
+    --paper:#1D1716; --paper-tint:#271F1E;
+    --line:#403532; --muted:#B4A8A3;
+    --card:#271F1E; --on-accent:#1D1716;
     color-scheme: dark;
   }
 
@@ -344,7 +348,7 @@
   .examples{background:var(--panel);color:var(--panel-ink)}
   .examples .section-block{padding-top:36px}
   .examples .swatch{color:var(--panel-muted)}
-  .examples h2{color:var(--panel-ink)}
+  .examples h2{color:var(--panel-accent)}  /* gold lettering on the burgundy fascia, like the Duke Street sign */
   .examples .head p{color:color-mix(in srgb, var(--panel-ink) 72%, var(--panel))}
   .examples .head{max-width:1000px}
   .examples .head p{max-width:80ch}
@@ -773,7 +777,7 @@
   .hv-plus-price{font-family:var(--font-display);font-size:20px}
   .hv-plus-price small{font-family:var(--font-body);font-size:12px;opacity:.7;margin-left:2px}
   .hv-verified{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:5px 10px 5px 8px;border-radius:999px;
-    background:var(--panel-accent);color:#122624;white-space:nowrap}
+    background:var(--panel-accent);color:#2A1C14;white-space:nowrap}
   .hv-verified svg,.hv-badges svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .hv-badges{list-style:none;margin:18px 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
   .hv-badges li{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid var(--panel-line);color:var(--panel-ink)}
@@ -782,7 +786,7 @@
   .hv-toggle i{position:relative;width:40px;height:22px;border-radius:99px;background:var(--panel-soft)}
   .hv-toggle i::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--panel-ink)}
   .hv-toggle i.on{background:var(--panel-accent)}
-  .hv-toggle i.on::after{left:21px;background:#122624}
+  .hv-toggle i.on::after{left:21px;background:#2A1C14}
 
   /* Free vs Club+ table */
   .hw-table{border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;background:var(--card);box-shadow:var(--shadow-sm)}
@@ -800,7 +804,7 @@
   .hw-th .hw-plus-col small{color:var(--panel-muted)}
   .hw-tr .yes,.hw-tr .no{font-size:0;align-items:flex-start}
   .hw-tr .yes::before,.hw-tr .no::before{content:"";display:inline-block;width:24px;height:24px;border-radius:50%;vertical-align:middle;
-    background:color-mix(in srgb, var(--terracotta) 14%, transparent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B34C1C' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4L18 8'/%3E%3C/svg%3E") center/16px no-repeat}
+    background:color-mix(in srgb, var(--terracotta) 14%, transparent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238E1B2B' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4L18 8'/%3E%3C/svg%3E") center/16px no-repeat}
   .hw-tr .no::before{width:14px;height:2px;border-radius:2px;background:var(--line);margin-left:5px}
   .hw-plans-foot{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:22px 0 0;color:var(--ink-soft);font-size:15px}
   .hw-plans-foot a{color:var(--terracotta);text-underline-offset:3px}
@@ -1040,7 +1044,7 @@
   .swoosh path{fill:none;stroke:var(--saffron);stroke-width:3.2;stroke-linecap:round}
   .hero-draw,.intro-draw{fill:none;stroke:#fff;stroke-width:14;stroke-linecap:round}
   .hero-plane{fill:var(--terracotta);opacity:0}
-  .hero-ping{fill:none;stroke:#B34C1C;stroke-width:2;opacity:0}
+  .hero-ping{fill:none;stroke:#8E1B2B;stroke-width:2;opacity:0}
 
   html.intro .arrival{display:grid;place-items:center;position:fixed;inset:0;z-index:100;background:var(--panel);color:var(--panel-ink);
     clip-path:inset(0 0 0 0);
