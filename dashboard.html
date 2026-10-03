@@ -32,7 +32,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340..600;1,9..144,340..600&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,500&family=Figtree:wght@400..800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -46,7 +46,7 @@
     </a>
     <div class="nav-right">
       <a class="nav-signin" href="signin.html">Sign in</a>
-      <a class="btn terracotta btn-sm nav-cta" href="./#join">Become a member</a>
+      <a class="btn terracotta btn-sm nav-cta" href="./#join">Join free</a>
       <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="menuOverlay">
         <span></span><span></span><span></span>
       </button>
@@ -65,7 +65,7 @@
     <div class="menu-links">
       <a href="./"><span class="mnum">01</span> Home</a>
       <a href="how-it-works.html"><span class="mnum">02</span> How it works</a>
-      <a href="matches.html"><span class="mnum">03</span> See a match</a>
+      <a href="connections.html"><span class="mnum">03</span> Example connections</a>
       <a href="membership.html"><span class="mnum">04</span> Membership</a>
       <a href="about.html"><span class="mnum">05</span> About us</a>
       <a href="signin.html"><span class="mnum">06</span> Sign in</a>
@@ -91,13 +91,27 @@
   <div class="wrap dash-grid">
     <div class="dash-main">
       <div class="dash-section-head">
-        <h2>Your matches</h2>
+        <h2>Your connections</h2>
         <p>Example profiles while the club is in its founding phase. Interests you share are highlighted.</p>
       </div>
-      <div class="cluster-cards" id="dashMatches"></div>
+      <div class="cluster-cards" id="dashConnections"></div>
     </div>
 
     <aside class="dash-side">
+      <!-- Plan status. PLACEHOLDER limits/prices, same as membership.html. -->
+      <div class="dash-panel dash-plan">
+        <div class="dash-plan-top">
+          <span class="dash-plan-tag">Free plan</span>
+          <a class="dash-plan-link" href="membership.html">Compare plans</a>
+        </div>
+        <p class="dash-plan-count"><b>3 of 5</b> new connections this month</p>
+        <div class="meter" role="progressbar" aria-label="New connections used this month" aria-valuemin="0" aria-valuemax="5" aria-valuenow="3"><div class="meter-fill" style="width:60%"></div></div>
+        <div class="dash-plan-offer">
+          <p><b>Founding offer:</b> 3 months of Club+ free when the club opens: ID verification, verified-only connections and no monthly limit.</p>
+          <a class="btn terracotta btn-sm" href="membership.html">See Club+</a>
+        </div>
+      </div>
+
       <div class="dash-panel">
         <!-- Profile completion: the meter + step list from the homepage join section (.profile-next) -->
         <div class="profile-next dash-profile">
@@ -120,7 +134,7 @@
         <ul class="dash-msgs" id="dashMessages"></ul>
       </div>
 
-      <p class="fine dash-fine"><strong>Demo dashboard.</strong> You're "signed in" only in this browser: your name and email are saved in localStorage, nothing is sent to a server, and there's no real account or security. Matches and messages are examples. Sign out to clear it.</p>
+      <p class="fine dash-fine"><strong>Demo dashboard.</strong> You're "signed in" only in this browser: your name and email are saved in localStorage, nothing is sent to a server, and there's no real account or security. Connections and messages are examples. Sign out to clear it.</p>
     </aside>
   </div>
 </section>
@@ -165,16 +179,16 @@
     window.location.href = 'index.html';
   });
 
-  // Example matches: the same fictional members (and data shape) as matches.html.
+  // Example connections: the same fictional members (and data shape) as connections.html.
   var MY_INTERESTS = ["Photography", "Street food", "Coffee culture", "Live music"];
-  var MATCHES = [
+  var CONNECTIONS = [
     { name:"Maya T.", age:29, home:"London", dest:"Lisbon, this spring", bio:"Chasing golden hour and good pastries.", interests:["Photography","Coffee culture","Street food","Historic sites","Walking tours","City breaks"], badges:["id","video","social"], color:"terracotta" },
     { name:"Aisha K.", age:27, home:"Toronto", dest:"Lisbon, this spring", bio:"Collects markets the way other people collect stamps.", interests:["Local markets","Cultural immersion","Street food","Photography","Architecture"], badges:["id","social"], color:"saffron" },
     { name:"Daniel P.", age:33, home:"Berlin", dest:"Lisbon, this spring", bio:"First stop is always the record shop.", interests:["Live music","Nightlife","Art galleries","Museums","Coffee culture"], badges:["id","video"], color:"turquoise" }
   ];
   function initials(n){ return n.split(' ').map(function(w){ return w[0]; }).join('').slice(0,2).toUpperCase(); }
-  var cards = document.getElementById('dashMatches');
-  MATCHES.forEach(function(m){
+  var cards = document.getElementById('dashConnections');
+  CONNECTIONS.forEach(function(m){
     var card = document.createElement('article');
     card.className = 'ccard';
     card.innerHTML =
