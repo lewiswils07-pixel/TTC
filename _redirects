@@ -10,3 +10,5 @@
 /README.md          /404.html  404!
 /skills-lock.json   /404.html  404!
 /_redirects         /404.html  404!
+/docs/*            /404.html  404!
+/tasks/*           /404.html  404!
