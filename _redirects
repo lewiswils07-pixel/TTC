@@ -12,3 +12,5 @@
 /_redirects         /404.html  404!
 /docs/*            /404.html  404!
 /tasks/*           /404.html  404!
+/.github/*          /404.html  404!
+/supabase/*         /404.html  404!

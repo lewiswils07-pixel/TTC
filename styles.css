@@ -1319,6 +1319,7 @@
   .hp{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
   .form-privacy{margin:12px 0 0;text-align:center;font-size:13px}
   .form-privacy a{color:var(--terracotta)}
+  .form-error{margin:12px 0 0;text-align:center;font-size:15px;font-weight:600;color:var(--terracotta)}
 
   /* Membership plan names are real headings (h2) styled as small labels */
   h2.swatch{font-family:var(--font-body);margin:0 0 14px;line-height:1.2}

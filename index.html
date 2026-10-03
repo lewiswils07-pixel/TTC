@@ -310,11 +310,12 @@
           <!-- Spam trap: hidden from people, but bots fill it in; submissions with it set are ignored. -->
           <div class="hp" aria-hidden="true"><label for="website">Leave this empty</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
           <div class="field full"><button class="btn terracotta" type="submit">Join free</button>
+            <p class="form-error" role="alert" hidden>Sorry, that didn't go through. Please check your connection and try again.</p>
             <p class="fine form-privacy">We'll only use your details to tell you about the club. You can unsubscribe at any time. <a href="terms.html#privacy">Privacy policy</a>.</p></div>
         </form>
-        <div id="success" class="fine" hidden>Thank you, you're on the founding list. We'll email you when the club opens, along with your founding offer of 3 months of Club+ free.
+        <div id="success" class="fine" role="status" hidden>Thank you, you're on the founding list. We'll email you when the club opens, along with your founding offer of 3 months of Club+ free.
           <a class="btn terracotta btn-sm success-cta" href="dashboard.html">Go to your dashboard</a></div>
-        <p class="fine join-demo-note"><strong>Demo:</strong> joining here also "signs you in" to a preview of the member dashboard. Your name and email are saved only in this browser (localStorage), nothing is sent anywhere, and there's no real account or security yet.</p>
+        <p class="fine join-demo-note"><strong>Demo:</strong> joining here also "signs you in" to a preview of the member dashboard. Your name, email and home town are added to the founding list; the dashboard "sign-in" is saved only in this browser (localStorage), and there's no real account or security yet.</p>
 
         <div class="profile-next">
           <h3>Your profile, built up over time</h3>
@@ -333,23 +334,16 @@
 </section>
 <script src="nav.js"></script>
 <script src="demo-auth.js"></script>
+<script src="join.js"></script>
 <script>
-  // Join form → DEMO sign-in. No backend: on submit we show the thank-you
-  // message and mark this browser as "signed in" via demo-auth.js
-  // (localStorage only), so sign-up and sign-in both lead to dashboard.html.
-  (function(){
-    var form = document.getElementById('joinForm');
-    if (!form) return;
-    form.addEventListener('submit', function(e){
-      e.preventDefault();
-      if (form.website.value) return; // honeypot: bots fill the hidden field
-      if (!form.checkValidity()) { form.reportValidity(); return; }
-      TTCDemoAuth.signIn(document.getElementById('fname').value, document.getElementById('email').value);
-      document.getElementById('success').hidden = false;
-      if (window.TTCRefreshNavSignIn) window.TTCRefreshNavSignIn();
-      form.reset();
-    });
-  })();
+  // Join form: saves to the founding list (join.js), then DEMO sign-in.
+  // demo-auth.js marks this browser as "signed in" (localStorage only), so
+  // sign-up and sign-in both lead to dashboard.html. Real accounts come with
+  // the members' app.
+  TTCWaitlist.bind(document.getElementById('joinForm'), document.getElementById('success'), function(name, email){
+    TTCDemoAuth.signIn(name, email);
+    if (window.TTCRefreshNavSignIn) window.TTCRefreshNavSignIn();
+  });
 </script>
 <script>
   // Opening sequence. CSS owns the timeline (see "Arrival intro" in
