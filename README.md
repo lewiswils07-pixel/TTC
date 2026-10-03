@@ -33,6 +33,18 @@ The sign-in and dashboard on the members branch are a **client-side demo only**
 - `badges.js`: trust badges on member cards
 - `img/`: photos and the globe texture used on connections.html
 
+## Design versions
+
+Every version is kept in the git history. These are the main looks, with
+the commit to go back to (`git checkout <commit> -- .` restores the files
+from that version; a revert commit is the safest way to switch on `main`):
+
+| Version | Commit | Notes |
+|---|---|---|
+| Terracotta | `daadae7` | Cream with terracotta, saffron and turquoise; dark green bands. |
+| Simple trial | `0739536` | Stripped-back, larger-text version for an older audience (tried, then reverted). |
+| Duke Street | `0fd50b5` | Burgundy fascia, mustard gold, cream and charcoal (current). |
+
 ## Running locally
 Serve the folder with any static server, e.g.:
 
