@@ -1,0 +1,12 @@
+# Netlify: keep project and tooling files off the public site.
+# Netlify publishes the whole repo folder, so these would otherwise be
+# reachable at their own URLs. "404!" forces the rule even though the
+# files exist, and shows the site's own 404 page. This file itself is
+# never served.
+/.claude/*          /404.html  404!
+/.mcp.json          /404.html  404!
+/.git/*             /404.html  404!
+/DESIGN.md          /404.html  404!
+/README.md          /404.html  404!
+/skills-lock.json   /404.html  404!
+/_redirects         /404.html  404!
