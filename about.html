@@ -22,9 +22,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Together Travel Club: find your people, wherever you&#x27;re travelling to.">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,500&family=Figtree:wght@400..800&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/figtree-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -66,6 +64,7 @@
   </div>
 </div>
 
+<main id="main">
 <header class="about-page" id="top">
   <div class="wrap about-hero-grid">
     <div class="about-copy-col">
@@ -119,7 +118,7 @@
       <p>Every photo here is from a trip Lewis took, and each one is somewhere you could find your people.</p>
     </div>
   </div>
-  <div class="journal" aria-label="Travel photos">
+  <div class="journal" role="region" aria-label="Travel photos (scroll sideways on phones)" tabindex="0">
     <figure class="pol"><img src="img/nice-coast.jpg" alt="Aerial view of the Baie des Anges coastline in Nice, France" loading="lazy"><figcaption>Nice</figcaption></figure>
     <figure class="pol"><img src="img/eiffel-tower.jpg" alt="The Eiffel Tower seen from the Trocadéro in Paris" loading="lazy"><figcaption>Paris</figcaption></figure>
     <figure class="pol"><img src="img/ski-alps.jpg" alt="Snow-capped peaks in the French Alps" loading="lazy"><figcaption>The Alps</figcaption></figure>
@@ -152,6 +151,8 @@
     </div>
   </div>
 </section>
+
+</main>
 
 <footer>
   <div class="wrap">

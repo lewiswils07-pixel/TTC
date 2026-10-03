@@ -30,9 +30,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Together Travel Club: find your people, wherever you&#x27;re travelling to.">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,500&family=Figtree:wght@400..800&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/figtree-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -74,6 +72,7 @@
   </div>
 </div>
 
+<main id="main">
 <header class="dash-page" id="top">
   <div class="wrap">
     <div class="dash-head">
@@ -139,6 +138,8 @@
   </div>
 </section>
 
+</main>
+
 <footer>
   <div class="wrap">
     <div class="foot-left">
@@ -194,7 +195,7 @@
     card.innerHTML =
       '<div class="ccard-stamp" style="background:var(--' + m.color + ')">' + initials(m.name) + '</div>' +
       '<div class="ccard-copy">' +
-        '<h4 class="ccard-name">' + m.name + ' <span class="ccard-age"><span class="sr-only">age </span>' + m.age + '</span></h4>' +
+        '<h3 class="ccard-name">' + m.name + ' <span class="ccard-age"><span class="sr-only">age </span>' + m.age + '</span></h3>' +
         '<span class="ccard-route">' + m.home + ' \u2192 ' + m.dest + '</span>' +
         TTCBadges.html(m.badges) +
         '<p class="ccard-bio">\u201c' + m.bio + '\u201d</p>' +
