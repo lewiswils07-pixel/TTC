@@ -43,7 +43,7 @@
   // [container, items inside it (default: its direct children)]
   var GROUPS = [
     ['.head'], ['.filmstrip'], ['.plist'],
-    ['.about-copy-col'], ['.about-collage'],
+    ['.about-copy-col'], ['.about-story-copy'], ['.values-grid'], ['.journal'], ['.promises'],
     ['.faq-intro'], ['.faq-list'],
     ['.mem-page .wrap'], ['.mem-plans'], ['.mem-notes'],
     ['.legal-page .wrap'],
@@ -52,7 +52,7 @@
     ['.hw-hero-copy'], ['.hw-steps-nav'], ['.hw-text'], ['.hw-table'], ['.hw-safe-grid']
   ];
   // Revealed on their own as each one scrolls into view
-  var SINGLES = '.mem-offer, .mem-more, .hiw-cta, .hw-plans-foot, .joinbox, .legal-part > h2, .legal-item';
+  var SINGLES = '.founder-card, .mem-offer, .mem-more, .hiw-cta, .hw-plans-foot, .joinbox, .legal-part > h2, .legal-item';
 
   document.documentElement.classList.add('rv');
   var io = new IntersectionObserver(function(entries){

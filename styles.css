@@ -266,55 +266,82 @@
   h2{font-family:var(--font-display);font-weight:700;font-size:clamp(28px,3.4vw,40px);line-height:1.1;letter-spacing:-.03em;margin:0 0 12px}
   .head p{color:var(--muted);font-size:17px;margin:0;max-width:54ch}
 
-  /* About page (about.html) — its own page rather than a homepage
-     section, so it gets the same generous top spacing as the hero and
-     room for the statement to breathe before the supporting paragraphs. */
-  .page-shell{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
-  .page-shell footer{margin-top:auto}
-  .about-page{padding:40px 0 8px}
-
-  /* Text and photo collage stack only on true mobile/small-tablet widths
-     (photos underneath, since the intro copy is what to read first); from
-     780px up they sit side by side and stay that way at every wider size.
-     The collage's overall height is set to match the text column exactly
-     (see the small script at the bottom of about.html) — a fixed px guess
-     for grid-auto-rows can't track a fluid text column, and a pure-CSS
-     percentage-height chain here runs into an indefinite-height loop that
-     lets images balloon to their native size, so JS measures the real
-     rendered text height instead and sets --collage-h from it. */
-  .about-hero-grid{display:grid;grid-template-columns:1fr;gap:40px}
-  .about-photos-col{margin-top:8px}
-  .about-photos-col .ac-label{margin-bottom:22px}
-
-  .about-collage{display:grid;grid-template-columns:repeat(2,1fr);grid-auto-rows:150px;grid-auto-flow:dense;gap:14px}
-  .ac-tile{margin:0;border-radius:3px;overflow:hidden;background:var(--panel-soft);grid-column:span 1;grid-row:span 1}
-  .ac-tile.ac-wide{grid-column:span 2}
-  .ac-tile.ac-tall{grid-row:span 2}
-  .ac-tile img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s var(--ease-out)}
-  @media (hover:hover) and (pointer:fine){ .ac-tile:hover img{transform:scale(1.04)} }
-
-  @media (max-width:640px){
-    .about-collage{grid-auto-rows:120px;gap:10px}
-  }
-
-  /* Side-by-side layout takes over from 780px up. Text column is a fluid
-     range (so it doesn't get uncomfortably wide on a large screen — the
-     .wrap max-width caps the whole page anyway); the photo column takes
-     the rest and its height is pinned to --collage-h (set by script). */
-  @media (min-width:780px){
-    .about-hero-grid{grid-template-columns:minmax(320px,560px) 1fr;gap:48px;align-items:start}
-    .about-photos-col{margin-top:0}
-    .about-collage.has-h{height:var(--collage-h);grid-auto-rows:1fr;gap:12px}
-  }
-  @media (min-width:1320px){
-    .about-hero-grid{gap:64px}
-  }
+  /* ───────── About page (about.html) ─────────
+     Founder hero (copy + photo card), the Paris story with a pull quote,
+     four value cards, a polaroid "travel journal" of Lewis's own photos
+     (scattered grid on wide screens, swipeable strip on phones), then the
+     promises strip and the founding-members invitation. */
+  .about-page{padding:40px 0 24px}
+  .about-hero-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:center}
   .about-page .swatch{margin-bottom:22px}
-  .about-page h1{max-width:15ch;margin:0 0 36px}
-  .about-page-copy{max-width:640px}
-  .about-page-copy p{color:var(--muted);font-size:18px;line-height:1.8;margin:0 0 22px}
-  .about-page-copy p:last-child{margin-bottom:0}
-  .about-page .actions{margin-top:36px}
+  .about-page h1{max-width:14ch;margin:0 0 22px}
+  .about-lead{color:var(--muted);font-size:18px;line-height:1.6;margin:0 0 30px;max-width:46ch}
+  .founder-card{margin:0;justify-self:center;width:min(100%,380px);padding:12px 12px 16px;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);transform:rotate(2deg)}
+  .founder-photo{border-radius:12px;overflow:hidden;aspect-ratio:4/5;background:var(--paper-tint)}
+  .founder-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 30%}
+  .founder-card figcaption{display:flex;justify-content:space-between;align-items:baseline;padding:14px 6px 0}
+  .founder-card figcaption b{font-size:17px}
+  .founder-card figcaption span{font-size:13px;color:var(--muted);font-weight:600;letter-spacing:.3px}
+
+  .about-story{padding-top:72px}
+  .about-story-grid{display:grid;grid-template-columns:1fr;gap:8px}
+  .about-story-copy{max-width:640px}
+  .about-story-copy p{color:var(--ink-soft);font-size:18px;line-height:1.65;margin:0 0 20px}
+  .about-quote{margin:30px 0;padding:6px 0 6px 22px;border-left:4px solid var(--terracotta)}
+  .about-quote p{margin:0;font-size:clamp(24px,2.8vw,32px);line-height:1.2;font-weight:700;letter-spacing:-.02em;color:var(--ink);text-wrap:balance}
+  .about-sign{margin-top:28px !important;font-family:var(--font-brand);font-style:italic;font-size:24px !important;color:var(--ink) !important}
+  .about-sign span{font-family:var(--font-body);font-style:normal;font-size:14px;color:var(--muted);margin-left:4px}
+
+  .values-grid{display:grid;grid-template-columns:1fr;gap:16px}
+  .value-card{padding:26px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card)}
+  .value-card h3{font-size:19px;margin:16px 0 8px;letter-spacing:-.01em}
+  .value-card p{margin:0;color:var(--muted);font-size:15px;line-height:1.6}
+  .value-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb, var(--terracotta) 12%, transparent)}
+  .value-icon svg{width:22px;height:22px;fill:none;stroke:var(--terracotta);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+  /* Polaroid journal: phones get a swipeable, snapping strip */
+  .journal{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding:12px 24px 28px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .journal::-webkit-scrollbar{display:none}
+  .pol{flex:0 0 68%;scroll-snap-align:center;margin:0;padding:10px 10px 0;background:#FFFDF8;border-radius:6px;
+    box-shadow:0 1px 2px rgba(33,32,30,.08), 0 14px 30px -14px rgba(33,32,30,.35);transition:transform .35s var(--ease-out), box-shadow .35s var(--ease-out)}
+  .pol img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:2px}
+  .pol figcaption{font-family:var(--font-brand);font-style:italic;font-size:19px;color:#3A3733;text-align:center;padding:10px 4px 14px}
+  .pol:nth-child(4n+1){transform:rotate(-2deg)}
+  .pol:nth-child(4n+2){transform:rotate(1.5deg)}
+  .pol:nth-child(4n+3){transform:rotate(-1deg)}
+  .pol:nth-child(4n){transform:rotate(2.5deg)}
+
+  .promises{list-style:none;margin:0 0 28px;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+  .promises li{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:14.5px;font-weight:600}
+  .promises li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--terracotta)}
+  .about-join{padding-top:32px}
+  .about-cta{margin-top:0}
+
+  @media (min-width:640px){
+    .values-grid{grid-template-columns:1fr 1fr}
+    .pol{flex-basis:42%}
+  }
+  @media (min-width:900px){
+    .about-hero-grid{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:64px}
+    .founder-card{justify-self:end}
+    .about-story-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:64px;align-items:start}
+    .about-story-head{position:sticky;top:110px}
+    .values-grid{grid-template-columns:repeat(4,1fr);gap:20px}
+    .journal{display:grid;grid-template-columns:repeat(4,1fr);gap:34px 30px;overflow:visible;max-width:1320px;margin:0 auto;padding:12px 40px 8px}
+    .pol:nth-child(even){margin-top:28px}
+  }
+  @media (hover:hover) and (pointer:fine){
+    .pol:hover{transform:rotate(0) translateY(-6px) scale(1.03);box-shadow:0 2px 4px rgba(33,32,30,.08), 0 24px 44px -16px rgba(33,32,30,.4);z-index:2;position:relative}
+    .founder-card{transition:transform .4s var(--ease-out)}
+    .founder-card:hover{transform:rotate(0)}
+  }
+  @media (max-width:480px){
+    .about-page{padding-top:32px}
+    .about-lead,.about-story-copy p{font-size:16.5px}
+    .journal{padding:8px 16px 24px}
+    .pol{flex-basis:74%}
+  }
 
   /* Our use cases — swatch-card wall. Deliberately a fixed dark panel in
      both themes (see --panel-* tokens), so it doesn't invert against the
@@ -1052,7 +1079,7 @@
   /* Reduced motion: keep the fades, drop the movement. */
   @media (prefers-reduced-motion: reduce){
     .btn:hover,.btn:active,.chip:active,.menu-btn:active,.menu-close:active,.hw-steps-nav a:hover,.hw-steps-nav a:active,.ccard:hover,
-    .ac-tile:hover img,.dest:hover .dest-art img{transform:none !important}
+    .pol:hover,.founder-card:hover,.dest:hover .dest-art img{transform:none !important}
     .menu-links a{transform:none}
     .ccard{animation:none}
   }
@@ -1149,6 +1176,6 @@
      Items stay hidden only while html.rv is set and they haven't been
      revealed; the entrance uses a backwards-filling animation, so once it
      ends the element's own styles (hover lifts etc.) apply untouched. */
-  @keyframes rvIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes rvIn{from{opacity:0;translate:0 10px}to{opacity:1;translate:none}}  /* translate, not transform: keeps tilted items (polaroids) tilted */
   html.rv .rv-i:not(.rv-in){opacity:0}
   html.rv .rv-i.rv-in{animation:rvIn .45s var(--ease-out) backwards;animation-delay:calc(var(--rv-i, 0) * 60ms)}
