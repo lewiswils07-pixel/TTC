@@ -688,32 +688,9 @@
   /* Step jump links */
   .hw-kicker span{flex:none;width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;
     background:var(--terracotta);color:var(--on-accent);font-family:var(--font-display);font-size:13px;font-weight:600}
-  /* Step bar (sticky, see the page script) */
-  .hw-steps-nav{position:sticky;top:88px;z-index:30;display:flex;gap:4px;padding:5px;margin:0 0 56px;
-    background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-sm);
-    overflow-x:auto;scrollbar-width:none;transition:box-shadow .25s ease, background .25s ease}
-  .hw-steps-nav::-webkit-scrollbar{display:none}
-  .hw-steps-nav a{flex:1 0 auto;display:flex;align-items:center;justify-content:center;gap:9px;padding:9px 14px;border-radius:10px;
-    color:var(--muted);text-decoration:none;font-size:14px;font-weight:600;white-space:nowrap;transition:background .2s ease, color .2s ease, transform .16s var(--ease-out)}
-  .hw-steps-nav a span{flex:none;width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;font-size:12px;font-weight:700;
-    border:1.5px solid currentColor;transition:background .2s ease, color .2s ease, border-color .2s ease}
-  .hw-steps-nav a:active{transform:scale(.97)}
-  @media (hover:hover) and (pointer:fine){ .hw-steps-nav a:hover{color:var(--ink);background:var(--paper-tint)} }
-  .hw-steps-nav a{position:relative;z-index:1}
-  .hw-steps-nav a[aria-current="step"]{color:var(--ink)}
-  /* sliding highlight behind the links, positioned by the page script */
-  .hw-steps-ind{position:absolute;top:5px;bottom:5px;left:0;width:0;border-radius:10px;pointer-events:none;
-    background:color-mix(in srgb, var(--terracotta) 13%, transparent);opacity:0;transition:opacity .25s ease;will-change:transform,width}
-  .hw-steps-nav a[aria-current="step"] span{background:var(--terracotta);border-color:var(--terracotta);color:var(--on-accent)}
-  .hw-steps-nav.is-stuck{box-shadow:var(--shadow-lg)}
-  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
-    .hw-steps-nav.is-stuck{background:color-mix(in srgb, var(--card) 84%, transparent);
-      -webkit-backdrop-filter:blur(24px) saturate(1.5);backdrop-filter:blur(24px) saturate(1.5)}
-  }
-  @media (prefers-reduced-transparency: reduce){ .hw-steps-nav.is-stuck{background:var(--card);-webkit-backdrop-filter:none;backdrop-filter:none} }
 
   /* Step rows */
-  .hw-steps{padding-top:40px}
+  .hw-steps{padding-top:72px}
   .hw-step{display:grid;grid-template-columns:1fr;gap:36px;align-items:center;scroll-margin-top:100px}
   .hw-step + .hw-step{margin-top:72px}
   .hw-kicker{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-size:12.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--terracotta)}
@@ -867,9 +844,7 @@
     .hw-pass-top{padding:20px}
     .hw-pass-city{font-size:28px}
     .hw-pass-body{padding:18px 20px 20px}
-    .hw-steps-nav{top:84px;margin-bottom:40px}
-    .hw-steps-nav a{flex:0 0 auto;padding:8px 12px;font-size:13px;gap:7px}
-    .hw-steps{padding-top:32px}
+    .hw-steps{padding-top:48px}
     .hw-step{gap:28px}
     .hw-step + .hw-step{margin-top:56px}
     .hw-visual{padding:28px 16px;border-radius:16px}
@@ -1042,7 +1017,7 @@
 
   /* Reduced motion: keep the fades, drop the movement. */
   @media (prefers-reduced-motion: reduce){
-    .btn:hover,.btn:active,.chip:active,.menu-btn:active,.menu-close:active,.hw-steps-nav a:active,.ccard:hover,
+    .btn:hover,.btn:active,.chip:active,.menu-btn:active,.menu-close:active,.ccard:hover,
     .pol:hover,.founder-card:hover,.dest:hover .dest-art img{transform:none !important}
     .menu-links a{transform:none}
     .ccard{animation:none}
@@ -1191,8 +1166,6 @@
   /* FAQ: the +/- icon's rotated bars made the question row 5px too wide */
   .faq-icon{overflow:hidden}
   .faq-q button span{min-width:0}
-  /* How it works step bar: 44px tall tap targets */
-  .hw-steps-nav a{min-height:44px}
   /* Boarding pass: let long rows shrink instead of widening the page */
   .hw-pass{min-width:0;max-width:100%}
   .hw-pass-people li > div{min-width:0;flex:1}
