@@ -300,7 +300,7 @@
         <h2>Join free as a founding member.</h2>
       </div>
       <div class="join-form-wrap">
-        <form class="form" id="joinForm" onsubmit="event.preventDefault(); if (this.website.value) return; document.getElementById('success').hidden=false; this.reset();">
+        <form class="form" id="joinForm">
           <div class="field"><label for="fname">First name</label><input id="fname" name="first_name" required autocomplete="given-name" maxlength="80" placeholder="Your first name"></div>
           <div class="field"><label for="email">Email address</label><input id="email" name="email" required type="email" autocomplete="email" maxlength="254" placeholder="you@example.com"></div>
           <div class="field full"><label for="home">Home location</label><input id="home" name="home" autocomplete="address-level2" maxlength="120" placeholder="e.g. London"></div>
@@ -308,9 +308,10 @@
           <!-- Spam trap: hidden from people, but bots fill it in; submissions with it set are ignored. -->
           <div class="hp" aria-hidden="true"><label for="website">Leave this empty</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
           <div class="field full"><button class="btn terracotta" type="submit">Join free</button>
+            <p class="form-error" role="alert" hidden>Sorry, that didn't go through. Please check your connection and try again.</p>
             <p class="fine form-privacy">We'll only use your details to tell you about the club. You can unsubscribe at any time. <a href="terms.html#privacy">Privacy policy</a>.</p></div>
         </form>
-        <div id="success" class="fine" hidden>Thank you, you're on the founding list. We'll email you when the club opens, along with your founding offer of 3 months of Club+ free.</div>
+        <div id="success" class="fine" role="status" hidden>Thank you, you're on the founding list. We'll email you when the club opens, along with your founding offer of 3 months of Club+ free.</div>
 
         <div class="profile-next">
           <h3>Your profile, built up over time</h3>
@@ -328,6 +329,8 @@
   </div>
 </section>
 <script src="nav.js"></script>
+<script src="join.js"></script>
+<script>TTCWaitlist.bind(document.getElementById('joinForm'), document.getElementById('success'));</script>
 <script>
   // Opening sequence. CSS owns the timeline (see "Arrival intro" in
   // styles.css); this only starts it, lets any input skip it, removes the
