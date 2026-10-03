@@ -31,8 +31,8 @@
     }
 })();
 
-// Scroll reveals: groups of content fade and slide up as they come into
-// view, each item ~60ms after the one before (the hero, How it works
+// Scroll reveals: collections (cards, rows, photos) fade and slide up as
+// they come into view, each item ~60ms after the one before (the hero, How it works
 // illustrations and connection cards have their own motion and are left
 // alone). Content is fully visible without JS, and for reduced-motion
 // users nothing is hidden at all.
@@ -40,19 +40,15 @@
   if (!('IntersectionObserver' in window)) return;
   if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  // [container, items inside it (default: its direct children)]
+  // [container, items inside it (default: its direct children)].
+  // Deliberately limited to collections (cards, rows, photos), where a
+  // stagger helps you read them as a set. Headings and body copy are
+  // simply there: animating every block on scroll is noise.
   var GROUPS = [
-    ['.head'], ['.filmstrip'], ['.plist'],
-    ['.about-copy-col'], ['.about-story-copy'], ['.values-grid'], ['.journal'], ['.promises'],
-    ['.faq-intro'], ['.faq-list'],
-    ['.mem-page .wrap'], ['.mem-plans'], ['.mem-notes'],
-    ['.legal-page .wrap'],
-    ['.match-page .wrap', ':scope > .swatch, :scope > h1, :scope > .match-intro'],
-    ['.nf-page .wrap'],
-    ['.hw-hero-copy'], ['.hw-steps-nav'], ['.hw-text'], ['.hw-table'], ['.hw-safe-grid']
+    ['.filmstrip'], ['.faq-list'], ['.mem-plans'], ['.mem-notes'],
+    ['.hw-table'], ['.journal'], ['.tenets']
   ];
-  // Revealed on their own as each one scrolls into view
-  var SINGLES = '.founder-card, .mem-offer, .mem-more, .hiw-cta, .hw-plans-foot, .joinbox, .legal-part > h2, .legal-item';
+  var SINGLES = '';
 
   document.documentElement.classList.add('rv');
   var io = new IntersectionObserver(function(entries){
@@ -74,7 +70,7 @@
       io.observe(box);
     });
   });
-  document.querySelectorAll(SINGLES).forEach(function(el){
+  if (SINGLES) document.querySelectorAll(SINGLES).forEach(function(el){
     if (el.classList.contains('rv-i')) return;
     el.classList.add('rv-i');
     io.observe(el);
