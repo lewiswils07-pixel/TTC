@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How it works · Together Travel Club</title>
-<meta name="description" content="How Together Travel Club works: join free, tell us about your trips, get connections with people travelling your way, chat and meet. Club+ adds ID verification and verified-only connections.">
+<meta name="description" content="How Together Travel Club works in three simple steps, what Free and Club+ include, and how to stay safe.">
 <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
 <link rel="icon" type="image/png" sizes="512x512" href="img/favicon-512.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
@@ -16,11 +16,11 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Together Travel Club">
 <meta property="og:title" content="How it works · Together Travel Club">
-<meta property="og:description" content="How Together Travel Club works: join free, tell us about your trips, get connections with people travelling your way, chat and meet. Club+ adds ID verification and verified-only connections.">
+<meta property="og:description" content="How Together Travel Club works in three simple steps, what Free and Club+ include, and how to stay safe.">
 <meta property="og:image" content="img/share.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Together Travel Club: find your people, wherever you&#x27;re travelling to.">
+<meta property="og:image:alt" content="Together Travel Club: find good company for your next trip.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,334 +28,124 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 
-<div class="page-shell">
-
-<nav>
-  <div class="wrap navrow">
-    <a class="brand" href="./">
-      <span class="brand-mark">T</span><span class="brand-word">ogether Travel Club</span>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="./" aria-label="Together Travel Club, home">
+      <span class="brand-mark" aria-hidden="true">T</span><span class="brand-word" aria-hidden="true">ogether Travel Club</span>
     </a>
-    <div class="nav-right">
-      <a class="btn terracotta btn-sm nav-cta" href="./#join">Join free</a>
-      <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="menuOverlay">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
+    <nav class="site-nav" aria-label="Main">
+      <a href="how-it-works.html" aria-current="page">How it works</a>
+      <a href="about.html">About us</a>
+      <a href="faq.html">Questions</a>
+    </nav>
+    <a class="btn btn-primary btn-sm head-cta" href="./#join">Join free</a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="mobileNav">Menu</button>
   </div>
-</nav>
-
-<div class="menu-overlay" id="menuOverlay">
-  <div class="wrap">
-    <div class="menu-top">
-      <a class="brand" href="./" id="menuBrandLink">
-        <span class="brand-mark">T</span><span class="brand-word">ogether Travel Club</span>
-      </a>
-      <button class="menu-close" id="menuClose" aria-label="Close menu">&times;</button>
-    </div>
-    <div class="menu-links">
-      <a href="./"><span class="mnum">01</span> Home</a>
-      <a href="how-it-works.html"><span class="mnum">02</span> How it works</a>
-      <a href="connections.html"><span class="mnum">03</span> Example connections</a>
-      <a href="membership.html"><span class="mnum">04</span> Membership</a>
-      <a href="about.html"><span class="mnum">05</span> About us</a>
-    </div>
-    <div class="menu-foot">A members' club for people who travel</div>
-  </div>
-</div>
-
-<header class="hw-hero" id="top">
-  <div class="wrap hw-hero-grid">
-    <div class="hw-hero-copy">
-      <h1>From a trip idea to a travel <em>companion</em>.</h1>
-      <p class="hw-intro">Join free, tell us where you're heading, and we'll connect you with people travelling the same way. Chat, meet if you'd like to, and upgrade to Club+ whenever you'd rather connect with verified members only.</p>
-      <div class="actions">
-        <a class="btn terracotta" href="./#join">Join free</a>
-        <a class="btn outline" href="#plans">Free vs Club+</a>
-      </div>
-    </div>
-
-    <!-- Boarding-pass illustration: one trip, the connections heading the same way. -->
-    <div class="hw-pass-wrap">
-      <div class="hw-pass" aria-hidden="true">
-        <div class="hw-pass-top">
-          <div>
-            <p class="hw-pass-label">Your trip</p>
-            <p class="hw-pass-city">Lisbon</p>
-          </div>
-          <svg class="hw-pass-plane" viewBox="0 0 24 24"><path d="M21 15.5v-1.6l-8-5V3.6a1.5 1.5 0 0 0-3 0v5.3l-8 5v1.6l8-2.5v5.4l-2 1.5V21l3.5-1 3.5 1v-1.1l-2-1.5V13z"/></svg>
-          <div class="hw-pass-right">
-            <p class="hw-pass-label">Dates</p>
-            <p class="hw-pass-dates">12–18 May</p>
-          </div>
-        </div>
-        <div class="hw-pass-tear"></div>
-        <div class="hw-pass-body">
-          <p class="hw-pass-label">Heading your way</p>
-          <ul class="hw-pass-people">
-            <li><span class="hw-av hw-av-1">D</span><div><b>Daniel, 33</b><small>Berlin · 14–20 May</small></div><span class="hw-common">4 in common</span></li>
-            <li><span class="hw-av hw-av-2">A</span><div><b>Ana, 31</b><small>Madrid · 10–16 May</small></div><span class="hw-common">3 in common</span></li>
-            <li><span class="hw-av hw-av-3">S</span><div><b>Sam, 27</b><small>Dublin · 15–19 May</small></div><span class="hw-common">3 in common</span></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
+  <nav class="mobile-nav" id="mobileNav" aria-label="Main" hidden>
+    <a href="./">Home</a>
+    <a href="how-it-works.html" aria-current="page">How it works</a>
+    <a href="about.html">About us</a>
+    <a href="faq.html">Questions</a>
+    <a class="btn btn-primary" href="./#join">Join free</a>
+  </nav>
 </header>
 
-<section class="section-block hw-steps">
-  <div class="wrap">
-    <!-- Sticky step bar: sits under the main nav while you read the steps,
-         frosted over the content scrolling beneath, current step highlighted. -->
-    <nav class="hw-steps-nav" id="stepsNav" aria-label="The four steps">
-      <a href="#step-1"><span>1</span> Tell us about you</a>
-      <a href="#step-2"><span>2</span> Get your connections</a>
-      <a href="#step-3"><span>3</span> Chat, then meet</a>
-      <a href="#step-4"><span>4</span> Go Club+ for verified</a>
-    </nav>
-
-    <article class="hw-step" id="step-1">
-      <div class="hw-text">
-        <p class="hw-kicker"><span>1</span> Step one</p>
-        <h2>Tell us about you</h2>
-        <p class="hw-lead">Start with your name, email and where you're based, then add the parts that help us find your people. It takes a couple of minutes, and you can add more whenever you like.</p>
-        <ul class="hw-points">
-          <li><b>Your interests.</b> Street food, hiking, galleries, live music: the most honest early signal of who you'd get on with.</li>
-          <li><b>Your travel style.</b> Budget, pace, and whether you like every day planned or prefer to wing it.</li>
-          <li><b>Your trips.</b> Where you're going and roughly when, or just where you'd like to go next.</li>
-        </ul>
-      </div>
-      <div class="hw-visual" aria-hidden="true">
-        <div class="hv-card hv-profile">
-          <div class="hv-row hv-who">
-            <span class="hw-av hw-av-me">M</span>
-            <div><b>Maya, 29</b><small>London</small></div>
-            <span class="hv-pct">Profile 80%</span>
-          </div>
-          <div class="hv-meter"><i style="width:80%"></i></div>
-          <p class="hv-label">Interests</p>
-          <div class="hv-chips">
-            <span class="on">Street food</span><span class="on">Photography</span><span>Hiking</span><span class="on">Live music</span><span>Galleries</span><span class="on">Coffee</span>
-          </div>
-          <p class="hv-label">Travel style</p>
-          <div class="hv-slider"><small>Slow days</small><div class="hv-track"><i style="left:34%"></i></div><small>Packed</small></div>
-          <div class="hv-slider"><small>Wing it</small><div class="hv-track"><i style="left:70%"></i></div><small>Planned</small></div>
-          <div class="hv-trip">
-            <svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
-            <div><b>Next trip: Lisbon</b><small>12–18 May</small></div>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <article class="hw-step hw-flip" id="step-2">
-      <div class="hw-text">
-        <p class="hw-kicker"><span>2</span> Step two</p>
-        <h2>Get your connections</h2>
-        <p class="hw-lead">We look for members whose plans and preferences overlap with yours, and put them on a shortlist you can browse at your own pace.</p>
-        <ul class="hw-points">
-          <li><b>Same place, similar time.</b> People heading to the same destination on overlapping dates rise to the top.</li>
-          <li><b>Same way of travelling.</b> Solo, as a couple or with friends; slow days or packed itineraries.</li>
-          <li><b>What you share, highlighted.</b> Every profile shows exactly what you have in common, so you can see why you've been connected.</li>
-        </ul>
-        <p class="hw-note">No one is introduced automatically. You decide who you'd like to say hello to.</p>
-      </div>
-      <div class="hw-visual" aria-hidden="true">
-        <div class="hv-card hv-overlap">
-          <p class="hv-label">Lisbon · May</p>
-          <div class="hv-days"><span>10</span><span>12</span><span>14</span><span>16</span><span>18</span><span>20</span></div>
-          <div class="hv-bars">
-            <div class="hv-bar-row"><small>You</small><div class="hv-lane"><i class="hv-bar hv-bar-me" style="left:20%;width:60%"></i></div></div>
-            <div class="hv-bar-row"><small>Daniel</small><div class="hv-lane"><i class="hv-bar" style="left:40%;width:60%"></i></div></div>
-            <div class="hv-bar-row"><small>Ana</small><div class="hv-lane"><i class="hv-bar" style="left:0;width:60%"></i></div></div>
-            <div class="hv-overlap-band"></div>
-          </div>
-          <p class="hv-foot"><b>14–16 May:</b> all three of you are in town</p>
-        </div>
-        <div class="hv-card hv-conn">
-          <div class="hv-row hv-who">
-            <span class="hw-av hw-av-1">D</span>
-            <div><b>Daniel, 33</b><small>Berlin · 14–20 May</small></div>
-            <span class="hw-common">4 in common</span>
-          </div>
-          <div class="hv-chips hv-chips-sm"><span class="on">Live music</span><span class="on">Coffee</span><span class="on">Street food</span><span class="on">Photography</span><span>Museums</span></div>
-          <p class="hv-limit">3 of 5 new connections this month <span>Free</span></p>
-        </div>
-      </div>
-    </article>
-
-    <article class="hw-step" id="step-3">
-      <div class="hw-text">
-        <p class="hw-kicker"><span>3</span> Step three</p>
-        <h2>Chat, then meet</h2>
-        <p class="hw-lead">Once you've found someone you'd like to travel with, chat for as long as you need before deciding anything.</p>
-        <ul class="hw-points">
-          <li><b>Message your connections.</b> Talk through plans, dates and expectations before anyone commits.</li>
-          <li><b>Meet before you go.</b> If you're both nearby, grab a coffee before the trip. It's entirely optional.</li>
-          <li><b>Travel your way.</b> Share a whole itinerary, meet up for a day or two, or just have someone to call when you land.</li>
-        </ul>
-      </div>
-      <div class="hw-visual" aria-hidden="true">
-        <div class="hv-card hv-chat">
-          <div class="hv-row hv-who hv-chat-head">
-            <span class="hw-av hw-av-1">D</span>
-            <div><b>Daniel</b><small>Lisbon · 14–20 May</small></div>
-          </div>
-          <div class="hv-msgs">
-            <p class="hv-msg them">Hi Maya! Looks like we're both in Lisbon that week. Are you going to the Sunday market at LX Factory?</p>
-            <p class="hv-msg me">Yes, that's the plan! Coffee there first?</p>
-            <p class="hv-msg them">Perfect. 10am at the café by the entrance?</p>
-            <p class="hv-typing"><i></i><i></i><i></i></p>
-          </div>
-          <p class="hv-tip">Tip: meet somewhere public first, and let a friend know your plans.</p>
-        </div>
-      </div>
-    </article>
-
-    <article class="hw-step hw-flip" id="step-4">
-      <div class="hw-text">
-        <p class="hw-kicker"><span>4</span> Optional</p>
-        <h2>Go Club+ for verified connections</h2>
-        <p class="hw-lead">Free gets you started. Club+ adds the reassurance of knowing exactly who you're talking to, and more people to choose from.</p>
-        <ul class="hw-points">
-          <li><b>ID verified.</b> Identity checks run through a specialist verification provider, so your documents never sit on our site.</li>
-          <li><b>Verified members only.</b> Choose to see, and be seen by, other verified members only.</li>
-          <li><b>Unlimited connections.</b> No monthly limit, plus a video intro and linked social account on your profile.</li>
-        </ul>
-        <p class="hw-note">Every profile shows whether someone is verified, so it's always clear what's been checked.</p>
-      </div>
-      <div class="hw-visual" aria-hidden="true">
-        <div class="hv-card hv-plus">
-          <div class="hv-plus-top">
-            <span class="hv-plus-tag">Club+</span>
-            <span class="hv-plus-price">£7.99<small>/month</small></span>
-          </div>
-          <div class="hv-row hv-who">
-            <span class="hw-av hw-av-me">M</span>
-            <div><b>Maya, 29</b><small>London</small></div>
-            <span class="hv-verified"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg> Verified</span>
-          </div>
-          <ul class="hv-badges">
-            <li><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg> ID verified</li>
-            <li><svg viewBox="0 0 24 24"><rect x="3" y="7" width="12" height="10" rx="2"/><path d="M15 10.5l6-3.5v10l-6-3.5"/></svg> Video intro'd</li>
-            <li><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1 1"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1-1"/></svg> Social linked</li>
-          </ul>
-          <div class="hv-toggle"><span>Verified members only</span><i class="on"></i></div>
-          <div class="hv-toggle"><span>New connections</span><b>Unlimited</b></div>
-        </div>
-      </div>
-    </article>
+<main id="main">
+<section class="page-head">
+  <div class="wrap narrow">
+    <h1>How it works</h1>
+    <p class="lead">Three simple steps, and you're in control at every one.</p>
   </div>
 </section>
 
-<!-- PLACEHOLDER PRICES AND LIMITS: keep in step with membership.html. -->
-<section class="section-block hw-plans" id="plans">
-  <div class="wrap">
-    <div class="head">
-      <h2>Start free. Upgrade if you want to.</h2>
-      <p>Everyone can connect and chat for free. Club+ is for verified members, more connections, and the option to connect with verified people only.</p>
-    </div>
-    <div class="hw-table" role="table" aria-label="Free and Club+ compared">
-      <div class="hw-tr hw-th" role="row">
-        <span role="columnheader"><span class="sr-only">Feature</span></span>
-        <span role="columnheader"><b>Free</b><small>£0</small></span>
-        <span role="columnheader" class="hw-plus-col"><b>Club+</b><small>£7.99/month</small></span>
-      </div>
-      <div class="hw-tr" role="row"><span role="rowheader">Profile, interests and trips</span><span role="cell" class="yes">Included</span><span role="cell" class="yes hw-plus-col">Included</span></div>
-      <div class="hw-tr" role="row"><span role="rowheader">New connections</span><span role="cell">5 a month</span><span role="cell" class="hw-plus-col"><b>Unlimited</b></span></div>
-      <div class="hw-tr" role="row"><span role="rowheader">Chat with your connections</span><span role="cell" class="yes">Included</span><span role="cell" class="yes hw-plus-col">Included</span></div>
-      <div class="hw-tr" role="row"><span role="rowheader">ID verification and Verified badge</span><span role="cell" class="no">Not included</span><span role="cell" class="yes hw-plus-col">Included</span></div>
-      <div class="hw-tr" role="row"><span role="rowheader">Verified-only connections</span><span role="cell" class="no">Not included</span><span role="cell" class="yes hw-plus-col">Included</span></div>
-      <div class="hw-tr" role="row"><span role="rowheader">Video intro and social link</span><span role="cell" class="no">Not included</span><span role="cell" class="yes hw-plus-col">Included</span></div>
-    </div>
-    <p class="hw-plans-foot"><span class="mem-offer-tag">Founding offer</span> Founding members get 3 months of Club+ free. <a href="membership.html">See membership details</a></p>
-  </div>
-</section>
-
-<section class="section-block hw-safety">
-  <div class="wrap">
-    <div class="head">
-      <h2>Good habits, whichever version you're on.</h2>
-    </div>
-    <ol class="tenets">
-      <li><span class="tenet-n">01</span><h3>Check the badges</h3><p>Every profile shows whether someone is ID verified. Free members aren't, so take that into account.</p></li>
-      <li><span class="tenet-n">02</span><h3>Meet in public first</h3><p>A café or a busy square is the right place for a first hello, before any shared plans.</p></li>
-      <li><span class="tenet-n">03</span><h3>Tell a friend</h3><p>Let someone know who you're meeting and where. And if anyone makes you uncomfortable, tell us.</p></li>
+<section class="section section-top-0">
+  <div class="wrap narrow">
+    <ol class="steps steps-long">
+      <li><span class="step-n" aria-hidden="true">1</span><h2>Tell us about yourself</h2>
+        <p>Sign up with your name and email, then add where you're travelling and roughly when. Add a few things you enjoy, like walking, food, museums or music, so we can find people you'll get on with.</p></li>
+      <li><span class="step-n" aria-hidden="true">2</span><h2>See who's going your way</h2>
+        <p>We show you a short list of members heading to the same place at a similar time. Each profile shows what you have in common, so it's easy to decide who to say hello to. Nobody is introduced to you automatically.</p></li>
+      <li><span class="step-n" aria-hidden="true">3</span><h2>Say hello, then meet if you'd like</h2>
+        <p>Chat in the club first and take as long as you need. If you get on, meet for a coffee before you go, explore together for a day, or travel together. It's entirely up to you.</p></li>
     </ol>
-
-    <div class="hiw-cta">
-      <div>
-        <h2>Ready to find your people?</h2>
-        <p>Join free as a founding member. It takes a minute.</p>
-      </div>
-      <div class="actions">
-        <a class="btn terracotta" href="./#join">Join free</a>
-        <a class="btn outline" href="connections.html">Example connections</a>
-      </div>
-    </div>
   </div>
 </section>
 
-<footer>
+<!-- PLACEHOLDER PRICES AND LIMITS: confirm before launch. -->
+<section class="section section-tint" id="prices">
   <div class="wrap">
-    <div class="foot-left">
-      <div class="foot-swatches"><i></i><i></i><i></i></div>
-      <div class="foot-tag">A members' club for people who want to travel more.</div>
+    <h2>Prices</h2>
+    <p class="lead">Start free. Upgrade to Club+ whenever you like, and cancel any time.</p>
+    <div class="plans">
+      <div class="plan">
+        <h3>Free</h3>
+        <p class="price">&pound;0</p>
+        <ul class="ticks">
+          <li>Your profile and trips</li>
+          <li>Up to 5 new people a month</li>
+          <li>Chat with the people you connect with</li>
+        </ul>
+        <a class="btn btn-secondary btn-block" href="./#join">Join free</a>
+      </div>
+      <div class="plan plan-plus">
+        <h3>Club+</h3>
+        <p class="price">&pound;7.99 <span>a month</span></p>
+        <p class="price-alt">or &pound;59.99 a year</p>
+        <ul class="ticks">
+          <li>Everything in Free</li>
+          <li>ID check and a Verified badge on your profile</li>
+          <li>The option to only meet verified members</li>
+          <li>No monthly limit on new people</li>
+        </ul>
+        <a class="btn btn-primary btn-block" href="./#join">Join free, then upgrade</a>
+      </div>
     </div>
-    <div class="foot-links">
+    <p class="note">Founding members get 3 months of Club+ free when the club opens. Free members are not ID-checked, and every profile shows clearly who is.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap split">
+    <div>
+      <h2>Staying safe</h2>
+      <p class="lead">Good habits, whichever plan you're on.</p>
+    </div>
+    <ul class="checklist">
+      <li><b>Look for the Verified badge.</b> It means the member has had their ID checked.</li>
+      <li><b>Take your time.</b> Chat in the club for as long as you like before sharing personal details.</li>
+      <li><b>Meet somewhere public.</b> A busy café is ideal for a first hello.</li>
+      <li><b>Tell someone, and tell us.</b> Let a friend know your plans, and report anyone who makes you uncomfortable.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap cta">
+    <h2>Ready to join?</h2>
+    <p class="lead">It's free, and it only takes a minute.</p>
+    <a class="btn btn-primary" href="./#join">Join free</a>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap foot">
+    <div>
+      <p class="foot-name">Together Travel Club</p>
+      <p class="foot-tag">Find good company for your next trip.</p>
+    </div>
+    <nav class="foot-links" aria-label="Footer">
       <a href="how-it-works.html">How it works</a>
-      <a href="membership.html">Membership</a>
-      <a href="faq.html">FAQ</a>
       <a href="about.html">About us</a>
-      <a href="./#examples">Example trips</a>
-      <a href="./#join">Sign up</a>
+      <a href="faq.html">Questions</a>
       <a href="terms.html">Terms &amp; privacy</a>
-    </div>
-    <div class="foot-meta">© 2026 Together Travel Club</div>
+    </nav>
+    <p class="foot-meta">&copy; 2026 Together Travel Club</p>
   </div>
 </footer>
 
-</div>
-
 <script src="nav.js"></script>
-<script>
-  // Fade each step's illustration in as it scrolls into view. Content is
-  // fully visible without JS, and reduced-motion users skip the animation.
-  // Step bar: highlight the step in view, and mark the bar as stuck once
-  // it's pinned under the main nav (that's when it turns to glass).
-  (function(){
-    var bar = document.getElementById('stepsNav'); if (!bar) return;
-    var links = bar.querySelectorAll('a');
-    var steps = Array.prototype.map.call(links, function(a){ return document.querySelector(a.getAttribute('href')); });
-    var stickTop = parseFloat(getComputedStyle(bar).top) || 0;
-    function update(){
-      bar.classList.toggle('is-stuck', Math.abs(bar.getBoundingClientRect().top - stickTop) < 1.5);
-      var mid = innerHeight * 0.45, current = -1;
-      steps.forEach(function(st, i){ if (st && st.getBoundingClientRect().top < mid) current = i; });
-      var last = steps[steps.length - 1];
-      if (last && last.getBoundingClientRect().bottom < 0) current = -1;   // past the steps
-      links.forEach(function(a, i){
-        if (i === current) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current');
-      });
-      if (current >= 0 && bar.scrollWidth > bar.clientWidth) {
-        var a = links[current], want = a.offsetLeft - (bar.clientWidth - a.offsetWidth) / 2;
-        if (Math.abs(bar.scrollLeft - want) > 4) bar.scrollTo({ left: want, behavior: 'smooth' });
-      }
-    }
-    addEventListener('scroll', update, { passive: true });
-    addEventListener('resize', function(){ stickTop = parseFloat(getComputedStyle(bar).top) || 0; update(); });
-    update();
-  })();
-  (function(){
-    var els = document.querySelectorAll('.hw-step, .hw-pass');
-    if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    document.documentElement.classList.add('hw-anim');
-    var io = new IntersectionObserver(function(entries){
-      entries.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-    }, { rootMargin: '0px 0px -12% 0px' });
-    els.forEach(function(el){ io.observe(el); });
-  })();
-</script>
 </body>
 </html>

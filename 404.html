@@ -2,13 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<!-- Hosts serve this page for any missing address (e.g. /old/page), so
-     resolve every relative link and asset from the site root. -->
 <base href="/">
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Page not found · Together Travel Club</title>
-<meta name="description" content="This page couldn't be found. Head back to Together Travel Club.">
+<meta name="description" content="Sorry, we can&#x27;t find that page.">
 <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
 <link rel="icon" type="image/png" sizes="512x512" href="img/favicon-512.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
@@ -20,11 +18,11 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Together Travel Club">
 <meta property="og:title" content="Page not found · Together Travel Club">
-<meta property="og:description" content="This page couldn&#x27;t be found. Head back to Together Travel Club.">
+<meta property="og:description" content="Sorry, we can&#x27;t find that page.">
 <meta property="og:image" content="img/share.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Together Travel Club: find your people, wherever you&#x27;re travelling to.">
+<meta property="og:image:alt" content="Together Travel Club: find good company for your next trip.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,74 +30,58 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 
-<div class="page-shell">
-
-<nav>
-  <div class="wrap navrow">
-    <a class="brand" href="./">
-      <span class="brand-mark">T</span><span class="brand-word">ogether Travel Club</span>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="./" aria-label="Together Travel Club, home">
+      <span class="brand-mark" aria-hidden="true">T</span><span class="brand-word" aria-hidden="true">ogether Travel Club</span>
     </a>
-    <div class="nav-right">
-      <a class="btn terracotta btn-sm nav-cta" href="./#join">Join free</a>
-      <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="menuOverlay">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
+    <nav class="site-nav" aria-label="Main">
+      <a href="how-it-works.html">How it works</a>
+      <a href="about.html">About us</a>
+      <a href="faq.html">Questions</a>
+    </nav>
+    <a class="btn btn-primary btn-sm head-cta" href="./#join">Join free</a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="mobileNav">Menu</button>
   </div>
-</nav>
-
-<div class="menu-overlay" id="menuOverlay">
-  <div class="wrap">
-    <div class="menu-top">
-      <a class="brand" href="./" id="menuBrandLink">
-        <span class="brand-mark">T</span><span class="brand-word">ogether Travel Club</span>
-      </a>
-      <button class="menu-close" id="menuClose" aria-label="Close menu">&times;</button>
-    </div>
-    <div class="menu-links">
-      <a href="./"><span class="mnum">01</span> Home</a>
-      <a href="how-it-works.html"><span class="mnum">02</span> How it works</a>
-      <a href="connections.html"><span class="mnum">03</span> Example connections</a>
-      <a href="membership.html"><span class="mnum">04</span> Membership</a>
-      <a href="about.html"><span class="mnum">05</span> About us</a>
-    </div>
-    <div class="menu-foot">A members' club for people who travel</div>
-  </div>
-</div>
-
-<header class="hiw-page nf-page" id="top">
-  <div class="wrap">
-    <h1>This page has <em>wandered off</em>.</h1>
-    <p class="hiw-intro">The link may be out of date, or the page has moved. Here are a few places to pick the trip back up.</p>
-    <div class="actions nf-actions">
-      <a class="btn terracotta" href="./">Back to the homepage</a>
-      <a class="btn outline" href="how-it-works.html">How it works</a>
-      <a class="btn outline" href="connections.html">Example connections</a>
-    </div>
-  </div>
+  <nav class="mobile-nav" id="mobileNav" aria-label="Main" hidden>
+    <a href="./">Home</a>
+    <a href="how-it-works.html">How it works</a>
+    <a href="about.html">About us</a>
+    <a href="faq.html">Questions</a>
+    <a class="btn btn-primary" href="./#join">Join free</a>
+  </nav>
 </header>
 
-<footer>
-  <div class="wrap">
-    <div class="foot-left">
-      <div class="foot-swatches"><i></i><i></i><i></i></div>
-      <div class="foot-tag">A members' club for people who want to travel more.</div>
+<main id="main">
+<section class="page-head page-404">
+  <div class="wrap narrow">
+    <h1>Sorry, we can't find that page.</h1>
+    <p class="lead">It may have moved. These links will take you somewhere useful.</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="./">Go to the home page</a>
+      <a class="btn btn-secondary" href="how-it-works.html">How it works</a>
     </div>
-    <div class="foot-links">
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap foot">
+    <div>
+      <p class="foot-name">Together Travel Club</p>
+      <p class="foot-tag">Find good company for your next trip.</p>
+    </div>
+    <nav class="foot-links" aria-label="Footer">
       <a href="how-it-works.html">How it works</a>
-      <a href="membership.html">Membership</a>
-      <a href="faq.html">FAQ</a>
       <a href="about.html">About us</a>
-      <a href="./#examples">Example trips</a>
-      <a href="./#join">Sign up</a>
+      <a href="faq.html">Questions</a>
       <a href="terms.html">Terms &amp; privacy</a>
-    </div>
-    <div class="foot-meta">© 2026 Together Travel Club</div>
+    </nav>
+    <p class="foot-meta">&copy; 2026 Together Travel Club</p>
   </div>
 </footer>
-
-</div>
 
 <script src="nav.js"></script>
 </body>

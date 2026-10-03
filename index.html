@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Together Travel Club</title>
-<meta name="description" content="Together Travel Club is free to join: connect with compatible travel companions before you set off. Club+ adds ID verification and verified-only connections.">
+<meta name="description" content="Find good company for your next trip. Together Travel Club introduces you to friendly members going to the same place as you, at the same time. Free to join.">
 <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
 <link rel="icon" type="image/png" sizes="512x512" href="img/favicon-512.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
@@ -16,492 +16,130 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Together Travel Club">
 <meta property="og:title" content="Together Travel Club">
-<meta property="og:description" content="Together Travel Club is free to join: connect with compatible travel companions before you set off. Club+ adds ID verification and verified-only connections.">
+<meta property="og:description" content="Find good company for your next trip. Together Travel Club introduces you to friendly members going to the same place as you, at the same time. Free to join.">
 <meta property="og:image" content="img/share.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Together Travel Club: find your people, wherever you&#x27;re travelling to.">
+<meta property="og:image:alt" content="Together Travel Club: find good company for your next trip.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,500&family=Figtree:wght@400..800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
-<script>
-  // Arrival intro: once per browser session, skipped for deep links
-  // (e.g. ./#join from another page) and for reduced-motion users.
-  // The hero's opening waits (paused) for the page script to start it,
-  // with a timed fallback so it can never stay hidden.
-  (function(){
-    var d = document.documentElement;
-    d.classList.add('hero-wait');
-    setTimeout(function(){ d.classList.add('hero-go'); }, 2500);
-    try {
-      if (location.hash || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      if (sessionStorage.getItem('ttc_intro')) return;
-      sessionStorage.setItem('ttc_intro', '1');
-      d.classList.add('intro');
-    } catch (e) {}
-  })();
-</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 
-<div class="arrival" id="intro" aria-hidden="true">
-  <div class="intro-inner">
-    <svg class="intro-route" viewBox="0 0 320 110" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <mask id="introRouteMask" maskUnits="userSpaceOnUse" x="0" y="0" width="320" height="110">
-          <path class="intro-draw" d="M22 88 C 90 0, 230 0, 298 62" pathLength="1"/>
-        </mask>
-      </defs>
-      <path class="intro-path" d="M22 88 C 90 0, 230 0, 298 62" mask="url(#introRouteMask)"/>
-      <circle class="intro-dot intro-dot-a" cx="22" cy="88" r="5"/>
-      <circle class="intro-ping" cx="298" cy="62" r="5"/>
-      <circle class="intro-dot intro-dot-b" cx="298" cy="62" r="5"/>
-      <g class="intro-plane" id="introPlane">
-        <g transform="rotate(90) translate(-12 -12)"><path d="M21 15.5v-1.6l-8-5V3.6a1.5 1.5 0 0 0-3 0v5.3l-8 5v1.6l8-2.5v5.4l-2 1.5V21l3.5-1 3.5 1v-1.1l-2-1.5V13z"/></g>
-        <animateMotion id="introPlaneMotion" dur=".8s" begin="indefinite" fill="freeze" rotate="auto"
-          calcMode="spline" keyTimes="0;1" keySplines=".77 0 .175 1" path="M22 88 C 90 0, 230 0, 298 62"/>
-      </g>
-    </svg>
-    <p class="intro-brand"><span class="brand-mark">T</span><span class="brand-word">ogether Travel Club</span></p>
-    <p class="intro-tag">A members' club for people who travel</p>
-  </div>
-</div>
-
-<nav>
-  <div class="wrap navrow">
-    <a class="brand" href="#top">
-      <span class="brand-mark">T</span><span class="brand-word">ogether Travel Club</span>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="./" aria-label="Together Travel Club, home">
+      <span class="brand-mark" aria-hidden="true">T</span><span class="brand-word" aria-hidden="true">ogether Travel Club</span>
     </a>
-    <div class="nav-right">
-      <a class="btn terracotta btn-sm nav-cta" href="#join">Join free</a>
-      <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="menuOverlay">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
+    <nav class="site-nav" aria-label="Main">
+      <a href="how-it-works.html">How it works</a>
+      <a href="about.html">About us</a>
+      <a href="faq.html">Questions</a>
+    </nav>
+    <a class="btn btn-primary btn-sm head-cta" href="#join">Join free</a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="mobileNav">Menu</button>
   </div>
-</nav>
-
-<div class="menu-overlay" id="menuOverlay">
-  <div class="wrap">
-    <div class="menu-top">
-      <a class="brand" href="#top" id="menuBrandLink">
-        <span class="brand-mark">T</span><span class="brand-word">ogether Travel Club</span>
-      </a>
-      <button class="menu-close" id="menuClose" aria-label="Close menu">&times;</button>
-    </div>
-    <div class="menu-links">
-      <a href="#top"><span class="mnum">01</span> Home</a>
-      <a href="how-it-works.html"><span class="mnum">02</span> How it works</a>
-      <a href="connections.html"><span class="mnum">03</span> Example connections</a>
-      <a href="membership.html"><span class="mnum">04</span> Membership</a>
-      <a href="about.html"><span class="mnum">05</span> About us</a>
-    </div>
-    <div class="menu-foot">A members' club for people who travel</div>
-  </div>
-</div>
-
-<header class="hero" id="top">
-  <div class="wrap">
-    <div class="hero-top">
-    <div class="hero-left">
-      <h1><span class="h1-line"><span>Find your people,</span></span> <span class="h1-line"><span>wherever you're <em class="swoosh">travelling<svg viewBox="0 0 200 18" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M4 13 C 52 5, 128 3, 196 9" pathLength="1"/></svg></em> to.</span></span></h1>
-      <div class="hero-copy">
-        <p class="hero-lead">Together Travel Club is where you meet people with travel plans like yours. Whatever you're into, or want to try, you can connect with others travelling to the same place as you, planned trip or not.</p>
-        <div class="actions">
-          <a class="btn terracotta" href="#join">Join free</a>
-          <a class="btn outline" href="#connecting">How does it work?</a>
-        </div>
-      </div>
-    </div>
-    <div class="hero-art" aria-hidden="true">
-      <svg viewBox="0 0 460 420" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <mask id="heroRouteMask" maskUnits="userSpaceOnUse" x="0" y="0" width="460" height="420">
-            <path class="hero-draw" d="M64 54 Q230 4 388 198" pathLength="1"/>
-          </mask>
-        </defs>
-        <g class="pc pc-a">
-          <g transform="translate(30,34) rotate(-6)">
-            <rect width="230" height="170" rx="6" fill="#4FA39B"/>
-            <circle class="pc-sun" cx="185" cy="34" r="16" fill="#F7F5F1" opacity=".8"/>
-            <path d="M0 108 Q60 82 120 106 T230 96 L230 170 L0 170 Z" fill="#367E77"/>
-            <path d="M0 134 Q76 112 152 134 T230 128 L230 170 L0 170 Z" fill="#B34C1C"/>
-          </g>
-        </g>
-        <g class="pc pc-b">
-          <g transform="translate(178,156) rotate(7)">
-            <rect width="230" height="170" rx="6" fill="#122624"/>
-            <rect y="112" width="230" height="58" fill="#0C1917"/>
-            <polygon points="24,170 24,120 38,90 50,118 54,170" fill="#08110F"/>
-            <polygon points="80,170 80,112 96,80 110,114 114,170" fill="#08110F"/>
-            <path d="M0 128 Q50 120 100 128 T200 124" stroke="#DCA23A" stroke-width="2" fill="none" opacity=".6"/>
-          </g>
-        </g>
-        <path d="M64 54 Q230 4 388 198" stroke="#B34C1C" stroke-width="2" stroke-dasharray="1 8" stroke-linecap="round" fill="none" opacity=".6" mask="url(#heroRouteMask)"/>
-        <circle class="hero-dot hero-dot-a" cx="64" cy="54" r="5" fill="#B34C1C"/>
-        <circle class="hero-ping" cx="388" cy="198" r="5"/>
-        <circle class="hero-dot hero-dot-b" cx="388" cy="198" r="5" fill="#B34C1C"/>
-        <g class="hero-plane" id="heroPlane">
-          <g transform="rotate(90) scale(.85) translate(-12 -12)"><path d="M21 15.5v-1.6l-8-5V3.6a1.5 1.5 0 0 0-3 0v5.3l-8 5v1.6l8-2.5v5.4l-2 1.5V21l3.5-1 3.5 1v-1.1l-2-1.5V13z"/></g>
-          <animateMotion id="heroPlaneMotion" dur="1.1s" begin="indefinite" fill="freeze" rotate="auto"
-            calcMode="spline" keyTimes="0;1" keySplines=".77 0 .175 1" path="M64 54 Q230 4 388 198"/>
-        </g>
-      </svg>
-    </div>
-    </div>
-  </div>
+  <nav class="mobile-nav" id="mobileNav" aria-label="Main" hidden>
+    <a href="./">Home</a>
+    <a href="how-it-works.html">How it works</a>
+    <a href="about.html">About us</a>
+    <a href="faq.html">Questions</a>
+    <a class="btn btn-primary" href="#join">Join free</a>
+  </nav>
 </header>
 
-<section class="examples" id="examples">
-  <div class="section-block">
-    <div class="wrap">
-      <div class="head">
-        <h2>Imagine knowing who's already going.</h2>
-        <p>A few examples of what you might see as a member. Pick a destination and imagine who else could already be travelling there, then decide for yourself whether you'd like to say hello.</p>
+<main id="main">
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <h1>Find good company for your next trip.</h1>
+      <p class="lead">Together Travel Club introduces you to friendly members who are going to the same place as you, at the same time, and enjoy the same things.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#join">Join free</a>
+        <a class="btn btn-secondary" href="how-it-works.html">How it works</a>
       </div>
-      <div class="filmstrip">
-        <div class="dest">
-          <div class="dest-art"><img src="img/dest-berlin.jpg" width="960" height="720" alt="The Brandenburg Gate lit up at night in Berlin" loading="lazy"></div>
-          <div class="dest-tag"><div class="dest-name">Berlin</div><div class="dest-meta">12 connections travelling in the next month</div></div>
-        </div>
-        <div class="dest">
-          <div class="dest-art"><img src="img/dest-rome.jpg" width="960" height="720" alt="The Colosseum lit up at dusk in Rome" loading="lazy"></div>
-          <div class="dest-tag"><div class="dest-name">Rome</div><div class="dest-meta">16 connections travelling in the next month</div></div>
-        </div>
-        <div class="dest">
-          <div class="dest-art"><img src="img/dest-algarve.jpg" width="960" height="720" alt="Red sandstone cliffs above a beach in the Algarve" loading="lazy"></div>
-          <div class="dest-tag"><div class="dest-name">Algarve</div><div class="dest-meta">11 connections travelling in the next month</div></div>
-        </div>
-        <div class="dest">
-          <div class="dest-art"><img src="img/dest-paris.jpg" width="960" height="720" alt="The Eiffel Tower seen from a Paris side street" loading="lazy"></div>
-          <div class="dest-tag"><div class="dest-name">Paris</div><div class="dest-meta">19 connections travelling in the next month</div></div>
-        </div>
-      </div>
+      <p class="reassure">Free to join. No card needed. Leave any time.</p>
     </div>
+    <figure class="hero-photo">
+      <img src="img/algarve-cliffs.jpg" width="1400" height="1866" alt="Golden cliffs above a quiet beach in the Algarve, Portugal">
+    </figure>
   </div>
 </section>
 
-<section class="connecting section-block" id="connecting">
+<section class="section">
   <div class="wrap">
-    <div class="head">
-      <h2>How it comes together.</h2>
-      <p>Four steps take you from signing up to messaging your next travel companion.</p>
-    </div>
-    <div class="connecting-grid">
-      <div class="csteps" id="csteps">
-        <div class="cstep" data-step="0">
-          <div class="cstep-num">Step 1</div>
-          <h3>Tell us about you</h3>
-          <p>Add your interests, travel style, and where you're travelling to, or just where you'd like to go. It only takes a couple of minutes to get started.</p>
-        </div>
-        <div class="cstep" data-step="1">
-          <div class="cstep-num">Step 2</div>
-          <h3>We find your people</h3>
-          <p>We connect you with members travelling to a similar place, or who travel in a similar way to you, whether solo, as a couple, or with friends.</p>
-        </div>
-        <div class="cstep" data-step="2">
-          <div class="cstep-num">Step 3</div>
-          <h3>Go verified with Club+</h3>
-          <p>Upgrade to Club+ to verify your ID, get more connections, and choose to connect only with other verified members.</p>
-        </div>
-        <div class="cstep" data-step="3">
-          <div class="cstep-num">Step 4</div>
-          <h3>Message, then meet</h3>
-          <p>Chat as much as you like before you set off, and meet up in person before your trip if you'd both like to.</p>
-        </div>
-      </div>
-      <div class="cs-visual" aria-hidden="true">
-        <svg viewBox="-30 0 260 420" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <!-- 3D plane shading, lit from the upper left -->
-            <linearGradient id="csFuselage" x1="-2" y1="0" x2="2" y2="0" gradientUnits="userSpaceOnUse">
-              <stop offset="0" stop-color="#FFFDF8"/><stop offset=".45" stop-color="#F4EEE4"/><stop offset="1" stop-color="#C9BCA9"/>
-            </linearGradient>
-            <linearGradient id="csWing" x1="-6" y1="-2" x2="6" y2="6" gradientUnits="userSpaceOnUse">
-              <stop offset="0" stop-color="#FBF7F0"/><stop offset="1" stop-color="#D6CBBB"/>
-            </linearGradient>
-            <linearGradient id="csEngine" x1="-1" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse">
-              <stop offset="0" stop-color="#E9E1D4"/><stop offset="1" stop-color="#9E927F"/>
-            </linearGradient>
-            <filter id="csShadowBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.3"/></filter>
-          </defs>
-          <path id="csRoute" class="cs-route" d="M46,22 C150,60 20,130 108,176 C196,222 24,286 104,338 C170,380 60,398 96,398"/>
-          <!-- Landing strip along the final approach; the route ends (and
-               the plane comes to rest) near its far end, at step 4. -->
-          <g class="cs-runway" transform="translate(96,398)">
-            <rect class="cs-runway-strip" x="-62" y="-7" width="90" height="14" rx="2"/>
-            <g class="cs-runway-mark">
-              <rect x="-58" y="-5" width="4.5" height="1.6"/><rect x="-58" y="-2.6" width="4.5" height="1.6"/>
-              <rect x="-58" y="1" width="4.5" height="1.6"/><rect x="-58" y="3.4" width="4.5" height="1.6"/>
-              <rect x="-48" y="-4.4" width="7" height="1.4"/><rect x="-48" y="3" width="7" height="1.4"/>
-            </g>
-            <line class="cs-runway-centre" x1="-38" y1="0" x2="24" y2="0"/>
-          </g>
-          <g id="csTicks"></g>
-          <g class="cs-stop" data-i="0"><circle class="cs-dot" r="11"/><text class="cs-dot-num">1</text></g>
-          <g class="cs-stop" data-i="1"><circle class="cs-dot" r="11"/><text class="cs-dot-num">2</text></g>
-          <g class="cs-stop" data-i="2"><circle class="cs-dot" r="11"/><text class="cs-dot-num">3</text></g>
-          <g class="cs-stop" data-i="3"><circle class="cs-dot" r="11"/><text class="cs-dot-num">4</text></g>
-          <!-- Passport -->
-          <g class="cs-icon cs-icon-passport" data-i="0">
-            <rect x="-7" y="-9" width="14" height="18" rx="2" class="cs-icon-main"/>
-            <circle cx="0" cy="-3" r="2.4" class="cs-icon-cut"/>
-            <line x1="-4" y1="4" x2="4" y2="4" class="cs-icon-cut-line"/>
-            <line x1="-4" y1="7" x2="4" y2="7" class="cs-icon-cut-line"/>
-          </g>
-          <!-- Cocktail glass -->
-          <g class="cs-icon cs-icon-cocktail" data-i="1">
-            <path d="M-9,-8 L9,-8 L0,6 Z" class="cs-icon-main"/>
-            <line x1="0" y1="6" x2="0" y2="13" class="cs-icon-stroke"/>
-            <line x1="-5.5" y1="13" x2="5.5" y2="13" class="cs-icon-stroke"/>
-            <circle cx="4.5" cy="-6.5" r="1.7" class="cs-icon-accent"/>
-          </g>
-          <!-- Mountain -->
-          <g class="cs-icon cs-icon-mountain" data-i="2">
-            <path d="M-11,7 L-2,-8 L3,-1 L8,-8 L12,7 Z" class="cs-icon-main"/>
-            <path d="M-2,-8 L1,-3.4 L-4.6,-3.4 Z" class="cs-icon-cut"/>
-            <path d="M8,-8 L10.2,-4.4 L5.8,-4.4 Z" class="cs-icon-cut"/>
-          </g>
-          <!-- Suitcase -->
-          <g class="cs-icon cs-icon-suitcase" data-i="3">
-            <rect x="-8" y="-5" width="16" height="13" rx="2" class="cs-icon-main"/>
-            <path d="M-3,-5 v-3 a3,3 0 0 1 6,0 v3" fill="none" class="cs-icon-stroke"/>
-            <line x1="-8" y1="1" x2="8" y2="1" class="cs-icon-cut-line"/>
-          </g>
-          <!-- Ground shadow: stays on the route while the plane climbs away
-               from it (offset/softness set by updateConnectingProgress). -->
-          <g id="csPlaneShadow" class="cs-plane-shadow" filter="url(#csShadowBlur)">
-            <path d="M-1.9,-1.4 L-10.8,3.9 Q-11.5,4.4 -10.9,5 L-1.9,3.3 Z M1.9,-1.4 L10.8,3.9 Q11.5,4.4 10.9,5 L1.9,3.3 Z M-1.4,7.4 L-5,9.7 Q-5.4,10.2 -4.9,10.6 L-1.1,9.9 Z M1.4,7.4 L5,9.7 Q5.4,10.2 4.9,10.6 L1.1,9.9 Z M0,-12 C1.5,-10.8 2,-8 2,-5 L2,6.6 C2,8.7 1.2,10.5 0,11.7 C-1.2,10.5 -2,8.7 -2,6.6 L-2,-5 C-2,-8 -1.5,-10.8 0,-12 Z"/>
-          </g>
-          <g id="csPlane" class="cs-plane">
-            <!-- 3D line-art plane, nose pointing up (-y); the body group is
-                 what banks on turns (see updateConnectingProgress). -->
-            <g id="csPlaneBody" class="cs-plane-body">
-              <path class="cs-plane-part cs-plane-wing" d="M-1.9,-1.4 L-10.8,3.9 Q-11.5,4.4 -10.9,5 L-1.9,3.3 Z M1.9,-1.4 L10.8,3.9 Q11.5,4.4 10.9,5 L1.9,3.3 Z"/>
-              <ellipse class="cs-plane-engine" cx="-5.4" cy="2.9" rx="1" ry="1.9"/>
-              <ellipse class="cs-plane-engine" cx="5.4" cy="2.9" rx="1" ry="1.9"/>
-              <path class="cs-plane-part cs-plane-wing" d="M-1.4,7.4 L-5,9.7 Q-5.4,10.2 -4.9,10.6 L-1.1,9.9 Z M1.4,7.4 L5,9.7 Q5.4,10.2 4.9,10.6 L1.1,9.9 Z"/>
-              <path class="cs-plane-part cs-plane-fuselage" d="M0,-12 C1.5,-10.8 2,-8 2,-5 L2,6.6 C2,8.7 1.2,10.5 0,11.7 C-1.2,10.5 -2,8.7 -2,6.6 L-2,-5 C-2,-8 -1.5,-10.8 0,-12 Z"/>
-              <path class="cs-plane-stripe" d="M0,-8.4 L0,5.2"/>
-              <ellipse class="cs-plane-glint" cx="-0.8" cy="-6.2" rx=".45" ry="2.2"/>
-            </g>
-          </g>
-        </svg>
-      </div>
-    </div>
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li><span class="step-n" aria-hidden="true">1</span><h3>Tell us about yourself</h3><p>Where you're going, roughly when, and what you enjoy, from walking tours to good food.</p></li>
+      <li><span class="step-n" aria-hidden="true">2</span><h3>See who's going your way</h3><p>We show you members heading to the same place at a similar time, and what you have in common.</p></li>
+      <li><span class="step-n" aria-hidden="true">3</span><h3>Say hello</h3><p>Chat in the club first. If you get on, meet for a coffee or explore together. There's no pressure.</p></li>
+    </ol>
+    <p class="more"><a href="how-it-works.html">More about how it works</a></p>
   </div>
 </section>
 
-<section class="join section-block" id="join">
-  <div class="wrap">
-    <div class="joinbox">
-      <div class="join-intro">
-        <h2>Join free as a founding member.</h2>
-      </div>
-      <div class="join-form-wrap">
-        <form class="form" id="joinForm" onsubmit="event.preventDefault(); document.getElementById('success').hidden=false; this.reset();">
-          <div class="field"><label for="fname">First name</label><input id="fname" required placeholder="Your first name"></div>
-          <div class="field"><label for="email">Email address</label><input id="email" required type="email" placeholder="you@example.com"></div>
-          <div class="field full"><label for="home">Home location</label><input id="home" placeholder="e.g. London"></div>
-
-          <div class="field full"><button class="btn terracotta" type="submit">Join free</button></div>
-        </form>
-        <div id="success" class="fine" hidden>Thank you, you're on the founding list. We'll email you when the club opens, along with your founding offer of 3 months of Club+ free.</div>
-
-        <div class="profile-next">
-          <h3>Your profile, built up over time</h3>
-          <p class="sub">Nothing here is required to sign up, but the more you fill in afterwards, the more precise your shortlist becomes.</p>
-          <div class="meter"><div class="meter-fill" style="width:0%"></div></div>
-          <div class="plist">
-            <div class="pstep todo"><div class="dot2">1</div> Your interests, so we can start shortlisting who you'd get on with</div>
-            <div class="pstep todo"><div class="dot2">2</div> Travel style, covering your budget, pace, board basis and how you like to plan a trip</div>
-            <div class="pstep todo"><div class="dot2">3</div> Your next trip, along with any other destinations you're considering</div>
-          </div>
-          <div class="granularity-note">You don't have to complete these extra steps to start connecting with other members, but each one gives us a little more to work with, so the more you fill in, the more precise your shortlist becomes.</div>
-        </div>
-      </div>
+<section class="section section-tint">
+  <div class="wrap split">
+    <div>
+      <h2>Safety comes first</h2>
+      <p class="lead">You stay in control from the first hello to the first meeting.</p>
     </div>
+    <ul class="checklist">
+      <li><b>See who's ID-checked.</b> Every profile shows whether the member has verified their identity.</li>
+      <li><b>You choose who to talk to.</b> Nobody is introduced to you automatically.</li>
+      <li><b>Meet in public first.</b> We always suggest a café or another busy place for a first meeting.</li>
+      <li><b>Tell us if anything feels wrong.</b> We'll look into it straight away.</li>
+    </ul>
   </div>
 </section>
-<script src="nav.js"></script>
-<script>
-  // Opening sequence. CSS owns the timeline (see "Arrival intro" in
-  // styles.css); this only starts it, lets any input skip it, removes the
-  // overlay when done, and fires the two SVG plane flights.
-  (function(){
-    var root = document.documentElement;
-    var intro = document.getElementById('intro');
-    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var playing = root.classList.contains('intro');
-    var heroDelay = playing ? 1150 : 0;   // ms; keep in step with --intro-delay
-    var started = false, done = false, heroTimer = 0;
 
-    function fly(id){ var m = document.getElementById(id); if (m && m.beginElement) m.beginElement(); }
-    // Classes stay on <html> afterwards: removing .intro would reset
-    // --intro-delay and make the hero animations jump mid-flight.
-    function finish(){
-      if (done) return; done = true;
-      if (intro) intro.remove();
-    }
-    function skip(){
-      if (!playing || done) return;
-      root.classList.add('intro-skip');
-      root.style.setProperty('--intro-delay', '.25s');
-      if (heroTimer) { clearTimeout(heroTimer); heroTimer = setTimeout(function(){ fly('heroPlaneMotion'); }, 250 + 700); }
-      setTimeout(finish, 450);
-    }
-    // Any input skips the intro, even before it has started.
-    if (playing) ['pointerdown','keydown','wheel','touchstart'].forEach(function(t){ addEventListener(t, skip, { once:true, passive:true }); });
-    function start(){
-      if (started) return; started = true;
-      root.classList.add('hero-go');
-      if (playing) {
-        root.classList.add('intro-go');
-        setTimeout(function(){ if (!root.classList.contains('intro-skip')) fly('introPlaneMotion'); }, 150);
-        intro.addEventListener('animationend', function(e){ if (e.target === intro) finish(); });
-        setTimeout(finish, 2600);  // safety net
-      }
-      if (!reduce) heroTimer = setTimeout(function(){ fly('heroPlaneMotion'); }, heroDelay + 700);
-    }
-    // Start once the brand fonts are ready, but never wait more than 500ms.
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(start);
-    setTimeout(start, 500);
-  })();
-</script>
-<script>
-  (function(){
-
-    // Connecting-section progress tracker: a continuous scroll-driven
-    // value (not discrete enter/exit events), so the stop numbers and
-    // route lighting move smoothly in both scroll directions.
-    var csteps = document.querySelectorAll('.cstep');
-    // Plane-on-a-route visual: the plane glides along an SVG path and
-    // hops a little as it passes each stop, in sync with scroll progress.
-    var csRoute = document.getElementById('csRoute');
-    var csPlane = document.getElementById('csPlane');
-    var csPlaneShadow = document.getElementById('csPlaneShadow');
-    var csStops = document.querySelectorAll('.cs-stop');
-    var csIcons = document.querySelectorAll('.cs-icon');
-    // Alternating offsets so each holiday icon sits clear of the dashed
-    // route rather than sitting right on top of the line.
-    var csIconOffsets = [
-      { dx: 34, dy: -14 },
-      { dx: -40, dy: 6 },
-      { dx: 40, dy: 2 },
-      { dx: -34, dy: -24 }
-    ];
-    var csRouteLength = csRoute ? csRoute.getTotalLength() : 0;
-    if (csRoute && csStops.length) {
-      csStops.forEach(function(d){
-        var i = Number(d.dataset.i);
-        var t = csStops.length > 1 ? i / (csStops.length - 1) : 0;
-        var pt = csRoute.getPointAtLength(t * csRouteLength);
-        // The last stop sits just past the end of the runway, like a
-        // terminal, so the plane rolls to a halt on clear asphalt beside it.
-        var nudge = i === csStops.length - 1 ? 42 : 0;
-        d.setAttribute('transform', 'translate(' + (pt.x + nudge) + ',' + pt.y + ')');
-        var icon = document.querySelector('.cs-icon[data-i="' + i + '"]');
-        if (icon) {
-          var off = csIconOffsets[i] || { dx: 0, dy: 0 };
-          icon.setAttribute('transform', 'translate(' + (pt.x + off.dx) + ',' + (pt.y + off.dy) + ')');
-        }
-      });
-    }
-
-    // Dotted route "lighting" — a run of small ticks along the path that
-    // switch from grey to orange as scroll progress passes them, so the
-    // dashed line fills in gradually rather than snapping at each stop.
-    var csTicksGroup = document.getElementById('csTicks');
-    var csTicks = [];
-    if (csRoute && csTicksGroup && csRouteLength) {
-      var TICK_SPACING = 9;
-      var tickCount = Math.floor(csRouteLength / TICK_SPACING);
-      for (var ti = 0; ti <= tickCount; ti++) {
-        var tickLen = Math.min(ti * TICK_SPACING, csRouteLength);
-        var tickPt = csRoute.getPointAtLength(tickLen);
-        var tickEl = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        tickEl.setAttribute('cx', tickPt.x);
-        tickEl.setAttribute('cy', tickPt.y);
-        tickEl.setAttribute('r', 1.3);
-        tickEl.setAttribute('class', 'cs-tick');
-        csTicksGroup.appendChild(tickEl);
-        csTicks.push({ el: tickEl, t: tickLen / csRouteLength });
-      }
-    }
-
-    function updateConnectingProgress(){
-      if (!csteps.length) return;
-      var vh = window.innerHeight || document.documentElement.clientHeight;
-      var centerY = vh / 2;
-      var firstRect = csteps[0].getBoundingClientRect();
-      var lastRect = csteps[csteps.length - 1].getBoundingClientRect();
-      var firstCenter = firstRect.top + firstRect.height / 2;
-      var lastCenter = lastRect.top + lastRect.height / 2;
-      var span = lastCenter - firstCenter;
-      var raw = span !== 0 ? (centerY - firstCenter) / span : 0;
-      var progress = Math.max(0, Math.min(1, raw));
-      var idxFloat = progress * (csteps.length - 1);
-      var idx = Math.round(idxFloat);
-
-      csteps.forEach(function(s){ s.classList.toggle('active', Number(s.dataset.step) === idx); });
-
-      csStops.forEach(function(d){ d.classList.toggle('active', Number(d.dataset.i) <= idx); });
-      csTicks.forEach(function(tk){ tk.el.classList.toggle('lit', tk.t <= progress); });
-      if (csRoute && csPlane && csRouteLength) {
-        var eps = 0.001;
-        var t = Math.max(0, Math.min(1, progress));
-        var pt = csRoute.getPointAtLength(t * csRouteLength);
-        var ptAhead = csRoute.getPointAtLength(Math.min(1, t + eps) * csRouteLength);
-        var angle = Math.atan2(ptAhead.y - pt.y, ptAhead.x - pt.x) * 180 / Math.PI + 90;
-        var segFrac = idxFloat - Math.floor(idxFloat);
-        var hop = -12 * Math.sin(Math.PI * segFrac);
-        csPlane.setAttribute('transform', 'translate(' + pt.x + ',' + (pt.y + hop) + ') rotate(' + angle.toFixed(1) + ')');
-        if (csPlaneShadow) {
-          var alt = -hop, off = 1.5 + alt * 0.55;
-          csPlaneShadow.setAttribute('transform', 'translate(' + (pt.x + off).toFixed(1) + ',' + (pt.y + off).toFixed(1) + ') rotate(' + angle.toFixed(1) + ') scale(' + (1 - alt * 0.012).toFixed(3) + ')');
-          csPlaneShadow.style.opacity = (0.3 - alt * 0.012).toFixed(3);
-        }
-      }
-    }
-
-    var connectingTicking = false;
-    function onConnectingScroll(){
-      if (connectingTicking) return;
-      connectingTicking = true;
-      requestAnimationFrame(function(){
-        updateConnectingProgress();
-        connectingTicking = false;
-      });
-    }
-    if (csteps.length) {
-      updateConnectingProgress();
-      window.addEventListener('scroll', onConnectingScroll, { passive: true });
-      window.addEventListener('resize', onConnectingScroll);
-    }
-
-  })();
-</script>
-
-<footer>
-  <div class="wrap">
-    <div class="foot-left">
-      <div class="foot-swatches"><i></i><i></i><i></i></div>
-      <div class="foot-tag">A members' club for people who want to travel more.</div>
+<section class="section">
+  <div class="wrap price-band">
+    <div>
+      <h2>Free to join</h2>
+      <p class="lead">Create your profile, see who's going your way and chat for free. Club+ adds ID checks, no monthly limit and the option to meet verified members only, for &pound;7.99 a month.</p>
     </div>
-    <div class="foot-links">
+    <a class="btn btn-secondary" href="how-it-works.html#prices">See prices</a>
+  </div>
+</section>
+
+<section class="section section-tint" id="join">
+  <div class="wrap join">
+    <div class="join-copy">
+      <h2>Join free</h2>
+      <p class="lead">We're opening soon. Join now and you'll be one of our founding members, with 3 months of Club+ free when we open.</p>
+    </div>
+    <form class="form" id="joinForm" onsubmit="event.preventDefault(); document.getElementById('success').hidden=false; this.reset();">
+      <div class="field"><label for="fname">First name</label><input id="fname" name="first_name" required autocomplete="given-name"></div>
+      <div class="field"><label for="email">Email address</label><input id="email" name="email" type="email" required autocomplete="email"></div>
+      <div class="field"><label for="home">Where you live <span class="opt">(optional)</span></label><input id="home" name="home" autocomplete="address-level2" placeholder="For example, Leeds"></div>
+      <button class="btn btn-primary btn-block" type="submit">Join free</button>
+      <p id="success" class="success" role="status" hidden>Thank you, you're on the list. We'll email you when the club opens.</p>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap foot">
+    <div>
+      <p class="foot-name">Together Travel Club</p>
+      <p class="foot-tag">Find good company for your next trip.</p>
+    </div>
+    <nav class="foot-links" aria-label="Footer">
       <a href="how-it-works.html">How it works</a>
-      <a href="membership.html">Membership</a>
-      <a href="faq.html">FAQ</a>
       <a href="about.html">About us</a>
-      <a href="#examples">Example trips</a>
-      <a href="#join">Sign up</a>
+      <a href="faq.html">Questions</a>
       <a href="terms.html">Terms &amp; privacy</a>
-    </div>
-    <div class="foot-meta">© 2026 Together Travel Club</div>
+    </nav>
+    <p class="foot-meta">&copy; 2026 Together Travel Club</p>
   </div>
 </footer>
 
+<script src="nav.js"></script>
 </body>
 </html>
