@@ -3,7 +3,7 @@ import { Link, Navigate } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { signOut } from '../lib/auth'
 import { cityLabel } from '../lib/cities'
-import { BUDGETS, GENDERS, PACES, TRAVEL_STYLES, ageLabel, labelFor } from '../lib/options'
+import { BUDGETS, GENDERS, MAX_PREF_AGE, PACES, TRAVEL_STYLES, ageLabel, labelFor } from '../lib/options'
 import { photoUrl } from '../lib/photo'
 import { listInterests, type Interest } from '../lib/profile'
 import { useSession } from '../lib/session-context'
@@ -45,54 +45,62 @@ export function Dashboard() {
   if (!data.profile.onboarded_at) return <Navigate to="/onboarding" replace />
 
   const { profile, interestIds, preferences } = data
+  const travel = [labelFor(TRAVEL_STYLES, profile.travel_style), labelFor(PACES, profile.pace), labelFor(BUDGETS, profile.budget)].filter(
+    (l) => l !== 'Not set',
+  )
   const myInterests = interests.filter((i) => interestIds.includes(i.id)).map((i) => i.label)
 
   return (
     <Layout actions={signOutButton}>
       <h1>Hello, {profile.display_name}</h1>
       <div className="notice">
-        <p>
-          <strong>Your profile is ready.</strong> Adding trips and finding people to travel with are coming next.
-        </p>
+        <strong>Your profile is ready.</strong> Adding trips and finding people to travel with are coming next.
       </div>
-      <section className="card" aria-labelledby="my-profile">
-        <h2 id="my-profile">My profile</h2>
-        {photo ? (
-          <img className="avatar" src={photo} alt="Your profile photo" />
-        ) : (
-          <div className="avatar avatar-empty" aria-hidden="true">
-            {(profile.display_name ?? '?').slice(0, 1).toUpperCase()}
-          </div>
-        )}
-        <dl className="facts">
-          <div>
-            <dt>Age</dt>
-            <dd>{ageLabel(profile.birth_year)}</dd>
-          </div>
-          <div>
-            <dt>Home</dt>
-            <dd>{profile.home_city ? cityLabel(profile.home_city) : 'Not set'}</dd>
-          </div>
-          {profile.bio && (
-            <div>
-              <dt>About me</dt>
-              <dd>{profile.bio}</dd>
+      <section className="card profile-card" aria-labelledby="my-profile">
+        <div className="profile-head">
+          {photo ? (
+            <img className="avatar" src={photo} alt="Your profile photo" />
+          ) : (
+            <div className="avatar avatar-empty" aria-hidden="true">
+              {(profile.display_name ?? '?').slice(0, 1).toUpperCase()}
             </div>
           )}
           <div>
-            <dt>Interests</dt>
-            <dd>{myInterests.join(', ') || 'Not set'}</dd>
+            <h2 id="my-profile">{profile.display_name}</h2>
+            <p className="profile-meta">
+              Age {ageLabel(profile.birth_year)} · {profile.home_city ? cityLabel(profile.home_city) : 'Home not set'}
+            </p>
           </div>
+        </div>
+        {profile.bio && <p className="profile-bio">{profile.bio}</p>}
+        <dl className="facts">
           <div>
-            <dt>How I travel</dt>
+            <dt>Interests</dt>
             <dd>
-              {[labelFor(TRAVEL_STYLES, profile.travel_style), labelFor(PACES, profile.pace), labelFor(BUDGETS, profile.budget)].join(' · ')}
+              {myInterests.length ? (
+                <ul className="chip-list">
+                  {myInterests.map((label) => (
+                    <li key={label} className="tag">
+                      {label}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                'Not set'
+              )}
             </dd>
           </div>
+          {travel.length > 0 && (
+            <div>
+              <dt>How I travel</dt>
+              <dd>{travel.join(' · ')}</dd>
+            </div>
+          )}
           <div>
             <dt>Looking for</dt>
             <dd>
-              {preferences.genders.map((g) => labelFor(GENDERS, g)).join(', ')}, aged {preferences.age_min} to {preferences.age_max}
+              {preferences.genders.map((g) => labelFor(GENDERS, g)).join(', ')}, aged {preferences.age_min} to{' '}
+              {preferences.age_max >= MAX_PREF_AGE ? `${MAX_PREF_AGE}+` : preferences.age_max}
             </dd>
           </div>
         </dl>

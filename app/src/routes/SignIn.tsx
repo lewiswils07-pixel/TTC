@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
-import { CODE_LENGTH, isValidEmail, sendCode, verifyCode } from '../lib/auth'
+import { TextField } from '../components/Field'
+import { CODE_LENGTH, sendCode, verifyCode } from '../lib/auth'
 import { messageOf } from '../lib/errors'
 import { useSession } from '../lib/session-context'
+import { useChecks } from '../lib/useChecks'
+import { checkCode, checkEmail } from '../lib/validation'
 
 const RESEND_SECONDS = 60
 
@@ -20,6 +23,8 @@ export function SignIn() {
   const [error, setError] = useState<string | null>(null)
   const [wait, setWait] = useState(0)
   const heading = useRef<HTMLHeadingElement>(null)
+  const errors = { email: checkEmail(email), code: stage === 'code' ? checkCode(code) : null }
+  const { shown, touch, validateAll } = useChecks(errors)
 
   useEffect(() => {
     if (wait <= 0) return
@@ -36,8 +41,8 @@ export function SignIn() {
 
   async function requestCode(e?: FormEvent) {
     e?.preventDefault()
-    if (!isValidEmail(email)) {
-      setError('Please enter your email address, for example jane@example.com.')
+    if (errors.email) {
+      validateAll()
       return
     }
     setBusy(true)
@@ -56,11 +61,8 @@ export function SignIn() {
 
   async function submitCode(e: FormEvent) {
     e.preventDefault()
+    if (!validateAll()) return
     const digits = code.replace(/\D/g, '')
-    if (digits.length !== CODE_LENGTH) {
-      setError(`Please enter the ${CODE_LENGTH}-digit code from the email.`)
-      return
-    }
     setBusy(true)
     setError(null)
     try {
@@ -72,94 +74,84 @@ export function SignIn() {
     }
   }
 
-  const errorId = error ? 'signin-error' : undefined
-
   return (
     <Layout>
-      {stage === 'email' ? (
-        <form onSubmit={requestCode} noValidate>
-          <h1 ref={heading} tabIndex={-1}>
-            Join or sign in
-          </h1>
-          <p>Enter your email and we'll send you a {CODE_LENGTH}-digit code. There's no password to remember.</p>
-          <div className="field">
-            <label htmlFor="email">Email address</label>
-            <input
-              id="email"
-              className="input"
+      <div className="auth">
+        {stage === 'email' ? (
+          <form className="card form-card" onSubmit={requestCode} noValidate>
+            <h1 ref={heading} tabIndex={-1}>
+              Join or sign in
+            </h1>
+            <p className="lede">Enter your email and we’ll send you a {CODE_LENGTH}-digit code. There’s no password to remember.</p>
+            <TextField
+              name="email"
+              label="Email address"
               type="email"
               inputMode="email"
               autoComplete="email"
               autoCapitalize="none"
               spellCheck={false}
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              aria-invalid={error ? true : undefined}
-              aria-describedby={errorId}
+              valid={!errors.email}
+              error={shown('email') ?? error}
+              onChange={(e) => {
+                setEmail(e.target.value)
+                setError(null)
+              }}
+              onBlur={() => email && touch('email')}
             />
-          </div>
-          {error && (
-            <p className="error" id={errorId} role="alert">
-              {error}
-            </p>
-          )}
-          <div className="actions">
-            <button className="btn btn-primary" type="submit" disabled={busy}>
+            <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
               {busy ? 'Sending…' : 'Send my code'}
             </button>
-          </div>
-        </form>
-      ) : (
-        <form onSubmit={submitCode} noValidate>
-          <h1 ref={heading} tabIndex={-1}>
-            Check your email
-          </h1>
-          <p>
-            We've sent a {CODE_LENGTH}-digit code to <strong>{email.trim()}</strong>. It can take a minute to arrive, and
-            it's worth checking your spam folder.
-          </p>
-          <div className="field">
-            <label htmlFor="code">Your code</label>
-            <input
-              id="code"
+          </form>
+        ) : (
+          <form className="card form-card" onSubmit={submitCode} noValidate>
+            <h1 ref={heading} tabIndex={-1}>
+              Check your email
+            </h1>
+            <p className="lede">
+              We’ve sent a {CODE_LENGTH}-digit code to <strong>{email.trim()}</strong>. It can take a minute to arrive, and
+              it’s worth checking your spam folder.
+            </p>
+            <TextField
+              name="code"
+              label="Your code"
               className="input input-code"
               inputMode="numeric"
               autoComplete="one-time-code"
               pattern="[0-9]*"
               maxLength={CODE_LENGTH + 2}
               value={code}
-              onChange={(e) => setCode(e.target.value)}
-              aria-invalid={error ? true : undefined}
-              aria-describedby={errorId}
+              error={shown('code') ?? error}
+              onChange={(e) => {
+                const v = e.target.value
+                setCode(v)
+                setError(null)
+                if (v.replace(/\D/g, '').length >= CODE_LENGTH || /[^\d\s]/.test(v)) touch('code')
+              }}
+              onBlur={() => code && touch('code')}
             />
-          </div>
-          {error && (
-            <p className="error" id={errorId} role="alert">
-              {error}
-            </p>
-          )}
-          <div className="actions">
-            <button className="btn btn-primary" type="submit" disabled={busy}>
+            <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
               {busy ? 'Checking…' : 'Sign in'}
             </button>
-          </div>
-          <p className="center">
-            <button type="button" className="btn-link" disabled={busy || wait > 0} onClick={() => requestCode()}>
-              {wait > 0 ? `Send a new code in ${wait}s` : 'Send a new code'}
-            </button>
-            <button
-              type="button"
-              className="btn-link"
-              onClick={() => {
-                setStage('email')
-                setError(null)
-              }}
-            >
-              Use a different email
-            </button>
-          </p>
-        </form>
-      )}
+            <div className="auth-links">
+              <button type="button" className="btn-link" disabled={busy || wait > 0} onClick={() => requestCode()}>
+                {wait > 0 ? `Send a new code in ${wait}s` : 'Send a new code'}
+              </button>
+              <button
+                type="button"
+                className="btn-link"
+                onClick={() => {
+                  setStage('email')
+                  setError(null)
+                }}
+              >
+                Use a different email
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
     </Layout>
   )
 }

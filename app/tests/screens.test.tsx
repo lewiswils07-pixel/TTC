@@ -35,7 +35,8 @@ beforeEach(() => {
 describe('home screen', () => {
   it('welcomes signed-out visitors by the brand name', async () => {
     const { container } = renderAt('/')
-    expect(await screen.findByRole('heading', { level: 1, name: `Welcome to ${brand.name}` })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: brand.tagline })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: brand.name })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Join or sign in' })).toHaveAttribute('href', '/sign-in')
     expect(await axeViolations(container)).toEqual([])
   })
@@ -45,8 +46,23 @@ describe('sign in with an email code', () => {
   it('asks for a valid email first', async () => {
     renderAt('/sign-in')
     await userEvent.click(await screen.findByRole('button', { name: 'Send my code' }))
-    expect(screen.getByRole('alert')).toHaveTextContent(/enter your email/)
+    const box = screen.getByLabelText('Email address')
+    expect(box).toHaveAttribute('aria-invalid', 'true')
+    expect(box).toHaveAccessibleDescription(/enter your email/)
+    await waitFor(() => expect(box).toHaveFocus())
     expect(auth.signInWithOtp).not.toHaveBeenCalled()
+  })
+
+  it('flags a mistyped email as soon as you leave the box', async () => {
+    renderAt('/sign-in')
+    const box = await screen.findByLabelText('Email address')
+    await userEvent.type(box, 'jane@example')
+    expect(box).not.toHaveAttribute('aria-invalid')
+    await userEvent.tab()
+    expect(box).toHaveAttribute('aria-invalid', 'true')
+    expect(box).toHaveAccessibleDescription(/doesn’t look like an email/)
+    await userEvent.type(box, '.com')
+    expect(box).not.toHaveAttribute('aria-invalid')
   })
 
   it('sends a code, then checks it', async () => {
@@ -61,10 +77,15 @@ describe('sign in with an email code', () => {
 
     expect(await screen.findByRole('heading', { name: 'Check your email' })).toHaveFocus()
     expect(await axeViolations(container)).toEqual([])
-    await userEvent.type(screen.getByLabelText('Your code'), '123 456')
+    const codeBox = screen.getByLabelText('Your code')
+    await userEvent.type(codeBox, '12a')
+    expect(codeBox).toHaveAccessibleDescription(/only has numbers/)
+    await userEvent.clear(codeBox)
+    await userEvent.type(codeBox, '123 456')
+    expect(codeBox).not.toHaveAttribute('aria-invalid')
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
     expect(auth.verifyOtp).toHaveBeenCalledWith({ email: 'jane@example.com', token: '123456', type: 'email' })
-    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent(/didn't work/))
+    await waitFor(() => expect(codeBox).toHaveAccessibleDescription(/didn't work/))
   })
 })
 
