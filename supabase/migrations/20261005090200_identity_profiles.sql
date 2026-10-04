@@ -70,7 +70,7 @@ grant update (display_name, birth_year, gender, home_city_id, bio, photo_path,
 
 -- ------------------------------------------------------------- preferences
 -- Who a member wants to see. The last four columns only take effect for
--- Club+ members (enforced in matching, week 2).
+-- Sodalis+ members (enforced in matching, week 2).
 create table public.preferences (
   profile_id       uuid primary key references public.profiles (id) on delete cascade,
   age_min          smallint not null default 18 check (age_min >= 18),

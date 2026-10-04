@@ -9,4 +9,6 @@ export const brand = {
   webUrl: data.webUrl,
   appUrl: data.appUrl,
   supportEmail: data.supportEmail,
+  /** The paid plan's name, for upgrade prompts and locked filters. */
+  plusName: data.plusName,
 } as const

@@ -1,4 +1,4 @@
-package club.togethertravel.app;
+package com.sodaliscollective.app;
 
 import com.getcapacitor.BridgeActivity;
 

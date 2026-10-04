@@ -1,12 +1,13 @@
 {
   "$comment": "The ONE place for the club's name, web address and colours. Change a value here, then rebuild: the app, its page title, the phone apps and the colours all follow. appId is the permanent store id: settle it before the first App Store / Google Play upload, it can't change after that.",
-  "name": "Together Travel Club",
-  "shortName": "Together Travel",
+  "name": "Sodalis Collective",
+  "shortName": "Sodalis",
   "tagline": "Find people to travel with",
   "webUrl": "https://togethertravelclub.netlify.app",
-  "appUrl": "https://togethertravelclub-app.netlify.app",
+  "appUrl": "https://sodalis-app.netlify.app",
   "supportEmail": "",
-  "appId": "club.togethertravel.app",
+  "plusName": "Sodalis+",
+  "appId": "com.sodaliscollective.app",
   "colors": {
     "light": {
       "accent": "#8E1B2B",

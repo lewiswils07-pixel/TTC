@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "club.togethertravel.app"
+    namespace = "com.sodaliscollective.app"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "club.togethertravel.app"
+        applicationId "com.sodaliscollective.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
