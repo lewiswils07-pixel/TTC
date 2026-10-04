@@ -18,15 +18,16 @@ Unless a task says otherwise, every task is verified with
 - [ ] Resend account, then verify the domain for sending email.
 - [ ] Affiliate programmes, once the marketing site is live: GetYourGuide, Viator, Booking.com
       (via Awin), Skyscanner. Approvals take weeks, so apply early.
-- [ ] Domain decided; add `app.` as a second Netlify site.
-- [ ] Answer the open questions in spec §15.
+- [ ] Buy the domain (needed for the Apple company account, email and `app.`), connect it to
+      Netlify, then add `app.` as a second Netlify site.
+- [x] Answer the open questions in spec §15 (done 4 Oct).
 
 ## Week 1: foundation (5–9 Oct)
 - [ ] **T1 `app-shell`: Scaffold the app.** Vite + React + TS strict, router, Duke Street tokens,
       Figtree, light and dark. Netlify config, plus CI running lint, build and test. (M)
   - Acceptance: the app builds; a placeholder home screen passes axe and fits the phone at 320 px.
 - [ ] **T2 `app-shell`: Capacitor wrapper.** iOS and Android projects, safe areas, status bar,
-      keyboard handling. iPhone builds on GitHub's Mac machines with fastlane, if no Mac. (M)
+      keyboard handling. iPhone builds on Lewis's Mac, with GitHub's Mac machines as backup. (M)
   - Acceptance: the app runs in the Android emulator and the iPhone simulator.
 - [ ] **T3 `identity`: Supabase project setup, migrations folder, and the `profiles` table with row-level security.** Email-code sign-in. (M)
   - Acceptance: sign in with an email code on the web; pgTAP proves a member reads only their own private fields.
@@ -41,7 +42,7 @@ Unless a task says otherwise, every task is verified with
 - [ ] **T8 `matching`: `suggest_for_trip`**: hard filters, the mutual age and gender rule, scoring, and "why you'd get on" reasons. pgTAP fixtures check the order. (M)
 - [ ] **T9 `matching`: `suggest_by_interests`**, plus the dashboard switch between "For my trip" and "Plan something new". (M)
 - [ ] **T10 `matching`: Filters.** Basic filters for everyone. Club+ filters are locked unless the member has Club+ (checked on the server). (S)
-- [ ] **T11 `connections`: Send, accept, decline and withdraw requests**, with monthly limits enforced in SQL and a "requests" inbox. (M)
+- [ ] **T11 `connections`: Send, accept, decline and withdraw requests**, with weekly limits (5 free, fair-use 50 for Club+) enforced in SQL and a "requests" inbox. (M)
 - [ ] **T12 `matching`: Performance check.** 10,000 seeded members; suggestions return in under 300 ms. (S)
 - [ ] **Checkpoint 16 Oct:** two test accounts with overlapping trips see each other in the right order and connect.
 

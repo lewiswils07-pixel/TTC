@@ -54,7 +54,7 @@ on day one: Apple's D-U-N-S number and app approval.
 | In-app purchase setup (tax forms, agreements, products) is slow | Med | Lewis fills in the Apple and Google tax and bank forms in week 0. RevenueCat products are configured in week 4. |
 | Six weeks is tight for this scope | High | Groups and the planner are weeks 4–5. If week 2 or 3 slips, the planner falls back to the hand-picked activity list and the AI version follows within 2 weeks of launch. |
 | Row-level security mistakes leak private data | High | pgTAP tests for every policy, run in CI. Security review in week 6. |
-| Building iPhone apps needs a Mac | Med | Build on GitHub's Mac machines with fastlane if Lewis has no Mac. |
+| Building iPhone apps needs a Mac | Med | Lewis has a Mac; GitHub's Mac machines are the backup. |
 | Trip planner gives wrong or outdated information | Med | Source links on every item, a "check before you go" note, the club's own activity lists preferred, and a manual review of 10 sample plans. |
 | Cost creep (SMS, AI, ID checks) | Low | Monthly caps in each provider's console and in our usage counters. A weekly cost check during beta. |
 

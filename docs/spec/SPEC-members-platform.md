@@ -17,7 +17,7 @@ fixed: tasks, tests, migrations and commits refer to them by these names.
 | `profiles` | Profile, photo, interests, preferences, home city | identity |
 | `trips` | Trips (destination and dates), wishlist destinations | profiles |
 | `matching` | Suggestions in trip mode and interest mode, filters, scoring | trips |
-| `connections` | Requests, accept and decline, monthly limits | matching |
+| `connections` | Requests, accept and decline, weekly limits | matching |
 | `chat` | One-to-one messages, live updates, unread counts | connections |
 | `groups` | Small trip groups, invites, group chat | chat |
 | `safety` | Block, report, scam warnings, moderation queue, trusted contact, "Did you meet?" | identity (cuts across chat, groups, matching) |
@@ -89,7 +89,9 @@ average. Every screen must be readable, forgiving and calm.
   prompt.
 - **Connect:** As a member, I send a connection request with an optional short note. The other
   person accepts or declines. Nothing else is shared until they accept. Free members can send
-  **5 requests a month**; Club+ can send **30**. *(Numbers to confirm.)*
+  **5 requests a week**; Club+ is unlimited, with a fair-use cap of **50 a week** to stop spam.
+  Because free members have so few requests, suggestions must be precise enough that each one
+  is worth sending.
 - **Chat:** Once connected, we chat one to one, with live updates, unread counts and an email
   nudge if a message goes unread for 30 minutes.
 - **Groups:** A member can create a group of up to **6** from their connections, tied to a trip
@@ -99,7 +101,7 @@ average. Every screen must be readable, forgiving and calm.
   uses the destination, dates, shared interests, pace, budget and mobility needs. Members can ask
   for changes in plain English ("something quieter on day 2"). Activities can be added to the
   shared plan board, where members can vote and tick things off. Free members get **2 plans a
-  month**; Club+ is unlimited, with a fair-use cap of **40 a month**. *(Numbers to confirm.)*
+  month**; Club+ is unlimited, with a fair-use cap of **40 a month**.
 - **Club+:** Upgrade on the web (Stripe) or in the apps (in-app purchase). Membership is
   recognised everywhere. Cancel any time.
 - **Verification:** Club+ members complete an ID and selfie check and receive a verified badge.
@@ -147,7 +149,8 @@ trusted_shares  id, profile_id, trip_id, contact_email, token, created_at
 meet_feedback   id, from_id, about_id, trip_id?, met bool, would_travel_again bool?, created_at
 entitlements    profile_id, plan ('free'|'club_plus'), source ('stripe'|'apple'|'google'),
                 expires_at, updated_at                  -- written only by webhook functions
-usage_counters  profile_id, month, connection_requests, planner_runs
+usage_counters  profile_id, week_start, connection_requests      -- weekly, resets Monday 00:00 UK
+planner_usage   profile_id, month, planner_runs
 ```
 
 **Key rules, enforced in the database and not only in the screens:**
@@ -209,14 +212,14 @@ Each returns at most 20 cards, ranked.
 
 ---
 
-## 5. Free vs Club+ (placeholders until Lewis confirms)
+## 5. Free vs Club+ (confirmed by Lewis, 4 Oct)
 
 | | Free | Club+ |
 |---|---|---|
-| Price | £0 | **£7.99/month or £59.99/year** *(placeholder)*, with a founding-member offer |
+| Price | £0 | **£7.99/month or £59.99/year**. Founding-member offer: **3 months of Club+ free** for people on the sign-up list, as the website already promises |
 | Basic filters | ✓ | ✓ |
 | Advanced filters (verified only, style, budget, pace, specific interests) | 🔒 | ✓ |
-| Connection requests a month | 5 | 30 |
+| Connection requests | 5 a week | Unlimited (fair use 50 a week) |
 | Trip plans a month | 2 | Unlimited (fair use 40) |
 | Groups | Join any; create 1 active | Create up to 3 active |
 | Verified badge (ID + selfie) | — | ✓ |
@@ -374,7 +377,7 @@ export async function sendConnectionRequest(toId: string, note?: string) {
     to_id: toId,
     note: note?.trim().slice(0, 280) ?? null,
   });
-  if (error) throw friendlyError(error); // e.g. "You've used your 5 requests this month."
+  if (error) throw friendlyError(error); // e.g. "You've used your 5 requests this week."
   return data as Connection;
 }
 ```
@@ -439,16 +442,18 @@ before each merge to `main`.
 
 ---
 
-## 15. Open questions for Lewis
+## 15. Decisions (answered by Lewis, 4 Oct)
 
-1. **Domain:** what is it, and is `app.<domain>` OK for the members' app?
-2. **Prices and limits:** confirm the prices and limits in §5, including the founding-member offer.
-3. **Apple developer account:** do you have a company? Company accounts need a **D-U-N-S number**,
-   which can take 1–2 weeks. Without a company, the App Store shows your personal name as the
-   seller. This needs starting **this week**.
-4. **Building the iPhone app:** iPhone apps must be built on a Mac. Do you have one, or should the
-   build run on GitHub's Mac machines? The second costs a little per build but needs nothing from
-   you.
-5. **Beta group:** can you gather 15–25 founding members to test from about 30 October?
-6. **Reviewing reports:** is it just you at launch? Which email should reports go to?
-7. **Minimum age:** 18, or something higher like 21 or 25, given the audience?
+1. **Domain:** for now the site is `togethertravelclub.netlify.app`. Lewis will buy a domain before
+   launch; the members' app then goes on `app.<domain>`. Until then it runs as a second Netlify
+   site (for example `togethertravelclub-app.netlify.app`).
+2. **Prices and limits:** as in §5. Free: 5 connection requests a week and 2 trip plans a month.
+   Club+: unlimited for both (fair-use caps only). Founding-member offer approved.
+3. **Apple developer account:** a **company** account. Lewis has no D-U-N-S number yet and requests
+   one now.
+4. **Building the iPhone app:** Lewis has a Mac laptop, so builds and TestFlight uploads can run
+   from it. GitHub's Mac machines stay as the backup.
+5. **Beta group:** yes, 15–25 founding members from about 30 October, invited from the sign-up list.
+6. **Reviewing reports:** Lewis alone at launch, to a `safety@<domain>` address once the domain is
+   bought.
+7. **Minimum age:** 18.
