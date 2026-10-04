@@ -1,4 +1,4 @@
-# Implementation plan: Together Travel Club members platform
+# Implementation plan: Sodalis Collective members platform
 
 Status: **DRAFT.** The order may change once Lewis approves the spec.
 Spec: `docs/spec/SPEC-members-platform.md` · Intent: `docs/intent/members-platform.md`
@@ -13,7 +13,7 @@ on day one: Apple's D-U-N-S number and app approval.
 ## Architecture decisions
 - **Separate app, same repo.** `app/` is a Vite + React + TypeScript app deployed as its own
   Netlify site. The marketing site stays static and untouched apart from its links.
-- **The database enforces the rules.** Limits, blocks, privacy and Club+ access are all checked
+- **The database enforces the rules.** Limits, blocks, privacy and Sodalis+ access are all checked
   in Postgres row-level security and SQL functions. The app can't get around them, and pgTAP
   tests prove it.
 - **One membership record.** Stripe and the app stores both send updates through webhooks into
@@ -32,7 +32,7 @@ on day one: Apple's D-U-N-S number and app approval.
 | 2 | 12–16 Oct | Trips; suggestions in both modes with filters; connection requests, accept and decline, limits |
 | 3 | 19–23 Oct | One-to-one chat, block, report, scam guard, moderation page, email nudges, delete and export account |
 | 4 | 26–30 Oct | Groups and group chat; trip planner agent and shared plan board; **founding-member beta starts 30 Oct** |
-| 5 | 2–6 Nov | Club+ (Stripe and RevenueCat), ID verification, push notifications; **apps submitted by 6 Nov** |
+| 5 | 2–6 Nov | Sodalis+ (Stripe and RevenueCat), ID verification, push notifications; **apps submitted by 6 Nov** |
 | 6 | 9–13 Nov | Launch check, security review, beta fixes, legal pages final; **go live** |
 
 ## Checkpoints (reviewed with Lewis)
@@ -42,7 +42,7 @@ on day one: Apple's D-U-N-S number and app approval.
   connect. Limits hold.
 - **23 Oct:** a full conversation works, including a scam warning and a report showing on `/admin`.
 - **30 Oct:** a group of 3 plans a trip with the agent. Beta invites go out.
-- **6 Nov:** Club+ purchase works on web, iPhone and Android sandbox. Both apps are submitted.
+- **6 Nov:** Sodalis+ purchase works on web, iPhone and Android sandbox. Both apps are submitted.
 - **13 Nov:** every success criterion in spec §14 is green.
 
 ## Risks and mitigations
@@ -55,7 +55,7 @@ on day one: Apple's D-U-N-S number and app approval.
 | Six weeks is tight for this scope | High | Groups and the planner are weeks 4–5. If week 2 or 3 slips, the planner falls back to the hand-picked activity list and the AI version follows within 2 weeks of launch. |
 | Row-level security mistakes leak private data | High | pgTAP tests for every policy, run in CI. Security review in week 6. |
 | Building iPhone apps needs a Mac | Med | Lewis has a Mac; GitHub's Mac machines are the backup. |
-| Trip planner gives wrong or outdated information | Med | Source links on every item, a "check before you go" note, the club's own activity lists preferred, and a manual review of 10 sample plans. |
+| Trip planner gives wrong or outdated information | Med | Source links on every item, a "check before you go" note, the Collective's own activity lists preferred, and a manual review of 10 sample plans. |
 | Cost creep (SMS, AI, ID checks) | Low | Monthly caps in each provider's console and in our usage counters. A weekly cost check during beta. |
 
 ## Parallel work (Lewis, alongside the build)

@@ -1,4 +1,4 @@
-# Spec: Together Travel Club members platform
+# Spec: Sodalis Collective members platform
 
 Status: **DRAFT, awaiting Lewis's approval.** It is built from `docs/intent/members-platform.md`.
 Target: launch-ready by **Friday 13 November 2026**.
@@ -21,8 +21,8 @@ fixed: tasks, tests, migrations and commits refer to them by these names.
 | `chat` | One-to-one messages, live updates, unread counts | connections |
 | `groups` | Small trip groups, invites, group chat | chat |
 | `safety` | Block, report, scam warnings, moderation queue, trusted contact, "Did you meet?" | identity (cuts across chat, groups, matching) |
-| `billing` | Club+ entitlement: Stripe (web) and RevenueCat (apps) | identity |
-| `verification` | ID and selfie check for Club+, verified badge | billing |
+| `billing` | Sodalis+ entitlement: Stripe (web) and RevenueCat (apps) | identity |
+| `verification` | ID and selfie check for Sodalis+, verified badge | billing |
 | `trip-planner` | AI agent that builds and edits day-by-day plans and the shared plan board | connections, groups, billing |
 | `notifications` | Email (launch), push in the apps, in-app badges | chat, connections |
 
@@ -49,11 +49,11 @@ grows past about a page, it gets split out as `SPEC-<module-id>.md`.
 4. **Sign-in uses a 6-digit email code, not a password.** It is simpler for an older audience and
    there's no password to forget. A **phone check** (SMS code through Twilio Verify) is required
    before a member can send a connection request.
-5. **Payments:** Club+ on the web goes through Stripe Checkout. In the apps it goes through Apple and
+5. **Payments:** Sodalis+ on the web goes through Stripe Checkout. In the apps it goes through Apple and
    Google in-app purchase, which the store rules require for digital memberships. **RevenueCat** joins
-   both into one "is this member Club+?" answer, written into our database.
+   both into one "is this member Sodalis+?" answer, written into our database.
 6. **ID check:** Stripe Identity (photo ID plus live selfie), about $1.50 a check, paid only when a
-   Club+ member verifies.
+   Sodalis+ member verifies.
 7. **Trip planner:** an AI agent run from a Supabase Edge Function, calling the Claude API with web
    search. The model is chosen at build time from current documentation. The API key never leaves
    the server.
@@ -85,11 +85,11 @@ average. Every screen must be readable, forgiving and calm.
   overlapping dates. The most compatible appear first, and each card shows what we have in common.
 - **Interest mode:** As a member without a trip, I see members with similar interests and wishlist
   destinations, so we can plan one together.
-- **Filters:** Basic filters are free. Advanced filters are Club+, shown with a lock and an upgrade
+- **Filters:** Basic filters are free. Advanced filters are Sodalis+, shown with a lock and an upgrade
   prompt.
 - **Connect:** As a member, I send a connection request with an optional short note. The other
   person accepts or declines. Nothing else is shared until they accept. Free members can send
-  **5 requests a week**; Club+ is unlimited, with a fair-use cap of **50 a week** to stop spam.
+  **5 requests a week**; Sodalis+ is unlimited, with a fair-use cap of **50 a week** to stop spam.
   Because free members have so few requests, suggestions must be precise enough that each one
   is worth sending.
 - **Chat:** Once connected, we chat one to one, with live updates, unread counts and an email
@@ -101,11 +101,11 @@ average. Every screen must be readable, forgiving and calm.
   uses the destination, dates, shared interests, pace, budget and mobility needs. Members can ask
   for changes in plain English ("something quieter on day 2"). Activities can be added to the
   shared plan board, where members can vote and tick things off. Free members get **2 plans a
-  month**; Club+ is unlimited, with a fair-use cap of **40 a month**.
-- **Club+:** Upgrade on the web (Stripe) or in the apps (in-app purchase). Membership is
+  month**; Sodalis+ is unlimited, with a fair-use cap of **40 a month**.
+- **Sodalis+:** Upgrade on the web (Stripe) or in the apps (in-app purchase). Membership is
   recognised everywhere. Cancel any time.
-- **Verification:** Club+ members complete an ID and selfie check and receive a verified badge.
-  Members can filter to verified people only (a Club+ filter).
+- **Verification:** Sodalis+ members complete an ID and selfie check and receive a verified badge.
+  Members can filter to verified people only (a Sodalis+ filter).
 - **Safety:** see §6.
 - **My data:** Members can download their data and delete their account from inside the app.
   Apple requires in-app account deletion, and UK GDPR gives members these rights.
@@ -127,7 +127,7 @@ profiles        id (= auth user), display_name, birth_year, gender, home_city_id
 interests       id, slug, label                       -- fixed list (~40)
 profile_interests profile_id, interest_id
 preferences     profile_id, age_min, age_max, genders[], max_distance_km,
-                verified_only, styles[], budgets[], paces[]   -- the last 4 are honoured only for Club+
+                verified_only, styles[], budgets[], paces[]   -- the last 4 are honoured only for Sodalis+
 cities          id, name, country_code, lat, lng, population   -- GeoNames >15k
 trips           id, owner_id, city_id, start_date, end_date, flexible_days (0–7),
                 note (≤280), visibility ('members'|'hidden'), created_at
@@ -147,7 +147,7 @@ reports         id, reporter_id, subject_profile_id, message_id?, group_id?, rea
                 details, status ('open'|'actioned'|'dismissed'), created_at
 trusted_shares  id, profile_id, trip_id, contact_email, token, created_at
 meet_feedback   id, from_id, about_id, trip_id?, met bool, would_travel_again bool?, created_at
-entitlements    profile_id, plan ('free'|'club_plus'), source ('stripe'|'apple'|'google'),
+entitlements    profile_id, plan ('free'|'plus'), source ('stripe'|'apple'|'google'),
                 expires_at, updated_at                  -- written only by webhook functions
 usage_counters  profile_id, week_start, connection_requests      -- weekly, resets Monday 00:00 UK
 planner_usage   profile_id, month, planner_runs
@@ -179,7 +179,7 @@ Each returns at most 20 cards, ranked.
 - **Both people's** age and gender preferences are satisfied. The filter is mutual: you don't
   appear to someone who wouldn't want to see you.
 - The viewer's distance filter (home city to home city).
-- Club+ viewer filters, if set: verified only, style, budget, pace.
+- Sodalis+ viewer filters, if set: verified only, style, budget, pace.
 
 ### 4.2 Trip mode
 - **Candidates:** other members' trips to the **same city** (or within 30 km, so Lisbon and Cascais
@@ -212,17 +212,18 @@ Each returns at most 20 cards, ranked.
 
 ---
 
-## 5. Free vs Club+ (confirmed by Lewis, 4 Oct)
+## 5. Free vs Sodalis+ (confirmed by Lewis, 4 Oct)
 
-| | Free | Club+ |
+| | Free | Sodalis+ |
 |---|---|---|
-| Price | £0 | **£7.99/month or £59.99/year**. Founding-member offer: **3 months of Club+ free** for people on the sign-up list, as the website already promises |
+| Price | £0 | **£7.99/month or £59.99/year**. Founding-member offer: **3 months of Sodalis+ free** for people on the sign-up list, as the website already promises |
 | Basic filters | ✓ | ✓ |
 | Advanced filters (verified only, style, budget, pace, specific interests) | 🔒 | ✓ |
 | Connection requests | 5 a week | Unlimited (fair use 50 a week) |
 | Trip plans a month | 2 | Unlimited (fair use 40) |
 | Groups | Join any; create 1 active | Create up to 3 active |
 | Verified badge (ID + selfie) | — | ✓ |
+| Sodalis travel tag (luggage tag posted in the first year, shown on the profile too) | — | ✓ |
 | Chat, block, report, safety tools | ✓ | ✓ |
 
 ---
@@ -268,7 +269,7 @@ Each returns at most 20 cards, ranked.
 - **Input:** destination, dates, members' shared interests, pace, budget, any mobility notes, plus
   an optional free-text request ("we love markets", "quieter day 2").
 - **Tools the agent can use:** web search, so opening times and events are current, and a lookup
-  of the club's own hand-picked activities for popular cities, which it prefers when it has them.
+  of the Collective's own hand-picked activities for popular cities, which it prefers when it has them.
 - **Output:** structured JSON, checked before saving. Each day has 2–4 activities, and each activity
   has title, why it suits this pair or group, rough cost band, walking level, and source link.
 - **Display:** shown as cards; "Add to our plan" copies an activity to the shared board.
@@ -278,7 +279,7 @@ Each returns at most 20 cards, ranked.
   - The prompt is shielded from message content, so only structured profile fields go in.
 - **Cost control:**
   - Results are cached for 7 days by destination, month and interest set.
-  - Free and Club+ monthly limits are enforced in the function.
+  - Free and Sodalis+ monthly limits are enforced in the function.
   - A hard monthly spend cap is set in the API console.
 - **Tests:** schema validation of agent output, limit enforcement, and a fixed-response mock in CI.
   The real-model check runs manually before launch.
@@ -299,7 +300,7 @@ Each returns at most 20 cards, ranked.
   only can read it.
 - **Later (after launch):** a deal finder for a member's saved trip, built from partners' official
   APIs or feeds (e.g. Skyscanner, Booking.com, GetYourGuide). Scraping travel sites is against their
-  terms, breaks often and shows stale prices, so we won't build it that way. It could be a Club+
+  terms, breaks often and shows stale prices, so we won't build it that way. It could be a Sodalis+
   perk.
 
 ---
@@ -395,7 +396,7 @@ export async function sendConnectionRequest(toId: string, note?: string) {
 |---|---|---|
 | Database | pgTAP (`supabase test db`) | Every RLS policy (as each role), matching filters and scoring, limits, blocks |
 | Unit | Vitest | lib functions, form validation, scam-pattern checker, planner output schema |
-| End-to-end | Playwright against local Supabase | Join → profile → trip → suggestions → request → accept → chat → group → plan → block/report; Club+ upgrade with Stripe test mode |
+| End-to-end | Playwright against local Supabase | Join → profile → trip → suggestions → request → accept → chat → group → plan → block/report; Sodalis+ upgrade with Stripe test mode |
 | Launch audits | Existing scratchpad tools | axe accessibility, phone fit 320–430 px, contrast, CSP, performance (LCP < 2.5 s, CLS < 0.1) |
 | Devices | TestFlight and Play internal testing | Real phones, including one older Android and a large-text setting |
 
@@ -433,7 +434,7 @@ before each merge to `main`.
 2. pgTAP proves a member cannot read another member's private fields, cannot message without an
    accepted connection, cannot exceed limits, and cannot see anyone who blocked them.
 3. axe reports no violations on any app screen, light and dark. No horizontal scroll from 320 px up.
-4. Club+ purchase, renewal and cancellation work in Stripe test mode and in Apple and Google sandbox.
+4. Sodalis+ purchase, renewal and cancellation work in Stripe test mode and in Apple and Google sandbox.
    Membership shows within 60 seconds on every device.
 5. The planner returns a valid plan in under 30 seconds for 10 sample city and interest pairs.
 6. Sentry shows no unhandled errors during a 1-week beta with at least 15 founding members.
@@ -444,11 +445,11 @@ before each merge to `main`.
 
 ## 15. Decisions (answered by Lewis, 4 Oct)
 
-1. **Domain:** for now the site is `togethertravelclub.netlify.app`. Lewis will buy a domain before
-   launch; the members' app then goes on `app.<domain>`. Until then it runs as a second Netlify
+1. **Domain:** for now the site is `togethertravelclub.netlify.app`. Lewis will buy a domain for the new
+   name before launch (`sodaliscollective.com` looked free on 4 Oct); the members' app then goes on `app.<domain>`. Until then it runs as a second Netlify
    site (for example `togethertravelclub-app.netlify.app`).
 2. **Prices and limits:** as in §5. Free: 5 connection requests a week and 2 trip plans a month.
-   Club+: unlimited for both (fair-use caps only). Founding-member offer approved.
+   Sodalis+: unlimited for both (fair-use caps only). Founding-member offer approved.
 3. **Apple developer account:** a **company** account. Lewis has no D-U-N-S number yet and requests
    one now.
 4. **Building the iPhone app:** Lewis has a Mac laptop, so builds and TestFlight uploads can run
@@ -457,3 +458,9 @@ before each merge to `main`.
 6. **Reviewing reports:** Lewis alone at launch, to a `safety@<domain>` address once the domain is
    bought.
 7. **Minimum age:** 18.
+8. **Name:** the brand is **Sodalis Collective** (Latin *sodalis*, "companion"); the paid plan is
+   **Sodalis+**. Members are "members of the Collective". The name, short name, tagline, domain and
+   colours live in one brand settings file in the app, so a later change is one edit.
+9. **Travel tags:** Sodalis+ members get a physical Sodalis luggage tag in their first year, and a
+   matching tag badge on their profile, so members recognise each other at airports and online.
+   Ordering and posting tags starts after launch, in line with keeping early costs low.

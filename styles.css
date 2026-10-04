@@ -635,7 +635,7 @@
      Hero with a boarding-pass illustration, then four steps in alternating
      text / illustration rows. The illustrations (.hv-*) are small UI mock-ups
      built from tokens, so they follow light and dark mode. Then a Free vs
-     Club+ table, safety tips and the closing CTA (.hiw-cta, also on 404). */
+     Sodalis+ table, safety tips and the closing CTA (.hiw-cta, also on 404). */
   .hiw-page{padding:var(--space-top) 0 8px}
   .hiw-page .swatch{margin-bottom:22px}
   .hiw-page h1{max-width:17ch;margin:0 0 24px}
@@ -773,7 +773,7 @@
   .hv-tip{margin:14px 0 0;padding:10px 12px;border-radius:12px;font-size:12.5px;line-height:1.5;color:var(--turquoise-deep);
     background:color-mix(in srgb, var(--turquoise) 12%, transparent)}
 
-  /* Step 4: Club+ card, always on the dark panel colours */
+  /* Step 4: Sodalis+ card, always on the dark panel colours */
   .hv-plus{background:var(--panel);border-color:var(--panel-line);color:var(--panel-ink)}
   .hv-plus .hv-who b{color:var(--panel-ink)}
   .hv-plus .hv-who small{color:var(--panel-muted)}
@@ -793,7 +793,7 @@
   .hv-toggle i.on{background:var(--panel-accent)}
   .hv-toggle i.on::after{left:21px;background:#2A1C14}
 
-  /* Free vs Club+ table */
+  /* Free vs Sodalis+ table */
   .hw-table{border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;background:var(--card);box-shadow:var(--shadow-sm)}
   .hw-tr{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);align-items:stretch}
   .hw-tr > span{display:flex;flex-direction:column;justify-content:center}
@@ -945,7 +945,7 @@
   .mem-note p{margin:0;color:var(--muted);font-size:15.5px;line-height:1.7}
   .mem-more{margin:10px 0 0;color:var(--muted);font-size:15px}
   .mem-more a{color:var(--terracotta);text-underline-offset:3px}
-  /* Free vs Club+ plans */
+  /* Free vs Sodalis+ plans */
   .mem-offer{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:0 0 32px;padding:18px 22px;border-radius:var(--radius);
     background:color-mix(in srgb, var(--saffron) 16%, var(--paper))}
   .mem-offer p{margin:0;font-size:15.5px;line-height:1.6;color:var(--ink-soft);flex:1 1 320px}
