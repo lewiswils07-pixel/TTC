@@ -1,7 +1,7 @@
 // Trust badges for member profile cards. Shared by every page that renders
 // a profile, so the labels, icons and order stay identical everywhere.
 // A member's `badges` array lists the keys they've earned; only earned
-// badges are shown. Verification comes with Club+, so a member without the
+// badges are shown. Verification comes with Sodalis+, so a member without the
 // `id` badge (a free member) gets a plain "Not ID verified" label instead,
 // so every profile makes its verification status clear.
 (function(){

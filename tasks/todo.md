@@ -24,7 +24,8 @@ Unless a task says otherwise, every task is verified with
 
 ## Week 1: foundation (5–9 Oct)
 - [x] **T1 `app-shell`: Scaffold the app.** Vite + React + TS strict, router, Duke Street tokens,
-      Figtree, light and dark. Netlify config, plus CI running lint, build and test. (M)
+      Figtree, light and dark. Netlify config, plus CI running lint, build and test. Brand name, tagline and colours in one
+      `app/brand.json` settings file. (M)
   - Acceptance: the app builds; a placeholder home screen passes axe and fits the phone at 320 px.
 - [ ] **T2 `app-shell`: Capacitor wrapper.** iOS and Android projects, safe areas, status bar,
       keyboard handling. iPhone builds on Lewis's Mac, with GitHub's Mac machines as backup. (M)
@@ -43,8 +44,8 @@ Unless a task says otherwise, every task is verified with
 - [ ] **T7 `trips`: Add, edit and delete trips**, plus wishlist cities, shown on the dashboard. (M)
 - [ ] **T8 `matching`: `suggest_for_trip`**: hard filters, the mutual age and gender rule, scoring, and "why you'd get on" reasons. pgTAP fixtures check the order. (M)
 - [ ] **T9 `matching`: `suggest_by_interests`**, plus the dashboard switch between "For my trip" and "Plan something new". (M)
-- [ ] **T10 `matching`: Filters.** Basic filters for everyone. Club+ filters are locked unless the member has Club+ (checked on the server). (S)
-- [ ] **T11 `connections`: Send, accept, decline and withdraw requests**, with weekly limits (5 free, fair-use 50 for Club+) enforced in SQL and a "requests" inbox. (M)
+- [ ] **T10 `matching`: Filters.** Basic filters for everyone. Sodalis+ filters are locked unless the member has Sodalis+ (checked on the server). (S)
+- [ ] **T11 `connections`: Send, accept, decline and withdraw requests**, with weekly limits (5 free, fair-use 50 for Sodalis+) enforced in SQL and a "requests" inbox. (M)
 - [ ] **T12 `matching`: Performance check.** 10,000 seeded members; suggestions return in under 300 ms. (S)
 - [ ] **Checkpoint 16 Oct:** two test accounts with overlapping trips see each other in the right order and connect.
 
@@ -69,13 +70,13 @@ Unless a task says otherwise, every task is verified with
 - [ ] **T25: Full end-to-end Playwright path** (join → … → plan → block/report) in CI. (M)
 - [ ] **Checkpoint 30 Oct:** a group of 3 plans a trip. **Beta invites go out** (web, TestFlight, Play internal testing).
 
-## Week 5: Club+, verification, apps (2–6 Nov)
+## Week 5: Sodalis+, verification, apps (2–6 Nov)
 - [ ] **T26 `billing`: Stripe Checkout, Customer Portal and `stripe-webhook`** writing to `entitlements`. (M)
 - [ ] **T27 `billing`: RevenueCat**: Apple and Google products, `revenuecat-webhook`, restore purchases. (M)
 - [ ] **T28 `verification`: Stripe Identity flow, `identity-webhook`, verified badge**, and the verified-only filter working. (M)
 - [ ] **T29 `notifications`: Push notifications in the apps** (requests, messages). (M)
 - [ ] **T30 `app-shell`: Store listings**: icons, splash screens, screenshots, privacy labels. **Submit both apps.** (M)
-- [ ] **Checkpoint 6 Nov:** Club+ works on web, iPhone and Android sandbox; apps submitted.
+- [ ] **Checkpoint 6 Nov:** Sodalis+ works on web, iPhone and Android sandbox; apps submitted.
 
 ## Week 6: launch (9–13 Nov)
 - [ ] **T31: Security review** (security-and-hardening skill), plus a re-check of all row-level-security policies. (S)
