@@ -1,0 +1,43 @@
+{
+  "$comment": "The ONE place for the club's name, web address and colours. Change a value here, then rebuild: the app, its page title, the phone apps and the colours all follow. appId is the permanent store id: settle it before the first App Store / Google Play upload, it can't change after that.",
+  "name": "Sodalis Collective",
+  "shortName": "Sodalis",
+  "tagline": "Find people to travel with",
+  "webUrl": "https://togethertravelclub.netlify.app",
+  "appUrl": "https://sodalis-app.netlify.app",
+  "supportEmail": "",
+  "plusName": "Sodalis+",
+  "appId": "com.sodaliscollective.app",
+  "colors": {
+    "light": {
+      "accent": "#8E1B2B",
+      "accentDeep": "#6C1320",
+      "onAccent": "#FFFFFF",
+      "gold": "#D9A92E",
+      "goldInk": "#7D5C0B",
+      "ink": "#241F1E",
+      "inkSoft": "#4A4240",
+      "muted": "#5E5550",
+      "paper": "#F5F0E6",
+      "paperTint": "#ECE5D7",
+      "card": "#FFFDF8",
+      "line": "#DCD2C0",
+      "danger": "#A3122A"
+    },
+    "dark": {
+      "accent": "#E8BF4F",
+      "accentDeep": "#F2D06F",
+      "onAccent": "#1D1716",
+      "gold": "#D9922E",
+      "goldInk": "#E8BF4F",
+      "ink": "#F1EBE3",
+      "inkSoft": "#D2C8C0",
+      "muted": "#B4A8A3",
+      "paper": "#1D1716",
+      "paperTint": "#271F1E",
+      "card": "#271F1E",
+      "line": "#403532",
+      "danger": "#FF8A8A"
+    }
+  }
+}
