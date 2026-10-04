@@ -1,6 +1,6 @@
-# Together Travel Club
+# Sodalis Collective
 
-Static multi-page site for Together Travel Club. Plain HTML/CSS/JS, no build step.
+Static multi-page site for Sodalis Collective. Plain HTML/CSS/JS, no build step.
 
 ## Two versions, two branches
 
