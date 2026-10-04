@@ -16,6 +16,8 @@ Unless a task says otherwise, every task is verified with
 - [ ] Twilio account, for SMS phone checks.
 - [ ] Anthropic API account. Set a monthly spend limit in the console.
 - [ ] Resend account, then verify the domain for sending email.
+- [ ] Affiliate programmes, once the marketing site is live: GetYourGuide, Viator, Booking.com
+      (via Awin), Skyscanner. Approvals take weeks, so apply early.
 - [ ] Domain decided; add `app.` as a second Netlify site.
 - [ ] Answer the open questions in spec §15.
 
@@ -59,6 +61,8 @@ Unless a task says otherwise, every task is verified with
 - [ ] **T22 `trip-planner`: Planner screens.** Request form, day-by-day cards, "change something" follow-ups. (M)
 - [ ] **T23 `trip-planner`: Shared plan board.** Add, vote, tick off; works in one-to-one chats and groups. (S)
 - [ ] **T24 `trip-planner`: Hand-picked activity lists** for the top 15 destinations, so the agent prefers our own picks. (S)
+- [ ] **T24b `trip-planner`: Booking links via `/go/<id>`.** Affiliate tag added when available,
+      click recorded, disclosure line shown next to the link (spec §7a). (S)
 - [ ] **T25: Full end-to-end Playwright path** (join → … → plan → block/report) in CI. (M)
 - [ ] **Checkpoint 30 Oct:** a group of 3 plans a trip. **Beta invites go out** (web, TestFlight, Play internal testing).
 

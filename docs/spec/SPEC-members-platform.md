@@ -109,8 +109,9 @@ average. Every screen must be readable, forgiving and calm.
   Apple requires in-app account deletion, and UK GDPR gives members these rights.
 
 ### Not at launch
-Video calls, photo swap, calendar export, "Meet for a day", web push notifications, and
-languages other than English.
+Video calls, photo swap, calendar export, "Meet for a day", web push notifications,
+languages other than English, and a **deal finder** for flights, hotels and packages. The deal
+finder comes after launch, built on official partner feeds and APIs, not scraping (see §7a).
 
 ---
 
@@ -278,6 +279,25 @@ Each returns at most 20 cards, ranked.
   - A hard monthly spend cap is set in the API console.
 - **Tests:** schema validation of agent output, limit enforcement, and a fixed-response mock in CI.
   The real-model check runs manually before launch.
+
+### 7a. Booking links and affiliate income (proposed, small)
+
+- **What:** every outbound booking link in the app goes through one redirect, `/go/<id>`. That
+  includes planner activities, plan-board items and hand-picked lists. The redirect adds our
+  affiliate tag when we have one for that partner, and records the click: who, which plan, which
+  partner, when.
+- **Partners to apply to:** GetYourGuide, Viator, Booking.com (via Awin) and Skyscanner. Apply once
+  the marketing site is live; approval can take weeks. Without an approved tag, links simply go to
+  the partner without it.
+- **Disclosure:** UK advertising rules (CAP code) require it. A short line by every booking link
+  reads: "We may earn a small commission if you book, at no extra cost to you." A fuller
+  explanation goes in the terms. Booking links never change what the planner recommends.
+- **Data:** a `link_clicks` table (profile_id, plan_id, partner, target_url, created_at). Admins
+  only can read it.
+- **Later (after launch):** a deal finder for a member's saved trip, built from partners' official
+  APIs or feeds (e.g. Skyscanner, Booking.com, GetYourGuide). Scraping travel sites is against their
+  terms, breaks often and shows stale prices, so we won't build it that way. It could be a Club+
+  perk.
 
 ---
 
