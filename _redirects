@@ -14,3 +14,4 @@
 /tasks/*           /404.html  404!
 /.github/*          /404.html  404!
 /supabase/*         /404.html  404!
+/app/*             /404.html  404!
