@@ -23,18 +23,20 @@ Unless a task says otherwise, every task is verified with
 - [x] Answer the open questions in spec §15 (done 4 Oct).
 
 ## Week 1: foundation (5–9 Oct)
-- [ ] **T1 `app-shell`: Scaffold the app.** Vite + React + TS strict, router, Duke Street tokens,
+- [x] **T1 `app-shell`: Scaffold the app.** Vite + React + TS strict, router, Duke Street tokens,
       Figtree, light and dark. Netlify config, plus CI running lint, build and test. (M)
   - Acceptance: the app builds; a placeholder home screen passes axe and fits the phone at 320 px.
 - [ ] **T2 `app-shell`: Capacitor wrapper.** iOS and Android projects, safe areas, status bar,
       keyboard handling. iPhone builds on Lewis's Mac, with GitHub's Mac machines as backup. (M)
   - Acceptance: the app runs in the Android emulator and the iPhone simulator.
-- [ ] **T3 `identity`: Supabase project setup, migrations folder, and the `profiles` table with row-level security.** Email-code sign-in. (M)
+  - Status 4 Oct: projects created; CI builds the Android APK; still to run on a simulator (Lewis's Mac).
+- [x] **T3 `identity`: Supabase project setup, migrations folder, and the `profiles` table with row-level security.** Email-code sign-in. (M)
   - Acceptance: sign in with an email code on the web; pgTAP proves a member reads only their own private fields.
 - [ ] **T4 `identity`: Phone check** (Twilio Verify) and one account per number. (S)
-- [ ] **T5 `profiles`: Profile onboarding**, 4 steps: name, birth year and home city; photo (private storage bucket, location data removed); interests; preferences. (M)
+  - Waiting on a Twilio account. A free Twilio trial (texts only to numbers you verify) is enough for testing.
+- [x] **T5 `profiles`: Profile onboarding**, 4 steps: name, birth year and home city; photo (private storage bucket, location data removed); interests; preferences. (M)
   - Acceptance: a new member gets from email to finished profile in under 3 minutes; works with a screen reader.
-- [ ] **T6 `profiles`: Seed data.** The ~40 interests, GeoNames cities (UK and Europe first), and 200 demo members for local testing. (S)
+- [x] **T6 `profiles`: Seed data.** The ~40 interests, GeoNames cities (UK and Europe first), and 200 demo members for local testing. (S)
 - [ ] **Checkpoint 9 Oct:** Lewis signs in on his phone and builds a profile.
 
 ## Week 2: trips, matching, connections (12–16 Oct)
