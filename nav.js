@@ -76,3 +76,6 @@
     io.observe(el);
   });
 })();
+
+// Footer copyright year stays current without editing every page.
+document.querySelectorAll('.js-year').forEach(function(el){ el.textContent = new Date().getFullYear(); });
