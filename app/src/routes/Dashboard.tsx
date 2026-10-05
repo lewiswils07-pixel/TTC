@@ -55,7 +55,7 @@ export function Dashboard() {
     <Layout actions={signOutButton}>
       <h1>Hello, {profile.display_name}</h1>
       <div className="notice">
-        <strong>Add your trips.</strong> Suggestions of people to travel with are coming next.
+        <strong>Coming next:</strong> suggestions of members to travel with.
       </div>
       <MyTrips />
       <Wishlist />

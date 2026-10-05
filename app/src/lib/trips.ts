@@ -22,11 +22,20 @@ export type TripInput = Pick<Trip, 'city_id' | 'start_date' | 'end_date' | 'flex
 
 export type WishlistItem = { city_id: number; city: City }
 
+// Until the trips tables are added to a database, the API answers with
+// PGRST205 ("could not find the table"). The dashboard hides trips then.
+type ApiError = { code?: string } | null
+const tablesMissing = (error: ApiError) => error?.code === 'PGRST205' || error?.code === '42P01'
+
 const TRIP_COLUMNS = 'id, city_id, start_date, end_date, flexible_days, note, visibility, city:cities(id, name, country_code)'
 
-/** Upcoming and current trips, soonest first. Trips that have ended are left out. */
-export async function listMyTrips(today = isoDate(new Date())): Promise<Trip[]> {
+/**
+ * Upcoming and current trips, soonest first. Trips that have ended are left
+ * out. Null when this database doesn't have trips yet.
+ */
+export async function listMyTrips(today = isoDate(new Date())): Promise<Trip[] | null> {
   const { data, error } = await supabase.from('trips').select(TRIP_COLUMNS).gte('end_date', today).order('start_date')
+  if (tablesMissing(error)) return null
   if (error) throw friendlyError(error)
   return data as unknown as Trip[]
 }
@@ -47,8 +56,10 @@ export async function deleteTrip(id: number): Promise<void> {
   if (error) throw friendlyError(error)
 }
 
-export async function listWishlist(): Promise<WishlistItem[]> {
+/** Null when this database doesn't have the wishlist yet. */
+export async function listWishlist(): Promise<WishlistItem[] | null> {
   const { data, error } = await supabase.from('wishlist').select('city_id, city:cities(id, name, country_code)').order('created_at')
+  if (tablesMissing(error)) return null
   if (error) throw friendlyError(error)
   return data as unknown as WishlistItem[]
 }

@@ -10,13 +10,14 @@ const MAX_WISHLIST = 10
 
 /** The member's upcoming trips, each linking to its edit screen. */
 export function MyTrips() {
-  const [trips, setTrips] = useState<Trip[] | null>(null)
+  const [trips, setTrips] = useState<Trip[] | null | undefined>(undefined)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     listMyTrips().then(setTrips, (e) => setError(messageOf(e)))
   }, [])
 
+  if (trips === null) return null
   return (
     <section className="card section-card" aria-labelledby="my-trips">
       <div className="section-head">
@@ -32,7 +33,7 @@ export function MyTrips() {
           {error}
         </p>
       )}
-      {!trips && !error && <p className="hint">Loading your trips…</p>}
+      {trips === undefined && !error && <p className="hint">Loading your trips…</p>}
       {trips && trips.length === 0 && (
         <div className="empty">
           <p>Add where you’re going and when. We’ll use it to find members travelling at the same time.</p>
@@ -73,7 +74,7 @@ export function MyTrips() {
 
 /** Places the member would love to visit one day, used to match people with no trip booked yet. */
 export function Wishlist() {
-  const [items, setItems] = useState<WishlistItem[] | null>(null)
+  const [items, setItems] = useState<WishlistItem[] | null | undefined>(undefined)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   // Changing the key resets the picker after each add.
@@ -105,6 +106,7 @@ export function Wishlist() {
   }
 
   const full = (items?.length ?? 0) >= MAX_WISHLIST
+  if (items === null) return null
 
   return (
     <section className="card section-card" aria-labelledby="wishlist">
