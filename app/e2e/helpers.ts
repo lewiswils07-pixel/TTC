@@ -12,7 +12,12 @@ export const admin = createClient(process.env.SUPABASE_URL ?? 'http://127.0.0.1:
 
 export async function newPhone(browser: Browser): Promise<Page> {
   const context = await browser.newContext({ locale: 'en-GB', viewport: { width: 390, height: 844 } })
-  return context.newPage()
+  const page = await context.newPage()
+  // Browser errors go into the test output, so a failure on CI can be diagnosed.
+  page.on('console', (m) => {
+    if (m.type() === 'error' || m.type() === 'warning') console.log(`[browser ${m.type()}] ${m.text()}`)
+  })
+  return page
 }
 
 async function latestCode(email: string, since: number): Promise<string> {

@@ -37,11 +37,13 @@ export function Chat() {
   useEffect(() => {
     sendersRef.current = senders
   }, [senders])
+  const seenRef = useRef<Set<number>>(new Set())
   const navigate = useNavigate()
   const list = useRef<HTMLOListElement>(null)
   const stick = useRef(true)
 
   const add = useCallback((incoming: Message[]) => {
+    for (const m of incoming) seenRef.current.add(m.id)
     setMessages((current) => {
       const seen = new Set(current.map((m) => m.id))
       return [...current, ...incoming.filter((m) => !seen.has(m.id))].sort((a, b) => a.id - b.id)
@@ -62,9 +64,16 @@ export function Chat() {
       (e) => setError(messageOf(e)),
     )
     // Messages sent while the live connection was opening are fetched once it's ready.
+    // The same check runs every little while as a safety net (see onNewMessage).
     const catchUp = () => {
-      void listMessages(conversationId).then(add, () => undefined)
-      void messageWarnings(conversationId).then(setWarnings)
+      void listMessages(conversationId).then((latest) => {
+        const fresh = latest.filter((m) => !seenRef.current.has(m.id))
+        if (fresh.length === 0) return
+        add(fresh)
+        void markRead(conversationId)
+        if (fresh.some((m) => m.sender_id !== me && !sendersRef.current.has(m.sender_id))) void conversationSenders(conversationId).then(setSenders)
+      }, () => undefined)
+      void messageWarnings(conversationId).then(setWarnings, () => undefined)
     }
     return onNewMessage(conversationId, catchUp, (m) => {
       stick.current = true

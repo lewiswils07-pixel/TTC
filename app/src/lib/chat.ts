@@ -78,6 +78,9 @@ export async function conversationSenders(conversationId: number): Promise<Map<s
  * view), so the screen can fetch anything it missed. Returns a function
  * that stops listening.
  */
+/** How often an open chat checks for messages the live connection missed. */
+export const POLL_MS = 10_000
+
 export function onNewMessage(conversationId: number, onReady: () => void, onMessage: (m: Message) => void): () => void {
   let channel: ReturnType<typeof supabase.channel> | null = null
   let stopped = false
@@ -102,9 +105,15 @@ export function onNewMessage(conversationId: number, onReady: () => void, onMess
     if (document.visibilityState === 'visible') onReady()
   }
   document.addEventListener('visibilitychange', onVisible)
+  // A safety net for a live connection that drops quietly: check again every
+  // little while the chat is on screen.
+  const poll = setInterval(() => {
+    if (document.visibilityState === 'visible') onReady()
+  }, POLL_MS)
 
   return () => {
     stopped = true
+    clearInterval(poll)
     document.removeEventListener('visibilitychange', onVisible)
     if (channel) void supabase.removeChannel(channel)
   }
