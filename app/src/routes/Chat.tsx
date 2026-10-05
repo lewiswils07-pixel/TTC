@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { Avatar } from '../components/Avatar'
+import { refreshTabCounts } from '../lib/tabCounts'
 import { Layout, Loading } from '../components/Layout'
 import { SafetyBox } from '../components/SafetyBox'
 import {
@@ -34,6 +35,8 @@ export function Chat() {
   const [reporting, setReporting] = useState<number | null>(null)
   const [senders, setSenders] = useState<Map<string, string>>(new Map())
   const sendersRef = useRef(senders)
+  // Opening a chat reads it, so the Chat tab's unread badge is recounted.
+  useEffect(refreshTabCounts, [conversationId])
   useEffect(() => {
     sendersRef.current = senders
   }, [senders])

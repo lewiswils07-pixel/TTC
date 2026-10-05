@@ -36,8 +36,8 @@ export function TripMatches() {
       <Layout>
         <h1>{error ? 'Something went wrong' : 'Trip not found'}</h1>
         <p className="lede">{error ?? 'It may have been deleted.'}</p>
-        <Link className="btn btn-secondary" to="/dashboard">
-          Back to my profile
+        <Link className="btn btn-secondary" to="/trips">
+          Back to my trips
         </Link>
       </Layout>
     )
@@ -47,8 +47,8 @@ export function TripMatches() {
   const flex = flexibilityLabel(trip.flexible_days)
   return (
     <Layout>
-      <Link className="back-link" to="/dashboard">
-        ‹ My profile
+      <Link className="back-link" to="/trips">
+        ‹ My trips
       </Link>
       <p className="eyebrow">Your trip</p>
       <h1 ref={heading} tabIndex={-1}>

@@ -12,11 +12,8 @@ const vars = (p: Palette) =>
     .join('')
 
 export function brandCss(): string {
-  const { light, dark } = brand.colors
-  return [
-    `:root{${vars(light)}color-scheme:light}`,
-    `@media (prefers-color-scheme: dark){:root{${vars(dark)}color-scheme:dark}}`,
-  ].join('\n')
+  // Day mode only (Lewis, 5 Oct): phones set to dark mode still see the light colours.
+  return `:root{${vars(brand.colors.light)}color-scheme:light only}`
 }
 
 const VIRTUAL = 'virtual:brand.css'
@@ -36,7 +33,6 @@ export function brandPlugin(): Plugin {
         .replaceAll('%BRAND_NAME%', brand.name)
         .replaceAll('%BRAND_TAGLINE%', brand.tagline)
         .replaceAll('%BRAND_THEME_LIGHT%', brand.colors.light.paper)
-        .replaceAll('%BRAND_THEME_DARK%', brand.colors.dark.paper)
     },
   }
 }

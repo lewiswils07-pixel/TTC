@@ -40,8 +40,8 @@ export function TripForm() {
         <p className="notice notice-error" role="alert">
           {loadError}
         </p>
-        <Link className="btn btn-secondary" to="/dashboard">
-          Back to my profile
+        <Link className="btn btn-secondary" to="/trips">
+          Back to my trips
         </Link>
       </Layout>
     )
@@ -52,8 +52,8 @@ export function TripForm() {
       <Layout>
         <h1>Trip not found</h1>
         <p className="lede">It may have been deleted.</p>
-        <Link className="btn btn-secondary" to="/dashboard">
-          Back to my profile
+        <Link className="btn btn-secondary" to="/trips">
+          Back to my trips
         </Link>
       </Layout>
     )
@@ -117,7 +117,7 @@ function TripEditor({ trip }: { trip: Trip | null }) {
     setError(null)
     try {
       await deleteTrip(trip.id)
-      navigate('/dashboard', { replace: true })
+      navigate('/trips', { replace: true })
     } catch (err) {
       setError(messageOf(err))
       setBusy(false)
@@ -223,7 +223,7 @@ function TripEditor({ trip }: { trip: Trip | null }) {
           )}
         </div>
         <SaveError error={error} />
-        <ActionBar busy={busy} onBack={() => navigate(trip ? `/trips/${trip.id}` : '/dashboard')} label={trip ? 'Save changes' : 'Add trip'} />
+        <ActionBar busy={busy} onBack={() => navigate(trip ? `/trips/${trip.id}` : '/trips')} label={trip ? 'Save changes' : 'Add trip'} />
       </form>
     </Layout>
   )

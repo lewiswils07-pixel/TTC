@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { Layout, Loading } from '../components/Layout'
+import { SubNav } from '../components/SubNav'
+import { CHAT_NAV } from '../lib/nav'
 import { messageTime, myConversations, type Conversation } from '../lib/chat'
 import { messageOf } from '../lib/errors'
 
@@ -20,13 +22,11 @@ export function Messages() {
   if (items === undefined && !error) return <Loading />
 
   return (
-    <Layout>
-      <Link className="back-link" to="/dashboard">
-        ‹ My profile
-      </Link>
+    <Layout tab="chat">
       <h1 ref={heading} tabIndex={-1}>
-        Messages
+        Chat
       </h1>
+      <SubNav label="Chat" items={CHAT_NAV} current="/messages" />
       {done && (
         <p className="notice notice-success" role="status">
           {done}
@@ -40,7 +40,7 @@ export function Messages() {
       {items && items.length === 0 && (
         <div className="card empty">
           <p>When someone accepts your request, or you accept theirs, you can message each other here.</p>
-          <Link className="btn btn-primary btn-block" to="/people">
+          <Link className="btn btn-primary btn-block" to="/connections">
             Find people to travel with
           </Link>
         </div>

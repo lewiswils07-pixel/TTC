@@ -175,7 +175,7 @@ function GroupEditor({ people }: { people: Connection[] }) {
               {people.length ? `Choose up to ${MAX_GROUP - 1}. ${invite.length} chosen.` : 'Only people you’re connected with can be invited.'}
             </p>
             {people.length === 0 ? (
-              <Link to="/people">Find people to travel with</Link>
+              <Link to="/connections">Find people to travel with</Link>
             ) : (
               <ul className="invite-list">
                 {people.map((p) => {

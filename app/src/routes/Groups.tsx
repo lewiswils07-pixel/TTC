@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
+import { SubNav } from '../components/SubNav'
+import { CHAT_NAV } from '../lib/nav'
 import { tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { groupsICanStart, myGroups, respondToInvite, type Group } from '../lib/groups'
@@ -49,13 +51,10 @@ export function Groups() {
   const joined = groups?.filter((g) => g.my_status === 'joined') ?? []
 
   return (
-    <Layout>
-      <Link className="back-link" to="/dashboard">
-        ‹ My profile
-      </Link>
+    <Layout tab="chat">
       <div className="page-head">
         <h1 ref={heading} tabIndex={-1}>
-          Groups
+          Chat
         </h1>
         {canStart > 0 && (
           <Link className="btn btn-primary btn-small" to="/groups/new">
@@ -63,6 +62,7 @@ export function Groups() {
           </Link>
         )}
       </div>
+      <SubNav label="Chat" items={CHAT_NAV} current="/groups" />
       <p className="lede">Travel as a small group of up to 6, made from people you’re connected with. Each group has its own chat.</p>
       {error && (
         <p className="notice notice-error" role="alert">

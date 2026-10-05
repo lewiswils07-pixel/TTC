@@ -64,7 +64,7 @@ export function Filters() {
     setError(null)
     try {
       await saveFilters(userId, values)
-      navigate('/people')
+      navigate('/connections')
     } catch (e) {
       setError(messageOf(e))
       setBusy(false)
@@ -74,8 +74,8 @@ export function Filters() {
   const locked = !plus
   return (
     <Layout>
-      <Link className="back-link" to="/people">
-        ‹ Find people
+      <Link className="back-link" to="/connections">
+        ‹ Connections
       </Link>
       <h1 ref={heading} tabIndex={-1}>
         Filters
@@ -138,7 +138,7 @@ export function Filters() {
 
         <SaveError error={error} />
         <div className="action-row">
-          <Link className="btn btn-secondary" to="/people">
+          <Link className="btn btn-secondary" to="/connections">
             Cancel
           </Link>
           <button type="submit" className="btn btn-primary" disabled={busy}>

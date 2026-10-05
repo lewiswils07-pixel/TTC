@@ -27,7 +27,7 @@ export function MeetingSafely() {
           ‹ Back
         </button>
       ) : (
-        <Link className="back-link" to="/dashboard">
+        <Link className="back-link" to="/profile">
           ‹ My profile
         </Link>
       )}

@@ -14,10 +14,9 @@ import {
   DAY_RHYTHMS,
   GENDERS,
   LANGUAGES,
-  MAX_INTERESTS,
   MAX_LANGUAGES,
   MIN_AGE,
-  MIN_INTERESTS,
+  INTERESTS_TO_PICK,
   MONTHS,
   PACES,
   ROOM_SHARING,
@@ -50,7 +49,7 @@ import { birthDate, checkBirthDate, checkChosen, checkInterests, checkName } fro
 const STEPS = [
   { title: 'About you', intro: 'Only your first name, age and home town are shown to other members.' },
   { title: 'Your photo', intro: 'A clear, smiling photo helps other members feel comfortable. Only signed-in members can see it.' },
-  { title: 'Your interests', intro: `Pick ${MIN_INTERESTS} to ${MAX_INTERESTS}. We use them to suggest people you’ll get on with.` },
+  { title: 'Your interests', intro: `Pick your top ${INTERESTS_TO_PICK}. We use them to suggest people you’ll get on with.` },
   {
     title: 'How you travel',
     intro: 'Optional, and there are no wrong answers. The more you add, the better we can suggest people who travel the way you do.',
@@ -100,7 +99,7 @@ export function Onboarding() {
     }
     await reload()
     if (step < TOTAL) goTo(step + 1)
-    else navigate('/dashboard', { replace: true })
+    else navigate('/profile', { replace: true })
   }
   const back = step > 1 ? () => goTo(step - 1) : undefined
 
@@ -385,7 +384,7 @@ function InterestsStep({ data, interests, onDone, onBack }: Omit<StepProps, 'use
       }}
       noValidate
     >
-      <InterestPicker interests={interests} selected={selected} onChange={setSelected} max={MAX_INTERESTS} error={shown('interests')} />
+      <InterestPicker interests={interests} selected={selected} onChange={setSelected} max={INTERESTS_TO_PICK} error={shown('interests')} />
       <SaveError error={error} />
       <ActionBar
         busy={busy}
@@ -393,8 +392,8 @@ function InterestsStep({ data, interests, onDone, onBack }: Omit<StepProps, 'use
         label={data.profile.onboarded_at ? undefined : 'Finish sign-up'}
         note={
           <span aria-live="polite">
-            <strong>{selected.length}</strong> of {MAX_INTERESTS} picked
-            {selected.length < MIN_INTERESTS ? ` · pick at least ${MIN_INTERESTS}` : ''}
+            <strong>{selected.length}</strong> of {INTERESTS_TO_PICK} picked
+            {selected.length < INTERESTS_TO_PICK ? ` · ${INTERESTS_TO_PICK - selected.length} to go` : ''}
           </span>
         }
       />

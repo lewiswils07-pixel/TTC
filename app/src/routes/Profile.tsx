@@ -1,14 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
-import { MyTrips, Wishlist } from '../components/MyTrips'
 import { dismissNotice, iAmAdmin, myNotices, type Notice } from '../lib/admin'
 import { signOut } from '../lib/auth'
 import { answerMeet, meetPrompts, type MeetPrompt } from '../lib/meet'
 import { Avatar } from '../components/Avatar'
-import { myConversations } from '../lib/chat'
-import { myConnections } from '../lib/connections'
-import { myGroups } from '../lib/groups'
 import { cityLabel } from '../lib/cities'
 import { BUDGETS, GENDERS, MAX_PREF_AGE, PACES, TRAVEL_STYLES, ageFromDate, ageLabel, labelFor } from '../lib/options'
 import { profileStrength } from '../lib/strength'
@@ -19,7 +15,7 @@ import { listInterests, type Interest, type Profile } from '../lib/profile'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
 
-export function Dashboard() {
+export function Profile() {
   const { session } = useSession()
   const { data, error, reload } = useMyProfile(session!.user.id)
   const [interests, setInterests] = useState<Interest[]>([])
@@ -46,7 +42,7 @@ export function Dashboard() {
 
   if (error) {
     return (
-      <Layout actions={signOutButton}>
+      <Layout tab="profile" actions={signOutButton}>
         <p className="error" role="alert">
           {error}
         </p>
@@ -66,39 +62,13 @@ export function Dashboard() {
   const myInterests = interests.filter((i) => interestIds.includes(i.id)).map((i) => i.label)
 
   return (
-    <Layout actions={signOutButton}>
+    <Layout tab="profile">
       <h1 className="gold-rule">Hello, {profile.display_name}</h1>
       {profile.member_number && <p className="founding-badge">Founding member No. {profile.member_number}</p>}
       <Notices />
       {hasTrip !== null && <Strength profile={profile} interestCount={interestIds.length} hasTrip={hasTrip} />}
       <MeetPrompts />
       <AdminLink />
-      <section className="find-people" aria-labelledby="find-heading">
-        <h2 id="find-heading" className="section-title gold-rule">
-          Find people to travel with
-        </h2>
-        <div className="find-grid">
-          <Link className="card find-card" to="/people">
-            <span className="find-icon" aria-hidden="true">
-              ✈
-            </span>
-            <strong>Same destination</strong>
-            <span>People heading to the same place at the same time as your trips.</span>
-          </Link>
-          <Link className="card find-card" to="/people?mode=new">
-            <span className="find-icon" aria-hidden="true">
-              ✦
-            </span>
-            <strong>Similar interests</strong>
-            <span>People with similar interests, to plan something new together.</span>
-          </Link>
-        </div>
-      </section>
-      <MessagesLink />
-      <ConnectionsLink />
-      <GroupsLink />
-      <MyTrips />
-      <Wishlist />
       <section className="card profile-card" aria-labelledby="my-profile">
         <div className="profile-head">
           {photo ? (
@@ -151,6 +121,16 @@ export function Dashboard() {
           Edit my profile
         </Link>
       </section>
+      <nav className="card settings-list" aria-label="Settings">
+        <Link to="/filters">Who I’d like to meet</Link>
+        <Link to="/meeting-safely">Meeting up safely</Link>
+        <Link to="/community-rules">Community rules</Link>
+        <Link to="/terms">Terms</Link>
+        <Link to="/privacy">Privacy</Link>
+        <button type="button" className="btn-link" onClick={() => signOut()}>
+          Sign out
+        </button>
+      </nav>
     </Layout>
   )
 }
@@ -181,65 +161,7 @@ function Strength({ profile, interestCount, hasTrip }: { profile: Profile; inter
   )
 }
 
-/** Entry to the Connections page, with a count of requests waiting for an answer. Hidden until the database has connections. */
-function ConnectionsLink() {
-  const [waiting, setWaiting] = useState<number | null>(null)
 
-  useEffect(() => {
-    myConnections().then(
-      (list) => setWaiting(list.filter((c) => c.direction === 'received' && c.status === 'pending').length),
-      () => setWaiting(null),
-    )
-  }, [])
-
-  if (waiting === null) return null
-  return (
-    <Link className="card link-card" to="/connections">
-      <span className="trip-text">
-        <strong>Connections</strong>
-        <span className="trip-meta">{waiting ? `${waiting} ${waiting === 1 ? 'request needs' : 'requests need'} your answer` : 'Your requests and the people you’ve met'}</span>
-      </span>
-      {waiting > 0 && (
-        <span className="badge" aria-hidden="true">
-          {waiting}
-        </span>
-      )}
-      <span className="trip-chevron" aria-hidden="true">
-        ›
-      </span>
-    </Link>
-  )
-}
-
-/** Entry to Messages, with the number of unread messages. Hidden until the database has chat and there's someone to talk to. */
-function MessagesLink() {
-  const [unread, setUnread] = useState<number | null>(null)
-
-  useEffect(() => {
-    myConversations().then(
-      (list) => setUnread(list && list.length ? list.reduce((n, c) => n + c.unread, 0) : null),
-      () => setUnread(null),
-    )
-  }, [])
-
-  if (unread === null) return null
-  return (
-    <Link className="card link-card" to="/messages">
-      <span className="trip-text">
-        <strong>Messages</strong>
-        <span className="trip-meta">{unread ? `${unread} unread ${unread === 1 ? 'message' : 'messages'}` : 'Chat with the people you’re connected with'}</span>
-      </span>
-      {unread > 0 && (
-        <span className="badge" aria-hidden="true">
-          {unread}
-        </span>
-      )}
-      <span className="trip-chevron" aria-hidden="true">
-        ›
-      </span>
-    </Link>
-  )
-}
 
 const NOTICE_TEXT: Record<Notice['kind'], { title: string; text: string }> = {
   warning: { title: 'A note from the Sodalis team', text: 'Please keep to our community rules so everyone feels safe.' },
@@ -379,40 +301,3 @@ function MeetPrompts() {
   )
 }
 
-/** Entry to Groups, with invites waiting for an answer. Hidden until the database has groups. */
-function GroupsLink() {
-  const [counts, setCounts] = useState<{ invites: number; joined: number } | null>(null)
-
-  useEffect(() => {
-    myGroups().then(
-      (list) =>
-        setCounts(list && { invites: list.filter((g) => g.my_status === 'invited').length, joined: list.filter((g) => g.my_status === 'joined').length }),
-      () => setCounts(null),
-    )
-  }, [])
-
-  if (!counts) return null
-  const { invites, joined } = counts
-  return (
-    <Link className="card link-card" to="/groups">
-      <span className="trip-text">
-        <strong>Groups</strong>
-        <span className="trip-meta">
-          {invites
-            ? `${invites} ${invites === 1 ? 'invite needs' : 'invites need'} your answer`
-            : joined
-              ? `You’re in ${joined} ${joined === 1 ? 'group' : 'groups'}`
-              : 'Travel as a small group of up to 6'}
-        </span>
-      </span>
-      {invites > 0 && (
-        <span className="badge" aria-hidden="true">
-          {invites}
-        </span>
-      )}
-      <span className="trip-chevron" aria-hidden="true">
-        ›
-      </span>
-    </Link>
-  )
-}

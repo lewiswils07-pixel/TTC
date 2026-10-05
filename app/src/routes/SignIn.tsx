@@ -14,7 +14,7 @@ export function SignIn() {
   const { session, loading } = useSession()
   const navigate = useNavigate()
   const location = useLocation()
-  const from = (location.state as { from?: string } | null)?.from ?? '/dashboard'
+  const from = (location.state as { from?: string } | null)?.from ?? '/connections'
 
   const [stage, setStage] = useState<'email' | 'code'>('email')
   const [email, setEmail] = useState('')

@@ -555,17 +555,107 @@ legend { padding: 0; }
 .date-readback { margin: calc(var(--space-3) * -1) 0 0; font-weight: 600; color: var(--ink-soft); }
 
 /* --------------------------------------------------------------- find people (two ways) */
-.find-people .section-title { margin-top: var(--space-2); }
-.find-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); }
-.find-card {
-  display: flex; flex-direction: column; gap: var(--space-1); color: var(--ink-soft); text-decoration: none; font-size: var(--text-sm);
-  box-shadow: inset 0 3px 0 var(--gold), var(--shadow-sm); transition: border-color 0.15s, transform 0.15s var(--ease-out);
+
+/* ------------------------------------------------------------ tab bar */
+.has-tabs .main { padding-bottom: calc(var(--safe-bottom) + 96px); }
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  padding: 0 var(--safe-right) var(--safe-bottom) var(--safe-left);
+  background: color-mix(in srgb, var(--card) 94%, transparent);
+  backdrop-filter: saturate(1.4) blur(12px);
+  -webkit-backdrop-filter: saturate(1.4) blur(12px);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -1px 0 color-mix(in srgb, var(--gold) 30%, transparent);
 }
-.find-card strong { color: var(--ink); font-size: 1.0625rem; line-height: 1.25; }
-.find-card:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
-.find-card:active { transform: scale(0.98); }
-.find-icon {
-  display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; margin-bottom: var(--space-2);
-  background: var(--brand-disc); color: var(--brand-gold); font-size: 1.125rem;
+.tabbar ul { list-style: none; margin: 0 auto; padding: 0; max-width: 640px; display: grid; grid-template-columns: repeat(4, 1fr); }
+.tab {
+  display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 60px; padding: 8px 4px 6px;
+  color: var(--muted); text-decoration: none; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.01em;
 }
-@media (max-width: 360px) { .find-grid { grid-template-columns: 1fr; } }
+.tab.is-current { color: var(--accent); }
+.tab.is-current .tab-icon::after {
+  content: ''; position: absolute; left: 50%; top: -8px; width: 28px; height: 3px; margin-left: -14px;
+  border-radius: 0 0 3px 3px; background: var(--gold);
+}
+.tab:focus-visible { outline: 3px solid var(--accent); outline-offset: -4px; border-radius: var(--radius-sm); }
+.tab-icon { position: relative; display: grid; place-items: center; width: 28px; height: 28px; }
+.tab-badge {
+  position: absolute; top: -4px; right: -10px; min-width: 18px; height: 18px; padding: 0 5px;
+  display: grid; place-items: center; border-radius: 999px; background: var(--brand-disc); color: #fff;
+  font-size: 0.6875rem; font-weight: 800; box-shadow: 0 0 0 2px var(--card);
+}
+
+/* page-level tabs: "For you" / "Requests & matches", "Chats" / "Groups" */
+.subnav { display: flex; gap: var(--space-1); margin: var(--space-4) 0; padding: 4px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 6%, var(--card)); }
+.subnav-item {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 12px;
+  border-radius: 999px; color: var(--ink-soft); font-weight: 700; font-size: 0.9375rem; text-decoration: none; text-align: center;
+}
+.subnav-item.is-current { background: var(--card); color: var(--accent); box-shadow: var(--shadow-sm); }
+.subnav-item:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+
+/* ------------------------------------------------- the For you feed */
+.person-feed-card { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-3); overflow: hidden; }
+.feed-photo {
+  position: relative; height: clamp(260px, calc(100dvh - 480px), 560px); border-radius: var(--radius); overflow: hidden;
+  background: linear-gradient(160deg, var(--brand-disc), color-mix(in srgb, var(--brand-disc) 60%, #000));
+  touch-action: pan-y; user-select: none; transition: transform 0.25s var(--ease-out);
+}
+.feed-photo.is-dragging { transition: none; }
+.person-feed-card.is-connecting .feed-photo { height: 200px; }
+.feed-photo img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.feed-initial { position: absolute; inset: 0; display: grid; place-items: center; color: var(--brand-gold); font-size: 7rem; font-weight: 800; }
+.feed-who {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 56px var(--space-4) var(--space-4);
+  background: linear-gradient(transparent, rgb(0 0 0 / 72%)); color: #fff;
+}
+.feed-who h2 { margin: 0; font-size: 1.75rem; line-height: 1.15; color: #fff; }
+.feed-age { font-weight: 500; }
+.feed-who p { margin: 2px 0 0; color: rgb(255 255 255 / 88%); }
+.feed-fit {
+  position: absolute; top: var(--space-3); left: var(--space-3); padding: 4px 12px; border-radius: 999px;
+  background: color-mix(in srgb, var(--card) 92%, transparent); color: var(--accent-deep, var(--accent)); font-weight: 800; font-size: 0.8125rem;
+}
+.swipe-label {
+  position: absolute; top: var(--space-5); padding: 4px 14px; border: 3px solid; border-radius: var(--radius-sm);
+  font-weight: 800; font-size: 1.25rem; text-transform: uppercase; letter-spacing: 0.04em; background: rgb(255 255 255 / 85%);
+}
+.swipe-yes { right: var(--space-4); color: var(--success); transform: rotate(8deg); }
+.swipe-no { left: var(--space-4); color: var(--ink-soft); transform: rotate(-8deg); }
+.callouts { list-style: none; margin: 0; padding: 0 var(--space-2); display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.callout {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px; border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-gold) 22%, var(--card)); color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--brand-gold) 55%, transparent); font-weight: 700; font-size: 0.875rem;
+}
+.callout::before { font-size: 0.875rem; color: var(--gold-ink, var(--ink-soft)); }
+.callout-trip::before { content: '✈'; }
+.callout-interests::before { content: '✦'; }
+.callout-home::before { content: '⌂'; }
+.callout-places::before { content: '★'; }
+.callout-trip { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.callout-trip::before { color: var(--brand-gold); }
+.feed-detail { margin: 0; padding: 0 var(--space-2); color: var(--ink-soft); }
+.feed-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: var(--space-3); padding: 0 var(--space-2); }
+.feed-actions .btn { gap: 8px; min-height: 56px; font-size: 1.0625rem; white-space: nowrap; padding-inline: var(--space-3); }
+.feed-yes span[aria-hidden], .feed-no span[aria-hidden] { font-weight: 800; }
+.feed-yes span[aria-hidden] { color: var(--brand-gold); }
+.person-feed-card .connect-box, .person-feed-card .safety-link, .person-feed-card .safety-box { padding: 0 var(--space-2); }
+.feed-count { text-align: center; margin-top: var(--space-3); }
+.feed-toast {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin: 0 0 var(--space-3);
+  padding: var(--space-3) var(--space-4); border-radius: var(--radius); background: var(--ink); color: var(--paper); font-weight: 600;
+}
+.feed-toast .btn-link { color: var(--brand-gold); }
+.feed-empty h2 { margin: 0; }
+.feed-tips { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: var(--space-2); }
+
+/* Profile tab: settings links */
+.settings-list { display: flex; flex-direction: column; padding: var(--space-2) var(--space-5); margin-top: var(--space-4); }
+.settings-list > a, .settings-list > button {
+  display: flex; align-items: center; justify-content: space-between; min-height: var(--tap);
+  color: var(--ink); text-decoration: none; font-weight: 600; text-align: left;
+}
+.settings-list > a::after { content: '›'; color: var(--muted); font-size: 1.4rem; }
+.settings-list > * + * { border-top: 1px solid var(--line); }
+.settings-list > button { padding: 0; color: var(--danger); text-decoration: none; }

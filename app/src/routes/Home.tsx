@@ -19,7 +19,7 @@ const POINTS = [
 export function Home() {
   const { session, loading } = useSession()
   if (loading) return <Loading />
-  if (session) return <Navigate to="/dashboard" replace />
+  if (session) return <Navigate to="/connections" replace />
   return (
     <Layout>
       <section className="hero">
