@@ -17,6 +17,7 @@ import {
   type Message,
 } from '../lib/chat'
 import { messageOf } from '../lib/errors'
+import { guideSeen, markGuideSeen } from '../lib/meet'
 import { useSession } from '../lib/session-context'
 
 /** One conversation: messages oldest to newest, new ones arriving live, and a box to reply. */
@@ -106,6 +107,9 @@ export function Chat() {
           <h1>{other.display_name}</h1>
         </div>
         <div className="chat-tools">
+          <Link className="safety-link" to="/meeting-safely">
+            Meeting up safely
+          </Link>
           <SafetyBox profileId={other.profile_id} name={other.display_name} onBlocked={(message) => navigate('/messages', { state: { message } })} />
         </div>
 
@@ -115,9 +119,10 @@ export function Chat() {
               Show earlier messages
             </button>
           )}
+          <GuideCard />
           {messages.length === 0 && (
             <p className="hint chat-empty">
-              You’re connected. Say hello, and maybe suggest a call before you meet. Never send money to someone you haven’t met.
+              You’re connected. Say hello!
             </p>
           )}
           <ol className="message-list" ref={list} aria-live="polite" aria-relevant="additions">
@@ -232,5 +237,37 @@ function Composer({ conversationId, name, onSent }: { conversationId: number; na
         </button>
       </div>
     </form>
+  )
+}
+
+/** The short meeting-up guide, shown once (the first time a member opens a chat). */
+function GuideCard() {
+  const [show, setShow] = useState(() => !guideSeen())
+  if (!show) return null
+  return (
+    <aside className="card guide-card" aria-labelledby="guide-title">
+      <h2 id="guide-title">Before you meet</h2>
+      <ul>
+        <li>Have a video call first.</li>
+        <li>Meet somewhere busy, in daylight.</li>
+        <li>Tell someone you trust where you’ll be.</li>
+        <li>Never send money to someone you haven’t met.</li>
+      </ul>
+      <div className="action-row">
+        <Link className="btn btn-secondary btn-small" to="/meeting-safely">
+          Read the full guide
+        </Link>
+        <button
+          type="button"
+          className="btn btn-primary btn-small"
+          onClick={() => {
+            markGuideSeen()
+            setShow(false)
+          }}
+        >
+          Got it
+        </button>
+      </div>
+    </aside>
   )
 }

@@ -424,3 +424,20 @@ legend { padding: 0; }
 .member-notice p { margin: 0; }
 .member-notice-body { font-style: italic; }
 .member-notice-warning, .member-notice-suspended, .member-notice-removed { border-color: color-mix(in srgb, var(--brand-gold) 60%, var(--line)); background: color-mix(in srgb, var(--brand-gold) 12%, var(--card)); }
+
+/* Meeting up safely and "Did you meet?" */
+.btn-plain { background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
+.guide-list { list-style: none; margin: var(--space-4) 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+.guide-list h2 { margin: 0 0 var(--space-1); font-size: var(--text-lg); }
+.guide-list p { margin: 0; color: var(--ink-soft); }
+.guide-card { margin-bottom: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); }
+.guide-card h2 { margin: 0; font-size: var(--text-lg); }
+.guide-card ul { margin: 0; padding-left: 1.25em; display: flex; flex-direction: column; gap: 2px; }
+.chat-tools { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 0 var(--space-4); }
+.chat-tools .safety-box { flex-basis: 100%; }
+.meet-card { margin-bottom: var(--space-3); display: flex; flex-direction: column; gap: var(--space-3); }
+.meet-card h2 { margin: 0; font-size: var(--text-lg); }
+.meet-card p { margin: 0; }
+.meet-card > .btn-small { align-self: flex-start; }
+.meet-choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
+.meet-choices .btn { padding-inline: var(--space-2); white-space: nowrap; }

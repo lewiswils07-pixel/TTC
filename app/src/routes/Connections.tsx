@@ -108,6 +108,11 @@ export function Connections() {
       )}
 
       <h2 className="section-title">Connected</h2>
+      {connected.length > 0 && (
+        <p className="hint section-hint">
+          Before you meet, read our tips for <Link to="/meeting-safely">meeting up safely</Link>.
+        </p>
+      )}
       {connected.length === 0 ? (
         <p className="hint section-hint">When someone accepts, or you accept them, they’ll appear here and you can message each other.</p>
       ) : (

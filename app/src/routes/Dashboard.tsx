@@ -4,10 +4,13 @@ import { Layout, Loading } from '../components/Layout'
 import { MyTrips, Wishlist } from '../components/MyTrips'
 import { dismissNotice, iAmAdmin, myNotices, type Notice } from '../lib/admin'
 import { signOut } from '../lib/auth'
+import { answerMeet, meetPrompts, type MeetPrompt } from '../lib/meet'
+import { Avatar } from '../components/Avatar'
 import { myConversations } from '../lib/chat'
 import { myConnections } from '../lib/connections'
 import { cityLabel } from '../lib/cities'
 import { BUDGETS, GENDERS, MAX_PREF_AGE, PACES, TRAVEL_STYLES, ageLabel, labelFor } from '../lib/options'
+import { messageOf } from '../lib/errors'
 import { photoUrl } from '../lib/photo'
 import { listInterests, type Interest } from '../lib/profile'
 import { useSession } from '../lib/session-context'
@@ -58,6 +61,7 @@ export function Dashboard() {
     <Layout actions={signOutButton}>
       <h1>Hello, {profile.display_name}</h1>
       <Notices />
+      <MeetPrompts />
       <AdminLink />
       <Link className="card link-card link-card-primary" to="/people">
         <span className="trip-text">
@@ -246,5 +250,82 @@ function AdminLink() {
         ›
       </span>
     </Link>
+  )
+}
+
+/** "Did you meet?" after a trip a connection was about, one person at a time. */
+function MeetPrompts() {
+  const [prompts, setPrompts] = useState<MeetPrompt[]>([])
+  const [step, setStep] = useState<'met' | 'again' | 'thanks'>('met')
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    meetPrompts().then(setPrompts)
+  }, [])
+
+  const p = prompts[0]
+  if (!p) return null
+
+  async function answer(met: boolean, again: boolean | null = null) {
+    setError(null)
+    try {
+      await answerMeet(p.connection_id, met, again)
+      setStep('thanks')
+    } catch (e) {
+      setError(messageOf(e))
+    }
+  }
+
+  function next() {
+    setPrompts((list) => list.slice(1))
+    setStep('met')
+  }
+
+  return (
+    <section className="card meet-card" aria-labelledby="meet-title">
+      <div className="match-head">
+        <Avatar name={p.display_name} path={p.photo_path} size="sm" />
+        <h2 id="meet-title">{step === 'thanks' ? 'Thank you' : step === 'met' ? `Did you meet ${p.display_name} in ${p.trip_city}?` : `Would you travel with ${p.display_name} again?`}</h2>
+      </div>
+      {step === 'met' && (
+        <>
+          <p className="hint">Only our team sees your answer. It helps us suggest good companions.</p>
+          <div className="action-row">
+            <button type="button" className="btn btn-secondary" onClick={() => answer(false)}>
+              No
+            </button>
+            <button type="button" className="btn btn-primary" onClick={() => setStep('again')}>
+              Yes, we met
+            </button>
+          </div>
+        </>
+      )}
+      {step === 'again' && (
+        <div className="meet-choices">
+          <button type="button" className="btn btn-primary" onClick={() => answer(true, true)}>
+            Yes
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={() => answer(true, null)}>
+            Not sure
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={() => answer(true, false)}>
+            No
+          </button>
+        </div>
+      )}
+      {step === 'thanks' && (
+        <>
+          <p>Your answer is saved. If anything went wrong on the trip, you can report {p.display_name} from your Connections page.</p>
+          <button type="button" className="btn btn-secondary btn-small" onClick={next}>
+            Done
+          </button>
+        </>
+      )}
+      {error && (
+        <p className="notice notice-error" role="alert">
+          {error}
+        </p>
+      )}
+    </section>
   )
 }

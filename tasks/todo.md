@@ -65,6 +65,7 @@ Unless a task says otherwise, every task is verified with
 - [x] **T16 `safety`: `/admin` moderation page** (admins only): actions, an action log, and the 3-report automatic pause. (M)
   - Done 5 Oct: `20261020090000_admin.sql` (25 pgTAP tests). Open reports and flagged messages with context; dismiss, warn, suspend, remove, and reinstate; every action logged. Warnings and suspensions show as a notice on the member's dashboard (email waits for T18). Suspended or removed members can't send requests or messages. "Remove" closes the account; deleting the sign-in itself comes with T19. Lewis is made an admin with one line of SQL (in the paste steps).
 - [ ] **T17 `safety`: Meeting-up guidance, trusted-contact share link, and the "Did you meet?" prompt.** (M)
+  - Status 5 Oct: meeting-up guidance and "Did you meet?" are done (`20261021090000_meet_feedback.sql`, 11 pgTAP tests). The guide is a page at /meeting-safely, shown once as a short card in the first chat and linked from every chat and from Connections. "Did you meet?" appears on the dashboard 2 to 60 days after the trip a connection was about, and the answers are private. Still to do: the trusted-contact link, which needs email sending (an email domain or Resend).
 - [ ] **T18 `notifications`: Email nudges** (new request, accepted, unread message after 30 min), with unsubscribe settings. (S)
 - [ ] **T19 `identity`: Delete account and download my data** (Edge Functions). (S)
 - [ ] **Checkpoint 23 Oct:** a full conversation, including a scam warning and a report visible on `/admin`.
