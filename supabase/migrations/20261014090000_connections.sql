@@ -5,7 +5,7 @@
 --
 -- Not yet here, added by later tasks: Sodalis+ limits (T10, everyone is
 -- on the free 5 a week until entitlements exist) and the phone check (T4).
--- Blocks and the 3-report pause come in through is_blocked and
+-- Blocks and the 3-report pause come in through blocked_with and
 -- requests_paused, which the safety migration fills in.
 
 create table public.connections (
@@ -63,14 +63,14 @@ as $$
   ))
 $$;
 
--- Placeholders, replaced by the safety migration: has either member
--- blocked the other, and are this member's requests paused after reports?
-create function public.is_blocked(a uuid, b uuid)
-returns boolean
+-- Placeholders, replaced by the safety migration: who has this member
+-- blocked or been blocked by, and are their requests paused after reports?
+create function public.blocked_with(member uuid)
+returns uuid[]
 language sql
 stable
 set search_path = ''
-as $$ select false $$;
+as $$ select '{}'::uuid[] $$;
 
 create function public.requests_paused(member uuid)
 returns boolean
@@ -79,23 +79,38 @@ stable
 set search_path = ''
 as $$ select false $$;
 
--- Replaces the placeholder from the matching migration. Is there anything
--- between these two that stops a new request or a suggestion? A block,
--- an open connection either way, or a decline in the last 90 days.
-create or replace function public.pair_is_closed(a uuid, b uuid)
+create function public.is_blocked(a uuid, b uuid)
 returns boolean
 language sql
 stable
 set search_path = ''
+as $$ select b = any (public.blocked_with(a)) $$;
+
+-- Replaces the placeholder from the matching migration. Who is kept out of
+-- this member's suggestions and requests? Anyone blocked either way, in an
+-- open connection either way, or who declined (or was declined) in the
+-- last 90 days.
+create or replace function public.closed_with(member uuid)
+returns uuid[]
+language sql
+stable
+set search_path = ''
 as $$
-  select public.is_blocked(a, b) or exists (
-    select 1 from public.connections c
-    where least(c.requester_id, c.addressee_id) = least(a, b)
-      and greatest(c.requester_id, c.addressee_id) = greatest(a, b)
+  select array(
+    select case when c.requester_id = member then c.addressee_id else c.requester_id end
+    from public.connections c
+    where member in (c.requester_id, c.addressee_id)
       and (c.status in ('pending', 'accepted')
            or (c.status = 'declined' and c.responded_at > now() - interval '90 days'))
-  )
+  ) || public.blocked_with(member)
 $$;
+
+create function public.pair_is_closed(a uuid, b uuid)
+returns boolean
+language sql
+stable
+set search_path = ''
+as $$ select b = any (public.closed_with(a)) $$;
 
 create function public.send_connection_request(p_to uuid, p_note text default null, p_trip_id bigint default null)
 returns bigint
@@ -230,6 +245,7 @@ revoke all on function public.week_start() from public, anon;
 revoke all on function public.weekly_request_limit(uuid) from public, anon;
 revoke all on function public.pair_is_closed(uuid, uuid) from public, anon, authenticated;
 revoke all on function public.is_blocked(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.blocked_with(uuid) from public, anon, authenticated;
 revoke all on function public.requests_paused(uuid) from public, anon, authenticated;
 revoke all on function public.requests_left_this_week() from public, anon;
 revoke all on function public.send_connection_request(uuid, text, bigint) from public, anon;

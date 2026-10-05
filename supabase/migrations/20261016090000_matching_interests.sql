@@ -29,6 +29,8 @@ declare
   my_prefs  public.preferences;
   my_count  integer;
   my_places integer;
+  closed    uuid[] := public.closed_with(me);
+  plus      boolean := public.has_plus(me);
 begin
   if me is null then
     raise exception 'Not signed in' using errcode = '42501';
@@ -61,46 +63,52 @@ begin
     join public.preferences pr on pr.profile_id = p.id
     where p.status = 'active'
       and p.onboarded_at is not null
-      and not public.pair_is_closed(me, p.id)
+      and not (p.id = any (closed))
       and public.fits_preferences(public.age_from_year(p.birth_year), p.gender, my_prefs)
       and public.fits_preferences(public.age_from_year(my.birth_year), my.gender, pr)
       and (my_prefs.max_distance_km is null
            or public.city_distance_km(p.home_city_id, my.home_city_id) <= my_prefs.max_distance_km)
-      and public.passes_viewer_filters(my_prefs, p)
+      and public.passes_viewer_filters(my_prefs, plus, p)
   ),
+  -- Score on counts first, keep the best 20, then fetch the names for
+  -- those 20 only, so this stays quick with many members.
   scored as (
     select c.*,
-           (select count(*) from public.profile_interests where profile_id = c.owner_id) as their_count,
-           array(select i.label from public.profile_interests a
-                   join mine b on b.interest_id = a.interest_id
-                   join public.interests i on i.id = a.interest_id
-                  where a.profile_id = c.owner_id
-                  order by i.sort) as shared,
-           array(select ci.name from public.wishlist w
-                   join public.wishlist v on v.city_id = w.city_id and v.profile_id = me
-                   join public.cities ci on ci.id = w.city_id
-                  where w.profile_id = c.owner_id
-                  order by ci.name) as places,
-           (select count(*) from public.wishlist where profile_id = c.owner_id) as their_places
+           round(
+             -- interests: Jaccard overlap
+             55 * c.shared_count::numeric
+               / (my_count + (select count(*) from public.profile_interests where profile_id = c.owner_id) - c.shared_count)
+             -- places both want to visit, against the shorter list
+             + 25 * coalesce(
+                 (select count(*) from public.wishlist w join public.wishlist v on v.city_id = w.city_id and v.profile_id = me
+                   where w.profile_id = c.owner_id)::numeric
+                 / nullif(least(my_places, (select count(*) from public.wishlist where profile_id = c.owner_id)), 0), 0)
+             -- style, pace and budget together
+             + 20 * (public.scale_match(c.travel_style, my.travel_style, '{planner,mix,spontaneous}')
+                     + public.scale_match(c.pace, my.pace, '{slow,steady,packed}')
+                     + public.scale_match(c.budget, my.budget, '{budget,mid,comfort}')) / 3
+           )::int as total
     from candidates c
+  ),
+  best as (
+    select * from scored s order by s.total desc, s.last_active_at desc limit 20
   )
-  select s.owner_id, s.display_name, s.birth_year, hc.name, hc.country_code::text, s.photo_path,
-         round(s.km)::int,
-         s.shared, s.places,
-         round(
-           -- interests: Jaccard overlap
-           55 * s.shared_count::numeric / (my_count + s.their_count - s.shared_count)
-           -- places both want to visit, against the shorter list
-           + 25 * coalesce(cardinality(s.places)::numeric / nullif(least(my_places, s.their_places), 0), 0)
-           -- style, pace and budget together
-           + 20 * (public.scale_match(s.travel_style, my.travel_style, '{planner,mix,spontaneous}')
-                   + public.scale_match(s.pace, my.pace, '{slow,steady,packed}')
-                   + public.scale_match(s.budget, my.budget, '{budget,mid,comfort}')) / 3
-         )::int as total
-  from scored s
-  left join public.cities hc on hc.id = s.home_city_id
-  order by total desc, s.last_active_at desc
-  limit 20;
+  select b.owner_id, b.display_name, b.birth_year, hc.name, hc.country_code::text, b.photo_path,
+         round(b.km)::int,
+         array(select i.label from public.profile_interests a
+                 join mine m on m.interest_id = a.interest_id
+                 join public.interests i on i.id = a.interest_id
+                where a.profile_id = b.owner_id
+                order by i.sort),
+         array(select ci.name from public.wishlist w
+                 join public.wishlist v on v.city_id = w.city_id and v.profile_id = me
+                 join public.cities ci on ci.id = w.city_id
+                where w.profile_id = b.owner_id
+                order by ci.name),
+         b.total
+  from best b
+  left join public.cities hc on hc.id = b.home_city_id
+  order by b.total desc, b.last_active_at desc;
 end;
 $$;
 

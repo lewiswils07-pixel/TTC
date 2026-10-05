@@ -51,7 +51,8 @@ Unless a task says otherwise, every task is verified with
   - Status 5 Oct: done in `20261017090000_plus_filters.sql` (10 pgTAP tests), which also adds the `entitlements` table and the 50-a-week Sodalis+ limit. Members can save Sodalis+ filters any time; the server ignores them unless the plan is active. Testers can be given Sodalis+ by adding a row in the table editor (source `manual`).
 - [x] **T11 `connections`: Send, accept, decline and withdraw requests**, with weekly limits (5 free, fair-use 50 for Sodalis+) enforced in SQL and a "requests" inbox. (M)
   - Status 5 Oct: done in `20261014090000_connections.sql` (24 pgTAP tests). Everyone gets 5 a week until Sodalis+ entitlements exist (T10). Withdrawn requests still count; a decline keeps the pair apart for 90 days. Live database needs it pasted after the matching file.
-- [ ] **T12 `matching`: Performance check.** 10,000 seeded members; suggestions return in under 300 ms. (S)
+- [x] **T12 `matching`: Performance check.** 10,000 seeded members; suggestions return in under 300 ms. (S)
+  - Status 5 Oct: `supabase/scripts/perf-10k.sql` (local only, rolled back). Suggestions for a trip take about 10 ms (slowest 21 ms) and by interests about 60 ms (slowest 140 ms). Getting there meant working out blocks, connections and nearby towns once per search instead of once per member.
 - [ ] **Checkpoint 16 Oct:** two test accounts with overlapping trips see each other in the right order and connect.
 
 ## Week 3: chat and safety (19–23 Oct)

@@ -22,7 +22,7 @@ create policy "Members read their own plan" on public.entitlements
 revoke all on public.entitlements from anon, authenticated;
 grant select on public.entitlements to authenticated;
 
-create function public.has_plus(member uuid)
+create or replace function public.has_plus(member uuid)
 returns boolean
 language sql
 stable
@@ -52,19 +52,18 @@ as $$ select case when public.has_plus(member) then 50 else 5 end $$;
 
 -- Empty lists mean "any". Members who haven't set a style, pace or budget
 -- are left out once the viewer filters on it.
-create or replace function public.passes_viewer_filters(prefs public.preferences, p public.profiles)
+create or replace function public.passes_viewer_filters(prefs public.preferences, plus boolean, p public.profiles)
 returns boolean
 language sql
 stable
 set search_path = ''
 as $$
-  select not public.has_plus(prefs.profile_id)
+  select not plus
       or ((not prefs.verified_only or p.id_verified_at is not null)
           and (cardinality(prefs.styles) = 0 or p.travel_style = any (prefs.styles))
           and (cardinality(prefs.paces) = 0 or p.pace = any (prefs.paces))
           and (cardinality(prefs.budgets) = 0 or p.budget = any (prefs.budgets)))
 $$;
 
-revoke all on function public.has_plus(uuid) from public, anon, authenticated;
 revoke all on function public.i_have_plus() from public, anon;
 grant execute on function public.i_have_plus() to authenticated;

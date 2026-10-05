@@ -4,8 +4,8 @@
 -- rows directly; this function returns a fixed set of public fields.
 --
 -- Not yet applied here: the phone check (T4). Blocks and connection
--- history come in through pair_is_closed (T11, T14), and Sodalis+
--- filters through passes_viewer_filters (T10).
+-- history come in through closed_with (T11, T14), and Sodalis+ filters
+-- through has_plus and passes_viewer_filters (T10).
 
 -- Distance between two cities in km (haversine).
 create function public.city_distance_km(a integer, b integer)
@@ -59,27 +59,37 @@ as $$
      and gender = any (prefs.genders)
 $$;
 
--- Is anything between these two members that should keep them out of
--- each other's suggestions? Nothing yet: the connections migration
--- replaces this with the real rule (open request, or declined lately).
-create function public.pair_is_closed(a uuid, b uuid)
+-- Placeholders that later migrations fill in. They are worked out once
+-- per search, not once per member, so suggestions stay quick.
+-- Members kept out of this member's suggestions (blocked, already in
+-- touch, or declined lately): none yet; see the connections migration.
+create function public.closed_with(member uuid)
+returns uuid[]
+language sql
+stable
+set search_path = ''
+as $$ select '{}'::uuid[] $$;
+
+-- Is this member on Sodalis+? No one is yet; see the filters migration.
+create function public.has_plus(member uuid)
 returns boolean
 language sql
 stable
 set search_path = ''
 as $$ select false $$;
-revoke all on function public.pair_is_closed(uuid, uuid) from public, anon, authenticated;
 
 -- Does this member pass the viewer's Sodalis+ filters (verified only,
--- style, pace, budget)? Everyone does for now: the filters migration
--- replaces this once there's a way to tell who has Sodalis+.
-create function public.passes_viewer_filters(prefs public.preferences, p public.profiles)
+-- style, pace, budget)? Everyone does until the filters migration.
+create function public.passes_viewer_filters(prefs public.preferences, plus boolean, p public.profiles)
 returns boolean
 language sql
 stable
 set search_path = ''
 as $$ select true $$;
-revoke all on function public.passes_viewer_filters(public.preferences, public.profiles) from public, anon, authenticated;
+
+revoke all on function public.closed_with(uuid) from public, anon, authenticated;
+revoke all on function public.has_plus(uuid) from public, anon, authenticated;
+revoke all on function public.passes_viewer_filters(public.preferences, boolean, public.profiles) from public, anon, authenticated;
 
 create function public.suggest_for_trip(p_trip_id bigint)
 returns table (
@@ -108,6 +118,9 @@ declare
   my_trip  public.trips;
   my       public.profiles;
   my_prefs public.preferences;
+  nearby   integer[];
+  closed   uuid[] := public.closed_with(me);
+  plus     boolean := public.has_plus(me);
 begin
   select * into my_trip from public.trips t where t.id = p_trip_id and t.owner_id = me;
   if not found then
@@ -115,6 +128,14 @@ begin
   end if;
   select * into my from public.profiles p where p.id = me;
   select * into my_prefs from public.preferences pr where pr.profile_id = me;
+  -- The trip's town and everywhere within 30 km (Lisbon and Cascais),
+  -- worked out once: a rough box first, then the exact distance.
+  select array_agg(c.id) into nearby
+  from public.cities c, public.cities m
+  where m.id = my_trip.city_id
+    and c.lat between m.lat - 0.3 and m.lat + 0.3
+    and abs(c.lng - m.lng) <= 0.3 / greatest(cos(radians(m.lat)), 0.01)
+    and public.city_distance_km(c.id, m.id) <= 30;
 
   return query
   with candidates as (
@@ -130,28 +151,27 @@ begin
     where t.owner_id <> me
       and t.visibility = 'members'
       and t.end_date >= current_date
-      -- same place, or within 30 km (Lisbon and Cascais)
-      and (t.city_id = my_trip.city_id or public.city_distance_km(t.city_id, my_trip.city_id) <= 30)
+      and t.city_id = any (nearby)
       -- date windows, each widened by its flexibility, overlap by a day or more
       and t.start_date - t.flexible_days <= my_trip.end_date + my_trip.flexible_days
       and my_trip.start_date - my_trip.flexible_days <= t.end_date + t.flexible_days
       and p.status = 'active'
       and p.onboarded_at is not null
-      and not public.pair_is_closed(me, p.id)
+      and not (p.id = any (closed))
       -- mutual: each fits what the other is looking for
       and public.fits_preferences(public.age_from_year(p.birth_year), p.gender, my_prefs)
       and public.fits_preferences(public.age_from_year(my.birth_year), my.gender, pr)
       and (my_prefs.max_distance_km is null
            or public.city_distance_km(p.home_city_id, my.home_city_id) <= my_prefs.max_distance_km)
-      and public.passes_viewer_filters(my_prefs, p)
+      and public.passes_viewer_filters(my_prefs, plus, p)
   ),
+  -- Score on counts first and keep the best 20, then fetch the shared
+  -- interests' names for those 20 only, so busy places stay quick.
   scored as (
     select c.*,
-           array(select i.label from public.profile_interests a
-                   join public.profile_interests b on b.interest_id = a.interest_id and b.profile_id = me
-                   join public.interests i on i.id = a.interest_id
-                  where a.profile_id = c.owner_id
-                  order by i.sort) as shared,
+           (select count(*) from public.profile_interests a
+              join public.profile_interests b on b.interest_id = a.interest_id and b.profile_id = me
+             where a.profile_id = c.owner_id) as shared_count,
            (select count(distinct interest_id) from public.profile_interests
              where profile_id in (c.owner_id, me)) as union_count,
            greatest(0, c.o_end - c.o_start + 1)::numeric
@@ -161,7 +181,7 @@ begin
   ranked as (
     select s.*,
            round(
-             45 * coalesce(cardinality(s.shared)::numeric / nullif(s.union_count, 0), 0)
+             45 * coalesce(s.shared_count::numeric / nullif(s.union_count, 0), 0)
              + 20 * s.date_fit
              + 15 * public.scale_match(s.travel_style, my.travel_style, '{planner,mix,spontaneous}')
              + 10 * public.scale_match(s.pace, my.pace, '{slow,steady,packed}')
@@ -170,18 +190,24 @@ begin
            -- one card per member: their best-matching trip
            row_number() over (partition by s.owner_id order by s.date_fit desc, s.start_date) as nth
     from scored s
+  ),
+  best as (
+    select * from ranked r where r.nth = 1 order by r.total desc, r.last_active_at desc limit 20
   )
-  select r.owner_id, r.display_name, r.birth_year, hc.name, hc.country_code::text, r.photo_path,
-         tc.name, r.start_date, r.end_date,
-         case when r.o_start <= r.o_end then r.o_start end,
-         case when r.o_start <= r.o_end then r.o_end end,
-         r.shared, r.total
-  from ranked r
-  join public.cities tc on tc.id = r.city_id
-  left join public.cities hc on hc.id = r.home_city_id
-  where r.nth = 1
-  order by r.total desc, r.last_active_at desc
-  limit 20;
+  select b.owner_id, b.display_name, b.birth_year, hc.name, hc.country_code::text, b.photo_path,
+         tc.name, b.start_date, b.end_date,
+         case when b.o_start <= b.o_end then b.o_start end,
+         case when b.o_start <= b.o_end then b.o_end end,
+         array(select i.label from public.profile_interests x
+                 join public.profile_interests y on y.interest_id = x.interest_id and y.profile_id = me
+                 join public.interests i on i.id = x.interest_id
+                where x.profile_id = b.owner_id
+                order by i.sort),
+         b.total
+  from best b
+  join public.cities tc on tc.id = b.city_id
+  left join public.cities hc on hc.id = b.home_city_id
+  order by b.total desc, b.last_active_at desc;
 end;
 $$;
 

@@ -43,15 +43,16 @@ create index reports_subject_idx on public.reports (subject_profile_id, status);
 alter table public.reports enable row level security;
 revoke all on public.reports from anon, authenticated;
 
-create or replace function public.is_blocked(a uuid, b uuid)
-returns boolean
+create or replace function public.blocked_with(member uuid)
+returns uuid[]
 language sql
 stable
 set search_path = ''
 as $$
-  select exists (
-    select 1 from public.blocks
-    where (blocker_id = a and blocked_id = b) or (blocker_id = b and blocked_id = a)
+  select array(
+    select blocked_id from public.blocks where blocker_id = member
+    union
+    select blocker_id from public.blocks where blocked_id = member
   )
 $$;
 
