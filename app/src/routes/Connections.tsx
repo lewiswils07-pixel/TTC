@@ -128,7 +128,7 @@ export function Connections() {
                 type="button"
                 className="btn-link"
                 disabled={busy === c.id}
-                onClick={() => window.confirm(`Withdraw your request to ${c.display_name}? It still counts towards this week’s 5.`) && act(c.id, () => withdrawRequest(c.id), `Request to ${c.display_name} withdrawn.`)}
+                onClick={() => window.confirm(`Withdraw your request to ${c.display_name}? It still counts towards this week’s requests.`) && act(c.id, () => withdrawRequest(c.id), `Request to ${c.display_name} withdrawn.`)}
               >
                 Withdraw request
               </button>

@@ -12,6 +12,9 @@ import { messageOf } from '../lib/errors'
 import { firstUnfinishedStep } from '../lib/onboarding'
 import {
   BUDGETS,
+  DISTANCES,
+  distanceKm,
+  distanceOption,
   GENDERS,
   MAX_INTERESTS,
   MAX_PREF_AGE,
@@ -20,6 +23,7 @@ import {
   PACES,
   TRAVEL_STYLES,
   type Budget,
+  type Distance,
   type Gender,
   type Pace,
   type TravelStyle,
@@ -332,14 +336,6 @@ function InterestsStep({ data, interests, onDone, onBack }: Omit<StepProps, 'use
   )
 }
 
-const DISTANCES = [
-  { value: 'any', label: 'Any' },
-  { value: '50', label: '50 km' },
-  { value: '150', label: '150 km' },
-  { value: '500', label: '500 km' },
-] as const
-type Distance = (typeof DISTANCES)[number]['value']
-
 function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
   const p = data.profile
   const prefs = data.preferences
@@ -349,8 +345,7 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
   const [mobility, setMobility] = useState(p.mobility_note ?? '')
   const [genders, setGenders] = useState<Gender[]>(prefs.genders)
   const [ages, setAges] = useState<[number, number]>([prefs.age_min, Math.min(prefs.age_max, MAX_PREF_AGE)])
-  const initialDistance = (DISTANCES.find((d) => d.value === String(prefs.max_distance_km))?.value ?? 'any') as Distance
-  const [distance, setDistance] = useState<Distance[]>([initialDistance])
+  const [distance, setDistance] = useState<Distance[]>([distanceOption(prefs.max_distance_km)])
 
   const errors = {
     genders: genders.length ? null : 'Choose at least one option.',
@@ -366,7 +361,7 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
         genders,
         age_min: ages[0],
         age_max: ages[1],
-        max_distance_km: distance[0] === 'any' ? null : Number(distance[0]),
+        max_distance_km: distanceKm(distance[0]),
       },
     )
     await finishOnboarding()

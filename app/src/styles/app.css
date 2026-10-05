@@ -361,3 +361,14 @@ legend { padding: 0; }
 .safety-box .chips { display: grid; grid-template-columns: 1fr 1fr; }
 .safety-box .chip span { width: 100%; justify-content: center; padding-inline: 8px; }
 .safety-box .action-row .btn { padding-inline: var(--space-4); white-space: nowrap; }
+
+/* Find people and filters */
+.page-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.page-head h1 { margin: 0; }
+.tag-plus { min-height: 26px; padding: 0 10px; font-size: 0.8125rem; background: color-mix(in srgb, var(--brand-gold) 24%, var(--card)); color: var(--ink); }
+.link-card-primary { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.link-card { margin-bottom: var(--space-3); }
+.mode-switch { margin-top: var(--space-4); }
+.mode-switch > legend { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* Headings get focus when a screen opens, for screen readers; no ring needed. */
+[tabindex='-1']:focus { outline: none; }

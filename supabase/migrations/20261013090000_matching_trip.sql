@@ -3,9 +3,9 @@
 -- with the reasons we think they'd get on. Members never read each other's
 -- rows directly; this function returns a fixed set of public fields.
 --
--- Not yet applied here, added by later tasks: blocks (T14), the phone
--- check (T4) and Sodalis+ filters (T10). Connection history comes in
--- through pair_is_closed (T11).
+-- Not yet applied here: the phone check (T4). Blocks and connection
+-- history come in through pair_is_closed (T11, T14), and Sodalis+
+-- filters through passes_viewer_filters (T10).
 
 -- Distance between two cities in km (haversine).
 create function public.city_distance_km(a integer, b integer)
@@ -70,6 +70,17 @@ set search_path = ''
 as $$ select false $$;
 revoke all on function public.pair_is_closed(uuid, uuid) from public, anon, authenticated;
 
+-- Does this member pass the viewer's Sodalis+ filters (verified only,
+-- style, pace, budget)? Everyone does for now: the filters migration
+-- replaces this once there's a way to tell who has Sodalis+.
+create function public.passes_viewer_filters(prefs public.preferences, p public.profiles)
+returns boolean
+language sql
+stable
+set search_path = ''
+as $$ select true $$;
+revoke all on function public.passes_viewer_filters(public.preferences, public.profiles) from public, anon, authenticated;
+
 create function public.suggest_for_trip(p_trip_id bigint)
 returns table (
   profile_id       uuid,
@@ -132,6 +143,7 @@ begin
       and public.fits_preferences(public.age_from_year(my.birth_year), my.gender, pr)
       and (my_prefs.max_distance_km is null
            or public.city_distance_km(p.home_city_id, my.home_city_id) <= my_prefs.max_distance_km)
+      and public.passes_viewer_filters(my_prefs, p)
   ),
   scored as (
     select c.*,

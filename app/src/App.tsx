@@ -12,6 +12,8 @@ const Onboarding = lazy(() => import('./routes/Onboarding').then((m) => ({ defau
 const TripMatches = lazy(() => import('./routes/TripMatches').then((m) => ({ default: m.TripMatches })))
 const Connections = lazy(() => import('./routes/Connections').then((m) => ({ default: m.Connections })))
 const TripForm = lazy(() => import('./routes/TripForm').then((m) => ({ default: m.TripForm })))
+const People = lazy(() => import('./routes/People').then((m) => ({ default: m.People })))
+const Filters = lazy(() => import('./routes/Filters').then((m) => ({ default: m.Filters })))
 const Dashboard = lazy(() => import('./routes/Dashboard').then((m) => ({ default: m.Dashboard })))
 
 export function App() {
@@ -67,6 +69,22 @@ export function AppRoutes() {
         element={
           <RequireSession>
             <TripForm />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/people"
+        element={
+          <RequireSession>
+            <People />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/filters"
+        element={
+          <RequireSession>
+            <Filters />
           </RequireSession>
         }
       />

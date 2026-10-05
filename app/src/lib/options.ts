@@ -34,6 +34,16 @@ export type TravelStyle = (typeof TRAVEL_STYLES)[number]['value']
 export type Pace = (typeof PACES)[number]['value']
 export type Budget = (typeof BUDGETS)[number]['value']
 
+export const DISTANCES = [
+  { value: 'any', label: 'Any' },
+  { value: '50', label: '50 km' },
+  { value: '150', label: '150 km' },
+  { value: '500', label: '500 km' },
+] as const
+export type Distance = (typeof DISTANCES)[number]['value']
+export const distanceOption = (km: number | null): Distance => DISTANCES.find((d) => d.value === String(km))?.value ?? 'any'
+export const distanceKm = (d: Distance | undefined): number | null => (!d || d === 'any' ? null : Number(d))
+
 export const MIN_AGE = 18
 export const MAX_PREF_AGE = 99
 export const MIN_INTERESTS = 3

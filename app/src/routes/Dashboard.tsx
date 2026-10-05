@@ -55,6 +55,15 @@ export function Dashboard() {
   return (
     <Layout actions={signOutButton}>
       <h1>Hello, {profile.display_name}</h1>
+      <Link className="card link-card link-card-primary" to="/people">
+        <span className="trip-text">
+          <strong>Find people to travel with</strong>
+          <span className="trip-meta">For a trip you’ve booked, or to plan something new</span>
+        </span>
+        <span className="trip-chevron" aria-hidden="true">
+          ›
+        </span>
+      </Link>
       <ConnectionsLink />
       <MyTrips />
       <Wishlist />

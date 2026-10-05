@@ -51,3 +51,35 @@ export function reasons(s: TripSuggestion, myCityName: string): string[] {
 export function homeLabel(s: Pick<TripSuggestion, 'home_city' | 'home_country'>): string | null {
   return s.home_city && s.home_country ? cityLabel({ name: s.home_city, country_code: s.home_country }) : null
 }
+
+export type InterestSuggestion = {
+  profile_id: string
+  display_name: string
+  birth_year: number | null
+  home_city: string | null
+  home_country: string | null
+  photo_path: string | null
+  distance_km: number | null
+  shared_interests: string[]
+  shared_places: string[]
+  score: number
+}
+
+/** Up to 20 members who share at least 2 interests, for planning something new. */
+export async function suggestByInterests(): Promise<InterestSuggestion[]> {
+  const { data, error } = await supabase.rpc('suggest_by_interests')
+  if (error) throw friendlyError(error)
+  return (data ?? []) as InterestSuggestion[]
+}
+
+/** Why we suggested someone with no trip in common. */
+export function interestReasons(s: InterestSuggestion): string[] {
+  const lines = [`Both into ${listLabels(s.shared_interests)}`]
+  if (s.shared_places.length) lines.push(`You both want to visit ${listLabels(s.shared_places)}`)
+  if (s.distance_km !== null) lines.push(s.distance_km < 10 ? 'Lives near you' : `Lives about ${roundKm(s.distance_km)} km from you`)
+  return lines
+}
+
+function roundKm(km: number): number {
+  return km < 100 ? Math.round(km / 5) * 5 : Math.round(km / 50) * 50
+}

@@ -3,8 +3,6 @@
 import { friendlyError } from './errors'
 import { supabase } from './supabase'
 
-export const WEEKLY_REQUESTS = 5
-
 export type Connection = {
   id: number
   status: 'pending' | 'accepted'
