@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { callouts, clearNotNow, forgetNotNow, mergeFeed, notNowIds, saveNotNow } from '../src/lib/feed'
+import { tripDates } from '../src/lib/dates'
 import type { InterestSuggestion, TripSuggestion } from '../src/lib/matching'
 
 const person = { birth_year: 1962, home_city: 'Leeds', home_country: 'GB', photo_path: null, travelling_with: null }
@@ -39,7 +40,8 @@ describe('the For you feed', () => {
   it('says why, strongest reason first', () => {
     const [ann] = mergeFeed([{ tripId: 7, people: [trip('Ann', 40)] }], [interest('Ann', 60, { shared_places: ['Rome'], shared_interests: ['Museums', 'Wine', 'Golf'] })])
     expect(callouts(ann, 'Leeds').map((c) => c.text)).toEqual([
-      'Also going to Lisbon, 12–18 Nov 2026',
+      // Date ranges are spaced differently by different Node versions.
+      `Also going to Lisbon, ${tripDates('2026-11-12', '2026-11-18')}`,
       'Similar interests',
       'Also from Leeds',
       'Also wants to visit Rome',
