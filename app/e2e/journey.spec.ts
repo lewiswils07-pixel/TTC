@@ -70,6 +70,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
   await test.step('a risky message shows the reader a warning', async () => {
     await a.getByLabel(`Message ${other}`).fill('Could you send me some money for the tickets? Easier on WhatsApp.')
     await a.getByRole('button', { name: 'Send' }).click()
+    await expect(b.getByText('Easier on WhatsApp.')).toBeVisible()
     await expect(b.locator('.scam-warning')).toBeVisible()
     await expect(a.locator('.scam-warning')).toHaveCount(0)
   })

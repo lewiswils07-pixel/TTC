@@ -72,7 +72,7 @@ jobs:
           cache-dependency-path: app/package-lock.json
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.119.0  # the version the test was written against; live chat behaves differently across versions
       - name: Start a local Supabase (database, sign-in, live chat, test inbox)
         run: supabase start -x studio,imgproxy,edge-runtime,logflare,vector,supavisor,postgres-meta
       - name: Point the test at the local Supabase
