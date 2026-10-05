@@ -20,6 +20,8 @@ const RULES: Array<[RegExp, string]> = [
   [/already in touch|connections_open_pair/i, 'You can’t send this member a request right now. You may already be connected or waiting for a reply.'],
   [/isn't available|isn’t available/i, 'This member isn’t available right now.'],
   [/finish your profile/i, 'Please finish your profile before sending requests.'],
+  [/requests are paused/i, 'Your requests are paused while we look into something about your account. We’ll be in touch by email.'],
+  [/member not found/i, 'We couldn’t find that member. They may have left.'],
   [/request not found/i, 'That request has already been answered or withdrawn.'],
   [/payload too large|exceeded the maximum allowed size/i, 'That photo is too big. Please choose a smaller one.'],
 ]

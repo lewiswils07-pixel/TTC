@@ -4,15 +4,16 @@
 -- rules can't be skipped from the app.
 --
 -- Not yet here, added by later tasks: Sodalis+ limits (T10, everyone is
--- on the free 5 a week until entitlements exist), the phone check (T4),
--- blocks and the 3-report pause (T14).
+-- on the free 5 a week until entitlements exist) and the phone check (T4).
+-- Blocks and the 3-report pause come in through is_blocked and
+-- requests_paused, which the safety migration fills in.
 
 create table public.connections (
   id            bigint generated always as identity primary key,
   requester_id  uuid not null references public.profiles (id) on delete cascade,
   addressee_id  uuid not null references public.profiles (id) on delete cascade,
   note          text check (char_length(note) <= 280),
-  status        text not null default 'pending' check (status in ('pending', 'accepted', 'declined', 'withdrawn')),
+  status        text not null default 'pending' check (status in ('pending', 'accepted', 'declined', 'withdrawn', 'ended')),
   trip_id       bigint references public.trips (id) on delete set null,
   created_at    timestamptz not null default now(),
   responded_at  timestamptz,
@@ -62,15 +63,32 @@ as $$
   ))
 $$;
 
+-- Placeholders, replaced by the safety migration: has either member
+-- blocked the other, and are this member's requests paused after reports?
+create function public.is_blocked(a uuid, b uuid)
+returns boolean
+language sql
+stable
+set search_path = ''
+as $$ select false $$;
+
+create function public.requests_paused(member uuid)
+returns boolean
+language sql
+stable
+set search_path = ''
+as $$ select false $$;
+
 -- Replaces the placeholder from the matching migration. Is there anything
--- between these two that stops a new request or a suggestion? An open connection either way, or a decline in the last 90 days.
+-- between these two that stops a new request or a suggestion? A block,
+-- an open connection either way, or a decline in the last 90 days.
 create or replace function public.pair_is_closed(a uuid, b uuid)
 returns boolean
 language sql
 stable
 set search_path = ''
 as $$
-  select exists (
+  select public.is_blocked(a, b) or exists (
     select 1 from public.connections c
     where least(c.requester_id, c.addressee_id) = least(a, b)
       and greatest(c.requester_id, c.addressee_id) = greatest(a, b)
@@ -99,7 +117,11 @@ begin
   if my.onboarded_at is null or my.status <> 'active' then
     raise exception 'Finish your profile before sending requests' using errcode = 'check_violation';
   end if;
-  if them.id is null or them.id = me or them.onboarded_at is null or them.status <> 'active' then
+  if public.requests_paused(me) then
+    raise exception 'Requests are paused' using errcode = 'check_violation';
+  end if;
+  if them.id is null or them.id = me or them.onboarded_at is null or them.status <> 'active'
+     or public.is_blocked(me, p_to) then
     raise exception 'This member isn''t available' using errcode = 'check_violation';
   end if;
   -- Only people who'd appear in each other's suggestions (spec §4.1).
@@ -207,6 +229,8 @@ $$;
 revoke all on function public.week_start() from public, anon;
 revoke all on function public.weekly_request_limit(uuid) from public, anon;
 revoke all on function public.pair_is_closed(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.is_blocked(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.requests_paused(uuid) from public, anon, authenticated;
 revoke all on function public.requests_left_this_week() from public, anon;
 revoke all on function public.send_connection_request(uuid, text, bigint) from public, anon;
 revoke all on function public.respond_to_request(bigint, boolean) from public, anon;

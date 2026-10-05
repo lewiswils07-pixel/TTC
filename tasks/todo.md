@@ -55,6 +55,7 @@ Unless a task says otherwise, every task is verified with
 ## Week 3: chat and safety (19–23 Oct)
 - [ ] **T13 `chat`: Conversations, messages and live updates**, unread counts and the chat screen; pgTAP proves you can't message without an accepted connection. (M)
 - [ ] **T14 `safety`: Block** (applies both ways, everywhere) **and report**, from profiles and messages. (M)
+  - Status 5 Oct: blocking and reporting members is done in `20261015090000_safety.sql` (22 pgTAP tests), from suggestion cards and the Connections page, with an unblock list. Reports from 3 different members pause requests. Still to do: reporting a message (with chat, T13), blocks in chat and groups, and the /admin review page; until then Lewis reviews reports in the Supabase table editor.
 - [ ] **T15 `safety`: Scam guard.** Pattern checker on the server, flagged messages, and a warning card for the recipient. Unit tests on 30+ example messages. (S)
 - [ ] **T16 `safety`: `/admin` moderation page** (admins only): actions, an action log, and the 3-report automatic pause. (M)
 - [ ] **T17 `safety`: Meeting-up guidance, trusted-contact share link, and the "Did you meet?" prompt.** (M)

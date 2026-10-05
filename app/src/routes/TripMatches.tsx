@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { Field } from '../components/Field'
 import { Layout, Loading } from '../components/Layout'
+import { SafetyBox } from '../components/SafetyBox'
 import { requestsLeft, sendRequest, WEEKLY_REQUESTS } from '../lib/connections'
 import { cityLabel } from '../lib/cities'
 import { tripDates } from '../lib/dates'
@@ -100,7 +101,17 @@ export function TripMatches() {
 }
 
 function MatchCard({ person, myCity, tripId, left, onSent }: { person: TripSuggestion; myCity: string; tripId: number; left: number; onSent: () => void }) {
+  const [gone, setGone] = useState<string | null>(null)
   const home = homeLabel(person)
+  if (gone) {
+    return (
+      <li className="card">
+        <p className="notice notice-success" role="status">
+          {gone}
+        </p>
+      </li>
+    )
+  }
   return (
     <li className="card match-card">
       <div className="match-head">
@@ -124,6 +135,7 @@ function MatchCard({ person, myCity, tripId, left, onSent }: { person: TripSugge
         ))}
       </ul>
       <ConnectBox person={person} tripId={tripId} left={left} onSent={onSent} />
+      <SafetyBox profileId={person.profile_id} name={person.display_name} onBlocked={setGone} />
     </li>
   )
 }

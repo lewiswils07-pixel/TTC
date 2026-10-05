@@ -2,32 +2,52 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { Layout, Loading } from '../components/Layout'
+import { SafetyBox } from '../components/SafetyBox'
 import { tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { homeLabel } from '../lib/matching'
 import { myConnections, respondToRequest, withdrawRequest, type Connection } from '../lib/connections'
 import { ageLabel } from '../lib/options'
+import { myBlocks, unblockMember, type BlockedMember } from '../lib/safety'
 
 /** Requests for me, requests I've sent, and people I'm connected with. */
 export function Connections() {
   const [items, setItems] = useState<Connection[] | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [busy, setBusy] = useState<number | null>(null)
+  const [busy, setBusy] = useState<number | string | null>(null)
   const [status, setStatus] = useState('')
+  const [done, setDone] = useState<string | null>(null)
+  const [blocked, setBlocked] = useState<BlockedMember[] | null>(null)
   const heading = useRef<HTMLHeadingElement>(null)
 
-  const load = useCallback(() => myConnections().then(setItems, (e) => setError(messageOf(e))), [])
+  const load = useCallback(
+    () =>
+      Promise.all([myConnections(), myBlocks()]).then(
+        ([c, b]) => {
+          setItems(c)
+          setBlocked(b)
+        },
+        (e) => setError(messageOf(e)),
+      ),
+    [],
+  )
   useEffect(() => {
     void load()
     heading.current?.focus()
   }, [load])
 
-  async function act(item: Connection, action: () => Promise<void>, done: string) {
-    setBusy(item.id)
+  function blockedOne(message: string) {
+    setDone(message)
+    void load()
+  }
+
+  async function act(key: number | string, action: () => Promise<void>, message: string) {
+    setBusy(key)
     setError(null)
+    setDone(null)
     try {
       await action()
-      setStatus(done)
+      setStatus(message)
       await load()
     } catch (e) {
       setError(messageOf(e))
@@ -58,6 +78,11 @@ export function Connections() {
           {error}
         </p>
       )}
+      {done && (
+        <p className="notice notice-success" role="status">
+          {done}
+        </p>
+      )}
 
       <h2 className="section-title">Requests for you</h2>
       {received.length === 0 ? (
@@ -65,12 +90,12 @@ export function Connections() {
       ) : (
         <ul className="person-list">
           {received.map((c) => (
-            <PersonCard key={c.id} item={c}>
+            <PersonCard key={c.id} item={c} onBlocked={blockedOne}>
               <div className="action-row">
-                <button type="button" className="btn btn-secondary" disabled={busy === c.id} onClick={() => act(c, () => respondToRequest(c.id, false), `You said no thanks to ${c.display_name}.`)}>
+                <button type="button" className="btn btn-secondary" disabled={busy === c.id} onClick={() => act(c.id, () => respondToRequest(c.id, false), `You said no thanks to ${c.display_name}.`)}>
                   No thanks
                 </button>
-                <button type="button" className="btn btn-primary" disabled={busy === c.id} onClick={() => act(c, () => respondToRequest(c.id, true), `You’re now connected with ${c.display_name}.`)}>
+                <button type="button" className="btn btn-primary" disabled={busy === c.id} onClick={() => act(c.id, () => respondToRequest(c.id, true), `You’re now connected with ${c.display_name}.`)}>
                   Accept
                 </button>
               </div>
@@ -85,7 +110,7 @@ export function Connections() {
       ) : (
         <ul className="person-list">
           {connected.map((c) => (
-            <PersonCard key={c.id} item={c}>
+            <PersonCard key={c.id} item={c} onBlocked={blockedOne}>
               <p className="hint">Messaging opens soon.</p>
             </PersonCard>
           ))}
@@ -98,12 +123,12 @@ export function Connections() {
       ) : (
         <ul className="person-list">
           {sent.map((c) => (
-            <PersonCard key={c.id} item={c}>
+            <PersonCard key={c.id} item={c} onBlocked={blockedOne}>
               <button
                 type="button"
                 className="btn-link"
                 disabled={busy === c.id}
-                onClick={() => window.confirm(`Withdraw your request to ${c.display_name}? It still counts towards this week’s 5.`) && act(c, () => withdrawRequest(c.id), `Request to ${c.display_name} withdrawn.`)}
+                onClick={() => window.confirm(`Withdraw your request to ${c.display_name}? It still counts towards this week’s 5.`) && act(c.id, () => withdrawRequest(c.id), `Request to ${c.display_name} withdrawn.`)}
               >
                 Withdraw request
               </button>
@@ -111,11 +136,34 @@ export function Connections() {
           ))}
         </ul>
       )}
+
+      {blocked && blocked.length > 0 && (
+        <>
+          <h2 className="section-title">Blocked</h2>
+          <p className="hint section-hint">You and they can’t see each other. Unblocking lets you both appear again.</p>
+          <ul className="blocked-list">
+            {blocked.map((b) => (
+              <li key={b.profile_id} className="card">
+                <span>{b.display_name}</span>
+                <button
+                  type="button"
+                  className="btn-link"
+                  disabled={busy === b.profile_id}
+                  aria-label={`Unblock ${b.display_name}`}
+                  onClick={() => act(b.profile_id, () => unblockMember(b.profile_id), `${b.display_name} is unblocked.`)}
+                >
+                  Unblock
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </Layout>
   )
 }
 
-function PersonCard({ item, children }: { item: Connection; children: React.ReactNode }) {
+function PersonCard({ item, children, onBlocked }: { item: Connection; children: React.ReactNode; onBlocked: (message: string) => void }) {
   const home = homeLabel(item)
   return (
     <li className="card person-card">
@@ -136,6 +184,7 @@ function PersonCard({ item, children }: { item: Connection; children: React.Reac
       )}
       {item.note && <blockquote className="person-note">“{item.note}”</blockquote>}
       {children}
+      <SafetyBox profileId={item.profile_id} name={item.display_name} onBlocked={onBlocked} />
     </li>
   )
 }

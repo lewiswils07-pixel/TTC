@@ -346,3 +346,18 @@ legend { padding: 0; }
 .link-card { display: flex; align-items: center; gap: var(--space-3); color: var(--ink); text-decoration: none; }
 .link-card:hover { border-color: var(--ink-soft); }
 .link-card > span:first-child { flex: 1; }
+
+/* Block and report */
+.btn-danger { background: var(--danger); color: var(--card); }
+.btn-danger:hover:not(:disabled) { background: color-mix(in srgb, var(--danger) 85%, #000); }
+.safety-link { align-self: center; min-height: 36px; color: var(--ink-soft); font-weight: 500; font-size: var(--text-sm); }
+.safety-box { display: flex; flex-direction: column; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--line); }
+.safety-box > p { margin: 0; }
+.safety-box .action-row > .btn-danger { flex: 1; }
+.safety-choices { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.safety-choices .btn { padding-inline: var(--space-3); text-align: center; }
+.blocked-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.blocked-list li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-2) var(--space-4); }
+.safety-box .chips { display: grid; grid-template-columns: 1fr 1fr; }
+.safety-box .chip span { width: 100%; justify-content: center; padding-inline: 8px; }
+.safety-box .action-row .btn { padding-inline: var(--space-4); white-space: nowrap; }
