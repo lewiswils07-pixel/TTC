@@ -408,3 +408,19 @@ legend { padding: 0; }
 .scam-warning > p { margin: 0; }
 .scam-warning > .btn-link { align-self: flex-start; }
 .scam-warning .safety-box { margin: 0; }
+
+/* Review page and team notices */
+.queue-card { display: flex; flex-direction: column; gap: var(--space-2); }
+.queue-card h3 { margin: 0; }
+.queue-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.tag-report { background: color-mix(in srgb, var(--danger) 14%, var(--card)); }
+.tag-flag { background: color-mix(in srgb, var(--brand-gold) 24%, var(--card)); }
+.queue-details { margin: 0; white-space: pre-wrap; }
+.admin-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: var(--space-2); margin-top: var(--space-2); }
+.admin-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.admin-log li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-1) var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--line); }
+.member-notice { margin-bottom: var(--space-3); display: flex; flex-direction: column; gap: var(--space-2); align-items: flex-start; }
+.member-notice h2 { margin: 0; font-size: var(--text-lg); }
+.member-notice p { margin: 0; }
+.member-notice-body { font-style: italic; }
+.member-notice-warning, .member-notice-suspended, .member-notice-removed { border-color: color-mix(in srgb, var(--brand-gold) 60%, var(--line)); background: color-mix(in srgb, var(--brand-gold) 12%, var(--card)); }

@@ -129,7 +129,10 @@ begin
   end if;
   select * into my from public.profiles where id = me;
   select * into them from public.profiles where id = p_to;
-  if my.onboarded_at is null or my.status <> 'active' then
+  if my.status <> 'active' then
+    raise exception 'Your account is paused' using errcode = '42501';
+  end if;
+  if my.onboarded_at is null then
     raise exception 'Finish your profile before sending requests' using errcode = 'check_violation';
   end if;
   if public.requests_paused(me) then

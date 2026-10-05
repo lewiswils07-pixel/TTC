@@ -16,6 +16,7 @@ const People = lazy(() => import('./routes/People').then((m) => ({ default: m.Pe
 const Filters = lazy(() => import('./routes/Filters').then((m) => ({ default: m.Filters })))
 const Messages = lazy(() => import('./routes/Messages').then((m) => ({ default: m.Messages })))
 const Chat = lazy(() => import('./routes/Chat').then((m) => ({ default: m.Chat })))
+const Admin = lazy(() => import('./routes/Admin').then((m) => ({ default: m.Admin })))
 const Dashboard = lazy(() => import('./routes/Dashboard').then((m) => ({ default: m.Dashboard })))
 
 export function App() {
@@ -111,6 +112,14 @@ export function AppRoutes() {
         element={
           <RequireSession>
             <Chat />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <RequireSession>
+            <Admin />
           </RequireSession>
         }
       />

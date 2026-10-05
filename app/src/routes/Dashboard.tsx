@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { MyTrips, Wishlist } from '../components/MyTrips'
+import { dismissNotice, iAmAdmin, myNotices, type Notice } from '../lib/admin'
 import { signOut } from '../lib/auth'
 import { myConversations } from '../lib/chat'
 import { myConnections } from '../lib/connections'
@@ -56,6 +57,8 @@ export function Dashboard() {
   return (
     <Layout actions={signOutButton}>
       <h1>Hello, {profile.display_name}</h1>
+      <Notices />
+      <AdminLink />
       <Link className="card link-card link-card-primary" to="/people">
         <span className="trip-text">
           <strong>Find people to travel with</strong>
@@ -178,6 +181,67 @@ function MessagesLink() {
           {unread}
         </span>
       )}
+      <span className="trip-chevron" aria-hidden="true">
+        ›
+      </span>
+    </Link>
+  )
+}
+
+const NOTICE_TEXT: Record<Notice['kind'], { title: string; text: string }> = {
+  warning: { title: 'A note from the Sodalis team', text: 'Please keep to our community rules so everyone feels safe.' },
+  suspended: {
+    title: 'Your account is paused',
+    text: 'While it’s paused, other members can’t see you, and you can’t send requests or messages. We’ll be in touch by email.',
+  },
+  removed: { title: 'Your account has been closed', text: 'It was closed for breaking our community rules. If you think this is a mistake, reply to any email from us.' },
+  reinstated: { title: 'Welcome back', text: 'Your account is active again.' },
+}
+
+/** Warnings and account changes from the team. Warnings and "welcome back" can be closed; a pause shows while it lasts. */
+function Notices() {
+  const [notices, setNotices] = useState<Notice[]>([])
+
+  useEffect(() => {
+    myNotices().then(setNotices)
+  }, [])
+
+  async function close(id: number) {
+    setNotices((list) => list.filter((n) => n.id !== id))
+    await dismissNotice(id).catch(() => undefined)
+  }
+
+  return notices.map((n) => {
+    const { title, text } = NOTICE_TEXT[n.kind]
+    const closable = n.kind === 'warning' || n.kind === 'reinstated'
+    return (
+      <section key={n.id} className={`card member-notice member-notice-${n.kind}`} role={closable ? undefined : 'alert'} aria-label={title}>
+        <h2>{title}</h2>
+        {n.body && <p className="member-notice-body">“{n.body}”</p>}
+        <p>{text}</p>
+        {closable && (
+          <button type="button" className="btn btn-secondary btn-small" onClick={() => close(n.id)}>
+            Got it
+          </button>
+        )}
+      </section>
+    )
+  })
+}
+
+/** Link to the review page, for admins only. */
+function AdminLink() {
+  const [admin, setAdmin] = useState(false)
+  useEffect(() => {
+    iAmAdmin().then(setAdmin)
+  }, [])
+  if (!admin) return null
+  return (
+    <Link className="card link-card" to="/admin">
+      <span className="trip-text">
+        <strong>Review reports</strong>
+        <span className="trip-meta">Reports and flagged messages (team only)</span>
+      </span>
       <span className="trip-chevron" aria-hidden="true">
         ›
       </span>
