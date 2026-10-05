@@ -46,6 +46,9 @@ insert into public.profile_interests (profile_id, interest_id) values
 update public.preferences set age_min = 40 where profile_id = pg_temp.m(1);            -- Ann: 40 and over
 update public.preferences set genders = '{man}' where profile_id = pg_temp.m(7);        -- Gus only wants men
 
+-- Keep any demo trips from the local seed out of these fixtures.
+update public.trips set visibility = 'hidden';
+
 insert into public.trips (owner_id, city_id, start_date, end_date, flexible_days, visibility) values
   (pg_temp.m(1),  2267057, current_date + 30, current_date + 37, 0, 'members'),  -- Ann: Lisbon
   (pg_temp.m(2),  2267057, current_date + 32, current_date + 35, 0, 'members'),  -- Bob: best match
