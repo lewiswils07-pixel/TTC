@@ -17,6 +17,8 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${port}`,
     locale: 'en-GB',
+    // One stuck step fails fast instead of using up the whole run.
+    actionTimeout: 30_000,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     // Cloud machines without Playwright's own browsers can point at another Chromium.

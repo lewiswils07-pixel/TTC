@@ -80,7 +80,7 @@ Unless a task says otherwise, every task is verified with
 - [ ] **T24 `trip-planner`: Hand-picked activity lists** for the top 15 destinations, so the agent prefers our own picks. (S)
 - [ ] **T24b `trip-planner`: Booking links via `/go/<id>`.** Affiliate tag added when available,
       click recorded, disclosure line shown next to the link (spec §7a). (S)
-- [ ] **T25: Full end-to-end Playwright path** (join → … → plan → block/report) in CI. (M)
+- [x] **T25: Full end-to-end Playwright path** (join → … → plan → block/report) in CI. (M) — app/e2e/journey.spec.ts runs two members through join, trip, request, accept, live chat with a scam warning, a group with a shared plan, report and block, and the review page, against a local Supabase. Runs in the "End to end" CI job. It found and fixed a live-chat sign-in delay.
 - [ ] **Checkpoint 30 Oct:** a group of 3 plans a trip. **Beta invites go out** (web, TestFlight, Play internal testing).
 
 ## Week 5: Sodalis+, verification, apps (2–6 Nov)

@@ -3,7 +3,7 @@
 // (with a scam warning), start a group, plan together, and report and block,
 // ending with the report on the review page.
 import { expect, test } from '@playwright/test'
-import { admin, closeGuide, emailOf, idOf, isoIn, newPhone, signIn } from './helpers'
+import { admin, closeGuide, emailOf, idOf, isoIn, newPhone, pickPlace, signIn } from './helpers'
 
 test('a new member joins, connects, chats, plans with a group, and reports', async ({ browser }) => {
   const a = await newPhone(browser)
@@ -15,8 +15,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.getByLabel('First name').fill('Lewis')
     await a.getByLabel(/born/).fill('1970')
     await a.getByRole('radio', { name: 'Man', exact: true }).check({ force: true })
-    await a.getByRole('combobox').fill('Leed')
-    await a.getByRole('option', { name: 'Leeds, United Kingdom' }).click()
+    await pickPlace(a, 'Leed', 'Leeds, United Kingdom')
     await a.getByRole('button', { name: /continue/i }).click()
     await expect(a.getByText(/Step 2 of 4/)).toBeVisible()
     await a.getByRole('button', { name: /continue|skip/i }).click()
@@ -34,8 +33,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
   let other = ''
   await test.step('add a trip and ask someone going too', async () => {
     await a.getByRole('link', { name: 'Add your first trip' }).click()
-    await a.getByRole('combobox').fill('Pari')
-    await a.getByRole('option', { name: /Paris, France/ }).first().click()
+    await pickPlace(a, 'Pari', /Paris, France/)
     await a.getByLabel('First day').fill(isoIn(20))
     await a.getByLabel('Last day').fill(isoIn(50))
     await a.getByRole('radio', { name: '± 1 week' }).evaluate((el: HTMLElement) => el.click())
@@ -79,8 +77,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
   await test.step('start a group and plan together', async () => {
     await a.goto('/groups/new')
     await a.getByLabel('Group name').fill('Paris in spring')
-    await a.getByRole('combobox').fill('Pari')
-    await a.getByRole('option', { name: /Paris, France/ }).first().click()
+    await pickPlace(a, 'Pari', /Paris, France/)
     await a.getByLabel('First day').fill(isoIn(25))
     await a.getByLabel('Last day').fill(isoIn(28))
     await a.getByText(other, { exact: true }).click()

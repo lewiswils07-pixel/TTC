@@ -64,3 +64,15 @@ export async function closeGuide(page: Page): Promise<void> {
   const gotIt = page.getByRole('button', { name: 'Got it' })
   if (await gotIt.isVisible().catch(() => false)) await gotIt.click()
 }
+
+/** Types into the place search and picks a result. Retries the typing, because a page that is still loading can clear the box. */
+export async function pickPlace(page: Page, typed: string, option: string | RegExp): Promise<void> {
+  const box = page.getByRole('combobox')
+  const choice = page.getByRole('option', { name: option }).first()
+  await expect(async () => {
+    await box.fill('')
+    await box.pressSequentially(typed, { delay: 30 })
+    await expect(choice).toBeVisible({ timeout: 5_000 })
+  }).toPass({ timeout: 60_000 })
+  await choice.click()
+}
