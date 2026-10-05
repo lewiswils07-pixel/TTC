@@ -46,9 +46,12 @@ export async function getTrip(id: number): Promise<Trip | null> {
   return data as unknown as Trip | null
 }
 
-export async function saveTrip(trip: TripInput, id?: number): Promise<void> {
-  const { error } = id ? await supabase.from('trips').update(trip).eq('id', id) : await supabase.from('trips').insert(trip)
+/** Adds or changes a trip and returns its id. */
+export async function saveTrip(trip: TripInput, id?: number): Promise<number> {
+  const query = id ? supabase.from('trips').update(trip).eq('id', id) : supabase.from('trips').insert(trip)
+  const { data, error } = await query.select('id').single()
   if (error) throw friendlyError(error)
+  return data.id as number
 }
 
 export async function deleteTrip(id: number): Promise<void> {

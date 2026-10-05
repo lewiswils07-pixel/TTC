@@ -22,7 +22,7 @@ const FLEXIBILITY: readonly Option<Flex>[] = [
 ]
 const toFlex = (days: number): Flex => (FLEXIBILITY.find((f) => Number(f.value) >= days)?.value ?? '7')
 
-/** Add a trip (/trips/new) or change one (/trips/:id). */
+/** Add a trip (/trips/new) or change one (/trips/:id/edit). */
 export function TripForm() {
   const { id } = useParams()
   const tripId = id ? Number(id) : undefined
@@ -93,7 +93,7 @@ function TripEditor({ trip }: { trip: Trip | null }) {
     setBusy(true)
     setError(null)
     try {
-      await saveTrip(
+      const savedId = await saveTrip(
         {
           city_id: city!.id,
           start_date: start,
@@ -104,7 +104,7 @@ function TripEditor({ trip }: { trip: Trip | null }) {
         },
         trip?.id,
       )
-      navigate('/dashboard', { replace: true })
+      navigate(`/trips/${savedId}`, { replace: true })
     } catch (err) {
       setError(messageOf(err))
       setBusy(false)
@@ -218,7 +218,7 @@ function TripEditor({ trip }: { trip: Trip | null }) {
           )}
         </div>
         <SaveError error={error} />
-        <ActionBar busy={busy} onBack={() => navigate('/dashboard')} label={trip ? 'Save changes' : 'Add trip'} />
+        <ActionBar busy={busy} onBack={() => navigate(trip ? `/trips/${trip.id}` : '/dashboard')} label={trip ? 'Save changes' : 'Add trip'} />
       </form>
     </Layout>
   )

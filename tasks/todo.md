@@ -43,7 +43,8 @@ Unless a task says otherwise, every task is verified with
 ## Week 2: trips, matching, connections (12–16 Oct)
 - [x] **T7 `trips`: Add, edit and delete trips**, plus wishlist cities, shown on the dashboard. (M)
   - Status 5 Oct: done in the app; the live database needs `20261012090000_trips.sql` pasted after the app is merged.
-- [ ] **T8 `matching`: `suggest_for_trip`**: hard filters, the mutual age and gender rule, scoring, and "why you'd get on" reasons. pgTAP fixtures check the order. (M)
+- [x] **T8 `matching`: `suggest_for_trip`**: hard filters, the mutual age and gender rule, scoring, and "why you'd get on" reasons. pgTAP fixtures check the order. (M)
+  - Status 5 Oct: first draft done (Lewis expects to change the rules after a Q&A). Blocks, connection history, the phone check and Sodalis+ filters are added by T14, T11, T4 and T10. Live database needs `20261013090000_matching_trip.sql` pasted after the trips file.
 - [ ] **T9 `matching`: `suggest_by_interests`**, plus the dashboard switch between "For my trip" and "Plan something new". (M)
 - [ ] **T10 `matching`: Filters.** Basic filters for everyone. Sodalis+ filters are locked unless the member has Sodalis+ (checked on the server). (S)
 - [ ] **T11 `connections`: Send, accept, decline and withdraw requests**, with weekly limits (5 free, fair-use 50 for Sodalis+) enforced in SQL and a "requests" inbox. (M)

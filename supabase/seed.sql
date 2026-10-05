@@ -75,3 +75,15 @@ update public.preferences
    set age_min = 18 + floor(random() * 30)::int,
        age_max = 70 + floor(random() * 30)::int
  where profile_id::text like '00000000-0000-4000-8000-%';
+
+-- One upcoming trip each, to a handful of popular cities, so trip
+-- suggestions have people to show.
+insert into public.trips (owner_id, city_id, start_date, end_date, flexible_days)
+select p.id, d.city_id, d.start_date, d.start_date + 2 + floor(random() * 8)::int, (array[0, 0, 1, 3])[1 + floor(random() * 4)::int]
+from public.profiles p
+cross join lateral (
+  select (array[2267057, 2269594, 3169070, 2988507, 3128760, 2650225, 2759794, 3176959])[1 + floor(random() * 8)::int] as city_id,
+         current_date + 7 + floor(random() * 80)::int as start_date
+  where p.id is not null                 -- ties the subquery to each member
+) d
+where p.id::text like '00000000-0000-4000-8000-%';

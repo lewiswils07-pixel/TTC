@@ -46,7 +46,7 @@ export function MyTrips() {
         <ul className="trip-list">
           {trips.map((trip) => (
             <li key={trip.id}>
-              <Link className="trip-row" to={`/trips/${trip.id}`} aria-label={`${cityLabel(trip.city)}, ${tripDates(trip.start_date, trip.end_date)}. Edit trip`}>
+              <Link className="trip-row" to={`/trips/${trip.id}`} aria-label={`${cityLabel(trip.city)}, ${tripDates(trip.start_date, trip.end_date)}. See who’s going`}>
                 <span className="trip-pin" aria-hidden="true">
                   <svg viewBox="0 0 24 24" width="20" height="20">
                     <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z" fill="currentColor" />
