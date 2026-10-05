@@ -4,10 +4,11 @@ import { Layout, Loading } from '../components/Layout'
 import { SafetyBox } from '../components/SafetyBox'
 import { SubNav } from '../components/SubNav'
 import { CONNECTIONS_NAV } from '../lib/nav'
-import { ConnectBox, useRequests, type Requests } from '../components/Suggestions'
+import { ConnectBox, SharedInterests, useRequests, type Requests } from '../components/Suggestions'
 import { messageOf } from '../lib/errors'
 import { callouts, clearNotNow, forgetNotNow, loadFeed, notNowIds, saveNotNow, type FeedPerson } from '../lib/feed'
-import { fitWords, homeLabel, listLabels } from '../lib/matching'
+import { noteFirstMatch } from '../lib/kpis'
+import { fitWords, homeLabel } from '../lib/matching'
 import { ageLabel } from '../lib/options'
 import { photoUrl } from '../lib/photo'
 import { useSession } from '../lib/session-context'
@@ -32,6 +33,7 @@ export function ForYou() {
         const hidden = notNowIds(me)
         setSkipped(list.filter((p) => hidden.has(p.profile_id)).length)
         setPeople(list.filter((p) => !hidden.has(p.profile_id)))
+        if (list.length) noteFirstMatch()
       },
       (e) => setError(messageOf(e)),
     )
@@ -228,7 +230,7 @@ function PersonCard({
           ))}
         </ul>
       )}
-      {person.shared_interests.length > 0 && <p className="feed-detail">Both into {listLabels(person.shared_interests, 4)}</p>}
+      {person.shared_interests.length > 0 && <SharedInterests labels={person.shared_interests} />}
       {person.travelling_with && <p className="feed-detail">Travels with: {person.travelling_with}</p>}
       {connecting ? (
         <ConnectBox person={person} tripId={person.trip_id ?? undefined} requests={requests} startOpen onSent={onSent} onCancel={() => setConnecting(false)} />

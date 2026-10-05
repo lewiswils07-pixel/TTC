@@ -8,6 +8,7 @@ import { Avatar } from '../components/Avatar'
 import { cityLabel } from '../lib/cities'
 import { BUDGETS, GENDERS, MAX_PREF_AGE, PACES, TRAVEL_STYLES, ageFromDate, ageLabel, labelFor } from '../lib/options'
 import { profileStrength } from '../lib/strength'
+import { answerNps, npsDue } from '../lib/kpis'
 import { listMyTrips } from '../lib/trips'
 import { messageOf } from '../lib/errors'
 import { photoUrl } from '../lib/photo'
@@ -68,6 +69,7 @@ export function Profile() {
       <Notices />
       {hasTrip !== null && <Strength profile={profile} interestCount={interestIds.length} hasTrip={hasTrip} />}
       <MeetPrompts />
+      <RecommendCard />
       <AdminLink />
       <section className="card profile-card" aria-labelledby="my-profile">
         <div className="profile-head">
@@ -214,8 +216,8 @@ function AdminLink() {
   return (
     <Link className="card link-card" to="/admin">
       <span className="trip-text">
-        <strong>Review reports</strong>
-        <span className="trip-meta">Reports and flagged messages (team only)</span>
+        <strong>Team: reports and insights</strong>
+        <span className="trip-meta">Reports, flagged messages and KPIs (team only)</span>
       </span>
       <span className="trip-chevron" aria-hidden="true">
         ›
@@ -301,3 +303,88 @@ function MeetPrompts() {
   )
 }
 
+
+/** "How likely are you to recommend us?" after 2 weeks, then every 90 days. "Not now" waits a week on this phone. */
+function RecommendCard() {
+  const [due, setDue] = useState(false)
+  const [score, setScore] = useState<number | null>(null)
+  const [comment, setComment] = useState('')
+  const [state, setState] = useState<'ask' | 'busy' | 'thanks'>('ask')
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let snoozed = false
+    try {
+      snoozed = Date.now() < Number(localStorage.getItem('sodalis.npsSnooze') ?? 0)
+    } catch {
+      // Private browsing: ask anyway.
+    }
+    if (!snoozed) npsDue().then(setDue)
+  }, [])
+
+  if (!due) return null
+
+  function later() {
+    try {
+      localStorage.setItem('sodalis.npsSnooze', String(Date.now() + 7 * 86_400_000))
+    } catch {
+      // Nothing to save.
+    }
+    setDue(false)
+  }
+
+  async function send() {
+    if (score === null) return
+    setState('busy')
+    setError(null)
+    try {
+      await answerNps(score, comment)
+      setState('thanks')
+    } catch (e) {
+      setError(messageOf(e))
+      setState('ask')
+    }
+  }
+
+  return (
+    <section className="card recommend-card" aria-labelledby="recommend-title">
+      <h2 id="recommend-title">{state === 'thanks' ? 'Thank you' : 'How likely are you to recommend Sodalis to a friend?'}</h2>
+      {state === 'thanks' ? (
+        <p>Your answer helps us make the Collective better.</p>
+      ) : (
+        <>
+          <div className="score-row" role="radiogroup" aria-label="0 is not at all likely, 10 is extremely likely">
+            {Array.from({ length: 11 }, (_, n) => (
+              <button key={n} type="button" role="radio" aria-checked={score === n} className={score === n ? 'score is-chosen' : 'score'} onClick={() => setScore(n)}>
+                {n}
+              </button>
+            ))}
+          </div>
+          <div className="score-ends" aria-hidden="true">
+            <span>Not likely</span>
+            <span>Very likely</span>
+          </div>
+          {score !== null && (
+            <label className="field">
+              <span>Anything you’d like to tell us? (optional)</span>
+              <textarea className="textarea textarea-short" maxLength={500} value={comment} onChange={(e) => setComment(e.target.value)} />
+            </label>
+          )}
+          {error && (
+            <p className="notice notice-error" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="action-row">
+            <button type="button" className="btn btn-secondary" onClick={later}>
+              Not now
+            </button>
+            <button type="button" className="btn btn-primary" disabled={score === null || state === 'busy'} onClick={send}>
+              Send
+            </button>
+          </div>
+        </>
+      )}
+    </section>
+  )
+}

@@ -10,6 +10,22 @@ import { Avatar } from './Avatar'
 import { Field } from './Field'
 import { SafetyBox } from './SafetyBox'
 
+/** Every interest two members share, as tags (Lewis, 5 Oct: show them all). */
+export function SharedInterests({ labels }: { labels: string[] }) {
+  return (
+    <div className="shared-interests">
+      <h4>Interests you share</h4>
+      <ul className="chip-list">
+        {labels.map((label) => (
+          <li key={label} className="tag tag-shared">
+            {label}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 type Person = {
   profile_id: string
   display_name: string
@@ -19,6 +35,7 @@ type Person = {
   photo_path: string | null
   travelling_with: string | null
   score: number
+  shared_interests?: string[]
 }
 
 export type Requests = { left: number; limit: number; used: () => void }
@@ -77,10 +94,11 @@ export function SuggestionCard({ person, reasons, tripId, requests }: { person: 
         </div>
       </div>
       <ul className="match-reasons">
-        {reasons.map((line) => (
+        {reasons.filter((line) => !line.startsWith('Both into')).map((line) => (
           <li key={line}>{line}</li>
         ))}
       </ul>
+      {!!person.shared_interests?.length && <SharedInterests labels={person.shared_interests} />}
       <ConnectBox person={person} tripId={tripId} requests={requests} />
       <SafetyBox profileId={person.profile_id} name={person.display_name} onBlocked={setGone} />
     </li>

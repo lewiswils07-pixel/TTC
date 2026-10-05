@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { Layout, Monogram } from '../components/Layout'
+import { HEARD_FROM, saveHeardFrom, type HeardFrom } from '../lib/kpis'
+import { useSession } from '../lib/session-context'
 import { brand } from '../lib/brand'
 import { longDate } from '../lib/dates'
 import { supabase } from '../lib/supabase'
@@ -53,6 +55,7 @@ export function WelcomeScreen() {
             <strong>Plan together</strong> in chat. Adding a trip is optional, and shows you people going too.
           </li>
         </ol>
+        <HeardFromQuestion />
         <Link className="btn btn-primary btn-block btn-lg" to="/connections">
           Start meeting people
         </Link>
@@ -61,5 +64,38 @@ export function WelcomeScreen() {
         </Link>
       </section>
     </Layout>
+  )
+}
+
+/** One optional tap: where the member heard about us (for the team's sign-ups by channel). */
+function HeardFromQuestion() {
+  const { session } = useSession()
+  const [chosen, setChosen] = useState<HeardFrom | null>(null)
+  const [hidden, setHidden] = useState(false)
+
+  async function pick(value: HeardFrom) {
+    setChosen(value)
+    // Older databases don't have the question yet: just hide it.
+    await saveHeardFrom(session!.user.id, value).catch(() => setHidden(true))
+  }
+
+  if (hidden) return null
+  return (
+    <fieldset className="heard-from">
+      <legend>Where did you hear about us? (optional)</legend>
+      {chosen ? (
+        <p className="hint" role="status">
+          Thank you.
+        </p>
+      ) : (
+        <div className="pill-row">
+          {HEARD_FROM.map((o) => (
+            <button key={o.value} type="button" className="pill" onClick={() => pick(o.value)}>
+              {o.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </fieldset>
   )
 }
