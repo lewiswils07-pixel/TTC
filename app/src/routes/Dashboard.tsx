@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { MyTrips, Wishlist } from '../components/MyTrips'
 import { signOut } from '../lib/auth'
+import { myConversations } from '../lib/chat'
 import { myConnections } from '../lib/connections'
 import { cityLabel } from '../lib/cities'
 import { BUDGETS, GENDERS, MAX_PREF_AGE, PACES, TRAVEL_STYLES, ageLabel, labelFor } from '../lib/options'
@@ -64,6 +65,7 @@ export function Dashboard() {
           ›
         </span>
       </Link>
+      <MessagesLink />
       <ConnectionsLink />
       <MyTrips />
       <Wishlist />
@@ -144,6 +146,36 @@ function ConnectionsLink() {
       {waiting > 0 && (
         <span className="badge" aria-hidden="true">
           {waiting}
+        </span>
+      )}
+      <span className="trip-chevron" aria-hidden="true">
+        ›
+      </span>
+    </Link>
+  )
+}
+
+/** Entry to Messages, with the number of unread messages. Hidden until the database has chat and there's someone to talk to. */
+function MessagesLink() {
+  const [unread, setUnread] = useState<number | null>(null)
+
+  useEffect(() => {
+    myConversations().then(
+      (list) => setUnread(list && list.length ? list.reduce((n, c) => n + c.unread, 0) : null),
+      () => setUnread(null),
+    )
+  }, [])
+
+  if (unread === null) return null
+  return (
+    <Link className="card link-card" to="/messages">
+      <span className="trip-text">
+        <strong>Messages</strong>
+        <span className="trip-meta">{unread ? `${unread} unread ${unread === 1 ? 'message' : 'messages'}` : 'Chat with the people you’re connected with'}</span>
+      </span>
+      {unread > 0 && (
+        <span className="badge" aria-hidden="true">
+          {unread}
         </span>
       )}
       <span className="trip-chevron" aria-hidden="true">

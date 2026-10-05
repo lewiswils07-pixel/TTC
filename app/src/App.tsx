@@ -14,6 +14,8 @@ const Connections = lazy(() => import('./routes/Connections').then((m) => ({ def
 const TripForm = lazy(() => import('./routes/TripForm').then((m) => ({ default: m.TripForm })))
 const People = lazy(() => import('./routes/People').then((m) => ({ default: m.People })))
 const Filters = lazy(() => import('./routes/Filters').then((m) => ({ default: m.Filters })))
+const Messages = lazy(() => import('./routes/Messages').then((m) => ({ default: m.Messages })))
+const Chat = lazy(() => import('./routes/Chat').then((m) => ({ default: m.Chat })))
 const Dashboard = lazy(() => import('./routes/Dashboard').then((m) => ({ default: m.Dashboard })))
 
 export function App() {
@@ -93,6 +95,22 @@ export function AppRoutes() {
         element={
           <RequireSession>
             <Connections />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/messages"
+        element={
+          <RequireSession>
+            <Messages />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/messages/:id"
+        element={
+          <RequireSession>
+            <Chat />
           </RequireSession>
         }
       />

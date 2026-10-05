@@ -23,6 +23,10 @@ const RULES: Array<[RegExp, string]> = [
   [/requests are paused/i, 'Your requests are paused while we look into something about your account. We’ll be in touch by email.'],
   [/member not found/i, 'We couldn’t find that member. They may have left.'],
   [/request not found/i, 'That request has already been answered or withdrawn.'],
+  [/conversation has ended/i, 'This conversation has ended, so new messages can’t be sent.'],
+  [/conversation not found/i, 'We couldn’t find that conversation. It may have ended.'],
+  [/write a message first/i, 'Write a message first.'],
+  [/messages_body_check/i, 'Messages can be up to 2,000 characters.'],
   [/payload too large|exceeded the maximum allowed size/i, 'That photo is too big. Please choose a smaller one.'],
 ]
 

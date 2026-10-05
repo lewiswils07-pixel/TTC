@@ -56,7 +56,8 @@ Unless a task says otherwise, every task is verified with
 - [ ] **Checkpoint 16 Oct:** two test accounts with overlapping trips see each other in the right order and connect.
 
 ## Week 3: chat and safety (19–23 Oct)
-- [ ] **T13 `chat`: Conversations, messages and live updates**, unread counts and the chat screen; pgTAP proves you can't message without an accepted connection. (M)
+- [x] **T13 `chat`: Conversations, messages and live updates**, unread counts and the chat screen; pgTAP proves you can't message without an accepted connection. (M)
+  - Done 5 Oct: `20261018090000_chat.sql` (16 pgTAP tests). A conversation opens when a request is accepted; blocking ends it and hides it. Messages page with unread counts, a chat screen with live updates (Supabase Realtime), and "Message …" on Connections. Tested in a browser with two members at 320 px dark and 390 px light, axe clean. Group chats come with T18.
 - [ ] **T14 `safety`: Block** (applies both ways, everywhere) **and report**, from profiles and messages. (M)
   - Status 5 Oct: blocking and reporting members is done in `20261015090000_safety.sql` (22 pgTAP tests), from suggestion cards and the Connections page, with an unblock list. Reports from 3 different members pause requests. Still to do: reporting a message (with chat, T13), blocks in chat and groups, and the /admin review page; until then Lewis reviews reports in the Supabase table editor.
 - [ ] **T15 `safety`: Scam guard.** Pattern checker on the server, flagged messages, and a warning card for the recipient. Unit tests on 30+ example messages. (S)

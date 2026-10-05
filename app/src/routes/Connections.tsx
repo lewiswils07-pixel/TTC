@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { Layout, Loading } from '../components/Layout'
 import { SafetyBox } from '../components/SafetyBox'
+import { myConversations } from '../lib/chat'
 import { tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { homeLabel } from '../lib/matching'
@@ -18,14 +19,16 @@ export function Connections() {
   const [status, setStatus] = useState('')
   const [done, setDone] = useState<string | null>(null)
   const [blocked, setBlocked] = useState<BlockedMember[] | null>(null)
+  const [chats, setChats] = useState<Map<string, number>>(new Map())
   const heading = useRef<HTMLHeadingElement>(null)
 
   const load = useCallback(
     () =>
-      Promise.all([myConnections(), myBlocks()]).then(
-        ([c, b]) => {
+      Promise.all([myConnections(), myBlocks(), myConversations().catch(() => null)]).then(
+        ([c, b, conv]) => {
           setItems(c)
           setBlocked(b)
+          setChats(new Map((conv ?? []).map((x) => [x.profile_id, x.id])))
         },
         (e) => setError(messageOf(e)),
       ),
@@ -106,12 +109,18 @@ export function Connections() {
 
       <h2 className="section-title">Connected</h2>
       {connected.length === 0 ? (
-        <p className="hint section-hint">When someone accepts, or you accept them, they’ll appear here. Messaging opens soon.</p>
+        <p className="hint section-hint">When someone accepts, or you accept them, they’ll appear here and you can message each other.</p>
       ) : (
         <ul className="person-list">
           {connected.map((c) => (
             <PersonCard key={c.id} item={c} onBlocked={blockedOne}>
-              <p className="hint">Messaging opens soon.</p>
+              {chats.has(c.profile_id) ? (
+                <Link className="btn btn-primary btn-block" to={`/messages/${chats.get(c.profile_id)}`}>
+                  Message {c.display_name}
+                </Link>
+              ) : (
+                <p className="hint">Messaging opens soon.</p>
+              )}
             </PersonCard>
           ))}
         </ul>
