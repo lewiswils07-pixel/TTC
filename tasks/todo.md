@@ -41,7 +41,8 @@ Unless a task says otherwise, every task is verified with
 - [ ] **Checkpoint 9 Oct:** Lewis signs in on his phone and builds a profile.
 
 ## Week 2: trips, matching, connections (12–16 Oct)
-- [ ] **T7 `trips`: Add, edit and delete trips**, plus wishlist cities, shown on the dashboard. (M)
+- [x] **T7 `trips`: Add, edit and delete trips**, plus wishlist cities, shown on the dashboard. (M)
+  - Status 5 Oct: done in the app; the live database needs `20261012090000_trips.sql` pasted after the app is merged.
 - [ ] **T8 `matching`: `suggest_for_trip`**: hard filters, the mutual age and gender rule, scoring, and "why you'd get on" reasons. pgTAP fixtures check the order. (M)
 - [ ] **T9 `matching`: `suggest_by_interests`**, plus the dashboard switch between "For my trip" and "Plan something new". (M)
 - [ ] **T10 `matching`: Filters.** Basic filters for everyone. Sodalis+ filters are locked unless the member has Sodalis+ (checked on the server). (S)
