@@ -25,5 +25,11 @@ export function useChecks<K extends string>(errors: Record<K, string | null>) {
     return false
   }
 
-  return { shown, touch, validateAll }
+  /** Hide all errors again, for a form that is used more than once. */
+  const reset = useCallback(() => {
+    setTouched({})
+    setSubmitted(false)
+  }, [])
+
+  return { shown, touch, validateAll, reset }
 }

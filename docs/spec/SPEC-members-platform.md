@@ -180,28 +180,37 @@ Each returns at most 20 cards, ranked.
   appear to someone who wouldn't want to see you.
 - The viewer's distance filter (home city to home city).
 - Sodalis+ viewer filters, if set: verified only, style, budget, pace.
+- Opened the app in the last 60 days (Lewis, 5 Oct).
+- Members without a photo still appear, but after everyone with one. A photo is needed to send a
+  connection request (Lewis, 5 Oct).
 
 ### 4.2 Trip mode
 - **Candidates:** other members' trips to the **same city** (or within 30 km, so Lisbon and Cascais
-  count) whose dates overlap by at least 1 day. Each trip's `flexible_days` widens its date window.
+  count) whose dates overlap by at least 2 days (or the whole of a 1-day trip). Each trip's
+  `flexible_days` widens its date window.
 - **Score (0–100):**
 
   | Weight | Factor | How it is measured |
   |---|---|---|
-  | 45 | Shared interests | Jaccard overlap of the two interest sets |
+  | 50 | Shared interests | Jaccard overlap of the two interest sets |
   | 20 | Date overlap | Overlapping days ÷ the shorter trip's length |
-  | 15 | Travel style | Exact match = 1, neighbouring = 0.5 |
-  | 10 | Pace | As travel style |
-  | 10 | Budget | As travel style |
+  | 15 | Budget | Exact match = 1, neighbouring = 0.5 |
+  | 10 | Travel style | As budget |
+  | 5 | Pace | As budget |
 
-  If either person hasn't set a factor, it scores a neutral 0.5.
+  If either person hasn't set a factor, it scores a neutral 0.5. Weights confirmed by Lewis, 5 Oct.
+- **Everyday habits:** room sharing, early riser or night owl, walking, and languages spoken
+  (any in common). Their average fit (0 to 1, unanswered = 0.5) multiplies the score by
+  0.85 to 1, so a clash lowers a score by up to 15% but never hides anyone.
+- Cards show words, not the number: 70+ "Great match", 50+ "Good match", otherwise "Worth a look".
+- One person per profile; a member can add a short "travelling with" note, shown on their card.
 - Ties are broken by most recently active.
 - Each card shows **why**: "Both into Photography and Coffee · overlap 12–15 May".
 
 ### 4.3 Interest mode
 - **Candidates:** members sharing at least 2 interests, within the distance filter.
-- **Score:** 55 interests + 25 wishlist overlap (shared wishlist cities) + 20 travel style, pace
-  and budget combined.
+- **Score:** 50 interests + 20 wishlist overlap (shared wishlist cities) + the same 30 for budget,
+  style and pace, then the same everyday-habits multiplier.
 - Each card shows shared interests and shared wishlist cities ("You both want to visit Kyoto").
 
 ### 4.4 Tests

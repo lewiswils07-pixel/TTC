@@ -6,7 +6,12 @@ import type { MyProfile, Profile } from '../src/lib/profile'
 
 const emptyProfile: Profile = {
   id: 'u1', display_name: null, birth_year: null, gender: null, home_city_id: null, bio: null, photo_path: null,
-  travel_style: null, pace: null, budget: null, mobility_note: null, onboarded_at: null, home_city: null,
+  travel_style: null, pace: null, budget: null, mobility_note: null,
+  travelling_with: null,
+  room_sharing: null,
+  day_rhythm: null,
+  walking: null,
+  languages: [], onboarded_at: null, home_city: null,
 }
 const prefs = { age_min: 18, age_max: 99, genders: [], max_distance_km: null }
 const make = (p: Partial<Profile>, interestIds: number[] = []): MyProfile => ({

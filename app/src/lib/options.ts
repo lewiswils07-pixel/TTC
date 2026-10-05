@@ -29,10 +29,65 @@ export const BUDGETS = [
   { value: 'comfort', label: 'Comfort', hint: 'Treat ourselves: good hotels and fine dining.' },
 ] as const satisfies readonly Option<string>[]
 
+// Everyday habits (matching v2). Also in order: a clash lowers a score a
+// little but never hides anyone.
+export const ROOM_SHARING = [
+  { value: 'share', label: 'Happy to share', hint: 'Sharing a twin room is fine, and saves money.' },
+  { value: 'unsure', label: 'Maybe', hint: 'It depends on the trip and the person.' },
+  { value: 'separate', label: 'Own room', hint: 'I’d always want a room to myself.' },
+] as const satisfies readonly Option<string>[]
+
+export const DAY_RHYTHMS = [
+  { value: 'early', label: 'Early riser' },
+  { value: 'either', label: 'Either' },
+  { value: 'late', label: 'Night owl' },
+] as const satisfies readonly Option<string>[]
+
+export const WALKING = [
+  { value: 'gentle', label: 'Gentle', hint: 'Short walks with plenty of sit-downs.' },
+  { value: 'moderate', label: 'Moderate', hint: 'A few hours on my feet is fine.' },
+  { value: 'lots', label: 'Lots', hint: 'Happy walking all day.' },
+] as const satisfies readonly Option<string>[]
+
+// Codes are ISO 639-1; the database only checks they're 2 letters.
+export const LANGUAGES = [
+  { value: 'en', label: 'English' },
+  { value: 'fr', label: 'French' },
+  { value: 'es', label: 'Spanish' },
+  { value: 'de', label: 'German' },
+  { value: 'it', label: 'Italian' },
+  { value: 'pt', label: 'Portuguese' },
+  { value: 'nl', label: 'Dutch' },
+  { value: 'el', label: 'Greek' },
+  { value: 'pl', label: 'Polish' },
+  { value: 'cy', label: 'Welsh' },
+  { value: 'ga', label: 'Irish' },
+  { value: 'sv', label: 'Swedish' },
+  { value: 'ar', label: 'Arabic' },
+  { value: 'hi', label: 'Hindi' },
+  { value: 'ur', label: 'Urdu' },
+  { value: 'zh', label: 'Chinese' },
+  { value: 'ja', label: 'Japanese' },
+] as const satisfies readonly Option<string>[]
+export const MAX_LANGUAGES = 10
+
 export type Gender = (typeof GENDERS)[number]['value']
 export type TravelStyle = (typeof TRAVEL_STYLES)[number]['value']
 export type Pace = (typeof PACES)[number]['value']
 export type Budget = (typeof BUDGETS)[number]['value']
+export type RoomSharing = (typeof ROOM_SHARING)[number]['value']
+export type DayRhythm = (typeof DAY_RHYTHMS)[number]['value']
+export type Walking = (typeof WALKING)[number]['value']
+
+export const DISTANCES = [
+  { value: 'any', label: 'Any' },
+  { value: '50', label: '50 km' },
+  { value: '150', label: '150 km' },
+  { value: '500', label: '500 km' },
+] as const
+export type Distance = (typeof DISTANCES)[number]['value']
+export const distanceOption = (km: number | null): Distance => DISTANCES.find((d) => d.value === String(km))?.value ?? 'any'
+export const distanceKm = (d: Distance | undefined): number | null => (!d || d === 'any' ? null : Number(d))
 
 export const MIN_AGE = 18
 export const MAX_PREF_AGE = 99

@@ -13,16 +13,17 @@ type Props<T extends string> = {
   error?: string | null
   /** Show the chosen option's description under the control. */
   describeSelection?: boolean
+  className?: string
 }
 
 /** Equal-width tiles in one row: radio buttons, or checkboxes when `multiple`. */
-export function Segmented<T extends string>({ name, legend, hint, options, selected, onChange, multiple = false, error, describeSelection }: Props<T>) {
+export function Segmented<T extends string>({ name, legend, hint, options, selected, onChange, multiple = false, error, describeSelection, className }: Props<T>) {
   const id = useId()
   const hintId = hint ? `${id}-hint` : undefined
   const errorId = `${id}-error`
   const chosen = describeSelection ? options.find((o) => o.value === selected[0]) : undefined
   return (
-    <fieldset className="field" data-field={name} aria-describedby={[hintId, error ? errorId : undefined].filter(Boolean).join(' ') || undefined}>
+    <fieldset className={`field${className ? ` ${className}` : ''}`} data-field={name} aria-describedby={[hintId, error ? errorId : undefined].filter(Boolean).join(' ') || undefined}>
       <legend>{legend}</legend>
       {hint && (
         <p className="hint" id={hintId}>

@@ -1,6 +1,7 @@
 # Checks every change to the members app and its database before it lands:
 # lint, type check, unit tests and build for the app; pgTAP security tests
-# for the database; and a debug Android build of the phone app.
+# for the database; an end-to-end journey through the app in a browser
+# against a local database; and a debug Android build of the phone app.
 name: Members app CI
 
 on:
@@ -56,6 +57,43 @@ jobs:
         run: supabase db start
       - name: Run the security tests
         run: supabase test db
+
+  e2e:
+    name: End to end (two members, one journey)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.119.0  # the version the test was written against; live chat behaves differently across versions
+      - name: Start a local Supabase (database, sign-in, live chat, test inbox)
+        run: supabase start -x studio,imgproxy,edge-runtime,logflare,vector,supavisor,postgres-meta
+      - name: Point the test at the local Supabase
+        run: |
+          supabase status -o env | sed -n 's/^API_URL=/SUPABASE_URL=/p; s/^ANON_KEY=/SUPABASE_ANON_KEY=/p; s/^SERVICE_ROLE_KEY=/SUPABASE_SERVICE_ROLE_KEY=/p; s/^MAILPIT_URL=/MAILPIT_URL=/p' | tr -d '"' >> "$GITHUB_ENV"
+      - name: Install the app and a browser
+        working-directory: app
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Run the journey
+        working-directory: app
+        run: npm run e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-report
+          path: |
+            app/playwright-report
+            app/test-results
+          retention-days: 7
 
   android:
     name: Android build

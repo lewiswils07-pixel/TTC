@@ -9,7 +9,19 @@ import { SignIn } from './routes/SignIn'
 
 // Screens for signed-in members load on demand, so the first screen is quick.
 const Onboarding = lazy(() => import('./routes/Onboarding').then((m) => ({ default: m.Onboarding })))
+const TripMatches = lazy(() => import('./routes/TripMatches').then((m) => ({ default: m.TripMatches })))
+const Connections = lazy(() => import('./routes/Connections').then((m) => ({ default: m.Connections })))
 const TripForm = lazy(() => import('./routes/TripForm').then((m) => ({ default: m.TripForm })))
+const People = lazy(() => import('./routes/People').then((m) => ({ default: m.People })))
+const Filters = lazy(() => import('./routes/Filters').then((m) => ({ default: m.Filters })))
+const Messages = lazy(() => import('./routes/Messages').then((m) => ({ default: m.Messages })))
+const Chat = lazy(() => import('./routes/Chat').then((m) => ({ default: m.Chat })))
+const Admin = lazy(() => import('./routes/Admin').then((m) => ({ default: m.Admin })))
+const MeetingSafely = lazy(() => import('./routes/MeetingSafely').then((m) => ({ default: m.MeetingSafely })))
+const Groups = lazy(() => import('./routes/Groups').then((m) => ({ default: m.Groups })))
+const GroupForm = lazy(() => import('./routes/GroupForm').then((m) => ({ default: m.GroupForm })))
+const GroupDetail = lazy(() => import('./routes/GroupDetail').then((m) => ({ default: m.GroupDetail })))
+const PlanBoard = lazy(() => import('./routes/PlanBoard').then((m) => ({ default: m.PlanBoard })))
 const Dashboard = lazy(() => import('./routes/Dashboard').then((m) => ({ default: m.Dashboard })))
 
 export function App() {
@@ -56,10 +68,99 @@ export function AppRoutes() {
         path="/trips/:id"
         element={
           <RequireSession>
+            <TripMatches />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/trips/:id/edit"
+        element={
+          <RequireSession>
             <TripForm />
           </RequireSession>
         }
       />
+      <Route
+        path="/people"
+        element={
+          <RequireSession>
+            <People />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/filters"
+        element={
+          <RequireSession>
+            <Filters />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/connections"
+        element={
+          <RequireSession>
+            <Connections />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/messages"
+        element={
+          <RequireSession>
+            <Messages />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/messages/:id"
+        element={
+          <RequireSession>
+            <Chat />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <RequireSession>
+            <Admin />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/groups"
+        element={
+          <RequireSession>
+            <Groups />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/groups/new"
+        element={
+          <RequireSession>
+            <GroupForm />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/groups/:id"
+        element={
+          <RequireSession>
+            <GroupDetail />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/messages/:id/plan"
+        element={
+          <RequireSession>
+            <PlanBoard />
+          </RequireSession>
+        }
+      />
+      <Route path="/meeting-safely" element={<MeetingSafely />} />
       <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
