@@ -3,7 +3,7 @@
 // rules, so these are for helpful, instant feedback only.
 import { CODE_LENGTH, isValidEmail } from './auth'
 import { addDays, daysBetween } from './dates'
-import { MAX_PREF_AGE, MIN_AGE, MIN_INTERESTS, ageFromDate, latestBirthYear } from './options'
+import { INTERESTS_TO_PICK, MAX_PREF_AGE, MIN_AGE, ageFromDate, latestBirthYear } from './options'
 
 export type Check<T> = (value: T) => string | null
 
@@ -59,7 +59,11 @@ export function checkBirthDate(day: string, month: string, year: string, now = n
 export const checkChosen = (what: string): Check<readonly unknown[]> => (v) => (v.length ? null : `Please choose ${what}.`)
 
 export const checkInterests: Check<readonly unknown[]> = (v) =>
-  v.length >= MIN_INTERESTS ? null : `Pick at least ${MIN_INTERESTS} interests. You’ve picked ${v.length}.`
+  v.length === INTERESTS_TO_PICK
+    ? null
+    : v.length < INTERESTS_TO_PICK
+      ? `Pick ${INTERESTS_TO_PICK} interests. You’ve picked ${v.length}, so ${INTERESTS_TO_PICK - v.length} more to go.`
+      : `Pick ${INTERESTS_TO_PICK} interests. You’ve picked ${v.length}, so remove ${v.length - INTERESTS_TO_PICK}.`
 
 export function checkAgeRange([min, max]: readonly [number, number]): string | null {
   if (min < MIN_AGE || max > MAX_PREF_AGE || min > max) return `Choose ages between ${MIN_AGE} and ${MAX_PREF_AGE}.`

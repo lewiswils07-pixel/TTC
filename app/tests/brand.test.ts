@@ -9,14 +9,11 @@ describe('brand settings', () => {
   it('comes from brand.json', () => {
     expect(brand.name).toBe(brandJson.name)
   })
-  it('turns colours into CSS variables for light and dark', () => {
+  it('turns colours into CSS variables, day mode only', () => {
     const css = brandCss()
     expect(css).toContain(`--accent:${brandJson.colors.light.accent};`)
-    expect(css).toContain(`--on-accent:${brandJson.colors.dark.onAccent};`)
-    expect(css).toContain('prefers-color-scheme: dark')
-  })
-  it('defines the same colour names in both themes', () => {
-    expect(Object.keys(brandJson.colors.dark).sort()).toEqual(Object.keys(brandJson.colors.light).sort())
+    expect(css).toContain('color-scheme:light only')
+    expect(css).not.toContain('prefers-color-scheme: dark')
   })
 })
 

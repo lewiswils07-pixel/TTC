@@ -26,24 +26,6 @@
       "success": "#2E7D4F",
       "brandDisc": "#8E1B2B",
       "brandGold": "#E3B53C"
-    },
-    "dark": {
-      "accent": "#E8BF4F",
-      "accentDeep": "#F2D06F",
-      "onAccent": "#1D1716",
-      "gold": "#D9922E",
-      "goldInk": "#E8BF4F",
-      "ink": "#F1EBE3",
-      "inkSoft": "#D2C8C0",
-      "muted": "#B4A8A3",
-      "paper": "#1D1716",
-      "paperTint": "#271F1E",
-      "card": "#271F1E",
-      "line": "#403532",
-      "danger": "#FF8A8A",
-      "success": "#7BD69B",
-      "brandDisc": "#8E1B2B",
-      "brandGold": "#E8BF4F"
     }
   }
 }

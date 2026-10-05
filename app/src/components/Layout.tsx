@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { brand } from '../lib/brand'
+import { TabBar, type Tab } from './TabBar'
 
 /** The club's initial in a burgundy disc with gold lettering. */
 export function Monogram({ size = 36 }: { size?: number }) {
@@ -11,9 +12,9 @@ export function Monogram({ size = 36 }: { size?: number }) {
   )
 }
 
-export function Layout({ children, actions, wide = false }: { children: ReactNode; actions?: ReactNode; wide?: boolean }) {
+export function Layout({ children, actions, wide = false, tab }: { children: ReactNode; actions?: ReactNode; wide?: boolean; tab?: Tab }) {
   return (
-    <div className="shell">
+    <div className={tab ? 'shell has-tabs' : 'shell'}>
       <a className="skip-link" href="#main">
         Skip to main content
       </a>
@@ -29,6 +30,7 @@ export function Layout({ children, actions, wide = false }: { children: ReactNod
       <main id="main" className={wide ? 'main main-wide' : 'main'} tabIndex={-1}>
         {children}
       </main>
+      {tab && <TabBar current={tab} />}
     </div>
   )
 }

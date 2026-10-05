@@ -87,8 +87,23 @@ export function SuggestionCard({ person, reasons, tripId, requests }: { person: 
   )
 }
 
-function ConnectBox({ person, tripId, requests }: { person: Person; tripId?: number; requests: Requests }) {
-  const [open, setOpen] = useState(false)
+/** "Ask to connect" with an optional note. In the For you feed it opens straight away and hands back to the card when sent or cancelled. */
+export function ConnectBox({
+  person,
+  tripId,
+  requests,
+  startOpen = false,
+  onSent,
+  onCancel,
+}: {
+  person: Pick<Person, 'profile_id' | 'display_name'>
+  tripId?: number
+  requests: Requests
+  startOpen?: boolean
+  onSent?: () => void
+  onCancel?: () => void
+}) {
+  const [open, setOpen] = useState(startOpen)
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [sent, setSent] = useState(false)
@@ -120,8 +135,9 @@ function ConnectBox({ person, tripId, requests }: { person: Person; tripId?: num
     setError(null)
     try {
       await sendRequest(person.profile_id, note, tripId)
-      setSent(true)
       requests.used()
+      if (onSent) return onSent()
+      setSent(true)
     } catch (e) {
       setError(messageOf(e))
       setBusy(false)
@@ -162,7 +178,7 @@ function ConnectBox({ person, tripId, requests }: { person: Person; tripId?: num
         </p>
       )}
       <div className="action-row">
-        <button type="button" className="btn btn-secondary" onClick={() => setOpen(false)} disabled={busy}>
+        <button type="button" className="btn btn-secondary" onClick={() => (onCancel ? onCancel() : setOpen(false))} disabled={busy}>
           Cancel
         </button>
         <button type="button" className="btn btn-primary" onClick={send} disabled={busy}>

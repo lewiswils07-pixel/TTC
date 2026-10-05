@@ -27,19 +27,20 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await expect(a.getByRole('img', { name: 'Your profile photo' })).toBeVisible()
     await a.getByRole('button', { name: /continue|skip/i }).click()
     await expect(a.getByText(/Step 3 of 3/)).toBeVisible()
-    for (const name of ['Museums', 'Wine and vineyards', 'Walking and rambling', 'Photography', 'Wine', 'Walking']) {
-      const chip = a.getByRole('checkbox', { name, exact: true })
-      if (await chip.count()) await chip.evaluate((el: HTMLElement) => el.click())
+    for (const name of ['Museums', 'Wine', 'Walking', 'Photography', 'Theatre', 'Local cuisine', 'Gardens']) {
+      await a.getByRole('checkbox', { name, exact: true }).evaluate((el: HTMLElement) => el.click())
     }
     await a.getByRole('button', { name: 'Finish sign-up' }).click()
     await expect(a.getByRole('heading', { name: 'Welcome to the Collective' })).toBeVisible()
     await expect(a.getByText(/founding member No\. \d+/)).toBeVisible()
-    await a.getByRole('link', { name: 'Go to my profile' }).click()
-    await expect(a.getByRole('heading', { name: 'Hello, Lewis' })).toBeVisible()
+    await a.getByRole('link', { name: 'Start meeting people' }).click()
+    await expect(a.getByRole('heading', { level: 1, name: 'Connections' })).toBeVisible()
+    await expect(a.locator('.person-feed-card')).toBeVisible()
   })
 
   let other = ''
   await test.step('add a trip and ask someone going too', async () => {
+    await a.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Trips' }).click()
     await a.getByRole('link', { name: 'Add your first trip' }).click()
     await pickPlace(a, 'Pari', /Paris, France/)
     await a.getByLabel('First day').fill(isoIn(20))
@@ -52,6 +53,9 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.getByLabel(/Add a note/).fill('Hello! Would you like to see the Musée d’Orsay together?')
     await a.getByRole('button', { name: 'Send request' }).click()
     await expect(a.getByText(/Request sent/)).toBeVisible()
+    // The Connections tab now leads with people going to Paris too.
+    await a.goto('/connections')
+    await expect(a.locator('.person-feed-card .callout-trip').first()).toContainText('Also going to Paris')
   })
 
   const lewis = await idOf(lewisEmail)
@@ -61,7 +65,8 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
 
   await test.step('they accept, and the two chat live', async () => {
     await signIn(b, otherEmail)
-    await b.getByRole('link', { name: /Connections/ }).click()
+    await b.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: /Connections/ }).click()
+    await b.getByRole('link', { name: /Requests & matches/ }).click()
     await b.getByRole('button', { name: /Accept/ }).first().click()
     await b.getByRole('link', { name: 'Message Lewis' }).click()
     await expect(b.getByRole('heading', { level: 1, name: 'Lewis' })).toBeVisible()
@@ -115,7 +120,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await b.getByRole('button', { name: 'Report this message' }).click()
     await b.getByRole('button', { name: 'Send report' }).click()
     await expect(b.getByText(/Thanks for telling us/)).toBeVisible()
-    await expect(b.getByRole('heading', { name: 'Messages' })).toBeVisible()
+    await expect(b.getByRole('heading', { level: 1, name: 'Chat' })).toBeVisible()
     const { data: blocks } = await admin.from('blocks').select('blocked_id').eq('blocked_id', lewis)
     expect(blocks).toHaveLength(1)
   })

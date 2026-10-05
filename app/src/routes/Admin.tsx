@@ -58,7 +58,7 @@ export function Admin() {
       <Layout>
         <h1>Review</h1>
         <p className="lede">This page is only for the Sodalis team.</p>
-        <Link className="btn btn-secondary" to="/dashboard">
+        <Link className="btn btn-secondary" to="/profile">
           Back to my profile
         </Link>
       </Layout>
@@ -68,7 +68,7 @@ export function Admin() {
 
   return (
     <Layout>
-      <Link className="back-link" to="/dashboard">
+      <Link className="back-link" to="/profile">
         ‹ My profile
       </Link>
       <h1 ref={heading} tabIndex={-1}>

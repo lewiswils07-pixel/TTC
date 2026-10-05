@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { RequireSession } from './components/Guards'
 import { Loading } from './components/Layout'
 import { SessionProvider } from './lib/session'
@@ -12,7 +12,8 @@ const Onboarding = lazy(() => import('./routes/Onboarding').then((m) => ({ defau
 const TripMatches = lazy(() => import('./routes/TripMatches').then((m) => ({ default: m.TripMatches })))
 const Connections = lazy(() => import('./routes/Connections').then((m) => ({ default: m.Connections })))
 const TripForm = lazy(() => import('./routes/TripForm').then((m) => ({ default: m.TripForm })))
-const People = lazy(() => import('./routes/People').then((m) => ({ default: m.People })))
+const ForYou = lazy(() => import('./routes/ForYou').then((m) => ({ default: m.ForYou })))
+const Trips = lazy(() => import('./routes/Trips').then((m) => ({ default: m.Trips })))
 const Filters = lazy(() => import('./routes/Filters').then((m) => ({ default: m.Filters })))
 const Messages = lazy(() => import('./routes/Messages').then((m) => ({ default: m.Messages })))
 const Chat = lazy(() => import('./routes/Chat').then((m) => ({ default: m.Chat })))
@@ -27,7 +28,7 @@ const Terms = lazy(() => legal().then((m) => ({ default: m.Terms })))
 const Privacy = lazy(() => legal().then((m) => ({ default: m.Privacy })))
 const CommunityRules = lazy(() => legal().then((m) => ({ default: m.CommunityRules })))
 const WelcomeScreen = lazy(() => import('./routes/Welcome').then((m) => ({ default: m.WelcomeScreen })))
-const Dashboard = lazy(() => import('./routes/Dashboard').then((m) => ({ default: m.Dashboard })))
+const Profile = lazy(() => import('./routes/Profile').then((m) => ({ default: m.Profile })))
 
 export function App() {
   return (
@@ -54,13 +55,24 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/dashboard"
+        path="/profile"
         element={
           <RequireSession>
-            <Dashboard />
+            <Profile />
           </RequireSession>
         }
       />
+      <Route
+        path="/trips"
+        element={
+          <RequireSession>
+            <Trips />
+          </RequireSession>
+        }
+      />
+      {/* Old addresses from before the tab bar (5 Oct). */}
+      <Route path="/dashboard" element={<Navigate to="/profile" replace />} />
+      <Route path="/people" element={<Navigate to="/connections" replace />} />
       <Route
         path="/trips/new"
         element={
@@ -86,14 +98,6 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/people"
-        element={
-          <RequireSession>
-            <People />
-          </RequireSession>
-        }
-      />
-      <Route
         path="/filters"
         element={
           <RequireSession>
@@ -103,6 +107,14 @@ export function AppRoutes() {
       />
       <Route
         path="/connections"
+        element={
+          <RequireSession>
+            <ForYou />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/connections/requests"
         element={
           <RequireSession>
             <Connections />

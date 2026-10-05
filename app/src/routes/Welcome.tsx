@@ -44,20 +44,20 @@ export function WelcomeScreen() {
         </div>
         <ol className="how-it-works">
           <li>
-            <strong>Add a trip</strong> where you’re going and when.
+            <strong>See people you’d get on with</strong>, one at a time, with why we think you’d click.
           </li>
           <li>
-            <strong>Meet people going too</strong>, matched on what you enjoy.
+            <strong>Say hello</strong> with Connect. Nothing more is shared until you both say yes.
           </li>
           <li>
-            <strong>Plan together</strong> once you both say yes.
+            <strong>Plan together</strong> in chat. Adding a trip is optional, and shows you people going too.
           </li>
         </ol>
-        <Link className="btn btn-primary btn-block btn-lg" to="/trips/new">
-          Add my first trip
+        <Link className="btn btn-primary btn-block btn-lg" to="/connections">
+          Start meeting people
         </Link>
-        <Link className="btn btn-secondary btn-block" to="/dashboard">
-          Go to my profile
+        <Link className="btn btn-secondary btn-block" to="/trips/new">
+          Add a trip (optional)
         </Link>
       </section>
     </Layout>

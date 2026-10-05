@@ -3,6 +3,9 @@ import { Link } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { Layout, Loading } from '../components/Layout'
 import { SafetyBox } from '../components/SafetyBox'
+import { SubNav } from '../components/SubNav'
+import { CONNECTIONS_NAV } from '../lib/nav'
+import { refreshTabCounts } from '../lib/tabCounts'
 import { myConversations } from '../lib/chat'
 import { tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
@@ -51,6 +54,7 @@ export function Connections() {
     try {
       await action()
       setStatus(message)
+      refreshTabCounts()
       await load()
     } catch (e) {
       setError(messageOf(e))
@@ -65,13 +69,11 @@ export function Connections() {
   const connected = items?.filter((c) => c.status === 'accepted') ?? []
 
   return (
-    <Layout>
-      <Link className="back-link" to="/dashboard">
-        ‹ My profile
-      </Link>
+    <Layout tab="connections">
       <h1 ref={heading} tabIndex={-1}>
         Connections
       </h1>
+      <SubNav label="Connections" items={CONNECTIONS_NAV.map((i) => (i.to === '/connections/requests' ? { ...i, count: received.length } : i))} current="/connections/requests" />
       <p className="lede">Nothing beyond your first name, age and home town is shared until you both say yes.</p>
       <p className="visually-hidden" role="status">
         {status}
