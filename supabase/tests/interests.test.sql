@@ -1,7 +1,7 @@
--- pgTAP: the grouped interests list (89 interests in 9 categories since v3).
+-- pgTAP: the grouped interests list (82 interests in 9 categories since the trim).
 begin;
 select plan(4);
-select is((select count(*)::int from public.interests), 89, 'there are 89 interests');
+select is((select count(*)::int from public.interests), 82, 'there are 82 interests');
 select is((select count(distinct category)::int from public.interests), 9, 'they sit in 9 categories');
 select is_empty($$select 1 from public.interests group by lower(label) having count(*) > 1$$, 'no interest is listed twice');
 select results_eq(
