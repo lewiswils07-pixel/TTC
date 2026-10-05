@@ -11,6 +11,11 @@ const RULES: Array<[RegExp, string]> = [
   [/must be 18/i, 'You need to be 18 or over to join.'],
   [/pick 3 to 10 interests/i, 'Please pick between 3 and 10 interests.'],
   [/profile is not finished/i, 'A few details are still missing. Please go back and fill them in.'],
+  [/already ended/i, 'This trip has already ended. Please check the dates.'],
+  [/up to 2 years ahead/i, 'Trips can be up to 2 years ahead.'],
+  [/up to 20 upcoming trips/i, 'You can have up to 20 upcoming trips. Delete one to add another.'],
+  [/up to 10 places/i, 'You can save up to 10 places. Remove one to add another.'],
+  [/wishlist_pkey/i, 'That place is already on your list.'],
   [/payload too large|exceeded the maximum allowed size/i, 'That photo is too big. Please choose a smaller one.'],
 ]
 

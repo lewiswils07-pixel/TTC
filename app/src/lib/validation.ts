@@ -2,6 +2,7 @@
 // on, or null when the value is fine. The database repeats the important
 // rules, so these are for helpful, instant feedback only.
 import { CODE_LENGTH, isValidEmail } from './auth'
+import { addDays, daysBetween } from './dates'
 import { MAX_PREF_AGE, MIN_AGE, MIN_INTERESTS, latestBirthYear } from './options'
 
 export type Check<T> = (value: T) => string | null
@@ -44,3 +45,21 @@ export function checkAgeRange([min, max]: readonly [number, number]): string | n
   if (min < MIN_AGE || max > MAX_PREF_AGE || min > max) return `Choose ages between ${MIN_AGE} and ${MAX_PREF_AGE}.`
   return null
 }
+
+export const MAX_TRIP_DAYS = 91
+export const MAX_NOTE = 280
+
+/** Errors for a trip's first and last day. `today` is YYYY-MM-DD. */
+export function checkTripDates(start: string, end: string, today: string): { start: string | null; end: string | null } {
+  let startError: string | null = null
+  let endError: string | null = null
+  if (!start) startError = 'Please choose your first day.'
+  else if (start > addDays(today, 730)) startError = 'Trips can be up to 2 years ahead.'
+  if (!end) endError = 'Please choose your last day.'
+  else if (end < today) endError = 'This date has passed. Please choose a future date.'
+  else if (start && end < start) endError = 'Your last day needs to be on or after your first day.'
+  else if (start && daysBetween(start, end) + 1 > MAX_TRIP_DAYS) endError = 'Trips can be up to 3 months long.'
+  return { start: startError, end: endError }
+}
+
+export const checkNote: Check<string> = (v) => (v.length > MAX_NOTE ? `Please keep this to ${MAX_NOTE} characters or fewer.` : null)

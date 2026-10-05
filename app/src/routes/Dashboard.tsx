@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
+import { MyTrips, Wishlist } from '../components/MyTrips'
 import { signOut } from '../lib/auth'
 import { cityLabel } from '../lib/cities'
 import { BUDGETS, GENDERS, MAX_PREF_AGE, PACES, TRAVEL_STYLES, ageLabel, labelFor } from '../lib/options'
@@ -54,8 +55,10 @@ export function Dashboard() {
     <Layout actions={signOutButton}>
       <h1>Hello, {profile.display_name}</h1>
       <div className="notice">
-        <strong>Your profile is ready.</strong> Adding trips and finding people to travel with are coming next.
+        <strong>Coming next:</strong> suggestions of members to travel with.
       </div>
+      <MyTrips />
+      <Wishlist />
       <section className="card profile-card" aria-labelledby="my-profile">
         <div className="profile-head">
           {photo ? (

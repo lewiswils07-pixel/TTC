@@ -5,6 +5,7 @@ import { CityPicker } from '../components/CityPicker'
 import { Field, FieldError, TextField } from '../components/Field'
 import { InterestPicker } from '../components/InterestPicker'
 import { Layout, Loading } from '../components/Layout'
+import { ActionBar, SaveError } from '../components/Form'
 import { Segmented } from '../components/Segmented'
 import type { City } from '../lib/cities'
 import { messageOf } from '../lib/errors'
@@ -132,33 +133,6 @@ function useStepSubmit(save: () => Promise<void>, onDone: () => Promise<void>) {
     }
   }
   return { busy, error, setError, submit }
-}
-
-function ActionBar({ busy, onBack, label = 'Continue', note }: { busy: boolean; onBack?: () => void; label?: string; note?: ReactNode }) {
-  return (
-    <div className="action-bar">
-      {note && <p className="action-note">{note}</p>}
-      <div className="action-row">
-        {onBack && (
-          <button type="button" className="btn btn-secondary" onClick={onBack} disabled={busy}>
-            Back
-          </button>
-        )}
-        <button type="submit" className="btn btn-primary" disabled={busy}>
-          {busy ? 'Saving…' : label}
-        </button>
-      </div>
-    </div>
-  )
-}
-
-function SaveError({ error }: { error: string | null }) {
-  if (!error) return null
-  return (
-    <p className="notice notice-error" role="alert">
-      {error}
-    </p>
-  )
 }
 
 type StepProps = { userId: string; data: MyProfile; onDone: () => Promise<void>; onBack?: () => void }
