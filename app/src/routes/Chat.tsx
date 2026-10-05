@@ -62,7 +62,10 @@ export function Chat() {
       (e) => setError(messageOf(e)),
     )
     // Messages sent while the live connection was opening are fetched once it's ready.
-    const catchUp = () => listMessages(conversationId).then(add, () => undefined)
+    const catchUp = () => {
+      void listMessages(conversationId).then(add, () => undefined)
+      void messageWarnings(conversationId).then(setWarnings)
+    }
     return onNewMessage(conversationId, catchUp, (m) => {
       stick.current = true
       add([m])

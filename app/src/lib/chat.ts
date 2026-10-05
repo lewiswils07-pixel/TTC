@@ -74,19 +74,39 @@ export async function conversationSenders(conversationId: number): Promise<Map<s
 
 /**
  * Calls onMessage for each new message in this conversation, and onReady
- * once listening has started. Returns a function that stops listening.
+ * once listening has started (and again whenever the app comes back into
+ * view), so the screen can fetch anything it missed. Returns a function
+ * that stops listening.
  */
 export function onNewMessage(conversationId: number, onReady: () => void, onMessage: (m: Message) => void): () => void {
-  const channel = supabase
-    .channel(`messages:${conversationId}`)
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, (payload) =>
-      onMessage(payload.new as Message),
-    )
-    .subscribe((status) => {
-      if (status === 'SUBSCRIBED') onReady()
-    })
+  let channel: ReturnType<typeof supabase.channel> | null = null
+  let stopped = false
+
+  // Right after signing in, the live connection may still be using the
+  // signed-out key, which isn't allowed to see any messages. Hand it the
+  // member's sign-in first.
+  void supabase.auth.getSession().then(async ({ data }) => {
+    if (data.session) await supabase.realtime.setAuth(data.session.access_token)
+    if (stopped) return
+    channel = supabase
+      .channel(`messages:${conversationId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, (payload) =>
+        onMessage(payload.new as Message),
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') onReady()
+      })
+  })
+
+  const onVisible = () => {
+    if (document.visibilityState === 'visible') onReady()
+  }
+  document.addEventListener('visibilitychange', onVisible)
+
   return () => {
-    void supabase.removeChannel(channel)
+    stopped = true
+    document.removeEventListener('visibilitychange', onVisible)
+    if (channel) void supabase.removeChannel(channel)
   }
 }
 
