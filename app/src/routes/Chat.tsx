@@ -4,6 +4,7 @@ import { Avatar } from '../components/Avatar'
 import { Layout, Loading } from '../components/Layout'
 import { SafetyBox } from '../components/SafetyBox'
 import {
+  conversationSenders,
   listMessages,
   markRead,
   MAX_MESSAGE,
@@ -31,6 +32,11 @@ export function Chat() {
   const [error, setError] = useState<string | null>(null)
   const [warnings, setWarnings] = useState<Set<number>>(new Set())
   const [reporting, setReporting] = useState<number | null>(null)
+  const [senders, setSenders] = useState<Map<string, string>>(new Map())
+  const sendersRef = useRef(senders)
+  useEffect(() => {
+    sendersRef.current = senders
+  }, [senders])
   const navigate = useNavigate()
   const list = useRef<HTMLOListElement>(null)
   const stick = useRef(true)
@@ -45,7 +51,9 @@ export function Chat() {
   useEffect(() => {
     Promise.all([myConversations(), listMessages(conversationId), messageWarnings(conversationId)]).then(
       ([all, first, warn]) => {
-        setOther(all?.find((c) => c.id === conversationId) ?? null)
+        const found = all?.find((c) => c.id === conversationId) ?? null
+        setOther(found)
+        if (found?.kind === 'group') void conversationSenders(conversationId).then(setSenders)
         setWarnings(warn)
         add(first)
         setMore(first.length === PAGE_SIZE)
@@ -53,12 +61,17 @@ export function Chat() {
       },
       (e) => setError(messageOf(e)),
     )
-    return onNewMessage(conversationId, (m) => {
+    // Messages sent while the live connection was opening are fetched once it's ready.
+    const catchUp = () => listMessages(conversationId).then(add, () => undefined)
+    return onNewMessage(conversationId, catchUp, (m) => {
       stick.current = true
       add([m])
       void markRead(conversationId)
       // The server decides which messages need a warning; ask again for theirs.
-      if (m.sender_id !== me) void messageWarnings(conversationId).then(setWarnings)
+      if (m.sender_id !== me) {
+        void messageWarnings(conversationId).then(setWarnings)
+        if (!sendersRef.current.has(m.sender_id)) void conversationSenders(conversationId).then(setSenders)
+      }
     })
   }, [conversationId, add, me])
 
@@ -96,6 +109,9 @@ export function Chat() {
     )
   }
 
+  const group = other.kind === 'group'
+  const nameOf = (id: string) => (group ? (senders.get(id) ?? 'A former member') : other.display_name)
+
   return (
     <Layout>
       <div className="chat">
@@ -110,7 +126,13 @@ export function Chat() {
           <Link className="safety-link" to="/meeting-safely">
             Meeting up safely
           </Link>
-          <SafetyBox profileId={other.profile_id} name={other.display_name} onBlocked={(message) => navigate('/messages', { state: { message } })} />
+          {group ? (
+            <Link className="safety-link" to={`/groups/${other.group_id}`}>
+              Group details and members
+            </Link>
+          ) : (
+            <SafetyBox profileId={other.profile_id!} name={other.display_name} onBlocked={(message) => navigate('/messages', { state: { message } })} />
+          )}
         </div>
 
         <section className="chat-body" aria-label={`Messages with ${other.display_name}`}>
@@ -122,7 +144,7 @@ export function Chat() {
           <GuideCard />
           {messages.length === 0 && (
             <p className="hint chat-empty">
-              You’re connected. Say hello!
+              {group ? 'This is your group chat. Say hello!' : 'You’re connected. Say hello!'}
             </p>
           )}
           <ol className="message-list" ref={list} aria-live="polite" aria-relevant="additions">
@@ -131,7 +153,11 @@ export function Chat() {
               return (
                 <Fragment key={m.id}>
                   <li className={`message ${mine ? 'message-mine' : 'message-theirs'}`}>
-                    <span className="visually-hidden">{mine ? 'You' : other.display_name}: </span>
+                    {group && !mine ? (
+                      <span className="message-sender">{nameOf(m.sender_id)}</span>
+                    ) : (
+                      <span className="visually-hidden">{mine ? 'You' : other.display_name}: </span>
+                    )}
                     <p className="message-body">{m.body}</p>
                     <time className="message-time" dateTime={m.created_at}>
                       {messageTime(m.created_at)}
@@ -144,8 +170,8 @@ export function Chat() {
                       </p>
                       {reporting === m.id ? (
                         <SafetyBox
-                          profileId={other.profile_id}
-                          name={other.display_name}
+                          profileId={m.sender_id}
+                          name={nameOf(m.sender_id)}
                           messageId={m.id}
                           onCancel={() => setReporting(null)}
                           onBlocked={(message) => navigate('/messages', { state: { message } })}
@@ -164,7 +190,7 @@ export function Chat() {
         </section>
 
         {other.can_message ? (
-          <Composer conversationId={conversationId} name={other.display_name} onSent={add} />
+          <Composer conversationId={conversationId} name={group ? 'the group' : other.display_name} onSent={add} />
         ) : (
           <p className="notice">This conversation has ended. You can still read it.</p>
         )}

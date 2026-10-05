@@ -441,3 +441,26 @@ legend { padding: 0; }
 .meet-card > .btn-small { align-self: flex-start; }
 .meet-choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
 .meet-choices .btn { padding-inline: var(--space-2); white-space: nowrap; }
+
+/* Groups */
+.message-sender { display: block; font-size: var(--text-sm); font-weight: 700; color: var(--accent); margin-bottom: 2px; }
+.avatar-group { border-radius: 16px; background: color-mix(in srgb, var(--brand-gold) 22%, var(--card)); color: var(--ink); }
+.group-card { display: flex; flex-direction: column; gap: var(--space-2); }
+.link-card.group-card { flex-direction: row; }
+.link-card.group-card .trip-text { display: flex; flex-direction: column; gap: 2px; }
+.group-name { font-size: 1.0625rem; }
+.group-invite { margin-bottom: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
+.group-invite p { margin: 0; }
+.group-leave { margin-top: var(--space-6); }
+.invite-list { list-style: none; margin: var(--space-2) 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--space-2); }
+.invite-option { display: flex; align-items: center; gap: var(--space-2); min-height: var(--tap); padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1); border: 1.5px solid var(--line); border-radius: 999px; background: var(--card); font-weight: 600; cursor: pointer; }
+.invite-option input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.invite-option.is-checked { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--card)); }
+.invite-option:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+.invite-option.is-disabled { opacity: 0.5; cursor: default; }
+.invite-option span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.invite-option .avatar-sm { width: 36px; height: 36px; }
+.invite-option.is-checked::after { content: '✓'; margin-left: auto; color: var(--accent); font-weight: 800; }
+.group-chat-link { margin-bottom: var(--space-2); }
+.person-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--space-4); }
+.person-actions .safety-box { flex-basis: 100%; }

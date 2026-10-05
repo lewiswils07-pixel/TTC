@@ -28,7 +28,7 @@ export function Connections() {
         ([c, b, conv]) => {
           setItems(c)
           setBlocked(b)
-          setChats(new Map((conv ?? []).map((x) => [x.profile_id, x.id])))
+          setChats(new Map((conv ?? []).flatMap((x) => (x.profile_id ? [[x.profile_id, x.id] as const] : []))))
         },
         (e) => setError(messageOf(e)),
       ),

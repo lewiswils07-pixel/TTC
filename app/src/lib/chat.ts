@@ -8,13 +8,17 @@ export const PAGE_SIZE = 50
 
 export type Conversation = {
   id: number
-  profile_id: string
+  kind: 'direct' | 'group'
+  group_id: number | null
+  /** The other person in a one-to-one chat; empty for a group. */
+  profile_id: string | null
   display_name: string
   birth_year: number | null
   photo_path: string | null
   last_body: string | null
   last_at: string
   last_mine: boolean | null
+  last_sender: string | null
   unread: number
   can_message: boolean
 }
@@ -62,14 +66,25 @@ export async function markRead(conversationId: number): Promise<void> {
   await supabase.rpc('mark_read', { p_conversation_id: conversationId })
 }
 
-/** Calls onMessage for each new message in this conversation. Returns a function that stops listening. */
-export function onNewMessage(conversationId: number, onMessage: (m: Message) => void): () => void {
+/** Names of everyone who has written here, for a group chat. */
+export async function conversationSenders(conversationId: number): Promise<Map<string, string>> {
+  const { data } = await supabase.rpc('conversation_senders', { p_conversation_id: conversationId })
+  return new Map(((data ?? []) as { profile_id: string; display_name: string }[]).map((s) => [s.profile_id, s.display_name]))
+}
+
+/**
+ * Calls onMessage for each new message in this conversation, and onReady
+ * once listening has started. Returns a function that stops listening.
+ */
+export function onNewMessage(conversationId: number, onReady: () => void, onMessage: (m: Message) => void): () => void {
   const channel = supabase
     .channel(`messages:${conversationId}`)
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, (payload) =>
       onMessage(payload.new as Message),
     )
-    .subscribe()
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') onReady()
+    })
   return () => {
     void supabase.removeChannel(channel)
   }

@@ -8,6 +8,7 @@ import { answerMeet, meetPrompts, type MeetPrompt } from '../lib/meet'
 import { Avatar } from '../components/Avatar'
 import { myConversations } from '../lib/chat'
 import { myConnections } from '../lib/connections'
+import { myGroups } from '../lib/groups'
 import { cityLabel } from '../lib/cities'
 import { BUDGETS, GENDERS, MAX_PREF_AGE, PACES, TRAVEL_STYLES, ageLabel, labelFor } from '../lib/options'
 import { messageOf } from '../lib/errors'
@@ -74,6 +75,7 @@ export function Dashboard() {
       </Link>
       <MessagesLink />
       <ConnectionsLink />
+      <GroupsLink />
       <MyTrips />
       <Wishlist />
       <section className="card profile-card" aria-labelledby="my-profile">
@@ -327,5 +329,43 @@ function MeetPrompts() {
         </p>
       )}
     </section>
+  )
+}
+
+/** Entry to Groups, with invites waiting for an answer. Hidden until the database has groups. */
+function GroupsLink() {
+  const [counts, setCounts] = useState<{ invites: number; joined: number } | null>(null)
+
+  useEffect(() => {
+    myGroups().then(
+      (list) =>
+        setCounts(list && { invites: list.filter((g) => g.my_status === 'invited').length, joined: list.filter((g) => g.my_status === 'joined').length }),
+      () => setCounts(null),
+    )
+  }, [])
+
+  if (!counts) return null
+  const { invites, joined } = counts
+  return (
+    <Link className="card link-card" to="/groups">
+      <span className="trip-text">
+        <strong>Groups</strong>
+        <span className="trip-meta">
+          {invites
+            ? `${invites} ${invites === 1 ? 'invite needs' : 'invites need'} your answer`
+            : joined
+              ? `You’re in ${joined} ${joined === 1 ? 'group' : 'groups'}`
+              : 'Travel as a small group of up to 6'}
+        </span>
+      </span>
+      {invites > 0 && (
+        <span className="badge" aria-hidden="true">
+          {invites}
+        </span>
+      )}
+      <span className="trip-chevron" aria-hidden="true">
+        ›
+      </span>
+    </Link>
   )
 }

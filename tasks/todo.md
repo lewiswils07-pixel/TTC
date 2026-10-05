@@ -58,7 +58,7 @@ Unless a task says otherwise, every task is verified with
 ## Week 3: chat and safety (19–23 Oct)
 - [x] **T13 `chat`: Conversations, messages and live updates**, unread counts and the chat screen; pgTAP proves you can't message without an accepted connection. (M)
   - Done 5 Oct: `20261018090000_chat.sql` (16 pgTAP tests). A conversation opens when a request is accepted; blocking ends it and hides it. Messages page with unread counts, a chat screen with live updates (Supabase Realtime), and "Message …" on Connections. Tested in a browser with two members at 320 px dark and 390 px light, axe clean. Group chats come with T18.
-- [ ] **T14 `safety`: Block** (applies both ways, everywhere) **and report**, from profiles and messages. (M)
+- [x] **T14 `safety`: Block** (applies both ways, everywhere) **and report**, from profiles and messages. (M)
   - Status 5 Oct: blocking and reporting members is done in `20261015090000_safety.sql` (22 pgTAP tests), from suggestion cards and the Connections page, with an unblock list. Reports from 3 different members pause requests. Reporting a message, blocking from chat and the /admin review page followed (T15, T16); blocks in groups come with groups.
 - [x] **T15 `safety`: Scam guard.** Pattern checker on the server, flagged messages, and a warning card for the recipient. Unit tests on 30+ example messages. (S)
   - Done 5 Oct: `20261019090000_scam_guard.sql`. `scam_reasons()` looks for money, bank details, gift cards, crypto, moving off the app, and a phone number in the first 24 hours. The checker lives only on the server, so its 36 example messages are pgTAP tests (48 in all). Flagged messages are still sent; the reader sees the warning card with "Report this message", the sender can't see the flag, and a copy goes to `message_flags` for review. Members can also report any message, and block or report from the chat.
@@ -71,7 +71,8 @@ Unless a task says otherwise, every task is verified with
 - [ ] **Checkpoint 23 Oct:** a full conversation, including a scam warning and a report visible on `/admin`.
 
 ## Week 4: groups and trip planner (26–30 Oct)
-- [ ] **T20 `groups`: Create a group from connections** (max 6), invite, leave, remove a member, group chat; blocks respected. (M)
+- [x] **T20 `groups`: Create a group from connections** (max 6), invite, leave, remove a member, group chat; blocks respected. (M)
+  - Done 5 Oct: `20261022090000_groups.sql` (30 pgTAP tests). Groups page, start-a-group form, group page (members, invite more, remove, leave, block or report), and group chats in Messages with each sender's name. Invited people choose to join. Free members can have 1 active group of their own, Sodalis+ 3. Blocked members can't be invited, and inside a group they don't see each other's messages. When the creator leaves, the longest-standing member takes over.
 - [ ] **T21 `trip-planner`: `planner` Edge Function.** Claude API with web search, structured output checked before saving, caching, limits, spend cap. (M)
 - [ ] **T22 `trip-planner`: Planner screens.** Request form, day-by-day cards, "change something" follow-ups. (M)
 - [ ] **T23 `trip-planner`: Shared plan board.** Add, vote, tick off; works in one-to-one chats and groups. (S)
