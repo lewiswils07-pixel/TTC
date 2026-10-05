@@ -47,7 +47,8 @@ Unless a task says otherwise, every task is verified with
   - Status 5 Oct: first draft done (Lewis expects to change the rules after a Q&A). Blocks, connection history, the phone check and Sodalis+ filters are added by T14, T11, T4 and T10. Live database needs `20261013090000_matching_trip.sql` pasted after the trips file.
 - [ ] **T9 `matching`: `suggest_by_interests`**, plus the dashboard switch between "For my trip" and "Plan something new". (M)
 - [ ] **T10 `matching`: Filters.** Basic filters for everyone. Sodalis+ filters are locked unless the member has Sodalis+ (checked on the server). (S)
-- [ ] **T11 `connections`: Send, accept, decline and withdraw requests**, with weekly limits (5 free, fair-use 50 for Sodalis+) enforced in SQL and a "requests" inbox. (M)
+- [x] **T11 `connections`: Send, accept, decline and withdraw requests**, with weekly limits (5 free, fair-use 50 for Sodalis+) enforced in SQL and a "requests" inbox. (M)
+  - Status 5 Oct: done in `20261014090000_connections.sql` (24 pgTAP tests). Everyone gets 5 a week until Sodalis+ entitlements exist (T10). Withdrawn requests still count; a decline keeps the pair apart for 90 days. Live database needs it pasted after the matching file.
 - [ ] **T12 `matching`: Performance check.** 10,000 seeded members; suggestions return in under 300 ms. (S)
 - [ ] **Checkpoint 16 Oct:** two test accounts with overlapping trips see each other in the right order and connect.
 

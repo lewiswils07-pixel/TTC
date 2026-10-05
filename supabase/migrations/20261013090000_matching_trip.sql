@@ -3,8 +3,9 @@
 -- with the reasons we think they'd get on. Members never read each other's
 -- rows directly; this function returns a fixed set of public fields.
 --
--- Not yet applied here, added by later tasks: blocks and connection
--- history (T11, T14), the phone check (T4) and Sodalis+ filters (T10).
+-- Not yet applied here, added by later tasks: blocks (T14), the phone
+-- check (T4) and Sodalis+ filters (T10). Connection history comes in
+-- through pair_is_closed (T11).
 
 -- Distance between two cities in km (haversine).
 create function public.city_distance_km(a integer, b integer)
@@ -57,6 +58,17 @@ as $$
      and (prefs.age_max >= 99 or age <= prefs.age_max)
      and gender = any (prefs.genders)
 $$;
+
+-- Is anything between these two members that should keep them out of
+-- each other's suggestions? Nothing yet: the connections migration
+-- replaces this with the real rule (open request, or declined lately).
+create function public.pair_is_closed(a uuid, b uuid)
+returns boolean
+language sql
+stable
+set search_path = ''
+as $$ select false $$;
+revoke all on function public.pair_is_closed(uuid, uuid) from public, anon, authenticated;
 
 create function public.suggest_for_trip(p_trip_id bigint)
 returns table (
@@ -114,6 +126,7 @@ begin
       and my_trip.start_date - my_trip.flexible_days <= t.end_date + t.flexible_days
       and p.status = 'active'
       and p.onboarded_at is not null
+      and not public.pair_is_closed(me, p.id)
       -- mutual: each fits what the other is looking for
       and public.fits_preferences(public.age_from_year(p.birth_year), p.gender, my_prefs)
       and public.fits_preferences(public.age_from_year(my.birth_year), my.gender, pr)

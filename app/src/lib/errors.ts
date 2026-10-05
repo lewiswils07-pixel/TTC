@@ -16,6 +16,11 @@ const RULES: Array<[RegExp, string]> = [
   [/up to 20 upcoming trips/i, 'You can have up to 20 upcoming trips. Delete one to add another.'],
   [/up to 10 places/i, 'You can save up to 10 places. Remove one to add another.'],
   [/wishlist_pkey/i, 'That place is already on your list.'],
+  [/weekly request limit/i, 'You’ve used your 5 requests this week. You get 5 more on Monday.'],
+  [/already in touch|connections_open_pair/i, 'You can’t send this member a request right now. You may already be connected or waiting for a reply.'],
+  [/isn't available|isn’t available/i, 'This member isn’t available right now.'],
+  [/finish your profile/i, 'Please finish your profile before sending requests.'],
+  [/request not found/i, 'That request has already been answered or withdrawn.'],
   [/payload too large|exceeded the maximum allowed size/i, 'That photo is too big. Please choose a smaller one.'],
 ]
 

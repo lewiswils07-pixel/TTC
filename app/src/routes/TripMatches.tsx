@@ -1,27 +1,32 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
+import { Avatar } from '../components/Avatar'
+import { Field } from '../components/Field'
 import { Layout, Loading } from '../components/Layout'
+import { requestsLeft, sendRequest, WEEKLY_REQUESTS } from '../lib/connections'
 import { cityLabel } from '../lib/cities'
 import { tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { homeLabel, reasons, suggestForTrip, type TripSuggestion } from '../lib/matching'
 import { ageLabel } from '../lib/options'
-import { photoUrl } from '../lib/photo'
 import { flexibilityLabel, getTrip, type Trip } from '../lib/trips'
+import { MAX_NOTE } from '../lib/validation'
 
 /** One trip and the members going to the same place at the same time. */
 export function TripMatches() {
   const tripId = Number(useParams().id)
   const [trip, setTrip] = useState<Trip | null | undefined>(undefined)
   const [people, setPeople] = useState<TripSuggestion[] | null>(null)
+  const [left, setLeft] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const heading = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
-    Promise.all([getTrip(tripId), suggestForTrip(tripId)]).then(
-      ([t, p]) => {
+    Promise.all([getTrip(tripId), suggestForTrip(tripId), requestsLeft()]).then(
+      ([t, p, l]) => {
         setTrip(t)
         setPeople(p)
+        setLeft(l)
       },
       (e) => setError(messageOf(e)),
     )
@@ -69,7 +74,11 @@ export function TripMatches() {
         <h2 id="going-too" className="section-title">
           {people.length ? `${people.length} ${people.length === 1 ? 'person' : 'people'} going too` : 'People going too'}
         </h2>
-        {people.length > 0 && <p className="hint section-hint">Best match first. Sending connection requests opens soon.</p>}
+        {people.length > 0 && (
+          <p className="hint section-hint">
+            Best fit first. You have {left} of {WEEKLY_REQUESTS} requests left this week{left === 0 ? '; you get 5 more on Monday' : ''}.
+          </p>
+        )}
         {people.length === 0 ? (
           <div className="card empty">
             <p>
@@ -81,7 +90,7 @@ export function TripMatches() {
         ) : (
           <ul className="match-list">
             {people.map((person) => (
-              <MatchCard key={person.profile_id} person={person} myCity={trip.city.name} />
+              <MatchCard key={person.profile_id} person={person} myCity={trip.city.name} tripId={trip.id} left={left} onSent={() => setLeft((n) => Math.max(0, n - 1))} />
             ))}
           </ul>
         )}
@@ -90,28 +99,17 @@ export function TripMatches() {
   )
 }
 
-function MatchCard({ person, myCity }: { person: TripSuggestion; myCity: string }) {
-  const [photo, setPhoto] = useState<string | null>(null)
-  useEffect(() => {
-    if (person.photo_path) photoUrl(person.photo_path).then(setPhoto, () => undefined)
-  }, [person.photo_path])
-
+function MatchCard({ person, myCity, tripId, left, onSent }: { person: TripSuggestion; myCity: string; tripId: number; left: number; onSent: () => void }) {
   const home = homeLabel(person)
   return (
     <li className="card match-card">
       <div className="match-head">
-        {photo ? (
-          <img className="avatar avatar-md" src={photo} alt="" />
-        ) : (
-          <div className="avatar avatar-md avatar-empty" aria-hidden="true">
-            {person.display_name.slice(0, 1).toUpperCase()}
-          </div>
-        )}
+        <Avatar name={person.display_name} path={person.photo_path} />
         <div className="match-who">
           <div className="match-name">
             <h3>{person.display_name}</h3>
             <span className="match-score" title="How well your interests, dates and travel style line up">
-              {person.score}% match
+              {person.score}% in common
             </span>
           </div>
           <p className="profile-meta">
@@ -125,6 +123,86 @@ function MatchCard({ person, myCity }: { person: TripSuggestion; myCity: string 
           <li key={line}>{line}</li>
         ))}
       </ul>
+      <ConnectBox person={person} tripId={tripId} left={left} onSent={onSent} />
     </li>
+  )
+}
+
+function ConnectBox({ person, tripId, left, onSent }: { person: TripSuggestion; tripId: number; left: number; onSent: () => void }) {
+  const [open, setOpen] = useState(false)
+  const [note, setNote] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const noteBox = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (open) noteBox.current?.focus()
+  }, [open])
+
+  if (sent) {
+    return (
+      <p className="notice notice-success" role="status">
+        Request sent. We’ll let you know when {person.display_name} replies.
+      </p>
+    )
+  }
+  if (!open) {
+    return (
+      <button type="button" className="btn btn-primary btn-block" disabled={left <= 0} onClick={() => setOpen(true)}>
+        {left > 0 ? `Ask to connect with ${person.display_name}` : 'No requests left this week'}
+      </button>
+    )
+  }
+
+  async function send() {
+    setBusy(true)
+    setError(null)
+    try {
+      await sendRequest(person.profile_id, note, tripId)
+      setSent(true)
+      onSent()
+    } catch (e) {
+      setError(messageOf(e))
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="connect-box">
+      <Field
+        name="note"
+        label={`Add a note for ${person.display_name} (optional)`}
+        hint={`Say hello and what you’d like to do together. ${MAX_NOTE - note.length} characters left.`}
+      >
+        {({ id, describedBy }) => (
+          <textarea
+            ref={noteBox}
+            id={id}
+            className="textarea textarea-short"
+            maxLength={MAX_NOTE}
+            aria-describedby={describedBy}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
+        )}
+      </Field>
+      <p className="hint">
+        This uses 1 of your {left} request{left === 1 ? '' : 's'} left this week. Nothing else is shared until they say yes.
+      </p>
+      {error && (
+        <p className="notice notice-error" role="alert">
+          {error}
+        </p>
+      )}
+      <div className="action-row">
+        <button type="button" className="btn btn-secondary" onClick={() => setOpen(false)} disabled={busy}>
+          Cancel
+        </button>
+        <button type="button" className="btn btn-primary" onClick={send} disabled={busy}>
+          {busy ? 'Sending…' : 'Send request'}
+        </button>
+      </div>
+    </div>
   )
 }

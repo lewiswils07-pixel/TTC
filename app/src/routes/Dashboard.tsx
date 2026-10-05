@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { MyTrips, Wishlist } from '../components/MyTrips'
 import { signOut } from '../lib/auth'
+import { myConnections } from '../lib/connections'
 import { cityLabel } from '../lib/cities'
 import { BUDGETS, GENDERS, MAX_PREF_AGE, PACES, TRAVEL_STYLES, ageLabel, labelFor } from '../lib/options'
 import { photoUrl } from '../lib/photo'
@@ -54,9 +55,7 @@ export function Dashboard() {
   return (
     <Layout actions={signOutButton}>
       <h1>Hello, {profile.display_name}</h1>
-      <div className="notice">
-        <strong>Coming next:</strong> suggestions of members to travel with.
-      </div>
+      <ConnectionsLink />
       <MyTrips />
       <Wishlist />
       <section className="card profile-card" aria-labelledby="my-profile">
@@ -112,5 +111,35 @@ export function Dashboard() {
         </Link>
       </section>
     </Layout>
+  )
+}
+
+/** Entry to the Connections page, with a count of requests waiting for an answer. Hidden until the database has connections. */
+function ConnectionsLink() {
+  const [waiting, setWaiting] = useState<number | null>(null)
+
+  useEffect(() => {
+    myConnections().then(
+      (list) => setWaiting(list.filter((c) => c.direction === 'received' && c.status === 'pending').length),
+      () => setWaiting(null),
+    )
+  }, [])
+
+  if (waiting === null) return null
+  return (
+    <Link className="card link-card" to="/connections">
+      <span className="trip-text">
+        <strong>Connections</strong>
+        <span className="trip-meta">{waiting ? `${waiting} ${waiting === 1 ? 'request needs' : 'requests need'} your answer` : 'Your requests and the people you’ve met'}</span>
+      </span>
+      {waiting > 0 && (
+        <span className="badge" aria-hidden="true">
+          {waiting}
+        </span>
+      )}
+      <span className="trip-chevron" aria-hidden="true">
+        ›
+      </span>
+    </Link>
   )
 }
