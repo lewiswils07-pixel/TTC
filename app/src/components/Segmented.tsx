@@ -14,13 +14,16 @@ type Props<T extends string> = {
   /** Show the chosen option's description under the control. */
   describeSelection?: boolean
   className?: string
+  /** Tiles per row; defaults to all in one row (up to 4). */
+  columns?: number
 }
 
 /** Equal-width tiles in one row: radio buttons, or checkboxes when `multiple`. */
-export function Segmented<T extends string>({ name, legend, hint, options, selected, onChange, multiple = false, error, describeSelection, className }: Props<T>) {
+export function Segmented<T extends string>({ name, legend, hint, options, selected, onChange, multiple = false, error, describeSelection, className, columns }: Props<T>) {
   const id = useId()
   const hintId = hint ? `${id}-hint` : undefined
   const errorId = `${id}-error`
+  const cols = columns ?? Math.min(options.length, 4)
   const chosen = describeSelection ? options.find((o) => o.value === selected[0]) : undefined
   return (
     <fieldset className={`field${className ? ` ${className}` : ''}`} data-field={name} aria-describedby={[hintId, error ? errorId : undefined].filter(Boolean).join(' ') || undefined}>
@@ -30,7 +33,7 @@ export function Segmented<T extends string>({ name, legend, hint, options, selec
           {hint}
         </p>
       )}
-      <div className="segmented" style={{ ['--cols' as string]: Math.min(options.length, 4) }} data-cols={Math.min(options.length, 4)} data-invalid={error ? 'true' : undefined}>
+      <div className="segmented" style={{ ['--cols' as string]: cols }} data-cols={cols} data-invalid={error ? 'true' : undefined}>
         {options.map((option) => {
           const checked = selected.includes(option.value)
           return (

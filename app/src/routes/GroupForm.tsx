@@ -7,7 +7,7 @@ import { ActionBar, SaveError } from '../components/Form'
 import { Layout, Loading } from '../components/Layout'
 import type { City } from '../lib/cities'
 import { myConnections, type Connection } from '../lib/connections'
-import { isoDate } from '../lib/dates'
+import { dateReadback, isoDate } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { checkGroupName, createGroup, groupsICanStart, MAX_GROUP, MAX_GROUP_NAME } from '../lib/groups'
 import { useChecks } from '../lib/useChecks'
@@ -164,6 +164,11 @@ function GroupEditor({ people }: { people: Connection[] }) {
               onBlur={() => touch('end')}
             />
           </div>
+          {dateReadback(start, end) && (
+            <p className="hint date-readback" aria-live="polite">
+              {dateReadback(start, end)}
+            </p>
+          )}
           <fieldset className="field" data-field="invite" aria-describedby={shown('invite') ? 'invite-error' : 'invite-hint'}>
             <legend>Who to invite</legend>
             <p className="hint" id="invite-hint">

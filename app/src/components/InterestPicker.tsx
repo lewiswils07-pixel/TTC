@@ -11,12 +11,16 @@ type Props = {
   error?: string | null
 }
 
+/** Interests shown per group before "Show more" (sign-up review item 10). */
+export const FOLDED = 6
+
 const fold = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
 
 /** Interests grouped by category, with a search box and compact tappable chips. */
 export function InterestPicker({ interests, selected, onChange, max, error }: Props) {
   const id = useId()
   const [query, setQuery] = useState('')
+  const [open, setOpen] = useState<string[]>([])
   const groups = useMemo(() => groupInterests(interests), [interests])
   const q = fold(query.trim())
   const visible = q ? groups.map((g) => ({ ...g, items: g.items.filter((i) => fold(i.label).includes(q)) })).filter((g) => g.items.length) : groups
@@ -59,22 +63,38 @@ export function InterestPicker({ interests, selected, onChange, max, error }: Pr
       {atMax && <p className="hint">You’ve picked {max}, the most allowed. Remove one to choose another.</p>}
 
       {visible.length === 0 && <p className="hint">No interests match “{query}”.</p>}
-      {visible.map((group) => (
-        <fieldset className="interest-group" key={group.label}>
-          <legend>{group.label}</legend>
-          <div className="chips chips-compact">
-            {group.items.map((interest) => {
-              const checked = selected.includes(interest.id)
-              return (
-                <label className="chip" key={interest.id}>
-                  <input type="checkbox" checked={checked} disabled={!checked && atMax} onChange={() => toggle(interest.id)} />
-                  <span>{interest.label}</span>
-                </label>
-              )
-            })}
-          </div>
-        </fieldset>
-      ))}
+      {visible.map((group) => {
+        // Folded: the first few, plus anything already picked further down.
+        const expanded = !!q || open.includes(group.label) || group.items.length <= FOLDED + 1
+        const items = expanded ? group.items : group.items.filter((i, n) => n < FOLDED || selected.includes(i.id))
+        const hidden = group.items.length - items.length
+        return (
+          <fieldset className="interest-group" key={group.label}>
+            <legend>{group.label}</legend>
+            <div className="chips chips-compact">
+              {items.map((interest) => {
+                const checked = selected.includes(interest.id)
+                return (
+                  <label className="chip" key={interest.id}>
+                    <input type="checkbox" checked={checked} disabled={!checked && atMax} onChange={() => toggle(interest.id)} />
+                    <span>{interest.label}</span>
+                  </label>
+                )
+              })}
+              {hidden > 0 && (
+                <button
+                  type="button"
+                  className="chip-more"
+                  onClick={() => setOpen([...open, group.label])}
+                  aria-label={`Show ${hidden} more in ${group.label}`}
+                >
+                  +{hidden} more
+                </button>
+              )}
+            </div>
+          </fieldset>
+        )
+      })}
     </div>
   )
 }

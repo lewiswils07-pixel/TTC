@@ -8,8 +8,8 @@ import { messageOf } from '../lib/errors'
 import { interestReasons, suggestByInterests, type InterestSuggestion } from '../lib/matching'
 
 const MODES = [
-  { value: 'trip', label: 'For my trip' },
-  { value: 'new', label: 'Plan something new' },
+  { value: 'trip', label: 'Same destination' },
+  { value: 'new', label: 'Similar interests' },
 ] as const
 type Mode = (typeof MODES)[number]['value']
 

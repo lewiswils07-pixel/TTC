@@ -35,6 +35,9 @@ update public.preferences set verified_only = true, styles = '{planner}' where p
 
 select ok((select relrowsecurity from pg_class where oid = 'public.entitlements'::regclass), 'entitlements has row-level security');
 
+-- These tests start on the free plan, without the founding offer.
+delete from public.entitlements where source = 'founding';
+
 select pg_temp.sign_in_as(pg_temp.m(1));
 select is(public.i_have_plus(), false, 'Ann starts on the free plan');
 select results_eq('select display_name from public.suggest_by_interests() order by display_name', $$values ('Bob'::text), ('Cat'), ('Dee')$$,

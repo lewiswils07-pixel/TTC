@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { TextField } from '../components/Field'
 import { CODE_LENGTH, sendCode, verifyCode } from '../lib/auth'
@@ -62,7 +62,12 @@ export function SignIn() {
   async function submitCode(e: FormEvent) {
     e.preventDefault()
     if (!validateAll()) return
-    const digits = code.replace(/\D/g, '')
+    await verify(code.replace(/\D/g, ''))
+  }
+
+  // Signs in as soon as the last digit is typed or pasted.
+  async function verify(digits: string) {
+    if (busy) return
     setBusy(true)
     setError(null)
     try {
@@ -103,6 +108,10 @@ export function SignIn() {
             <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
               {busy ? 'Sending…' : 'Send my code'}
             </button>
+            <p className="hint center legal-line">
+              By continuing you agree to our <Link to="/terms">terms</Link>, <Link to="/privacy">privacy notice</Link> and{' '}
+              <Link to="/community-rules">community rules</Link>.
+            </p>
           </form>
         ) : (
           <form className="card form-card" onSubmit={submitCode} noValidate>
@@ -127,7 +136,9 @@ export function SignIn() {
                 const v = e.target.value
                 setCode(v)
                 setError(null)
-                if (v.replace(/\D/g, '').length >= CODE_LENGTH || /[^\d\s]/.test(v)) touch('code')
+                const digits = v.replace(/\D/g, '')
+                if (digits.length === CODE_LENGTH && !/[^\d\s]/.test(v)) void verify(digits)
+                else if (digits.length > CODE_LENGTH || /[^\d\s]/.test(v)) touch('code')
               }}
               onBlur={() => code && touch('code')}
             />

@@ -24,3 +24,24 @@ export function tripDates(start: string, end: string): string {
   const e = new Date(`${end}T00:00:00Z`)
   return dateFormat.formatRange(s, e)
 }
+
+const longFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+const dayFormat = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' })
+
+/** "5 January 2027". */
+export function longDate(iso: string): string {
+  return longFormat.format(new Date(`${iso}T00:00:00Z`))
+}
+
+/** "Sat 14 Nov": how a chosen date reads back under a date box, whatever
+ *  order the phone's own date box uses. */
+export function shortDay(iso: string): string {
+  return dayFormat.format(new Date(`${iso}T00:00:00Z`))
+}
+
+/** "Sat 14 Nov to Sun 22 Nov, 9 days" under a pair of date boxes. */
+export function dateReadback(start: string, end: string): string | null {
+  if (!start || !end || end < start) return null
+  const days = daysBetween(start, end) + 1
+  return start === end ? `${shortDay(start)}, 1 day` : `${shortDay(start)} to ${shortDay(end)}, ${days} days`
+}

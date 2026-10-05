@@ -42,6 +42,7 @@ legend { padding: 0; }
   backdrop-filter: saturate(1.4) blur(10px);
   -webkit-backdrop-filter: saturate(1.4) blur(10px);
   border-bottom: 1px solid var(--line);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--gold) 35%, transparent);
 }
 .topbar-inner {
   max-width: 640px; margin: 0 auto; min-height: 60px;
@@ -167,6 +168,9 @@ legend { padding: 0; }
 .segment input:checked + span { background: var(--accent); color: var(--on-accent); }
 .segment input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: -5px; }
 .segmented[data-cols='4'] .segment span { padding-inline: 4px; }
+.segmented[data-cols='2'] .segment:nth-child(odd) { border-left: 0; }
+.segmented[data-cols='2'] .segment:nth-child(n + 3) { border-top: 1.5px solid var(--line); }
+.dob { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr) 5.5rem; gap: var(--space-2); }
 @media (max-width: 380px) { .segment span { font-size: 0.8125rem; padding-inline: 4px; } }
 
 /* Interest chips */
@@ -228,7 +232,7 @@ legend { padding: 0; }
 
 /* Onboarding progress */
 .progress { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin-bottom: var(--space-4); }
-.progress-bar { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.4s var(--ease-out); }
+.progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--gold))); border-radius: 3px; transition: width 0.4s var(--ease-out); }
 .step h1 { margin-bottom: var(--space-2); }
 
 /* Photo */
@@ -366,7 +370,7 @@ legend { padding: 0; }
 .page-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
 .page-head h1 { margin: 0; }
 .tag-plus { min-height: 26px; padding: 0 10px; font-size: 0.8125rem; background: color-mix(in srgb, var(--brand-gold) 24%, var(--card)); color: var(--ink); }
-.link-card-primary { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.link-card-primary { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); box-shadow: inset 4px 0 0 var(--gold), var(--shadow-sm); }
 .link-card { margin-bottom: var(--space-3); }
 .mode-switch { margin-top: var(--space-4); }
 .mode-switch > legend { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -480,3 +484,88 @@ legend { padding: 0; }
 .vote:disabled { cursor: default; opacity: 0.6; }
 .idea-link { font-weight: 600; font-size: var(--text-sm); }
 .chat-tools .chat-plan-link { font-weight: 700; color: var(--accent); }
+
+/* --------------------------------------------------------------- gold accents (sign-up review 15) */
+.gold-rule::after {
+  content: ''; display: block; width: 40px; height: 2px; margin-top: var(--space-2);
+  background: var(--gold); border-radius: 1px;
+}
+.center .gold-rule::after, .welcome .gold-rule::after, .hero .gold-rule::after { margin-inline: auto; }
+.section-title { font-size: var(--text-lg); margin: var(--space-6) 0 var(--space-4); }
+.founding-badge {
+  display: inline-flex; align-items: center; gap: var(--space-2); margin: calc(var(--space-2) * -1) 0 var(--space-4);
+  padding: 4px 12px; border-radius: 999px; font-size: var(--text-sm); font-weight: 700; color: var(--gold-ink);
+  border: 1px solid color-mix(in srgb, var(--gold) 60%, transparent);
+  background: color-mix(in srgb, var(--gold) 10%, var(--card));
+}
+.founding-badge::before { content: '✦'; color: var(--gold); }
+.saved-note { margin: calc(var(--space-2) * -1) 0 var(--space-4); }
+
+/* --------------------------------------------------------------- home */
+.travel-art { width: 100%; max-width: 320px; height: auto; display: block; }
+.hero-for { margin: 0; color: var(--muted); font-size: var(--text-sm); font-weight: 600; }
+.steps-strip { list-style: none; margin: 0 0 var(--space-6); padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+.steps-strip li { display: flex; flex-direction: column; gap: var(--space-1); text-align: center; align-items: center; font-size: var(--text-sm); color: var(--ink-soft); }
+.steps-strip strong { color: var(--ink); font-size: 1rem; line-height: 1.25; }
+.step-number {
+  display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; margin-bottom: var(--space-1);
+  border: 1.5px solid var(--gold); color: var(--gold-ink); font-weight: 800;
+}
+@media (max-width: 380px) { .steps-strip { grid-template-columns: 1fr; } .steps-strip li { flex-direction: row; text-align: left; flex-wrap: wrap; column-gap: var(--space-2); } }
+
+/* --------------------------------------------------------------- welcome */
+.welcome { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-4); padding-top: var(--space-4); }
+.welcome h1 { margin: 0; font-size: clamp(1.75rem, 7vw, 2.25rem); }
+.welcome .eyebrow { margin: var(--space-2) 0 0; color: var(--gold-ink); }
+.member-number { margin: 0; font-size: var(--text-lg); color: var(--ink-soft); }
+.member-number strong { color: var(--accent); }
+.welcome-gift { width: 100%; text-align: left; border-color: color-mix(in srgb, var(--gold) 60%, var(--line)); box-shadow: inset 0 3px 0 var(--gold), var(--shadow-sm); }
+.welcome-gift h2 { font-size: var(--text-lg); margin-bottom: var(--space-2); }
+.welcome-gift p { margin: 0; color: var(--ink-soft); }
+.how-it-works { width: 100%; text-align: left; margin: 0; padding-left: 1.4em; display: grid; gap: var(--space-2); color: var(--ink-soft); }
+.how-it-works li::marker { color: var(--gold-ink); font-weight: 800; }
+.welcome .btn { width: 100%; }
+
+/* --------------------------------------------------------------- profile strength */
+.strength { margin-bottom: var(--space-4); }
+.strength-head { display: flex; justify-content: space-between; align-items: baseline; }
+.strength-head h2 { font-size: 1.0625rem; margin: 0; }
+.strength-value { font-weight: 800; color: var(--gold-ink); }
+.strength-bar { height: 8px; border-radius: 4px; background: var(--paper-tint); overflow: hidden; margin: var(--space-3) 0; }
+.strength-bar > div { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--gold)); }
+.strength .hint { margin: 0 0 var(--space-2); }
+.strength-next { margin: 0; padding-left: 1.2em; display: grid; gap: var(--space-1); font-weight: 600; }
+
+/* --------------------------------------------------------------- photo tips */
+.photo-tips { margin: 0; padding-left: 1.2em; display: grid; gap: var(--space-1); color: var(--ink-soft); }
+.photo-tips li::marker { color: var(--gold); }
+
+/* --------------------------------------------------------------- legal pages */
+.legal h2 { font-size: var(--text-lg); margin-top: var(--space-5); }
+.legal ul, .legal ol { padding-left: 1.2em; display: grid; gap: var(--space-2); }
+.legal-links { margin-top: var(--space-6); color: var(--muted); }
+.legal-line { margin: 0; }
+.rules li::marker { color: var(--gold-ink); font-weight: 800; }
+.chip-more {
+  min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px dashed color-mix(in srgb, var(--gold) 70%, var(--line));
+  background: transparent; color: var(--gold-ink); font: inherit; font-size: 0.9375rem; font-weight: 700; cursor: pointer;
+}
+.chip-more:hover { background: color-mix(in srgb, var(--gold) 10%, transparent); }
+.chip-more:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.date-readback { margin: calc(var(--space-3) * -1) 0 0; font-weight: 600; color: var(--ink-soft); }
+
+/* --------------------------------------------------------------- find people (two ways) */
+.find-people .section-title { margin-top: var(--space-2); }
+.find-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); }
+.find-card {
+  display: flex; flex-direction: column; gap: var(--space-1); color: var(--ink-soft); text-decoration: none; font-size: var(--text-sm);
+  box-shadow: inset 0 3px 0 var(--gold), var(--shadow-sm); transition: border-color 0.15s, transform 0.15s var(--ease-out);
+}
+.find-card strong { color: var(--ink); font-size: 1.0625rem; line-height: 1.25; }
+.find-card:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.find-card:active { transform: scale(0.98); }
+.find-icon {
+  display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; margin-bottom: var(--space-2);
+  background: var(--brand-disc); color: var(--brand-gold); font-size: 1.125rem;
+}
+@media (max-width: 360px) { .find-grid { grid-template-columns: 1fr; } }

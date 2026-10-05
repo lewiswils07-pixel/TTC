@@ -3,7 +3,7 @@
 // rules, so these are for helpful, instant feedback only.
 import { CODE_LENGTH, isValidEmail } from './auth'
 import { addDays, daysBetween } from './dates'
-import { MAX_PREF_AGE, MIN_AGE, MIN_INTERESTS, latestBirthYear } from './options'
+import { MAX_PREF_AGE, MIN_AGE, MIN_INTERESTS, ageFromDate, latestBirthYear } from './options'
 
 export type Check<T> = (value: T) => string | null
 
@@ -33,6 +33,26 @@ export function checkBirthYear(v: string, now = new Date()): string | null {
   const year = Number(v)
   if (year < 1900) return 'Please check the year: it looks too early.'
   if (year > latestBirthYear(now)) return `You need to be ${MIN_AGE} or over to join.`
+  return null
+}
+
+/** Day, month (1-12) and year as typed; returns YYYY-MM-DD when valid. */
+export function birthDate(day: string, month: string, year: string): string | null {
+  if (!day || !month || !/^\d{4}$/.test(year)) return null
+  const d = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)))
+  if (d.getUTCDate() !== Number(day)) return null
+  return d.toISOString().slice(0, 10)
+}
+
+export function checkBirthDate(day: string, month: string, year: string, now = new Date()): string | null {
+  if (!day && !month && !year) return 'Please enter your date of birth.'
+  if (!day || !month) return 'Please choose the day and month.'
+  // Too young is decided by the full date below, not the year.
+  const yearError = checkBirthYear(year, now)
+  if (yearError && !(/^\d{4}$/.test(year) && Number(year) > latestBirthYear(now))) return yearError
+  const date = birthDate(day, month, year)
+  if (!date) return 'That date doesn’t exist. Please check the day and month.'
+  if (ageFromDate(date, now) < MIN_AGE) return `You need to be ${MIN_AGE} or over to join.`
   return null
 }
 

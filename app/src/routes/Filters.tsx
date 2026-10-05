@@ -8,7 +8,7 @@ import { Segmented } from '../components/Segmented'
 import { brand } from '../lib/brand'
 import { messageOf } from '../lib/errors'
 import { getFilters, saveFilters, type Filters as FilterValues } from '../lib/filters'
-import { BUDGETS, DISTANCES, distanceKm, distanceOption, GENDERS, MAX_PREF_AGE, MIN_AGE, PACES, TRAVEL_STYLES } from '../lib/options'
+import { BUDGETS, DISTANCES, distanceKm, distanceOption, MAX_PREF_AGE, MIN_AGE, PACES, SHOWN_GENDERS, TRAVEL_STYLES } from '../lib/options'
 import { hasPlus } from '../lib/plan'
 import { useSession } from '../lib/session-context'
 import { checkAgeRange } from '../lib/validation'
@@ -95,7 +95,7 @@ export function Filters() {
             name="genders"
             legend="Show me"
             hint="Pick all that apply."
-            options={GENDERS}
+            options={SHOWN_GENDERS}
             selected={values.genders}
             onChange={(genders) => set({ genders })}
             multiple

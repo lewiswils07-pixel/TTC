@@ -6,7 +6,7 @@ import { ActionBar, SaveError } from '../components/Form'
 import { Layout, Loading } from '../components/Layout'
 import { Segmented } from '../components/Segmented'
 import type { City } from '../lib/cities'
-import { isoDate } from '../lib/dates'
+import { dateReadback, isoDate } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import type { Option } from '../lib/options'
 import { deleteTrip, getTrip, saveTrip, type Trip } from '../lib/trips'
@@ -177,6 +177,11 @@ function TripEditor({ trip }: { trip: Trip | null }) {
               onBlur={() => touch('end')}
             />
           </div>
+          {dateReadback(start, end) && (
+            <p className="hint date-readback" aria-live="polite">
+              {dateReadback(start, end)}
+            </p>
+          )}
           <Segmented
             name="flex"
             legend="How flexible are your dates?"
