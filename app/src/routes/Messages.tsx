@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { Layout, Loading } from '../components/Layout'
 import { messageTime, myConversations, type Conversation } from '../lib/chat'
@@ -10,6 +10,7 @@ export function Messages() {
   const [items, setItems] = useState<Conversation[] | null | undefined>(undefined)
   const [error, setError] = useState<string | null>(null)
   const heading = useRef<HTMLHeadingElement>(null)
+  const done = (useLocation().state as { message?: string } | null)?.message
 
   useEffect(() => {
     myConversations().then(setItems, (e) => setError(messageOf(e)))
@@ -26,6 +27,11 @@ export function Messages() {
       <h1 ref={heading} tabIndex={-1}>
         Messages
       </h1>
+      {done && (
+        <p className="notice notice-success" role="status">
+          {done}
+        </p>
+      )}
       {error && (
         <p className="notice notice-error" role="alert">
           {error}

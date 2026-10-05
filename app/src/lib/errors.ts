@@ -21,6 +21,7 @@ const RULES: Array<[RegExp, string]> = [
   [/isn't available|isn’t available/i, 'This member isn’t available right now.'],
   [/finish your profile/i, 'Please finish your profile before sending requests.'],
   [/requests are paused/i, 'Your requests are paused while we look into something about your account. We’ll be in touch by email.'],
+  [/message not found/i, 'We couldn’t find that message.'],
   [/member not found/i, 'We couldn’t find that member. They may have left.'],
   [/request not found/i, 'That request has already been answered or withdrawn.'],
   [/conversation has ended/i, 'This conversation has ended, so new messages can’t be sent.'],

@@ -402,3 +402,9 @@ legend { padding: 0; }
 .composer-row { display: flex; align-items: flex-end; gap: var(--space-2); }
 .composer-input { flex: 1; min-height: 48px; max-height: 160px; resize: none; field-sizing: content; }
 .composer-send { flex: none; }
+.chat-tools { padding-top: var(--space-2); }
+.chat-tools .safety-link { font-size: var(--text-sm); }
+.scam-warning { align-self: stretch; margin: var(--space-1) 0 var(--space-2); padding: var(--space-3) var(--space-4); border-radius: var(--radius); background: color-mix(in srgb, var(--brand-gold) 16%, var(--card)); border: 1px solid color-mix(in srgb, var(--brand-gold) 55%, var(--line)); display: flex; flex-direction: column; gap: var(--space-2); }
+.scam-warning > p { margin: 0; }
+.scam-warning > .btn-link { align-self: flex-start; }
+.scam-warning .safety-box { margin: 0; }

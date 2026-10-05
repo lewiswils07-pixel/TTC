@@ -34,6 +34,12 @@ export async function reportMember(id: string, reason: ReportReason, details: st
   if (error) throw friendlyError(error)
 }
 
+/** Report one message someone sent me; counts as a report about them, with the message attached. */
+export async function reportMessage(messageId: number, reason: ReportReason, details: string): Promise<void> {
+  const { error } = await supabase.rpc('report_message', { p_message_id: messageId, p_reason: reason, p_details: details.trim() || null })
+  if (error) throw friendlyError(error)
+}
+
 /** Members I've blocked, newest first. Null when this database doesn't have blocks yet. */
 export async function myBlocks(): Promise<BlockedMember[] | null> {
   const { data, error } = await supabase.rpc('my_blocks')

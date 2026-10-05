@@ -1,8 +1,21 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { Layout, Loading } from '../components/Layout'
-import { listMessages, markRead, MAX_MESSAGE, messageTime, myConversations, onNewMessage, PAGE_SIZE, sendMessage, type Conversation, type Message } from '../lib/chat'
+import { SafetyBox } from '../components/SafetyBox'
+import {
+  listMessages,
+  markRead,
+  MAX_MESSAGE,
+  messageTime,
+  messageWarnings,
+  myConversations,
+  onNewMessage,
+  PAGE_SIZE,
+  sendMessage,
+  type Conversation,
+  type Message,
+} from '../lib/chat'
 import { messageOf } from '../lib/errors'
 import { useSession } from '../lib/session-context'
 
@@ -15,6 +28,9 @@ export function Chat() {
   const [messages, setMessages] = useState<Message[]>([])
   const [more, setMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [warnings, setWarnings] = useState<Set<number>>(new Set())
+  const [reporting, setReporting] = useState<number | null>(null)
+  const navigate = useNavigate()
   const list = useRef<HTMLOListElement>(null)
   const stick = useRef(true)
 
@@ -26,9 +42,10 @@ export function Chat() {
   }, [])
 
   useEffect(() => {
-    Promise.all([myConversations(), listMessages(conversationId)]).then(
-      ([all, first]) => {
+    Promise.all([myConversations(), listMessages(conversationId), messageWarnings(conversationId)]).then(
+      ([all, first, warn]) => {
         setOther(all?.find((c) => c.id === conversationId) ?? null)
+        setWarnings(warn)
         add(first)
         setMore(first.length === PAGE_SIZE)
         void markRead(conversationId)
@@ -39,8 +56,10 @@ export function Chat() {
       stick.current = true
       add([m])
       void markRead(conversationId)
+      // The server decides which messages need a warning; ask again for theirs.
+      if (m.sender_id !== me) void messageWarnings(conversationId).then(setWarnings)
     })
-  }, [conversationId, add])
+  }, [conversationId, add, me])
 
   // Keep the newest message in view as messages arrive.
   useLayoutEffect(() => {
@@ -86,6 +105,9 @@ export function Chat() {
           <Avatar name={other.display_name} path={other.photo_path} size="sm" />
           <h1>{other.display_name}</h1>
         </div>
+        <div className="chat-tools">
+          <SafetyBox profileId={other.profile_id} name={other.display_name} onBlocked={(message) => navigate('/messages', { state: { message } })} />
+        </div>
 
         <section className="chat-body" aria-label={`Messages with ${other.display_name}`}>
           {more && (
@@ -102,13 +124,35 @@ export function Chat() {
             {messages.map((m) => {
               const mine = m.sender_id === me
               return (
-                <li key={m.id} className={`message ${mine ? 'message-mine' : 'message-theirs'}`}>
-                  <span className="visually-hidden">{mine ? 'You' : other.display_name}: </span>
-                  <p className="message-body">{m.body}</p>
-                  <time className="message-time" dateTime={m.created_at}>
-                    {messageTime(m.created_at)}
-                  </time>
-                </li>
+                <Fragment key={m.id}>
+                  <li className={`message ${mine ? 'message-mine' : 'message-theirs'}`}>
+                    <span className="visually-hidden">{mine ? 'You' : other.display_name}: </span>
+                    <p className="message-body">{m.body}</p>
+                    <time className="message-time" dateTime={m.created_at}>
+                      {messageTime(m.created_at)}
+                    </time>
+                  </li>
+                  {!mine && warnings.has(m.id) && (
+                    <li className="scam-warning">
+                      <p>
+                        <strong>Never send money to someone you haven’t met.</strong> Report if this feels wrong.
+                      </p>
+                      {reporting === m.id ? (
+                        <SafetyBox
+                          profileId={other.profile_id}
+                          name={other.display_name}
+                          messageId={m.id}
+                          onCancel={() => setReporting(null)}
+                          onBlocked={(message) => navigate('/messages', { state: { message } })}
+                        />
+                      ) : (
+                        <button type="button" className="btn-link" onClick={() => setReporting(m.id)}>
+                          Report this message
+                        </button>
+                      )}
+                    </li>
+                  )}
+                </Fragment>
               )
             })}
           </ol>

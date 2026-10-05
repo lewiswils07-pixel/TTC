@@ -51,6 +51,13 @@ export async function sendMessage(conversationId: number, body: string): Promise
   return data as number
 }
 
+/** Messages sent to me here that should carry a scam warning. */
+export async function messageWarnings(conversationId: number): Promise<Set<number>> {
+  const { data, error } = await supabase.rpc('message_warnings', { p_conversation_id: conversationId })
+  if (error) return new Set()
+  return new Set((data ?? []) as number[])
+}
+
 export async function markRead(conversationId: number): Promise<void> {
   await supabase.rpc('mark_read', { p_conversation_id: conversationId })
 }

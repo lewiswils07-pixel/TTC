@@ -3,8 +3,8 @@
 -- conversations they are in, and can only send while the connection stands.
 -- A block ends the connection, and the chat leaves both members' lists.
 --
--- Not yet here: group chats (T20), the scam guard (T15), reporting a
--- message (T14), new-account message limits and email nudges (T18).
+-- Not yet here: group chats (T20), the scam guard and reporting a
+-- message (in 20261019090000_scam_guard.sql), new-account message limits and email nudges (T18).
 
 create table public.conversations (
   id             bigint generated always as identity primary key,

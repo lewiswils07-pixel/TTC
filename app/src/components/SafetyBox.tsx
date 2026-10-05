@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { messageOf } from '../lib/errors'
-import { blockMember, MAX_REPORT_DETAILS, REPORT_REASONS, reportMember, type ReportReason } from '../lib/safety'
+import { blockMember, MAX_REPORT_DETAILS, REPORT_REASONS, reportMember, reportMessage, type ReportReason } from '../lib/safety'
 import { Field, FieldError } from './Field'
 
 type Mode = 'closed' | 'menu' | 'block' | 'report' | 'reported'
@@ -8,10 +8,23 @@ type Mode = 'closed' | 'menu' | 'block' | 'report' | 'reported'
 /**
  * "Block or report" at the foot of a member's card. Blocking calls
  * onBlocked so the card can go; a report without a block stays on the card.
+ * With messageId it reports that message, opening straight on the report form.
  */
-export function SafetyBox({ profileId, name, onBlocked }: { profileId: string; name: string; onBlocked: (message: string) => void }) {
-  const [mode, setMode] = useState<Mode>('closed')
-  const [reason, setReason] = useState<ReportReason | null>(null)
+export function SafetyBox({
+  profileId,
+  name,
+  onBlocked,
+  messageId,
+  onCancel,
+}: {
+  profileId: string
+  name: string
+  onBlocked: (message: string) => void
+  messageId?: number
+  onCancel?: () => void
+}) {
+  const [mode, setMode] = useState<Mode>(messageId ? 'report' : 'closed')
+  const [reason, setReason] = useState<ReportReason | null>(messageId ? 'asking_for_money' : null)
   const [details, setDetails] = useState('')
   const [alsoBlock, setAlsoBlock] = useState(true)
   const [tried, setTried] = useState(false)
@@ -25,6 +38,7 @@ export function SafetyBox({ profileId, name, onBlocked }: { profileId: string; n
   }, [mode])
 
   function close() {
+    onCancel?.()
     setMode('closed')
     setError(null)
     setTried(false)
@@ -50,7 +64,8 @@ export function SafetyBox({ profileId, name, onBlocked }: { profileId: string; n
     if (!reason) return
     void run(
       async () => {
-        await reportMember(profileId, reason, details)
+        if (messageId) await reportMessage(messageId, reason, details)
+        else await reportMember(profileId, reason, details)
         if (alsoBlock) await blockMember(profileId)
       },
       () => (alsoBlock ? onBlocked(`Thanks for telling us. We’ll look into it, and you won’t see ${name} again.`) : setMode('reported')),
