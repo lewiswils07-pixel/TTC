@@ -1,20 +1,27 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
-import { ChoiceChips } from '../components/ChoiceChips'
+import { AgeRange } from '../components/AgeRange'
 import { CityPicker } from '../components/CityPicker'
+import { Field, FieldError, TextField } from '../components/Field'
+import { InterestPicker } from '../components/InterestPicker'
 import { Layout, Loading } from '../components/Layout'
+import { Segmented } from '../components/Segmented'
 import type { City } from '../lib/cities'
 import { messageOf } from '../lib/errors'
+import { firstUnfinishedStep } from '../lib/onboarding'
 import {
   BUDGETS,
   GENDERS,
   MAX_INTERESTS,
+  MAX_PREF_AGE,
   MIN_AGE,
   MIN_INTERESTS,
   PACES,
   TRAVEL_STYLES,
-  latestBirthYear,
+  type Budget,
   type Gender,
+  type Pace,
+  type TravelStyle,
 } from '../lib/options'
 import { photoUrl, preparePhoto, uploadPhoto } from '../lib/photo'
 import {
@@ -28,11 +35,17 @@ import {
   type MyProfile,
 } from '../lib/profile'
 import { useSession } from '../lib/session-context'
+import { useChecks } from '../lib/useChecks'
 import { useMyProfile } from '../lib/useMyProfile'
-import { firstUnfinishedStep } from '../lib/onboarding'
+import { checkAgeRange, checkBirthYear, checkChosen, checkInterests, checkName } from '../lib/validation'
 
-const STEP_TITLES = ['About you', 'Your photo', 'Your interests', 'How you like to travel'] as const
-const TOTAL = STEP_TITLES.length
+const STEPS = [
+  { title: 'About you', intro: 'Only your first name, age and home town are shown to other members.' },
+  { title: 'Your photo', intro: 'A clear, smiling photo helps other members feel comfortable. Only signed-in members can see it.' },
+  { title: 'Your interests', intro: `Pick ${MIN_INTERESTS} to ${MAX_INTERESTS}. We use them to suggest people you’ll get on with.` },
+  { title: 'How you travel', intro: 'There are no wrong answers. These help us suggest people who travel the way you do.' },
+] as const
+const TOTAL = STEPS.length
 
 export function Onboarding() {
   const { session } = useSession()
@@ -82,25 +95,24 @@ export function Onboarding() {
   )
 }
 
-
 function StepFrame({ step, children }: { step: number; children: ReactNode }) {
   const heading = useRef<HTMLHeadingElement>(null)
   useEffect(() => heading.current?.focus(), [])
+  const { title, intro } = STEPS[step - 1]
   return (
-    <>
-      <ol className="steps" aria-hidden="true">
-        {STEP_TITLES.map((title, i) => (
-          <li key={title} data-done={i < step} />
-        ))}
-      </ol>
-      <p className="step-label">
+    <div className="step">
+      <div className="progress" aria-hidden="true">
+        <div className="progress-bar" style={{ width: `${(step / TOTAL) * 100}%` }} />
+      </div>
+      <p className="eyebrow">
         Step {step} of {TOTAL}
       </p>
       <h1 ref={heading} tabIndex={-1}>
-        {STEP_TITLES[step - 1]}
+        {title}
       </h1>
+      <p className="lede">{intro}</p>
       {children}
-    </>
+    </div>
   )
 }
 
@@ -108,8 +120,7 @@ function StepFrame({ step, children }: { step: number; children: ReactNode }) {
 function useStepSubmit(save: () => Promise<void>, onDone: () => Promise<void>) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  async function submit(e?: FormEvent) {
-    e?.preventDefault()
+  async function submit() {
     setBusy(true)
     setError(null)
     try {
@@ -123,25 +134,28 @@ function useStepSubmit(save: () => Promise<void>, onDone: () => Promise<void>) {
   return { busy, error, setError, submit }
 }
 
-function StepActions({ busy, onBack, label = 'Save and continue' }: { busy: boolean; onBack?: () => void; label?: string }) {
+function ActionBar({ busy, onBack, label = 'Continue', note }: { busy: boolean; onBack?: () => void; label?: string; note?: ReactNode }) {
   return (
-    <div className="actions">
-      {onBack && (
-        <button type="button" className="btn btn-secondary" onClick={onBack} disabled={busy}>
-          Back
+    <div className="action-bar">
+      {note && <p className="action-note">{note}</p>}
+      <div className="action-row">
+        {onBack && (
+          <button type="button" className="btn btn-secondary" onClick={onBack} disabled={busy}>
+            Back
+          </button>
+        )}
+        <button type="submit" className="btn btn-primary" disabled={busy}>
+          {busy ? 'Saving…' : label}
         </button>
-      )}
-      <button type="submit" className="btn btn-primary" disabled={busy}>
-        {busy ? 'Saving…' : label}
-      </button>
+      </div>
     </div>
   )
 }
 
-function FormError({ error }: { error: string | null }) {
+function SaveError({ error }: { error: string | null }) {
   if (!error) return null
   return (
-    <p className="error" role="alert">
+    <p className="notice notice-error" role="alert">
       {error}
     </p>
   )
@@ -155,60 +169,84 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
   const [birthYear, setBirthYear] = useState(p.birth_year ? String(p.birth_year) : '')
   const [gender, setGender] = useState<Gender[]>(p.gender ? [p.gender] : [])
   const [city, setCity] = useState<City | null>(p.home_city)
-  const latest = latestBirthYear()
 
-  const { busy, error, setError, submit } = useStepSubmit(async () => {
-    await saveBasics(userId, {
-      display_name: name.trim(),
-      birth_year: Number(birthYear),
-      gender: gender[0],
-      home_city_id: city!.id,
-    })
+  const errors = {
+    name: checkName(name),
+    birthYear: checkBirthYear(birthYear),
+    gender: checkChosen('how you describe yourself')(gender),
+    city: city ? null : 'Please choose your home town or city from the list.',
+  }
+  const { shown, touch, validateAll } = useChecks(errors)
+
+  const { busy, error, submit } = useStepSubmit(async () => {
+    await saveBasics(userId, { display_name: name.trim(), birth_year: Number(birthYear), gender: gender[0], home_city_id: city!.id })
   }, onDone)
 
   function onSubmit(e: FormEvent) {
     e.preventDefault()
-    const year = Number(birthYear)
-    if (!name.trim()) return setError('Please tell us your first name.')
-    if (!Number.isInteger(year) || year < 1900) return setError('Please enter the year you were born, for example 1965.')
-    if (year > latest) return setError(`You need to be ${MIN_AGE} or over to join.`)
-    if (!gender.length) return setError('Please choose how you describe yourself.')
-    if (!city) return setError('Please choose your home town or city from the list.')
-    void submit()
+    if (validateAll()) void submit()
   }
 
   return (
     <form onSubmit={onSubmit} noValidate>
-      <p>Only your first name, age and home town are shown to other members.</p>
-      <div className="field">
-        <label htmlFor="name">First name</label>
-        <input id="name" className="input" autoComplete="given-name" maxLength={40} value={name} onChange={(e) => setName(e.target.value)} />
-      </div>
-      <div className="field">
-        <label htmlFor="birth-year">Year you were born</label>
-        <p className="hint" id="birth-year-hint">
-          Members see your age, never your birthday. You must be {MIN_AGE} or over.
-        </p>
-        <input
-          id="birth-year"
-          className="input"
+      <div className="card form-card">
+        <TextField
+          name="name"
+          label="First name"
+          autoComplete="given-name"
+          maxLength={41}
+          value={name}
+          error={shown('name')}
+          valid={!errors.name}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={() => touch('name')}
+        />
+        <TextField
+          name="birthYear"
+          label="Year you were born"
+          hint={`Members see your age, never your birthday. You must be ${MIN_AGE} or over.`}
           inputMode="numeric"
           autoComplete="bday-year"
+          placeholder="YYYY"
           maxLength={4}
-          aria-describedby="birth-year-hint"
+          className="input input-short"
           value={birthYear}
-          onChange={(e) => setBirthYear(e.target.value.replace(/\D/g, ''))}
+          error={shown('birthYear')}
+          valid={!errors.birthYear}
+          onChange={(e) => {
+            const v = e.target.value.replace(/\D/g, '')
+            setBirthYear(v)
+            if (v.length === 4) touch('birthYear')
+          }}
+          onBlur={() => touch('birthYear')}
         />
+        <Segmented
+          name="gender"
+          legend="I am a"
+          options={GENDERS}
+          selected={gender}
+          onChange={(v) => {
+            setGender(v)
+            touch('gender')
+          }}
+          error={shown('gender')}
+        />
+        <div data-field="city">
+          <CityPicker
+            label="Home town or city"
+            hint="Start typing, then pick from the list. We never show your exact location."
+            value={city}
+            onChange={(c) => {
+              setCity(c)
+              if (c) touch('city')
+            }}
+            onBlur={() => touch('city')}
+            error={shown('city')}
+          />
+        </div>
       </div>
-      <ChoiceChips name="gender" legend="I am a…" options={GENDERS} selected={gender} onChange={setGender} />
-      <CityPicker
-        label="Home town or city"
-        hint="Start typing, then pick from the list. We never show your exact location."
-        value={city}
-        onChange={setCity}
-      />
-      <FormError error={error} />
-      <StepActions busy={busy} />
+      <SaveError error={error} />
+      <ActionBar busy={busy} />
     </form>
   )
 }
@@ -219,6 +257,7 @@ function PhotoStep({ userId, data, onDone, onBack }: StepProps) {
   const [photo, setPhoto] = useState<Blob | null>(null)
   const [bio, setBio] = useState(p.bio ?? '')
   const [preparing, setPreparing] = useState(false)
+  const [photoError, setPhotoError] = useState<string | null>(null)
 
   useEffect(() => {
     if (p.photo_path) photoUrl(p.photo_path).then(setPreview)
@@ -231,7 +270,7 @@ function PhotoStep({ userId, data, onDone, onBack }: StepProps) {
     return () => URL.revokeObjectURL(url)
   }, [photo])
 
-  const { busy, error, setError, submit } = useStepSubmit(async () => {
+  const { busy, error, submit } = useStepSubmit(async () => {
     if (photo) await uploadPhoto(userId, photo, p.photo_path)
     await saveAboutMe(userId, { bio: bio.trim() || null })
   }, onDone)
@@ -239,160 +278,181 @@ function PhotoStep({ userId, data, onDone, onBack }: StepProps) {
   async function pick(file: File | undefined) {
     if (!file) return
     setPreparing(true)
-    setError(null)
+    setPhotoError(null)
     try {
       setPhoto(await preparePhoto(file))
     } catch (err) {
-      setError(messageOf(err))
+      setPhotoError(messageOf(err))
     } finally {
       setPreparing(false)
     }
   }
 
   return (
-    <form onSubmit={submit} noValidate>
-      <p>A clear, smiling photo of your face helps other members feel comfortable. Only signed-in members can see it.</p>
-      <div className="field">
-        {preview ? (
-          <img className="avatar" src={preview} alt="Your profile photo" />
-        ) : (
-          <div className="avatar avatar-empty" aria-hidden="true">
-            {(p.display_name ?? '?').slice(0, 1).toUpperCase()}
+    <form
+      onSubmit={(e) => {
+        e.preventDefault()
+        void submit()
+      }}
+      noValidate
+    >
+      <div className="card form-card">
+        <div className="photo-picker" data-field="photo">
+          {preview ? (
+            <img className="avatar avatar-lg" src={preview} alt="Your profile photo" />
+          ) : (
+            <div className="avatar avatar-lg avatar-empty" aria-hidden="true">
+              {(p.display_name ?? '?').slice(0, 1).toUpperCase()}
+            </div>
+          )}
+          <div className="photo-actions">
+            <label className="btn btn-secondary" htmlFor="photo">
+              {preview ? 'Change photo' : 'Choose a photo'}
+            </label>
+            <input id="photo" className="visually-hidden" type="file" accept="image/*" onChange={(e) => pick(e.target.files?.[0])} />
+            <p className="hint" role="status" aria-live="polite">
+              {preparing ? 'Getting your photo ready…' : 'We remove location details from your photo before it’s saved.'}
+            </p>
+            <FieldError error={photoError} />
           </div>
-        )}
-        <label className="btn btn-secondary btn-start" htmlFor="photo">
-          {preview ? 'Choose a different photo' : 'Choose a photo'}
-        </label>
-        <input id="photo" className="visually-hidden" type="file" accept="image/*" onChange={(e) => pick(e.target.files?.[0])} />
-        <p className="hint" role="status" aria-live="polite">
-          {preparing ? 'Getting your photo ready…' : 'We remove location details from your photo before it is saved.'}
-        </p>
+        </div>
+        <Field name="bio" label="A few words about you (optional)" hint={`Where you’ve been, where you’d love to go, or what makes a good travel companion. ${500 - bio.length} characters left.`}>
+          {({ id, describedBy }) => (
+            <textarea id={id} className="textarea" maxLength={500} aria-describedby={describedBy} value={bio} onChange={(e) => setBio(e.target.value)} />
+          )}
+        </Field>
       </div>
-      <div className="field">
-        <label htmlFor="bio">A few words about you (optional)</label>
-        <p className="hint" id="bio-hint">
-          For example, where you've been, where you'd love to go, or what makes a good travel companion. {500 - bio.length}{' '}
-          characters left.
-        </p>
-        <textarea id="bio" className="textarea" maxLength={500} aria-describedby="bio-hint" value={bio} onChange={(e) => setBio(e.target.value)} />
-      </div>
-      <FormError error={error} />
-      <StepActions busy={busy || preparing} onBack={onBack} label={photo || p.photo_path ? 'Save and continue' : 'Continue without a photo'} />
+      <SaveError error={error} />
+      <ActionBar busy={busy || preparing} onBack={onBack} label={photo || p.photo_path ? 'Continue' : 'Skip photo for now'} />
     </form>
   )
 }
 
 function InterestsStep({ data, interests, onDone, onBack }: Omit<StepProps, 'userId'> & { interests: Interest[] }) {
-  const options = interests.map((i) => ({ value: String(i.id), label: i.label }))
-  const [selected, setSelected] = useState<string[]>(data.interestIds.map(String))
-  const { busy, error, setError, submit } = useStepSubmit(() => saveInterests(selected.map(Number)), onDone)
-
-  function onSubmit(e: FormEvent) {
-    e.preventDefault()
-    if (selected.length < MIN_INTERESTS) return setError(`Please pick at least ${MIN_INTERESTS} interests.`)
-    void submit()
-  }
+  const [selected, setSelected] = useState<number[]>(data.interestIds)
+  const errors = { interests: checkInterests(selected) }
+  const { shown, validateAll } = useChecks(errors)
+  const { busy, error, submit } = useStepSubmit(() => saveInterests(selected), onDone)
 
   return (
-    <form onSubmit={onSubmit} noValidate>
-      <ChoiceChips
-        name="interests"
-        legend="What do you enjoy on a trip?"
-        hint={`Pick ${MIN_INTERESTS} to ${MAX_INTERESTS}. We use these to find people you'll get on with. ${selected.length} picked.`}
-        options={options}
-        selected={selected}
-        onChange={setSelected}
-        multiple
-        max={MAX_INTERESTS}
+    <form
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (validateAll()) void submit()
+      }}
+      noValidate
+    >
+      <InterestPicker interests={interests} selected={selected} onChange={setSelected} max={MAX_INTERESTS} error={shown('interests')} />
+      <SaveError error={error} />
+      <ActionBar
+        busy={busy}
+        onBack={onBack}
+        note={
+          <span aria-live="polite">
+            <strong>{selected.length}</strong> of {MAX_INTERESTS} picked
+            {selected.length < MIN_INTERESTS ? ` · pick at least ${MIN_INTERESTS}` : ''}
+          </span>
+        }
       />
-      <FormError error={error} />
-      <StepActions busy={busy} onBack={onBack} />
     </form>
   )
 }
 
 const DISTANCES = [
-  { value: 'any', label: 'Anywhere' },
-  { value: '50', label: 'Within 50 km' },
-  { value: '150', label: 'Within 150 km' },
-  { value: '500', label: 'Within 500 km' },
+  { value: 'any', label: 'Any' },
+  { value: '50', label: '50 km' },
+  { value: '150', label: '150 km' },
+  { value: '500', label: '500 km' },
 ] as const
+type Distance = (typeof DISTANCES)[number]['value']
 
 function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
   const p = data.profile
   const prefs = data.preferences
-  const [style, setStyle] = useState(p.travel_style ? [p.travel_style] : [])
-  const [pace, setPace] = useState(p.pace ? [p.pace] : [])
-  const [budget, setBudget] = useState(p.budget ? [p.budget] : [])
+  const [style, setStyle] = useState<TravelStyle[]>(p.travel_style ? [p.travel_style] : [])
+  const [pace, setPace] = useState<Pace[]>(p.pace ? [p.pace] : [])
+  const [budget, setBudget] = useState<Budget[]>(p.budget ? [p.budget] : [])
   const [mobility, setMobility] = useState(p.mobility_note ?? '')
   const [genders, setGenders] = useState<Gender[]>(prefs.genders)
-  const [ageMin, setAgeMin] = useState(String(prefs.age_min))
-  const [ageMax, setAgeMax] = useState(String(prefs.age_max))
-  const [distance, setDistance] = useState(prefs.max_distance_km ? String(prefs.max_distance_km) : 'any')
+  const [ages, setAges] = useState<[number, number]>([prefs.age_min, Math.min(prefs.age_max, MAX_PREF_AGE)])
+  const initialDistance = (DISTANCES.find((d) => d.value === String(prefs.max_distance_km))?.value ?? 'any') as Distance
+  const [distance, setDistance] = useState<Distance[]>([initialDistance])
 
-  const { busy, error, setError, submit } = useStepSubmit(async () => {
+  const errors = {
+    genders: genders.length ? null : 'Choose at least one option.',
+    ages: checkAgeRange(ages),
+  }
+  const { shown, touch, validateAll } = useChecks(errors)
+
+  const { busy, error, submit } = useStepSubmit(async () => {
     await saveStyleAndPreferences(
       userId,
       { travel_style: style[0] ?? null, pace: pace[0] ?? null, budget: budget[0] ?? null, mobility_note: mobility.trim() || null },
-      { genders, age_min: Number(ageMin), age_max: Number(ageMax), max_distance_km: distance === 'any' ? null : Number(distance) },
+      {
+        genders,
+        age_min: ages[0],
+        age_max: ages[1],
+        max_distance_km: distance[0] === 'any' ? null : Number(distance[0]),
+      },
     )
     await finishOnboarding()
   }, onDone)
 
-  function onSubmit(e: FormEvent) {
-    e.preventDefault()
-    const min = Number(ageMin)
-    const max = Number(ageMax)
-    if (!genders.length) return setError('Please choose at least one option for who you would like to travel with.')
-    if (!Number.isInteger(min) || !Number.isInteger(max) || min < MIN_AGE || max > 120 || min > max)
-      return setError(`Please check the ages: the youngest can be ${MIN_AGE}, and it must be lower than the oldest.`)
-    void submit()
-  }
-
   return (
-    <form onSubmit={onSubmit} noValidate>
-      <p>There are no wrong answers. These help us suggest people who travel the way you do.</p>
-      <ChoiceChips name="style" legend="Planning" options={TRAVEL_STYLES} selected={style} onChange={setStyle} />
-      <ChoiceChips name="pace" legend="Pace" options={PACES} selected={pace} onChange={setPace} />
-      <ChoiceChips name="budget" legend="Budget" options={BUDGETS} selected={budget} onChange={setBudget} />
-      <div className="field">
-        <label htmlFor="mobility">Anything about getting around we should know? (optional)</label>
-        <p className="hint" id="mobility-hint">
-          For example, "I avoid lots of stairs". This is only used to plan trips, never shown on your profile.
-        </p>
-        <input id="mobility" className="input" maxLength={200} aria-describedby="mobility-hint" value={mobility} onChange={(e) => setMobility(e.target.value)} />
-      </div>
-      <h2>Who you'd like to travel with</h2>
-      <ChoiceChips name="genders" legend="Show me" hint="Pick all that apply." options={GENDERS} selected={genders} onChange={setGenders} multiple />
-      <fieldset className="field">
-        <legend>Aged between</legend>
-        <div className="chips chips-inline">
-          <label className="visually-hidden" htmlFor="age-min">
-            Youngest age
-          </label>
-          <input id="age-min" className="input input-age" inputMode="numeric" maxLength={3} value={ageMin} onChange={(e) => setAgeMin(e.target.value.replace(/\D/g, ''))} />
-          <span aria-hidden="true">and</span>
-          <label className="visually-hidden" htmlFor="age-max">
-            Oldest age
-          </label>
-          <input id="age-max" className="input input-age" inputMode="numeric" maxLength={3} value={ageMax} onChange={(e) => setAgeMax(e.target.value.replace(/\D/g, ''))} />
-        </div>
-      </fieldset>
-      <div className="field">
-        <label htmlFor="distance">How far from home should we look?</label>
-        <p className="hint" id="distance-hint">
-          Used when you're looking for someone to plan a new trip with.
-        </p>
-        <select id="distance" className="select" aria-describedby="distance-hint" value={distance} onChange={(e) => setDistance(e.target.value)}>
-          {DISTANCES.map((d) => (
-            <option key={d.value} value={d.value}>
-              {d.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <FormError error={error} />
-      <StepActions busy={busy} onBack={onBack} label="Finish my profile" />
+    <form
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (validateAll()) void submit()
+      }}
+      noValidate
+    >
+      <section className="card form-card" aria-labelledby="style-heading">
+        <h2 id="style-heading" className="card-title">
+          Your travel style
+        </h2>
+        <Segmented name="style" legend="Planning" options={TRAVEL_STYLES} selected={style} onChange={setStyle} describeSelection />
+        <Segmented name="pace" legend="Pace" options={PACES} selected={pace} onChange={setPace} describeSelection />
+        <Segmented name="budget" legend="Budget" options={BUDGETS} selected={budget} onChange={setBudget} describeSelection />
+        <TextField
+          name="mobility"
+          label="Anything about getting around? (optional)"
+          hint="For example, “I avoid lots of stairs”. Only used to plan trips, never shown on your profile."
+          maxLength={200}
+          value={mobility}
+          onChange={(e) => setMobility(e.target.value)}
+        />
+      </section>
+
+      <section className="card form-card" aria-labelledby="who-heading">
+        <h2 id="who-heading" className="card-title">
+          Who you’d like to travel with
+        </h2>
+        <Segmented
+          name="genders"
+          legend="Show me"
+          hint="Pick all that apply."
+          options={GENDERS}
+          selected={genders}
+          onChange={(v) => {
+            setGenders(v)
+            touch('genders')
+          }}
+          multiple
+          error={shown('genders')}
+        />
+        <AgeRange legend="Aged" min={MIN_AGE} max={MAX_PREF_AGE} value={ages} onChange={setAges} />
+        <FieldError error={shown('ages')} />
+        <Segmented
+          name="distance"
+          legend="How far from home should we look?"
+          hint="Used when you’re looking for someone to plan a new trip with."
+          options={DISTANCES}
+          selected={distance}
+          onChange={setDistance}
+        />
+      </section>
+      <SaveError error={error} />
+      <ActionBar busy={busy} onBack={onBack} label="Finish my profile" />
     </form>
   )
 }

@@ -5,7 +5,7 @@ import { friendlyError } from './errors'
 import type { Budget, Gender, Pace, TravelStyle } from './options'
 import { supabase } from './supabase'
 
-export type Interest = { id: number; slug: string; label: string }
+export type Interest = { id: number; slug: string; label: string; category_label?: string | null }
 
 export type Profile = {
   id: string
@@ -63,7 +63,8 @@ export const saveBasics = (userId: string, basics: Basics) => updateProfile(user
 export const saveAboutMe = (userId: string, about: AboutMe) => updateProfile(userId, about)
 
 export async function listInterests(): Promise<Interest[]> {
-  const { data, error } = await supabase.from('interests').select('id, slug, label').order('sort')
+  // '*' so this works before and after the categories migration.
+  const { data, error } = await supabase.from('interests').select('*').order('sort')
   if (error) throw friendlyError(error)
   return data as Interest[]
 }

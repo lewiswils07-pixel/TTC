@@ -22,7 +22,10 @@
       "paperTint": "#ECE5D7",
       "card": "#FFFDF8",
       "line": "#DCD2C0",
-      "danger": "#A3122A"
+      "danger": "#A3122A",
+      "success": "#2E7D4F",
+      "brandDisc": "#8E1B2B",
+      "brandGold": "#E3B53C"
     },
     "dark": {
       "accent": "#E8BF4F",
@@ -37,7 +40,10 @@
       "paperTint": "#271F1E",
       "card": "#271F1E",
       "line": "#403532",
-      "danger": "#FF8A8A"
+      "danger": "#FF8A8A",
+      "success": "#7BD69B",
+      "brandDisc": "#8E1B2B",
+      "brandGold": "#E8BF4F"
     }
   }
 }

@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from 'react'
 import { cityLabel, searchCities, type City } from '../lib/cities'
 import { messageOf } from '../lib/errors'
+import { FieldError } from './Field'
 
 type Props = {
   label: string
@@ -8,16 +9,19 @@ type Props = {
   value: City | null
   onChange: (city: City | null) => void
   search?: (query: string) => Promise<City[]>
+  onBlur?: () => void
+  /** A validation message from the form, shown under the box. */
+  error?: string | null
 }
 
 /** Type a few letters, then pick the city from the list (ARIA combobox). */
-export function CityPicker({ label, hint, value, onChange, search = searchCities }: Props) {
+export function CityPicker({ label, hint, value, onChange, search = searchCities, onBlur, error: formError }: Props) {
   const id = useId()
   const [text, setText] = useState(value ? cityLabel(value) : '')
   const [results, setResults] = useState<City[]>([])
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(-1)
-  const [error, setError] = useState<string | null>(null)
+  const [loadError, setError] = useState<string | null>(null)
   const [searched, setSearched] = useState('')
 
   useEffect(() => {
@@ -55,7 +59,7 @@ export function CityPicker({ label, hint, value, onChange, search = searchCities
   const noMatch = open && typedEnough && searched === text.trim() && results.length === 0
 
   return (
-    <div className="field">
+    <div className="field" data-invalid={formError ? 'true' : undefined}>
       <label htmlFor={id}>{label}</label>
       {hint && (
         <p className="hint" id={`${id}-hint`}>
@@ -70,7 +74,12 @@ export function CityPicker({ label, hint, value, onChange, search = searchCities
         aria-autocomplete="list"
         aria-expanded={showList}
         aria-controls={listId}
-        aria-describedby={hint ? `${id}-hint` : undefined}
+        aria-describedby={[hint ? `${id}-hint` : '', formError || loadError ? `${id}-error` : ''].filter(Boolean).join(' ') || undefined}
+        aria-invalid={formError ? true : undefined}
+        onBlur={() => {
+          setOpen(false)
+          onBlur?.()
+        }}
         aria-activedescendant={showList && active >= 0 ? `${id}-opt-${active}` : undefined}
         value={text}
         onChange={(e) => {
@@ -111,7 +120,7 @@ export function CityPicker({ label, hint, value, onChange, search = searchCities
       <p className="hint" role="status" aria-live="polite">
         {noMatch ? 'No towns or cities found. Try the nearest bigger town.' : ''}
       </p>
-      {error && <p className="error">{error}</p>}
+      <FieldError id={`${id}-error`} error={formError ?? loadError} />
     </div>
   )
 }
