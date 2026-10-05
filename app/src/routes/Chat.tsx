@@ -123,6 +123,9 @@ export function Chat() {
           <h1>{other.display_name}</h1>
         </div>
         <div className="chat-tools">
+          <Link className="safety-link chat-plan-link" to={`/messages/${conversationId}/plan`}>
+            Plan board
+          </Link>
           <Link className="safety-link" to="/meeting-safely">
             Meeting up safely
           </Link>

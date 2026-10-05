@@ -1,0 +1,256 @@
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
+import { Link, useParams } from 'react-router'
+import { TextField } from '../components/Field'
+import { Layout, Loading } from '../components/Layout'
+import { addIdea, checkIdea, checkLink, dayLabel, deleteIdea, MAX_IDEA, normalizeLink, planBoard, setDone, toggleVote, type Idea } from '../lib/board'
+import { myConversations, type Conversation } from '../lib/chat'
+import { daysBetween } from '../lib/dates'
+import { messageOf } from '../lib/errors'
+import { myGroups } from '../lib/groups'
+import { useChecks } from '../lib/useChecks'
+
+type Trip = { start: string; days: number } | null
+
+/** The shared plan board for one chat: add ideas, vote, tick them off. */
+export function PlanBoard() {
+  const conversationId = Number(useParams().id)
+  const [chat, setChat] = useState<Conversation | null | undefined>(undefined)
+  const [trip, setTrip] = useState<Trip>(null)
+  const [ideas, setIdeas] = useState<Idea[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [busy, setBusy] = useState<number | null>(null)
+  const [status, setStatus] = useState('')
+  const heading = useRef<HTMLHeadingElement>(null)
+
+  const reload = useCallback(() => planBoard(conversationId).then(setIdeas), [conversationId])
+
+  useEffect(() => {
+    Promise.all([myConversations(), planBoard(conversationId)]).then(
+      async ([all, list]) => {
+        const found = all?.find((c) => c.id === conversationId) ?? null
+        if (found?.kind === 'group') {
+          const g = (await myGroups())?.find((x) => x.id === found.group_id)
+          if (g) setTrip({ start: g.start_date, days: daysBetween(g.start_date, g.end_date) + 1 })
+        }
+        setChat(found)
+        setIdeas(list)
+        heading.current?.focus()
+      },
+      (e) => setError(messageOf(e)),
+    )
+  }, [conversationId])
+
+  /** Runs an action. `optimistic` updates the idea on screen straight away; the list is reloaded either way. */
+  async function act(id: number, action: () => Promise<void>, message: string, optimistic?: (i: Idea) => Idea) {
+    setBusy(id)
+    setError(null)
+    if (optimistic) setIdeas((list) => list.map((i) => (i.id === id ? optimistic(i) : i)))
+    try {
+      await action()
+      setStatus(message)
+    } catch (e) {
+      setError(messageOf(e))
+    } finally {
+      await reload().catch(() => undefined)
+      setBusy(null)
+    }
+  }
+
+  if (chat === undefined && !error) return <Loading />
+  if (!chat) {
+    return (
+      <Layout>
+        <h1>Plan board not found</h1>
+        {error && (
+          <p className="notice notice-error" role="alert">
+            {error}
+          </p>
+        )}
+        <Link className="btn btn-secondary" to="/messages">
+          Back to messages
+        </Link>
+      </Layout>
+    )
+  }
+
+  const todo = ideas.filter((i) => !i.done)
+  const done = ideas.filter((i) => i.done)
+  const who = chat.kind === 'group' ? chat.display_name : `You and ${chat.display_name}`
+
+  const card = (idea: Idea) => (
+    <li key={idea.id} className={`card idea${idea.done ? ' is-done' : ''}`}>
+      <label className="idea-tick">
+        <input
+          type="checkbox"
+          checked={idea.done}
+          disabled={!chat.can_message || busy === idea.id}
+          onChange={(e) => {
+            const on = e.target.checked
+            void act(idea.id, () => setDone(idea.id, on), on ? `Ticked off ${idea.title}.` : `${idea.title} is back on the list.`, (i) => ({ ...i, done: on }))
+          }}
+        />
+        <span className="idea-title">{idea.title}</span>
+      </label>
+      <p className="idea-meta">
+        {idea.day ? dayLabel(idea.day, trip?.start) : 'Any day'}
+        {idea.added_by && ` · added by ${idea.mine ? 'you' : idea.added_by}`}
+      </p>
+      <div className="idea-actions">
+        <button
+          type="button"
+          className={`vote${idea.i_voted ? ' is-on' : ''}`}
+          aria-pressed={idea.i_voted}
+          aria-label={`Vote for ${idea.title}. ${idea.votes} ${idea.votes === 1 ? 'vote' : 'votes'}.`}
+          disabled={!chat.can_message || busy === idea.id}
+          onClick={() =>
+            act(idea.id, () => toggleVote(idea.id), idea.i_voted ? 'Vote taken back.' : 'Vote added.', (i) => ({
+              ...i,
+              i_voted: !i.i_voted,
+              votes: i.votes + (i.i_voted ? -1 : 1),
+            }))
+          }
+        >
+          <span aria-hidden="true">👍 {idea.votes}</span>
+        </button>
+        {idea.source_url && (
+          <a className="idea-link" href={idea.source_url} target="_blank" rel="noopener noreferrer">
+            Open link<span className="visually-hidden"> for {idea.title} (opens in a new tab)</span>
+          </a>
+        )}
+        {idea.mine && chat.can_message && (
+          <button
+            type="button"
+            className="btn-link safety-link"
+            disabled={busy === idea.id}
+            onClick={() => window.confirm(`Remove “${idea.title}” from the plan?`) && act(idea.id, () => deleteIdea(idea.id), `${idea.title} removed.`)}
+          >
+            Remove
+          </button>
+        )}
+      </div>
+    </li>
+  )
+
+  return (
+    <Layout>
+      <Link className="back-link" to={`/messages/${conversationId}`}>
+        ‹ Back to the chat
+      </Link>
+      <p className="eyebrow">{who}</p>
+      <h1 ref={heading} tabIndex={-1}>
+        Plan board
+      </h1>
+      <p className="lede">Add ideas for things to do, vote for your favourites and tick them off as you go.</p>
+      <p className="visually-hidden" role="status">
+        {status}
+      </p>
+      {error && (
+        <p className="notice notice-error" role="alert">
+          {error}
+        </p>
+      )}
+
+      {chat.can_message ? (
+        <AddIdea conversationId={conversationId} days={trip?.days ?? 14} start={trip?.start} onAdded={(title) => reload().then(() => setStatus(`${title} added.`))} />
+      ) : (
+        <p className="notice">This conversation has ended, so the plan can’t be changed. You can still read it.</p>
+      )}
+
+      <h2 className="section-title">To do{todo.length ? ` (${todo.length})` : ''}</h2>
+      {todo.length === 0 ? <p className="hint section-hint">No ideas yet. Add the first one above.</p> : <ul className="idea-list">{todo.map(card)}</ul>}
+
+      {done.length > 0 && (
+        <>
+          <h2 className="section-title">Done ({done.length})</h2>
+          <ul className="idea-list">{done.map(card)}</ul>
+        </>
+      )}
+    </Layout>
+  )
+}
+
+function AddIdea({ conversationId, days, start, onAdded }: { conversationId: number; days: number; start?: string; onAdded: (title: string) => void }) {
+  const [title, setTitle] = useState('')
+  const [day, setDay] = useState('')
+  const [url, setUrl] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const { shown, touch, validateAll, reset } = useChecks({ idea: checkIdea(title), link: checkLink(normalizeLink(url)) })
+
+  async function submit(e: FormEvent) {
+    e.preventDefault()
+    if (!validateAll()) return
+    setBusy(true)
+    setError(null)
+    try {
+      await addIdea(conversationId, title, day ? Number(day) : null, normalizeLink(url))
+      onAdded(title.trim())
+      setTitle('')
+      setDay('')
+      setUrl('')
+      reset()
+    } catch (err) {
+      setError(messageOf(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <form className="card form-card add-idea" onSubmit={submit} noValidate aria-labelledby="add-idea">
+      <h2 id="add-idea" className="section-title">
+        Add an idea
+      </h2>
+      <TextField
+        name="idea"
+        label="What’s the idea?"
+        hint={`For example, “Sunset at the Miradouro”. ${MAX_IDEA - title.length} characters left.`}
+        maxLength={MAX_IDEA}
+        value={title}
+        error={shown('idea')}
+        onChange={(e) => {
+          setTitle(e.target.value)
+          touch('idea')
+        }}
+        onBlur={() => touch('idea')}
+      />
+      <div className="field">
+        <label htmlFor="idea-day">Which day? (optional)</label>
+        <select id="idea-day" className="input" value={day} onChange={(e) => setDay(e.target.value)}>
+          <option value="">Any day</option>
+          {Array.from({ length: Math.min(days, 91) }, (_, i) => (
+            <option key={i + 1} value={i + 1}>
+              {dayLabel(i + 1, start)}
+            </option>
+          ))}
+        </select>
+      </div>
+      <TextField
+        name="link"
+        label="Link (optional)"
+        hint="A web page with details, such as opening times or tickets."
+        type="url"
+        inputMode="url"
+        placeholder="https://"
+        value={url}
+        error={shown('link')}
+        onChange={(e) => {
+          setUrl(e.target.value)
+          if (shown('link')) touch('link')
+        }}
+        onBlur={() => {
+          setUrl(normalizeLink(url))
+          touch('link')
+        }}
+      />
+      {error && (
+        <p className="notice notice-error" role="alert">
+          {error}
+        </p>
+      )}
+      <button type="submit" className="btn btn-primary btn-block" disabled={busy}>
+        {busy ? 'Adding…' : 'Add to the plan'}
+      </button>
+    </form>
+  )
+}

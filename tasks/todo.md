@@ -75,7 +75,8 @@ Unless a task says otherwise, every task is verified with
   - Done 5 Oct: `20261022090000_groups.sql` (30 pgTAP tests). Groups page, start-a-group form, group page (members, invite more, remove, leave, block or report), and group chats in Messages with each sender's name. Invited people choose to join. Free members can have 1 active group of their own, Sodalis+ 3. Blocked members can't be invited, and inside a group they don't see each other's messages. When the creator leaves, the longest-standing member takes over.
 - [ ] **T21 `trip-planner`: `planner` Edge Function.** Claude API with web search, structured output checked before saving, caching, limits, spend cap. (M)
 - [ ] **T22 `trip-planner`: Planner screens.** Request form, day-by-day cards, "change something" follow-ups. (M)
-- [ ] **T23 `trip-planner`: Shared plan board.** Add, vote, tick off; works in one-to-one chats and groups. (S)
+- [x] **T23 `trip-planner`: Shared plan board.** Add, vote, tick off; works in one-to-one chats and groups. (S)
+  - Done 5 Oct: `20261023090000_plan_board.sql` (17 pgTAP tests). "Plan board" from every chat: ideas with an optional day (shown with dates in a group) and https link, votes (most votes first), ticks, and removing your own ideas. Read-only once a chat has ended. `plan_items.plan_id` is ready for the planner (T21) to add its suggestions.
 - [ ] **T24 `trip-planner`: Hand-picked activity lists** for the top 15 destinations, so the agent prefers our own picks. (S)
 - [ ] **T24b `trip-planner`: Booking links via `/go/<id>`.** Affiliate tag added when available,
       click recorded, disclosure line shown next to the link (spec §7a). (S)

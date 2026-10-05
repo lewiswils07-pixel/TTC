@@ -21,6 +21,7 @@ const MeetingSafely = lazy(() => import('./routes/MeetingSafely').then((m) => ({
 const Groups = lazy(() => import('./routes/Groups').then((m) => ({ default: m.Groups })))
 const GroupForm = lazy(() => import('./routes/GroupForm').then((m) => ({ default: m.GroupForm })))
 const GroupDetail = lazy(() => import('./routes/GroupDetail').then((m) => ({ default: m.GroupDetail })))
+const PlanBoard = lazy(() => import('./routes/PlanBoard').then((m) => ({ default: m.PlanBoard })))
 const Dashboard = lazy(() => import('./routes/Dashboard').then((m) => ({ default: m.Dashboard })))
 
 export function App() {
@@ -148,6 +149,14 @@ export function AppRoutes() {
         element={
           <RequireSession>
             <GroupDetail />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/messages/:id/plan"
+        element={
+          <RequireSession>
+            <PlanBoard />
           </RequireSession>
         }
       />

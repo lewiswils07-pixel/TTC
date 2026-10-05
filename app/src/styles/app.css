@@ -464,3 +464,19 @@ legend { padding: 0; }
 .group-chat-link { margin-bottom: var(--space-2); }
 .person-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--space-4); }
 .person-actions .safety-box { flex-basis: 100%; }
+
+/* Plan board */
+.add-idea { margin-bottom: var(--space-5); }
+.add-idea .section-title { margin: 0; }
+.idea-list { list-style: none; margin: 0 0 var(--space-5); padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.idea { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3) var(--space-4); }
+.idea-tick { display: flex; align-items: flex-start; gap: var(--space-3); cursor: pointer; font-weight: 600; }
+.idea-tick input { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+.idea.is-done .idea-title { text-decoration: line-through; color: var(--muted); }
+.idea-meta { margin: 0 0 0 calc(22px + var(--space-3)); color: var(--muted); font-size: var(--text-sm); }
+.idea-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); margin-left: calc(22px + var(--space-3)); }
+.vote { min-height: 36px; padding: 0 var(--space-3); border: 1.5px solid var(--line); border-radius: 999px; background: var(--card); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
+.vote.is-on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--card)); }
+.vote:disabled { cursor: default; opacity: 0.6; }
+.idea-link { font-weight: 600; font-size: var(--text-sm); }
+.chat-tools .chat-plan-link { font-weight: 700; color: var(--accent); }
