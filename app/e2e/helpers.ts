@@ -40,8 +40,9 @@ export async function signIn(page: Page, email: string): Promise<void> {
   const since = Date.now()
   await page.getByRole('button', { name: /send my code/i }).click()
   await expect(page.getByRole('heading', { name: 'Check your email' })).toBeVisible()
+  // The code signs in on its own once all the digits are in.
   await page.getByLabel('Your code').fill(await latestCode(email, since))
-  await page.getByRole('button', { name: 'Sign in' }).click()
+  await expect(page.getByRole('heading', { name: 'Check your email' })).toBeHidden()
 }
 
 export async function emailOf(profileId: string): Promise<string> {
@@ -72,7 +73,7 @@ export async function closeGuide(page: Page): Promise<void> {
 
 /** Types into the place search and picks a result. Retries the typing, because a page that is still loading can clear the box. */
 export async function pickPlace(page: Page, typed: string, option: string | RegExp): Promise<void> {
-  const box = page.getByRole('combobox')
+  const box = page.locator('input[role=combobox]')
   const choice = page.getByRole('option', { name: option }).first()
   await expect(async () => {
     await box.fill('')

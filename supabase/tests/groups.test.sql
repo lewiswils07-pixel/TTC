@@ -28,6 +28,9 @@ grant select, insert on ids to authenticated;
 select ok((select bool_and(relrowsecurity) from pg_class where oid in ('public.groups'::regclass, 'public.group_members'::regclass)),
   'group tables have row-level security');
 
+-- These tests start on the free plan, without the founding offer.
+delete from public.entitlements where source = 'founding';
+
 select pg_temp.sign_in_as(pg_temp.m(1));
 select is(public.groups_i_can_start(), 1, 'a free member can start 1 group');
 select throws_ok($$select public.create_group('Lisbon', 2267057, current_date + 10, current_date + 14, array[pg_temp.m(8)])$$,

@@ -6,7 +6,8 @@ const MAX_SIDE = 1024
 const MAX_INPUT_BYTES = 20 * 1024 * 1024
 
 /**
- * Redraws the photo onto a canvas and saves it as a new JPEG. Only the
+ * Crops the photo to a centred square, redraws it onto a canvas and saves
+ * it as a new JPEG. Only the
  * pixels survive, so location and camera details (EXIF) are removed before
  * the file ever leaves the phone. The phone's rotation is applied first.
  */
@@ -19,11 +20,13 @@ export async function preparePhoto(file: File): Promise<Blob> {
   } catch {
     throw new FriendlyError("We couldn't open that photo. Please try a different one.")
   }
-  const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height))
+  // A centred square, so faces sit in the middle of the round photo.
+  const side = Math.min(bitmap.width, bitmap.height)
+  const out = Math.min(side, MAX_SIDE)
   const canvas = document.createElement('canvas')
-  canvas.width = Math.round(bitmap.width * scale)
-  canvas.height = Math.round(bitmap.height * scale)
-  canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+  canvas.width = out
+  canvas.height = out
+  canvas.getContext('2d')!.drawImage(bitmap, (bitmap.width - side) / 2, (bitmap.height - side) / 2, side, side, 0, 0, out, out)
   bitmap.close()
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85))
   if (!blob) throw new FriendlyError("We couldn't open that photo. Please try a different one.")

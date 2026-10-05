@@ -11,6 +11,7 @@ export type Profile = {
   id: string
   display_name: string | null
   birth_year: number | null
+  birth_date: string | null
   gender: Gender | null
   home_city_id: number | null
   bio: string | null
@@ -25,6 +26,7 @@ export type Profile = {
   walking: Walking | null
   languages: string[]
   onboarded_at: string | null
+  member_number: number | null
   home_city: City | null
 }
 
@@ -40,7 +42,7 @@ export type MyProfile = { profile: Profile; interestIds: number[]; preferences: 
 // The foreign key is named because profiles also reach cities through the
 // wishlist table, which would make a plain cities(...) embed ambiguous.
 const PROFILE_COLUMNS =
-  'id, display_name, birth_year, gender, home_city_id, bio, photo_path, travel_style, pace, budget, mobility_note, travelling_with, room_sharing, day_rhythm, walking, languages, onboarded_at, home_city:cities!profiles_home_city_id_fkey(id, name, country_code)'
+  'id, display_name, birth_year, birth_date, gender, home_city_id, bio, photo_path, travel_style, pace, budget, mobility_note, travelling_with, room_sharing, day_rhythm, walking, languages, onboarded_at, member_number, home_city:cities!profiles_home_city_id_fkey(id, name, country_code)'
 
 export async function getMyProfile(userId: string): Promise<MyProfile> {
   const [profile, interests, preferences] = await Promise.all([
@@ -57,7 +59,7 @@ export async function getMyProfile(userId: string): Promise<MyProfile> {
   }
 }
 
-export type Basics = Pick<Profile, 'display_name' | 'birth_year' | 'gender' | 'home_city_id'>
+export type Basics = Pick<Profile, 'display_name' | 'birth_date' | 'gender' | 'home_city_id'>
 export type AboutMe = Pick<Profile, 'bio'>
 export type Style = Pick<
   Profile,

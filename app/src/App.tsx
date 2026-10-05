@@ -22,6 +22,11 @@ const Groups = lazy(() => import('./routes/Groups').then((m) => ({ default: m.Gr
 const GroupForm = lazy(() => import('./routes/GroupForm').then((m) => ({ default: m.GroupForm })))
 const GroupDetail = lazy(() => import('./routes/GroupDetail').then((m) => ({ default: m.GroupDetail })))
 const PlanBoard = lazy(() => import('./routes/PlanBoard').then((m) => ({ default: m.PlanBoard })))
+const legal = () => import('./routes/Legal')
+const Terms = lazy(() => legal().then((m) => ({ default: m.Terms })))
+const Privacy = lazy(() => legal().then((m) => ({ default: m.Privacy })))
+const CommunityRules = lazy(() => legal().then((m) => ({ default: m.CommunityRules })))
+const WelcomeScreen = lazy(() => import('./routes/Welcome').then((m) => ({ default: m.WelcomeScreen })))
 const Dashboard = lazy(() => import('./routes/Dashboard').then((m) => ({ default: m.Dashboard })))
 
 export function App() {
@@ -161,6 +166,17 @@ export function AppRoutes() {
         }
       />
       <Route path="/meeting-safely" element={<MeetingSafely />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/community-rules" element={<CommunityRules />} />
+      <Route
+        path="/welcome"
+        element={
+          <RequireSession>
+            <WelcomeScreen />
+          </RequireSession>
+        }
+      />
       <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>

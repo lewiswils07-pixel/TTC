@@ -33,6 +33,9 @@ grant select, insert on ids to authenticated;
 select ok((select relrowsecurity from pg_class where oid = 'public.connections'::regclass), 'connections has row-level security');
 
 -- ------------------------------------------------------------ as Ann
+-- These tests start on the free plan, without the founding offer.
+delete from public.entitlements where source = 'founding';
+
 select pg_temp.sign_in_as(pg_temp.m(1));
 select lives_ok($$insert into ids select 'ann-bob', public.send_connection_request(pg_temp.m(2), '  Hello Bob!  ')$$, 'Ann can send Bob a request with a note');
 select is((select note from public.connections where id = (select id from ids where name = 'ann-bob')), 'Hello Bob!', 'the note is tidied');

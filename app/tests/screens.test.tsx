@@ -65,7 +65,7 @@ describe('sign in with an email code', () => {
     expect(box).not.toHaveAttribute('aria-invalid')
   })
 
-  it('sends a code, then checks it', async () => {
+  it('sends a code, then checks it as soon as all the digits are in', async () => {
     auth.signInWithOtp.mockResolvedValue({ error: null })
     auth.verifyOtp.mockResolvedValue({ data: { session: null }, error: { message: 'Token has expired or is invalid' } })
     const { container } = renderAt('/sign-in')
@@ -81,9 +81,9 @@ describe('sign in with an email code', () => {
     await userEvent.type(codeBox, '12a')
     expect(codeBox).toHaveAccessibleDescription(/only has numbers/)
     await userEvent.clear(codeBox)
-    await userEvent.type(codeBox, '123 456')
-    expect(codeBox).not.toHaveAttribute('aria-invalid')
-    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
+    await userEvent.type(codeBox, '123 45')
+    expect(auth.verifyOtp).not.toHaveBeenCalled()
+    await userEvent.type(codeBox, '6')
     expect(auth.verifyOtp).toHaveBeenCalledWith({ email: 'jane@example.com', token: '123456', type: 'email' })
     await waitFor(() => expect(codeBox).toHaveAccessibleDescription(/didn't work/))
   })

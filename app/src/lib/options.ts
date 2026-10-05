@@ -7,7 +7,12 @@ export const GENDERS = [
   { value: 'woman', label: 'Woman' },
   { value: 'man', label: 'Man' },
   { value: 'nonbinary', label: 'Non-binary' },
+  { value: 'unsaid', label: 'Prefer not to say' },
 ] as const satisfies readonly Option<string>[]
+
+/** Genders members can choose to see. "Prefer not to say" members are shown
+ *  to those who pick all three. */
+export const SHOWN_GENDERS = GENDERS.filter((g) => g.value !== 'unsaid')
 
 // Travel style, pace and budget are each in order, so "next to each other"
 // counts as a partial match in matching (spec §4.2).
@@ -103,9 +108,18 @@ export function latestBirthYear(now = new Date()): number {
   return now.getFullYear() - MIN_AGE
 }
 
-/** We only store the birth year, so the age is one of two numbers. */
+/** The database sends "this year minus the member's exact age" (it never
+ *  shares a date of birth), so this is their exact age. */
 export function ageLabel(birthYear: number | null, now = new Date()): string {
   if (!birthYear) return 'Not set'
-  const age = now.getFullYear() - birthYear
-  return `${age - 1} or ${age}`
+  return String(now.getFullYear() - birthYear)
 }
+
+/** Exact age from a YYYY-MM-DD date of birth. */
+export function ageFromDate(date: string, now = new Date()): number {
+  const [y, m, d] = date.split('-').map(Number)
+  const had = now.getMonth() + 1 > m || (now.getMonth() + 1 === m && now.getDate() >= d)
+  return now.getFullYear() - y - (had ? 0 : 1)
+}
+
+export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']

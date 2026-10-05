@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
-import { AgeRange } from '../components/AgeRange'
 import { CityPicker } from '../components/CityPicker'
 import { Field, FieldError, TextField } from '../components/Field'
 import { InterestPicker } from '../components/InterestPicker'
@@ -13,23 +12,19 @@ import { firstUnfinishedStep } from '../lib/onboarding'
 import {
   BUDGETS,
   DAY_RHYTHMS,
-  DISTANCES,
-  distanceKm,
-  distanceOption,
   GENDERS,
   LANGUAGES,
   MAX_INTERESTS,
   MAX_LANGUAGES,
-  MAX_PREF_AGE,
   MIN_AGE,
   MIN_INTERESTS,
+  MONTHS,
   PACES,
   ROOM_SHARING,
   TRAVEL_STYLES,
   WALKING,
   type Budget,
   type DayRhythm,
-  type Distance,
   type Gender,
   type Pace,
   type RoomSharing,
@@ -50,14 +45,20 @@ import {
 import { useSession } from '../lib/session-context'
 import { useChecks } from '../lib/useChecks'
 import { useMyProfile } from '../lib/useMyProfile'
-import { checkAgeRange, checkBirthYear, checkChosen, checkInterests, checkName } from '../lib/validation'
+import { birthDate, checkBirthDate, checkChosen, checkInterests, checkName } from '../lib/validation'
 
 const STEPS = [
   { title: 'About you', intro: 'Only your first name, age and home town are shown to other members.' },
   { title: 'Your photo', intro: 'A clear, smiling photo helps other members feel comfortable. Only signed-in members can see it.' },
   { title: 'Your interests', intro: `Pick ${MIN_INTERESTS} to ${MAX_INTERESTS}. We use them to suggest people you’ll get on with.` },
-  { title: 'How you travel', intro: 'There are no wrong answers. These help us suggest people who travel the way you do.' },
+  {
+    title: 'How you travel',
+    intro: 'Optional, and there are no wrong answers. The more you add, the better we can suggest people who travel the way you do.',
+  },
 ] as const
+/** Sign-up is the first 3 steps (Lewis, 5 Oct: keep it quick). "How you
+ *  travel" comes after, from the profile page, to strengthen the profile. */
+const SIGN_UP_STEPS = 3
 const TOTAL = STEPS.length
 
 export function Onboarding() {
@@ -89,7 +90,14 @@ export function Onboarding() {
   const requested = Number(params.get('step'))
   const step = requested >= 1 && requested <= TOTAL ? requested : firstUnfinishedStep(data)
   const goTo = (n: number) => setParams({ step: String(n) })
+  const firstTime = !data.profile.onboarded_at
   const next = async () => {
+    if (firstTime && step >= SIGN_UP_STEPS) {
+      await finishOnboarding()
+      await reload()
+      navigate('/welcome', { replace: true })
+      return
+    }
     await reload()
     if (step < TOTAL) goTo(step + 1)
     else navigate('/dashboard', { replace: true })
@@ -98,7 +106,7 @@ export function Onboarding() {
 
   return (
     <Layout>
-      <StepFrame step={step} key={step}>
+      <StepFrame step={step} key={step} signingUp={firstTime}>
         {step === 1 && <BasicsStep userId={userId} data={data} onDone={next} />}
         {step === 2 && <PhotoStep userId={userId} data={data} onDone={next} onBack={back} />}
         {step === 3 && <InterestsStep data={data} interests={interests} onDone={next} onBack={back} />}
@@ -108,22 +116,24 @@ export function Onboarding() {
   )
 }
 
-function StepFrame({ step, children }: { step: number; children: ReactNode }) {
+function StepFrame({ step, signingUp, children }: { step: number; signingUp: boolean; children: ReactNode }) {
   const heading = useRef<HTMLHeadingElement>(null)
   useEffect(() => heading.current?.focus(), [])
   const { title, intro } = STEPS[step - 1]
+  const extra = step > SIGN_UP_STEPS
   return (
     <div className="step">
-      <div className="progress" aria-hidden="true">
-        <div className="progress-bar" style={{ width: `${(step / TOTAL) * 100}%` }} />
-      </div>
-      <p className="eyebrow">
-        Step {step} of {TOTAL}
-      </p>
+      {signingUp && !extra && (
+        <div className="progress" aria-hidden="true">
+          <div className="progress-bar" style={{ width: `${(step / SIGN_UP_STEPS) * 100}%` }} />
+        </div>
+      )}
+      <p className="eyebrow">{extra ? 'Strengthen your profile' : signingUp ? `Step ${step} of ${SIGN_UP_STEPS}` : 'Edit your profile'}</p>
       <h1 ref={heading} tabIndex={-1}>
         {title}
       </h1>
       <p className="lede">{intro}</p>
+      {signingUp && !extra && <p className="hint saved-note">Each step is saved when you continue, so you can stop and come back any time.</p>}
       {children}
     </div>
   )
@@ -152,20 +162,22 @@ type StepProps = { userId: string; data: MyProfile; onDone: () => Promise<void>;
 function BasicsStep({ userId, data, onDone }: StepProps) {
   const p = data.profile
   const [name, setName] = useState(p.display_name ?? '')
-  const [birthYear, setBirthYear] = useState(p.birth_year ? String(p.birth_year) : '')
+  const [dobDay, setDobDay] = useState(p.birth_date ? String(Number(p.birth_date.slice(8, 10))) : '')
+  const [dobMonth, setDobMonth] = useState(p.birth_date ? String(Number(p.birth_date.slice(5, 7))) : '')
+  const [dobYear, setDobYear] = useState(p.birth_date ? p.birth_date.slice(0, 4) : p.birth_year ? String(p.birth_year) : '')
   const [gender, setGender] = useState<Gender[]>(p.gender ? [p.gender] : [])
   const [city, setCity] = useState<City | null>(p.home_city)
 
   const errors = {
     name: checkName(name),
-    birthYear: checkBirthYear(birthYear),
+    birthDate: checkBirthDate(dobDay, dobMonth, dobYear),
     gender: checkChosen('how you describe yourself')(gender),
     city: city ? null : 'Please choose your home town or city from the list.',
   }
   const { shown, touch, validateAll } = useChecks(errors)
 
   const { busy, error, submit } = useStepSubmit(async () => {
-    await saveBasics(userId, { display_name: name.trim(), birth_year: Number(birthYear), gender: gender[0], home_city_id: city!.id })
+    await saveBasics(userId, { display_name: name.trim(), birth_date: birthDate(dobDay, dobMonth, dobYear), gender: gender[0], home_city_id: city!.id })
   }, onDone)
 
   function onSubmit(e: FormEvent) {
@@ -187,29 +199,68 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
           onChange={(e) => setName(e.target.value)}
           onBlur={() => touch('name')}
         />
-        <TextField
-          name="birthYear"
-          label="Year you were born"
-          hint={`Members see your age, never your birthday. You must be ${MIN_AGE} or over.`}
-          inputMode="numeric"
-          autoComplete="bday-year"
-          placeholder="YYYY"
-          maxLength={4}
-          className="input input-short"
-          value={birthYear}
-          error={shown('birthYear')}
-          valid={!errors.birthYear}
-          onChange={(e) => {
-            const v = e.target.value.replace(/\D/g, '')
-            setBirthYear(v)
-            if (v.length === 4) touch('birthYear')
-          }}
-          onBlur={() => touch('birthYear')}
-        />
+        <fieldset className="field" data-field="birthDate" aria-describedby="dob-hint">
+          <legend>Date of birth</legend>
+          <p className="hint" id="dob-hint">
+            Members see your age, never your birthday. You must be {MIN_AGE} or over.
+          </p>
+          <div className="dob">
+            <select
+              aria-label="Day"
+              className="input"
+              autoComplete="bday-day"
+              value={dobDay}
+              aria-invalid={shown('birthDate') ? true : undefined}
+              onChange={(e) => setDobDay(e.target.value)}
+              onBlur={() => dobDay && dobMonth && dobYear.length === 4 && touch('birthDate')}
+            >
+              <option value="">Day</option>
+              {Array.from({ length: 31 }, (_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1}
+                </option>
+              ))}
+            </select>
+            <select
+              aria-label="Month"
+              className="input"
+              autoComplete="bday-month"
+              value={dobMonth}
+              aria-invalid={shown('birthDate') ? true : undefined}
+              onChange={(e) => setDobMonth(e.target.value)}
+              onBlur={() => dobDay && dobMonth && dobYear.length === 4 && touch('birthDate')}
+            >
+              <option value="">Month</option>
+              {MONTHS.map((m, i) => (
+                <option key={m} value={i + 1}>
+                  {m}
+                </option>
+              ))}
+            </select>
+            <input
+              aria-label="Year"
+              className="input"
+              inputMode="numeric"
+              autoComplete="bday-year"
+              placeholder="Year"
+              maxLength={4}
+              value={dobYear}
+              aria-invalid={shown('birthDate') ? true : undefined}
+              onChange={(e) => {
+                const v = e.target.value.replace(/\D/g, '')
+                setDobYear(v)
+                if (v.length === 4) touch('birthDate')
+              }}
+              onBlur={() => touch('birthDate')}
+            />
+          </div>
+          <FieldError error={shown('birthDate')} />
+        </fieldset>
         <Segmented
           name="gender"
-          legend="I am a"
+          legend="Gender"
           options={GENDERS}
+          columns={2}
           selected={gender}
           onChange={(v) => {
             setGender(v)
@@ -302,6 +353,12 @@ function PhotoStep({ userId, data, onDone, onBack }: StepProps) {
             <FieldError error={photoError} />
           </div>
         </div>
+        <ul className="photo-tips" aria-label="What makes a good photo">
+          <li>Just you, with your face clearly visible</li>
+          <li>Recent, and in good light</li>
+          <li>No sunglasses, hats or group shots</li>
+        </ul>
+        <p className="hint">We crop it to a square around the middle. You’ll need a photo before asking to connect with anyone.</p>
         <Field name="bio" label="A few words about you (optional)" hint={`Where you’ve been, where you’d love to go, or what makes a good travel companion. ${500 - bio.length} characters left.`}>
           {({ id, describedBy }) => (
             <textarea id={id} className="textarea" maxLength={500} aria-describedby={describedBy} value={bio} onChange={(e) => setBio(e.target.value)} />
@@ -333,6 +390,7 @@ function InterestsStep({ data, interests, onDone, onBack }: Omit<StepProps, 'use
       <ActionBar
         busy={busy}
         onBack={onBack}
+        label={data.profile.onboarded_at ? undefined : 'Finish sign-up'}
         note={
           <span aria-live="polite">
             <strong>{selected.length}</strong> of {MAX_INTERESTS} picked
@@ -356,15 +414,6 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
   const [rhythm, setRhythm] = useState<DayRhythm[]>(p.day_rhythm ? [p.day_rhythm] : [])
   const [walking, setWalking] = useState<Walking[]>(p.walking ? [p.walking] : [])
   const [languages, setLanguages] = useState<string[]>(p.languages ?? [])
-  const [genders, setGenders] = useState<Gender[]>(prefs.genders)
-  const [ages, setAges] = useState<[number, number]>([prefs.age_min, Math.min(prefs.age_max, MAX_PREF_AGE)])
-  const [distance, setDistance] = useState<Distance[]>([distanceOption(prefs.max_distance_km)])
-
-  const errors = {
-    genders: genders.length ? null : 'Choose at least one option.',
-    ages: checkAgeRange(ages),
-  }
-  const { shown, touch, validateAll } = useChecks(errors)
 
   const { busy, error, submit } = useStepSubmit(async () => {
     await saveStyleAndPreferences(
@@ -380,21 +429,15 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
         walking: walking[0] ?? null,
         languages,
       },
-      {
-        genders,
-        age_min: ages[0],
-        age_max: ages[1],
-        max_distance_km: distanceKm(distance[0]),
-      },
+      prefs,
     )
-    await finishOnboarding()
   }, onDone)
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault()
-        if (validateAll()) void submit()
+        void submit()
       }}
       noValidate
     >
@@ -454,36 +497,11 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
         />
       </section>
 
-      <section className="card form-card" aria-labelledby="who-heading">
-        <h2 id="who-heading" className="card-title">
-          Who you’d like to travel with
-        </h2>
-        <Segmented
-          name="genders"
-          legend="Show me"
-          hint="Pick all that apply."
-          options={GENDERS}
-          selected={genders}
-          onChange={(v) => {
-            setGenders(v)
-            touch('genders')
-          }}
-          multiple
-          error={shown('genders')}
-        />
-        <AgeRange legend="Aged" min={MIN_AGE} max={MAX_PREF_AGE} value={ages} onChange={setAges} />
-        <FieldError error={shown('ages')} />
-        <Segmented
-          name="distance"
-          legend="How far from home should we look?"
-          hint="Used when you’re looking for someone to plan a new trip with."
-          options={DISTANCES}
-          selected={distance}
-          onChange={setDistance}
-        />
-      </section>
+      <p className="hint section-hint">
+        Everyone is shown to you to start with. You can choose who you’d like to see (gender, age and distance) any time in Filters.
+      </p>
       <SaveError error={error} />
-      <ActionBar busy={busy} onBack={onBack} label="Finish my profile" />
+      <ActionBar busy={busy} onBack={onBack} label="Save" />
     </form>
   )
 }

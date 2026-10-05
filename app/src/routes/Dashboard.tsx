@@ -10,10 +10,12 @@ import { myConversations } from '../lib/chat'
 import { myConnections } from '../lib/connections'
 import { myGroups } from '../lib/groups'
 import { cityLabel } from '../lib/cities'
-import { BUDGETS, GENDERS, MAX_PREF_AGE, PACES, TRAVEL_STYLES, ageLabel, labelFor } from '../lib/options'
+import { BUDGETS, GENDERS, MAX_PREF_AGE, PACES, TRAVEL_STYLES, ageFromDate, ageLabel, labelFor } from '../lib/options'
+import { profileStrength } from '../lib/strength'
+import { listMyTrips } from '../lib/trips'
 import { messageOf } from '../lib/errors'
 import { photoUrl } from '../lib/photo'
-import { listInterests, type Interest } from '../lib/profile'
+import { listInterests, type Interest, type Profile } from '../lib/profile'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
 
@@ -22,6 +24,11 @@ export function Dashboard() {
   const { data, error, reload } = useMyProfile(session!.user.id)
   const [interests, setInterests] = useState<Interest[]>([])
   const [photo, setPhoto] = useState<string | null>(null)
+  const [hasTrip, setHasTrip] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    listMyTrips().then((t) => setHasTrip(!!t?.length), () => setHasTrip(false))
+  }, [])
 
   useEffect(() => {
     listInterests().then(setInterests, () => undefined)
@@ -60,19 +67,33 @@ export function Dashboard() {
 
   return (
     <Layout actions={signOutButton}>
-      <h1>Hello, {profile.display_name}</h1>
+      <h1 className="gold-rule">Hello, {profile.display_name}</h1>
+      {profile.member_number && <p className="founding-badge">Founding member No. {profile.member_number}</p>}
       <Notices />
+      {hasTrip !== null && <Strength profile={profile} interestCount={interestIds.length} hasTrip={hasTrip} />}
       <MeetPrompts />
       <AdminLink />
-      <Link className="card link-card link-card-primary" to="/people">
-        <span className="trip-text">
-          <strong>Find people to travel with</strong>
-          <span className="trip-meta">For a trip you’ve booked, or to plan something new</span>
-        </span>
-        <span className="trip-chevron" aria-hidden="true">
-          ›
-        </span>
-      </Link>
+      <section className="find-people" aria-labelledby="find-heading">
+        <h2 id="find-heading" className="section-title gold-rule">
+          Find people to travel with
+        </h2>
+        <div className="find-grid">
+          <Link className="card find-card" to="/people">
+            <span className="find-icon" aria-hidden="true">
+              ✈
+            </span>
+            <strong>Same destination</strong>
+            <span>People heading to the same place at the same time as your trips.</span>
+          </Link>
+          <Link className="card find-card" to="/people?mode=new">
+            <span className="find-icon" aria-hidden="true">
+              ✦
+            </span>
+            <strong>Similar interests</strong>
+            <span>People with similar interests, to plan something new together.</span>
+          </Link>
+        </div>
+      </section>
       <MessagesLink />
       <ConnectionsLink />
       <GroupsLink />
@@ -90,7 +111,7 @@ export function Dashboard() {
           <div>
             <h2 id="my-profile">{profile.display_name}</h2>
             <p className="profile-meta">
-              Age {ageLabel(profile.birth_year)} · {profile.home_city ? cityLabel(profile.home_city) : 'Home not set'}
+              Age {profile.birth_date ? ageFromDate(profile.birth_date) : ageLabel(profile.birth_year)} · {profile.home_city ? cityLabel(profile.home_city) : 'Home not set'}
             </p>
           </div>
         </div>
@@ -131,6 +152,32 @@ export function Dashboard() {
         </Link>
       </section>
     </Layout>
+  )
+}
+
+/** A bar showing how complete the profile is, with the next thing to add. Hidden once it's complete. */
+function Strength({ profile, interestCount, hasTrip }: { profile: Profile; interestCount: number; hasTrip: boolean }) {
+  const { percent, parts } = profileStrength(profile, interestCount, hasTrip)
+  const next = parts.filter((p) => !p.done)
+  if (!next.length) return null
+  return (
+    <section className="card strength" aria-labelledby="strength-heading">
+      <div className="strength-head">
+        <h2 id="strength-heading">Profile strength</h2>
+        <span className="strength-value">{percent}%</span>
+      </div>
+      <div className="strength-bar" role="progressbar" aria-labelledby="strength-heading" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
+        <div style={{ width: `${percent}%` }} />
+      </div>
+      <p className="hint">Complete profiles get more suggestions and more yeses. Next:</p>
+      <ul className="strength-next">
+        {next.slice(0, 2).map((p) => (
+          <li key={p.label}>
+            <Link to={p.to}>{p.label}</Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }
 
