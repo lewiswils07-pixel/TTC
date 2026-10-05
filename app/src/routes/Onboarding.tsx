@@ -12,21 +12,29 @@ import { messageOf } from '../lib/errors'
 import { firstUnfinishedStep } from '../lib/onboarding'
 import {
   BUDGETS,
+  DAY_RHYTHMS,
   DISTANCES,
   distanceKm,
   distanceOption,
   GENDERS,
+  LANGUAGES,
   MAX_INTERESTS,
+  MAX_LANGUAGES,
   MAX_PREF_AGE,
   MIN_AGE,
   MIN_INTERESTS,
   PACES,
+  ROOM_SHARING,
   TRAVEL_STYLES,
+  WALKING,
   type Budget,
+  type DayRhythm,
   type Distance,
   type Gender,
   type Pace,
+  type RoomSharing,
   type TravelStyle,
+  type Walking,
 } from '../lib/options'
 import { photoUrl, preparePhoto, uploadPhoto } from '../lib/photo'
 import {
@@ -343,6 +351,11 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
   const [pace, setPace] = useState<Pace[]>(p.pace ? [p.pace] : [])
   const [budget, setBudget] = useState<Budget[]>(p.budget ? [p.budget] : [])
   const [mobility, setMobility] = useState(p.mobility_note ?? '')
+  const [travellingWith, setTravellingWith] = useState(p.travelling_with ?? '')
+  const [room, setRoom] = useState<RoomSharing[]>(p.room_sharing ? [p.room_sharing] : [])
+  const [rhythm, setRhythm] = useState<DayRhythm[]>(p.day_rhythm ? [p.day_rhythm] : [])
+  const [walking, setWalking] = useState<Walking[]>(p.walking ? [p.walking] : [])
+  const [languages, setLanguages] = useState<string[]>(p.languages ?? [])
   const [genders, setGenders] = useState<Gender[]>(prefs.genders)
   const [ages, setAges] = useState<[number, number]>([prefs.age_min, Math.min(prefs.age_max, MAX_PREF_AGE)])
   const [distance, setDistance] = useState<Distance[]>([distanceOption(prefs.max_distance_km)])
@@ -356,7 +369,17 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
   const { busy, error, submit } = useStepSubmit(async () => {
     await saveStyleAndPreferences(
       userId,
-      { travel_style: style[0] ?? null, pace: pace[0] ?? null, budget: budget[0] ?? null, mobility_note: mobility.trim() || null },
+      {
+        travel_style: style[0] ?? null,
+        pace: pace[0] ?? null,
+        budget: budget[0] ?? null,
+        mobility_note: mobility.trim() || null,
+        travelling_with: travellingWith.trim() || null,
+        room_sharing: room[0] ?? null,
+        day_rhythm: rhythm[0] ?? null,
+        walking: walking[0] ?? null,
+        languages,
+      },
       {
         genders,
         age_min: ages[0],
@@ -389,6 +412,45 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
           maxLength={200}
           value={mobility}
           onChange={(e) => setMobility(e.target.value)}
+        />
+      </section>
+
+      <section className="card form-card" aria-labelledby="habits-heading">
+        <h2 id="habits-heading" className="card-title">
+          On the road
+        </h2>
+        <p className="hint section-hint">All optional. They help us suggest people you’d be comfortable travelling with.</p>
+        <Segmented name="room" legend="Sharing a room" options={ROOM_SHARING} selected={room} onChange={setRoom} describeSelection />
+        <Segmented name="rhythm" legend="Mornings" options={DAY_RHYTHMS} selected={rhythm} onChange={setRhythm} />
+        <Segmented name="walking" legend="Walking" options={WALKING} selected={walking} onChange={setWalking} describeSelection />
+        <fieldset className="field" data-field="languages">
+          <legend>Languages you speak</legend>
+          <div className="chips chips-compact">
+            {LANGUAGES.map((lang) => {
+              const checked = languages.includes(lang.value)
+              return (
+                <label className="chip" key={lang.value}>
+                  <input
+                    type="checkbox"
+                    name="languages"
+                    value={lang.value}
+                    checked={checked}
+                    disabled={!checked && languages.length >= MAX_LANGUAGES}
+                    onChange={() => setLanguages(checked ? languages.filter((l) => l !== lang.value) : [...languages, lang.value])}
+                  />
+                  <span>{lang.label}</span>
+                </label>
+              )
+            })}
+          </div>
+        </fieldset>
+        <TextField
+          name="travelling-with"
+          label="Travelling with someone? (optional)"
+          hint="For example, “usually with my sister Jo”. Shown on your card. Each profile is for one person."
+          maxLength={80}
+          value={travellingWith}
+          onChange={(e) => setTravellingWith(e.target.value)}
         />
       </section>
 

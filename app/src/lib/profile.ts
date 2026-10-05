@@ -2,7 +2,7 @@
 // profile. Row-level security limits every query here to their own rows.
 import type { City } from './cities'
 import { friendlyError } from './errors'
-import type { Budget, Gender, Pace, TravelStyle } from './options'
+import type { Budget, DayRhythm, Gender, Pace, RoomSharing, TravelStyle, Walking } from './options'
 import { supabase } from './supabase'
 
 export type Interest = { id: number; slug: string; label: string; category_label?: string | null }
@@ -19,6 +19,11 @@ export type Profile = {
   pace: Pace | null
   budget: Budget | null
   mobility_note: string | null
+  travelling_with: string | null
+  room_sharing: RoomSharing | null
+  day_rhythm: DayRhythm | null
+  walking: Walking | null
+  languages: string[]
   onboarded_at: string | null
   home_city: City | null
 }
@@ -35,7 +40,7 @@ export type MyProfile = { profile: Profile; interestIds: number[]; preferences: 
 // The foreign key is named because profiles also reach cities through the
 // wishlist table, which would make a plain cities(...) embed ambiguous.
 const PROFILE_COLUMNS =
-  'id, display_name, birth_year, gender, home_city_id, bio, photo_path, travel_style, pace, budget, mobility_note, onboarded_at, home_city:cities!profiles_home_city_id_fkey(id, name, country_code)'
+  'id, display_name, birth_year, gender, home_city_id, bio, photo_path, travel_style, pace, budget, mobility_note, travelling_with, room_sharing, day_rhythm, walking, languages, onboarded_at, home_city:cities!profiles_home_city_id_fkey(id, name, country_code)'
 
 export async function getMyProfile(userId: string): Promise<MyProfile> {
   const [profile, interests, preferences] = await Promise.all([
@@ -54,7 +59,10 @@ export async function getMyProfile(userId: string): Promise<MyProfile> {
 
 export type Basics = Pick<Profile, 'display_name' | 'birth_year' | 'gender' | 'home_city_id'>
 export type AboutMe = Pick<Profile, 'bio'>
-export type Style = Pick<Profile, 'travel_style' | 'pace' | 'budget' | 'mobility_note'>
+export type Style = Pick<
+  Profile,
+  'travel_style' | 'pace' | 'budget' | 'mobility_note' | 'travelling_with' | 'room_sharing' | 'day_rhythm' | 'walking' | 'languages'
+>
 
 async function updateProfile(userId: string, fields: Partial<Profile>): Promise<void> {
   const { error } = await supabase.from('profiles').update(fields).eq('id', userId)

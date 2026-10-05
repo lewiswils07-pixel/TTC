@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router'
 import { requestsLeft, sendRequest } from '../lib/connections'
 import { messageOf } from '../lib/errors'
-import { homeLabel } from '../lib/matching'
+import { fitWords, homeLabel } from '../lib/matching'
 import { ageLabel } from '../lib/options'
 import { hasPlus, weeklyRequests } from '../lib/plan'
 import { MAX_NOTE } from '../lib/validation'
@@ -16,6 +17,7 @@ type Person = {
   home_city: string | null
   home_country: string | null
   photo_path: string | null
+  travelling_with: string | null
   score: number
 }
 
@@ -64,13 +66,14 @@ export function SuggestionCard({ person, reasons, tripId, requests }: { person: 
           <div className="match-name">
             <h3>{person.display_name}</h3>
             <span className="match-score" title="How well your interests, dates and travel style line up">
-              {person.score}% in common
+              {fitWords(person.score)}
             </span>
           </div>
           <p className="profile-meta">
             {person.birth_year ? `Age ${ageLabel(person.birth_year)}` : null}
             {home && ` · ${home}`}
           </p>
+          {person.travelling_with && <p className="profile-meta">Travels with: {person.travelling_with}</p>}
         </div>
       </div>
       <ul className="match-reasons">
@@ -150,6 +153,12 @@ function ConnectBox({ person, tripId, requests }: { person: Person; tripId?: num
       {error && (
         <p className="notice notice-error" role="alert">
           {error}
+          {/photo/i.test(error) && (
+            <>
+              {' '}
+              <Link to="/onboarding?step=2">Add a photo</Link>
+            </>
+          )}
         </p>
       )}
       <div className="action-row">

@@ -15,7 +15,7 @@ $$;
 -- Lewis (admin), Ann, Bob (who misbehaves), Cat and Dan.
 insert into auth.users (id, email, aud, role)
 select pg_temp.m(n), 'a' || n || '@example.com', 'authenticated', 'authenticated' from generate_series(1, 5) n;
-update public.profiles p set display_name = v.name, gender = 'woman', birth_year = 1960, home_city_id = 2644688, onboarded_at = now()
+update public.profiles p set photo_path = p.id || '/photo.jpg', display_name = v.name, gender = 'woman', birth_year = 1960, home_city_id = 2644688, onboarded_at = now()
 from (values (1, 'Lewis'), (2, 'Ann'), (3, 'Bob'), (4, 'Cat'), (5, 'Dan')) as v(n, name)
 where p.id = pg_temp.m(v.n);
 update public.profiles set role = 'admin' where id = pg_temp.m(1);

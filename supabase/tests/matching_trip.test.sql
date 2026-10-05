@@ -19,7 +19,7 @@ create function pg_temp.m(n int) returns uuid language sql as $$
 $$;
 
 -- Leeds 2644688, Lisbon 2267057, Cascais 2269594 (about 25 km away), Paris 2988507.
-update public.profiles p set
+update public.profiles p set photo_path = p.id || '/photo.jpg',
   display_name = v.name, gender = v.gender, birth_year = v.born, home_city_id = v.home,
   travel_style = v.style, pace = v.pace, budget = v.budget, onboarded_at = case when v.done then now() end,
   status = v.status
@@ -54,7 +54,7 @@ insert into public.trips (owner_id, city_id, start_date, end_date, flexible_days
   (pg_temp.m(2),  2267057, current_date + 32, current_date + 35, 0, 'members'),  -- Bob: best match
   (pg_temp.m(3),  2269594, current_date + 36, current_date + 40, 0, 'members'),  -- Cat: Cascais, 2 days overlap
   (pg_temp.m(4),  2267057, current_date + 40, current_date + 45, 0, 'members'),  -- Dan: no overlap
-  (pg_temp.m(5),  2267057, current_date + 39, current_date + 42, 2, 'members'),  -- Eve: overlaps only with flexibility
+  (pg_temp.m(5),  2267057, current_date + 38, current_date + 42, 2, 'members'),  -- Eve: 2 days only with flexibility
   (pg_temp.m(6),  2267057, current_date + 31, current_date + 33, 0, 'hidden'),   -- Fay: hidden trip
   (pg_temp.m(7),  2267057, current_date + 31, current_date + 33, 0, 'members'),  -- Gus: wouldn't want Ann
   (pg_temp.m(8),  2267057, current_date + 31, current_date + 33, 0, 'members'),  -- Hal: 30, under Ann's minimum
@@ -75,9 +75,9 @@ select results_eq(
   $$values ('Bob'::text), ('Cat'), ('Eve')$$,
   'Ann sees Bob, Cat and Eve, best match first');
 
-select is((select score from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Bob'), 89, 'Bob scores 89 (3 of 4 interests, full overlap, same style)');
-select is((select score from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Cat'), 24, 'Cat scores 24');
-select is((select score from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Eve'), 18, 'Eve scores 18 (nothing in common, neutral style)');
+select is((select score from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Bob'), 81, 'Bob scores 81 (3 of 4 interests, full overlap, same style)');
+select is((select score from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Cat'), 26, 'Cat scores 26');
+select is((select score from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Eve'), 14, 'Eve scores 14 (nothing in common, neutral style)');
 
 select is((select cardinality(shared_interests) from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Bob'), 3, 'Bob''s card lists 3 shared interests');
 select is((select overlap_start from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Bob'), current_date + 32, 'Bob''s card shows when they overlap');

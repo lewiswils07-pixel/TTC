@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { interestReasons, listLabels, reasons, type InterestSuggestion, type TripSuggestion } from '../src/lib/matching'
+import { fitWords, interestReasons, listLabels, reasons, type InterestSuggestion, type TripSuggestion } from '../src/lib/matching'
 
 const base: TripSuggestion = {
   profile_id: 'x',
@@ -8,6 +8,7 @@ const base: TripSuggestion = {
   home_city: 'Leeds',
   home_country: 'GB',
   photo_path: null,
+  travelling_with: null,
   trip_city: 'Lisbon',
   trip_start: '2026-11-14',
   trip_end: '2026-11-20',
@@ -40,6 +41,7 @@ describe('why we suggested someone with no trip in common', () => {
     home_city: 'York',
     home_country: 'GB',
     photo_path: null,
+  travelling_with: null,
     distance_km: 37,
     shared_interests: ['Museums', 'Theatre'],
     shared_places: ['Kyoto'],
@@ -50,5 +52,14 @@ describe('why we suggested someone with no trip in common', () => {
   })
   it('says "near you" for the same town and leaves out places when none are shared', () => {
     expect(interestReasons({ ...person, distance_km: 0, shared_places: [] })).toEqual(['Both into Museums and Theatre', 'Lives near you'])
+  })
+})
+
+describe('words instead of a score', () => {
+  it('turns the score into a few words', () => {
+    expect(fitWords(81)).toBe('Great match')
+    expect(fitWords(70)).toBe('Great match')
+    expect(fitWords(56)).toBe('Good match')
+    expect(fitWords(26)).toBe('Worth a look')
   })
 })

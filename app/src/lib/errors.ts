@@ -19,6 +19,7 @@ const RULES: Array<[RegExp, string]> = [
   [/weekly request limit/i, 'You’ve used all your requests for this week. You get more on Monday.'],
   [/already in touch|connections_open_pair/i, 'You can’t send this member a request right now. You may already be connected or waiting for a reply.'],
   [/isn't available|isn’t available/i, 'This member isn’t available right now.'],
+  [/add a profile photo before asking to connect/i, 'Please add a profile photo before asking to connect. It helps members feel safe saying yes.'],
   [/finish your profile/i, 'Please finish your profile before sending requests.'],
   [/requests are paused/i, 'Your requests are paused while we look into something about your account. We’ll be in touch by email.'],
   [/message not found/i, 'We couldn’t find that message.'],

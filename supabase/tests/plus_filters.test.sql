@@ -15,7 +15,7 @@ $$;
 insert into auth.users (id, email, aud, role)
 select pg_temp.m(n), 'f' || n || '@example.com', 'authenticated', 'authenticated' from generate_series(1, 4) n;
 
-update public.profiles p set
+update public.profiles p set photo_path = p.id || '/photo.jpg',
   display_name = v.name, gender = 'woman', birth_year = 1960, home_city_id = 2644688, onboarded_at = now(),
   travel_style = v.style, id_verified_at = case when v.verified then now() end
 from (values

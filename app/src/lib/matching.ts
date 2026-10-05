@@ -12,6 +12,7 @@ export type TripSuggestion = {
   home_city: string | null
   home_country: string | null
   photo_path: string | null
+  travelling_with: string | null
   trip_city: string
   trip_start: string
   trip_end: string
@@ -26,6 +27,14 @@ export async function suggestForTrip(tripId: number): Promise<TripSuggestion[]> 
   const { data, error } = await supabase.rpc('suggest_for_trip', { p_trip_id: tripId })
   if (error) throw friendlyError(error)
   return (data ?? []) as TripSuggestion[]
+}
+
+/** Words instead of a number on each card (Lewis, 5 Oct). Thresholds suit
+ *  the 0 to 100 score from the database. */
+export function fitWords(score: number): string {
+  if (score >= 70) return 'Great match'
+  if (score >= 50) return 'Good match'
+  return 'Worth a look'
 }
 
 /** "Museums", "Museums and Theatre", "Museums, Theatre and 2 more". */
@@ -59,6 +68,7 @@ export type InterestSuggestion = {
   home_city: string | null
   home_country: string | null
   photo_path: string | null
+  travelling_with: string | null
   distance_km: number | null
   shared_interests: string[]
   shared_places: string[]

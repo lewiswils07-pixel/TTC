@@ -16,7 +16,7 @@ insert into auth.users (id, email, aud, role)
 select pg_temp.m(n), 'i' || n || '@example.com', 'authenticated', 'authenticated' from generate_series(1, 8) n;
 
 -- Leeds 2644688, York 2633352 (about 35 km), Paris 2988507.
-update public.profiles p set
+update public.profiles p set photo_path = p.id || '/photo.jpg',
   display_name = v.name, gender = v.gender, birth_year = v.born, home_city_id = v.home,
   travel_style = v.style, pace = v.pace, budget = v.budget, onboarded_at = now()
 from (values
@@ -52,10 +52,10 @@ insert into public.wishlist (profile_id, city_id) values
 insert into public.blocks (blocker_id, blocked_id) values (pg_temp.m(1), pg_temp.m(8));
 
 select pg_temp.sign_in_as(pg_temp.m(1));
-select results_eq('select display_name from public.suggest_by_interests()', $$values ('Eve'::text), ('Bob'), ('Dan'), ('Cat')$$,
-  'Ann sees Eve, Bob, Dan and Cat, best match first');
-select is((select score from public.suggest_by_interests() where display_name = 'Bob'), 61, 'Bob scores 61 (3 of 4 interests, same style)');
-select is((select score from public.suggest_by_interests() where display_name = 'Dan'), 57, 'Dan scores 57 (2 of 5 interests, a shared place)');
+select results_eq('select display_name from public.suggest_by_interests()', $$values ('Bob'::text), ('Eve'), ('Dan'), ('Cat')$$,
+  'Ann sees Bob, Eve, Dan and Cat, best match first');
+select is((select score from public.suggest_by_interests() where display_name = 'Bob'), 62, 'Bob scores 62 (3 of 4 interests, same style)');
+select is((select score from public.suggest_by_interests() where display_name = 'Dan'), 51, 'Dan scores 51 (2 of 5 interests, a shared place)');
 select is((select shared_places from public.suggest_by_interests() where display_name = 'Dan'), array['Paris'], 'Dan''s card says you both want to visit Paris');
 select is((select distance_km from public.suggest_by_interests() where display_name = 'Bob') between 30 and 40, true, 'cards show how far away they live');
 select is_empty($$select 1 from public.suggest_by_interests() where display_name in ('Fay', 'Gus', 'Hal')$$,

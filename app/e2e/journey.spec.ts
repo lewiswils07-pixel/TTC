@@ -5,6 +5,8 @@
 import { expect, test } from '@playwright/test'
 import { admin, closeGuide, emailOf, idOf, isoIn, newPhone, pickPlace, signIn } from './helpers'
 
+const TINY_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+
 test('a new member joins, connects, chats, plans with a group, and reports', async ({ browser }) => {
   const a = await newPhone(browser)
   const lewisEmail = `journey${Date.now()}@example.com`
@@ -18,6 +20,9 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await pickPlace(a, 'Leed', 'Leeds, United Kingdom')
     await a.getByRole('button', { name: /continue/i }).click()
     await expect(a.getByText(/Step 2 of 4/)).toBeVisible()
+    // A photo is needed to ask to connect (a 1×1 PNG is enough here).
+    await a.locator('#photo').setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: Buffer.from(TINY_PNG, 'base64') })
+    await expect(a.getByRole('img', { name: 'Your profile photo' })).toBeVisible()
     await a.getByRole('button', { name: /continue|skip/i }).click()
     await expect(a.getByText(/Step 3 of 4/)).toBeVisible()
     for (const name of ['Museums', 'Wine and vineyards', 'Walking and rambling', 'Photography', 'Wine', 'Walking']) {

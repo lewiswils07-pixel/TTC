@@ -15,7 +15,7 @@ $$;
 -- Ann (1) is connected with Bob, Cat, Dan, Eve, Fay and Gus (2 to 7). Hal (8) is not.
 insert into auth.users (id, email, aud, role)
 select pg_temp.m(n), 'g' || n || '@example.com', 'authenticated', 'authenticated' from generate_series(1, 8) n;
-update public.profiles p set display_name = v.name, gender = 'woman', birth_year = 1960, home_city_id = 2644688, onboarded_at = now()
+update public.profiles p set photo_path = p.id || '/photo.jpg', display_name = v.name, gender = 'woman', birth_year = 1960, home_city_id = 2644688, onboarded_at = now()
 from (values (1, 'Ann'), (2, 'Bob'), (3, 'Cat'), (4, 'Dan'), (5, 'Eve'), (6, 'Fay'), (7, 'Gus'), (8, 'Hal')) as v(n, name)
 where p.id = pg_temp.m(v.n);
 insert into public.connections (requester_id, addressee_id, status)
