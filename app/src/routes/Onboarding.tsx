@@ -51,8 +51,14 @@ const STEPS = [
   { title: 'About you', intro: 'Only your first name, age and home town are shown to other members.' },
   { title: 'Your photo', intro: 'A clear, smiling photo helps other members feel comfortable. Only signed-in members can see it.' },
   { title: 'Your interests', intro: `Pick ${MIN_INTERESTS} to ${MAX_INTERESTS}. We use them to suggest people you’ll get on with.` },
-  { title: 'How you travel', intro: 'There are no wrong answers. These help us suggest people who travel the way you do.' },
+  {
+    title: 'How you travel',
+    intro: 'Optional, and there are no wrong answers. The more you add, the better we can suggest people who travel the way you do.',
+  },
 ] as const
+/** Sign-up is the first 3 steps (Lewis, 5 Oct: keep it quick). "How you
+ *  travel" comes after, from the profile page, to strengthen the profile. */
+const SIGN_UP_STEPS = 3
 const TOTAL = STEPS.length
 
 export function Onboarding() {
@@ -86,15 +92,21 @@ export function Onboarding() {
   const goTo = (n: number) => setParams({ step: String(n) })
   const firstTime = !data.profile.onboarded_at
   const next = async () => {
+    if (firstTime && step >= SIGN_UP_STEPS) {
+      await finishOnboarding()
+      await reload()
+      navigate('/welcome', { replace: true })
+      return
+    }
     await reload()
     if (step < TOTAL) goTo(step + 1)
-    else navigate(firstTime ? '/welcome' : '/dashboard', { replace: true })
+    else navigate('/dashboard', { replace: true })
   }
   const back = step > 1 ? () => goTo(step - 1) : undefined
 
   return (
     <Layout>
-      <StepFrame step={step} key={step}>
+      <StepFrame step={step} key={step} signingUp={firstTime}>
         {step === 1 && <BasicsStep userId={userId} data={data} onDone={next} />}
         {step === 2 && <PhotoStep userId={userId} data={data} onDone={next} onBack={back} />}
         {step === 3 && <InterestsStep data={data} interests={interests} onDone={next} onBack={back} />}
@@ -104,23 +116,24 @@ export function Onboarding() {
   )
 }
 
-function StepFrame({ step, children }: { step: number; children: ReactNode }) {
+function StepFrame({ step, signingUp, children }: { step: number; signingUp: boolean; children: ReactNode }) {
   const heading = useRef<HTMLHeadingElement>(null)
   useEffect(() => heading.current?.focus(), [])
   const { title, intro } = STEPS[step - 1]
+  const extra = step > SIGN_UP_STEPS
   return (
     <div className="step">
-      <div className="progress" aria-hidden="true">
-        <div className="progress-bar" style={{ width: `${(step / TOTAL) * 100}%` }} />
-      </div>
-      <p className="eyebrow">
-        Step {step} of {TOTAL}
-      </p>
+      {signingUp && !extra && (
+        <div className="progress" aria-hidden="true">
+          <div className="progress-bar" style={{ width: `${(step / SIGN_UP_STEPS) * 100}%` }} />
+        </div>
+      )}
+      <p className="eyebrow">{extra ? 'Strengthen your profile' : signingUp ? `Step ${step} of ${SIGN_UP_STEPS}` : 'Edit your profile'}</p>
       <h1 ref={heading} tabIndex={-1}>
         {title}
       </h1>
       <p className="lede">{intro}</p>
-      <p className="hint saved-note">Each step is saved when you continue, so you can stop and come back any time.</p>
+      {signingUp && !extra && <p className="hint saved-note">Each step is saved when you continue, so you can stop and come back any time.</p>}
       {children}
     </div>
   )
@@ -377,6 +390,7 @@ function InterestsStep({ data, interests, onDone, onBack }: Omit<StepProps, 'use
       <ActionBar
         busy={busy}
         onBack={onBack}
+        label={data.profile.onboarded_at ? undefined : 'Finish sign-up'}
         note={
           <span aria-live="polite">
             <strong>{selected.length}</strong> of {MAX_INTERESTS} picked
@@ -417,7 +431,6 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
       },
       prefs,
     )
-    await finishOnboarding()
   }, onDone)
 
   return (
@@ -488,7 +501,7 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
         Everyone is shown to you to start with. You can choose who you’d like to see (gender, age and distance) any time in Filters.
       </p>
       <SaveError error={error} />
-      <ActionBar busy={busy} onBack={onBack} label="Finish my profile" />
+      <ActionBar busy={busy} onBack={onBack} label="Save" />
     </form>
   )
 }

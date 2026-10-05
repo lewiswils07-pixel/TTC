@@ -46,6 +46,6 @@ describe('profile helpers', () => {
     expect(firstUnfinishedStep(make({}))).toBe(1)
     expect(firstUnfinishedStep(make(basics))).toBe(2)
     expect(firstUnfinishedStep(make({ ...basics, bio: 'Hi' }))).toBe(3)
-    expect(firstUnfinishedStep(make(basics, [1, 2, 3]))).toBe(4)
+    expect(firstUnfinishedStep(make(basics, [1, 2, 3]))).toBe(3)
   })
 })

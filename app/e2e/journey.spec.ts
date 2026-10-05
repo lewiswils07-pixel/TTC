@@ -13,7 +13,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
 
   await test.step('join and build a profile', async () => {
     await signIn(a, lewisEmail)
-    await expect(a.getByText(/Step 1 of 4/)).toBeVisible()
+    await expect(a.getByText(/Step 1 of 3/)).toBeVisible()
     await a.getByLabel('First name').fill('Lewis')
     await a.getByLabel('Day').selectOption('14')
     await a.getByLabel('Month').selectOption({ label: 'November' })
@@ -21,19 +21,17 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.getByRole('radio', { name: 'Man', exact: true }).check({ force: true })
     await pickPlace(a, 'Leed', 'Leeds, United Kingdom')
     await a.getByRole('button', { name: /continue/i }).click()
-    await expect(a.getByText(/Step 2 of 4/)).toBeVisible()
+    await expect(a.getByText(/Step 2 of 3/)).toBeVisible()
     // A photo is needed to ask to connect (a 1×1 PNG is enough here).
     await a.locator('#photo').setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: Buffer.from(TINY_PNG, 'base64') })
     await expect(a.getByRole('img', { name: 'Your profile photo' })).toBeVisible()
     await a.getByRole('button', { name: /continue|skip/i }).click()
-    await expect(a.getByText(/Step 3 of 4/)).toBeVisible()
+    await expect(a.getByText(/Step 3 of 3/)).toBeVisible()
     for (const name of ['Museums', 'Wine and vineyards', 'Walking and rambling', 'Photography', 'Wine', 'Walking']) {
       const chip = a.getByRole('checkbox', { name, exact: true })
       if (await chip.count()) await chip.evaluate((el: HTMLElement) => el.click())
     }
-    await a.getByRole('button', { name: /continue/i }).click()
-    await expect(a.getByText(/Step 4 of 4/)).toBeVisible()
-    await a.getByRole('button', { name: /finish/i }).click()
+    await a.getByRole('button', { name: 'Finish sign-up' }).click()
     await expect(a.getByRole('heading', { name: 'Welcome to the Collective' })).toBeVisible()
     await expect(a.getByText(/founding member No\. \d+/)).toBeVisible()
     await a.getByRole('link', { name: 'Go to my profile' }).click()
@@ -126,7 +124,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     const reviewer = `reviewer${Date.now()}@example.com`
     const r = await newPhone(browser)
     await signIn(r, reviewer)
-    await expect(r.getByText(/Step 1 of 4/)).toBeVisible()
+    await expect(r.getByText(/Step 1 of 3/)).toBeVisible()
     await admin.from('profiles').update({ role: 'admin' }).eq('id', await idOf(reviewer))
     await r.goto('/admin')
     await expect(r.getByRole('heading', { name: /To review/ })).toBeVisible()
