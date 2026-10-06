@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { RequireSession } from './components/Guards'
+import { HeardFromPrompt } from './components/HeardFromPrompt'
+import { PrivacyPrompt } from './components/PrivacyPrompt'
 import { Loading } from './components/Layout'
 import { SessionProvider } from './lib/session'
 import { useSession } from './lib/session-context'
@@ -38,6 +40,9 @@ const Privacy = lazy(() => legal().then((m) => ({ default: m.Privacy })))
 const CommunityRules = lazy(() => legal().then((m) => ({ default: m.CommunityRules })))
 const WelcomeScreen = lazy(() => import('./routes/Welcome').then((m) => ({ default: m.WelcomeScreen })))
 const Profile = lazy(() => import('./routes/Profile').then((m) => ({ default: m.Profile })))
+const settings = () => import('./routes/Settings')
+const Settings = lazy(() => settings().then((m) => ({ default: m.Settings })))
+const PrivacyChoices = lazy(() => settings().then((m) => ({ default: m.PrivacyChoicesPage })))
 
 export function App() {
   return (
@@ -67,6 +72,7 @@ const MEMBER_SCREENS = [
   () => import('./routes/Profile'),
   () => import('./routes/Filters'),
   () => import('./routes/Account'),
+  () => import('./routes/Settings'),
   () => import('./routes/MeetingSafely'),
   () => import('./routes/Onboarding'),
 ]
@@ -86,6 +92,8 @@ export function AppRoutes() {
   usePreloadScreens()
   return (
     <Suspense fallback={<Loading />}>
+      <HeardFromPrompt />
+      <PrivacyPrompt />
       <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/sign-in" element={<SignIn />} />
@@ -250,6 +258,22 @@ export function AppRoutes() {
         element={
           <RequireSession>
             <Account />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <RequireSession>
+            <Settings />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/settings/privacy"
+        element={
+          <RequireSession>
+            <PrivacyChoices />
           </RequireSession>
         }
       />

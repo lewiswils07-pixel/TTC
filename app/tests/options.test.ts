@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { cityLabel } from '../src/lib/cities'
-import { GENDERS, ageFromDate, ageLabel, labelFor, latestBirthYear } from '../src/lib/options'
+import { DISTANCE_MILES, GENDERS, ageFromDate, ageLabel, distanceLabel, distanceStop, labelFor, latestBirthYear, milesToKm } from '../src/lib/options'
 import { firstUnfinishedStep } from '../src/lib/onboarding'
 import type { MyProfile, Profile } from '../src/lib/profile'
 
@@ -47,5 +47,20 @@ describe('profile helpers', () => {
     expect(firstUnfinishedStep(make(basics))).toBe(2)
     expect(firstUnfinishedStep(make({ ...basics, bio: 'Hi' }))).toBe(3)
     expect(firstUnfinishedStep(make(basics, [1, 2, 3, 4, 5, 6, 7, 8]))).toBe(3)
+  })
+})
+
+describe('distance slider', () => {
+  it('starts at 0, meaning your town only', () => {
+    expect(DISTANCE_MILES[0]).toBe(0)
+    expect(distanceLabel(0)).toBe('Your town only')
+    // The database's smallest distance; people in your town always count.
+    expect(milesToKm(0)).toBe(1)
+    expect(distanceStop(1)).toBe(0)
+  })
+  it('ends at any distance', () => {
+    expect(distanceLabel(null)).toBe('Any distance')
+    expect(distanceStop(null)).toBe(DISTANCE_MILES.length - 1)
+    expect(distanceStop(milesToKm(50))).toBe(DISTANCE_MILES.indexOf(50))
   })
 })

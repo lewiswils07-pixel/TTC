@@ -55,8 +55,8 @@ const CHOICES = [
   ['preferences', 'preferences_styles_check', 'travelStyle', set],
   ['preferences', 'preferences_paces_check', 'pace', set],
   ['preferences', 'preferences_budgets_check', 'budget', set],
-  // Preferences can't ask for "rather not say", so it is left out there.
-  ['preferences', 'preferences_genders_check', 'gender', (v) => set(v.filter((g) => g !== 'unsaid'))],
+  // Who to show: "Non-binary" there also covers the other identities.
+  ['preferences', 'preferences_genders_check', 'genderShown', set],
 ]
 
 /** Functions that must keep a fixed number (they back a table check or an

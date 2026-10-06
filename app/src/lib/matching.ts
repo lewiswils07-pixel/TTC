@@ -86,10 +86,12 @@ export async function suggestByInterests(): Promise<InterestSuggestion[]> {
 export function interestReasons(s: InterestSuggestion): string[] {
   const lines = [`Both into ${listLabels(s.shared_interests)}`]
   if (s.shared_places.length) lines.push(`You both want to visit ${listLabels(s.shared_places)}`)
-  if (s.distance_km !== null) lines.push(s.distance_km < 10 ? 'Lives near you' : `Lives about ${roundKm(s.distance_km)} km from you`)
+  if (s.distance_km !== null) lines.push(s.distance_km < 10 ? 'Lives near you' : `Lives about ${roundMiles(s.distance_km)} miles from you`)
   return lines
 }
 
-function roundKm(km: number): number {
-  return km < 100 ? Math.round(km / 5) * 5 : Math.round(km / 50) * 50
+/** Members think in miles: "about 20 miles", "about 150 miles". */
+function roundMiles(km: number): number {
+  const miles = km / 1.609344
+  return miles < 60 ? Math.max(5, Math.round(miles / 5) * 5) : Math.round(miles / 25) * 25
 }

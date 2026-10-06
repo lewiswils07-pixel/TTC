@@ -5,10 +5,12 @@ import { Field, FieldError, TextField } from '../components/Field'
 import { InterestPicker } from '../components/InterestPicker'
 import { Layout, Loading } from '../components/Layout'
 import { ActionBar, SaveError } from '../components/Form'
+import { QuestionPicker } from '../components/QuestionPicker'
 import { Segmented } from '../components/Segmented'
-import { ANSWER_MAX_CHARS, ANSWER_MAX_WORDS, ANSWERS_TO_PICK, CARD_QUESTIONS, checkAnswer, questionText, saveCard, wordCount, type CardAnswer } from '../lib/card'
+import { ANSWER_MAX_CHARS, ANSWER_MAX_WORDS, ANSWERS_TO_PICK, checkAnswer, questionText, saveCard, wordCount, type CardAnswer } from '../lib/card'
 import type { City } from '../lib/cities'
 import { messageOf } from '../lib/errors'
+import { clearMyLocation, locateMe } from '../lib/location'
 import { firstUnfinishedStep, STEP } from '../lib/onboarding'
 import { rules } from '../lib/rules'
 import {
@@ -49,18 +51,18 @@ import { useMyProfile } from '../lib/useMyProfile'
 import { birthDate, checkBirthDate, checkChosen, checkInterests, checkName } from '../lib/validation'
 
 const STEPS = [
-  { title: 'About you', intro: 'Only your first name, age and home town are shown to other members.' },
-  { title: 'Your photo', intro: 'A clear, smiling photo helps other members feel comfortable. Only signed-in members can see it.' },
-  { title: 'Your interests', intro: `Pick your top ${INTERESTS_TO_PICK}. We use them to suggest people you’ll get on with.` },
+  { title: 'About you', intro: null },
+  { title: 'Your photo', intro: null },
+  { title: 'Your interests', intro: `Pick the ${INTERESTS_TO_PICK} you love most, and meet people who love them too.` },
   {
     title: 'The back of your card',
-    intro: `Choose ${ANSWERS_TO_PICK} questions and answer them in a sentence or two. Members see your answers when they flip your card.`,
+    intro: `Pick ${ANSWERS_TO_PICK} questions and answer each in a sentence or two. People see them when they turn your card over.`,
   },
   {
     title: 'How you travel',
-    intro: 'Optional, and there are no wrong answers. The more you add, the better we can suggest people who travel the way you do.',
+    intro: 'All optional, and there are no wrong answers. Add as much as you like to meet people who travel the way you do.',
   },
-] as const
+] as const satisfies readonly { title: string; intro: string | null }[]
 /** Sign-up is the first 4 steps (Lewis, 5 Oct: keep it quick; 6 Oct: add
  *  the back of the card). "How you travel" comes after, from the profile
  *  page. Until the card is live in the database, sign-up is 3 steps. */
@@ -141,8 +143,7 @@ function StepFrame({ step, signingUp, signUpSteps, children }: { step: number; s
       <h1 ref={heading} tabIndex={-1}>
         {title}
       </h1>
-      <p className="lede">{intro}</p>
-      {signingUp && !extra && <p className="hint saved-note">Each step is saved when you continue, so you can stop and come back any time.</p>}
+      {intro && <p className="lede">{intro}</p>}
       {children}
     </div>
   )
@@ -176,16 +177,34 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
   const [dobYear, setDobYear] = useState(p.birth_date ? p.birth_date.slice(0, 4) : p.birth_year ? String(p.birth_year) : '')
   const [gender, setGender] = useState<Gender[]>(p.gender ? [p.gender] : [])
   const [city, setCity] = useState<City | null>(p.home_city)
+  // "Use my location" (Lewis, 6 Oct): sets the nearest town; can be used again after a move.
+  const [locating, setLocating] = useState(false)
+  const [located, setLocated] = useState(false)
+  const [locateError, setLocateError] = useState<string | null>(null)
+  async function locate() {
+    setLocating(true)
+    setLocateError(null)
+    try {
+      setCity(await locateMe())
+      setLocated(true)
+    } catch (err) {
+      setLocateError(messageOf(err))
+    } finally {
+      setLocating(false)
+    }
+  }
 
   const errors = {
     name: checkName(name),
     birthDate: checkBirthDate(dobDay, dobMonth, dobYear),
     gender: checkChosen('how you describe yourself')(gender),
-    city: city ? null : 'Please choose your home town or city from the list.',
+    city: city ? null : 'Please choose your home city from the list.',
   }
   const { shown, touch, validateAll } = useChecks(errors)
 
   const { busy, error, submit } = useStepSubmit(async () => {
+    // A town typed in by hand replaces any exact spot saved before.
+    if (!located && city!.id !== p.home_city?.id) await clearMyLocation(userId)
     await saveBasics(userId, { display_name: name.trim(), birth_date: birthDate(dobDay, dobMonth, dobYear), gender: gender[0], home_city_id: city!.id })
   }, onDone)
 
@@ -211,7 +230,7 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
         <fieldset className="field" data-field="birthDate" aria-describedby="dob-hint">
           <legend>Date of birth</legend>
           <p className="hint" id="dob-hint">
-            Members see your age, never your birthday. You must be {MIN_AGE} or over.
+            You must be {MIN_AGE} or over.
           </p>
           <div className="dob">
             <select
@@ -277,18 +296,27 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
           }}
           error={shown('gender')}
         />
-        <div data-field="city">
+        <div data-field="city" className="home-city">
           <CityPicker
-            label="Home town or city"
-            hint="Start typing, then pick from the list. We never show your exact location."
+            label="Home city"
             value={city}
             onChange={(c) => {
               setCity(c)
+              setLocated(false)
               if (c) touch('city')
             }}
             onBlur={() => touch('city')}
             error={shown('city')}
           />
+          <button type="button" className="btn btn-link locate" onClick={locate} disabled={locating}>
+            <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
+              <circle cx="10" cy="10" r="3" fill="currentColor" />
+              <path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" strokeWidth="2" />
+            </svg>
+            {locating ? 'Finding you…' : located ? 'Location updated' : 'Use my location'}
+          </button>
+          <FieldError error={locateError} />
         </div>
       </div>
       <SaveError error={error} />
@@ -357,7 +385,7 @@ function PhotoStep({ userId, data, onDone, onBack }: StepProps) {
             </label>
             <input id="photo" className="visually-hidden" type="file" accept="image/*" onChange={(e) => pick(e.target.files?.[0])} />
             <p className="hint" role="status" aria-live="polite">
-              {preparing ? 'Getting your photo ready…' : 'We remove location details from your photo before it’s saved.'}
+              {preparing ? 'Getting your photo ready…' : ''}
             </p>
             <FieldError error={photoError} />
           </div>
@@ -367,8 +395,8 @@ function PhotoStep({ userId, data, onDone, onBack }: StepProps) {
           <li>Recent, and in good light</li>
           <li>No sunglasses, hats or group shots</li>
         </ul>
-        <p className="hint">A head-and-shoulders photo works best. You’ll need a photo before you can connect with anyone.</p>
-        <Field name="bio" label="A few words about you (optional)" hint={`Where you’ve been, where you’d love to go, or what makes a good travel companion. ${500 - bio.length} characters left.`}>
+        <p className="hint">You’ll need a photo to connect with people.</p>
+        <Field name="bio" label="A few words about you (optional)" hint={`Where you’ve been, where you’d love to go, or what makes a good travel companion. ${rules.profile.bioMax - bio.length} characters left.`}>
           {({ id, describedBy }) => (
             <textarea id={id} className="textarea" maxLength={rules.profile.bioMax} aria-describedby={describedBy} value={bio} onChange={(e) => setBio(e.target.value)} />
           )}
@@ -403,7 +431,6 @@ function InterestsStep({ data, interests, onDone, onBack, lastStep }: Omit<StepP
         note={
           <span aria-live="polite">
             <strong>{selected.length}</strong> of {INTERESTS_TO_PICK} picked
-            {selected.length < INTERESTS_TO_PICK ? ` · ${INTERESTS_TO_PICK - selected.length} to go` : ''}
           </span>
         }
       />
@@ -460,7 +487,7 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
         <TextField
           name="mobility"
           label="Anything about getting around? (optional)"
-          hint="For example, “I avoid lots of stairs”. Only used to plan trips, never shown on your profile."
+          hint="For example, “I avoid lots of stairs”. Only you can see this."
           maxLength={rules.profile.mobilityNoteMax}
           value={mobility}
           onChange={(e) => setMobility(e.target.value)}
@@ -471,7 +498,6 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
         <h2 id="habits-heading" className="card-title">
           On the road
         </h2>
-        <p className="hint section-hint">All optional. They help us suggest people you’d be comfortable travelling with.</p>
         <Segmented name="room" legend="Sharing a room" options={ROOM_SHARING} selected={room} onChange={setRoom} describeSelection />
         <Segmented name="rhythm" legend="Mornings" options={DAY_RHYTHMS} selected={rhythm} onChange={setRhythm} />
         <Segmented name="walking" legend="Walking" options={WALKING} selected={walking} onChange={setWalking} describeSelection />
@@ -499,7 +525,7 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
         <TextField
           name="travelling-with"
           label="Travelling with someone? (optional)"
-          hint="For example, “usually with my sister Jo”. Shown on your card. Each profile is for one person."
+          hint="For example, “usually with my sister Jo”. Shown on your card."
           maxLength={rules.profile.travellingWithMax}
           value={travellingWith}
           onChange={(e) => setTravellingWith(e.target.value)}
@@ -507,13 +533,16 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
       </section>
 
       <p className="hint section-hint">
-        Everyone is shown to you to start with. You can choose who you’d like to see (gender, age and distance) any time in Filters.
+        Choose who you see (gender, age and distance) any time in Filters.
       </p>
       <SaveError error={error} />
       <ActionBar busy={busy} onBack={onBack} label="Save" />
     </form>
   )
 }
+
+/** The word limit shows (in red) once an answer gets this long. */
+const WORDS_WARNING = ANSWER_MAX_WORDS - 5
 
 const EMPTY_ANSWERS: CardAnswer[] = [
   { q: '', a: '' },
@@ -554,28 +583,17 @@ function CardStep({ userId, data, onDone, onBack }: StepProps) {
             </h2>
             <Field name={`q${i}`} label="Choose a question" error={shown(`q${i}`)}>
               {({ id, describedBy, invalid }) => (
-                <select
+                <QuestionPicker
                   id={id}
-                  className="input"
                   value={answer.q}
-                  aria-invalid={invalid || undefined}
-                  aria-describedby={describedBy}
-                  onChange={(e) => {
-                    set(i, { q: e.target.value })
+                  taken={taken}
+                  invalid={invalid}
+                  describedBy={describedBy}
+                  onChange={(q) => {
+                    set(i, { q })
                     touch(`q${i}`)
                   }}
-                >
-                  <option value="">Choose…</option>
-                  {CARD_QUESTIONS.map((g) => (
-                    <optgroup key={g.group} label={g.group}>
-                      {g.questions.map((q) => (
-                        <option key={q.key} value={q.key} disabled={taken.has(q.key)}>
-                          {q.text}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
+                />
               )}
             </Field>
             {answer.q && (
@@ -583,9 +601,12 @@ function CardStep({ userId, data, onDone, onBack }: StepProps) {
                 name={`a${i}`}
                 label={`Your answer to “${questionText(answer.q)}”`}
                 hint={
-                  <span aria-live="polite">
-                    {words} of {ANSWER_MAX_WORDS} words
-                  </span>
+                  // Only once they're close to the limit (Lewis, 6 Oct).
+                  words >= WORDS_WARNING ? (
+                    <span className="word-limit" aria-live="polite">
+                      Maximum of {ANSWER_MAX_WORDS} words
+                    </span>
+                  ) : undefined
                 }
                 error={shown(`a${i}`)}
               >

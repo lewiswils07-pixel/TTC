@@ -61,7 +61,7 @@ function tabFor(path: string): Tab | undefined {
   if (path.startsWith('/connections') || path.startsWith('/filters')) return 'connections'
   if (path.startsWith('/trips')) return 'trips'
   if (path.startsWith('/messages') || path.startsWith('/groups')) return 'chat'
-  if (path.startsWith('/profile') || path.startsWith('/account')) return 'profile'
+  if (path.startsWith('/profile') || path.startsWith('/account') || path.startsWith('/settings')) return 'profile'
   return undefined
 }
 

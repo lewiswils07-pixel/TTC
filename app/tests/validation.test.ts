@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { groupInterests } from '../src/lib/interests'
 import { birthDate, checkAgeRange, checkBirthDate, checkBirthYear, checkCode, checkEmail, checkInterests, checkName } from '../src/lib/validation'
 
 const now = new Date('2026-10-05')
@@ -34,20 +33,6 @@ describe('instant field checks', () => {
     expect(checkInterests([1, 2, 3, 4, 5, 6, 7, 8, 9])).toMatch(/remove 1/)
     expect(checkAgeRange([18, 99])).toBeNull()
     expect(checkAgeRange([60, 40])).not.toBeNull()
-  })
-})
-
-describe('groupInterests', () => {
-  it('keeps the list order and groups by category', () => {
-    const groups = groupInterests([
-      { id: 1, slug: 'museums', label: 'Museums', category_label: 'Arts and culture' },
-      { id: 2, slug: 'theatre', label: 'Theatre', category_label: 'Arts and culture' },
-      { id: 3, slug: 'wine', label: 'Wine', category_label: 'Food and drink' },
-    ])
-    expect(groups.map((g) => [g.label, g.items.length])).toEqual([['Arts and culture', 2], ['Food and drink', 1]])
-  })
-  it('copes with the old list that has no categories', () => {
-    expect(groupInterests([{ id: 1, slug: 'museums', label: 'Museums' }])[0].label).toBe('Interests')
   })
 })
 

@@ -9,12 +9,20 @@ export const GENDERS = [
   { value: 'woman', label: 'Woman' },
   { value: 'man', label: 'Man' },
   { value: 'nonbinary', label: 'Non-binary' },
+  { value: 'genderfluid', label: 'Genderfluid' },
+  { value: 'agender', label: 'Agender' },
+  { value: 'another', label: 'Another identity' },
   { value: 'unsaid', label: 'Prefer not to say' },
 ] as const satisfies readonly Option<string>[]
 
-/** Genders members can choose to see. "Prefer not to say" members are shown
- *  to those who pick all three. */
-export const SHOWN_GENDERS = GENDERS.filter((g) => g.value !== 'unsaid')
+/** Who members can choose to see. The third also shows genderfluid, agender
+ *  and "another identity" members; "Prefer not to say" members are shown to
+ *  those who pick all three (the database's fits_preferences does the same). */
+export const SHOWN_GENDERS = [
+  { value: 'woman', label: 'Women' },
+  { value: 'man', label: 'Men' },
+  { value: 'nonbinary', label: 'Non-binary and other identities' },
+] as const satisfies readonly Option<Gender>[]
 
 // Travel style, pace and budget are each in order, so "next to each other"
 // counts as a partial match in matching (spec §4.2).
@@ -86,15 +94,22 @@ export type RoomSharing = (typeof ROOM_SHARING)[number]['value']
 export type DayRhythm = (typeof DAY_RHYTHMS)[number]['value']
 export type Walking = (typeof WALKING)[number]['value']
 
-export const DISTANCES = [
-  { value: 'any', label: 'Any' },
-  { value: '50', label: '50 km' },
-  { value: '150', label: '150 km' },
-  { value: '500', label: '500 km' },
-] as const
-export type Distance = (typeof DISTANCES)[number]['value']
-export const distanceOption = (km: number | null): Distance => DISTANCES.find((d) => d.value === String(km))?.value ?? 'any'
-export const distanceKm = (d: Distance | undefined): number | null => (!d || d === 'any' ? null : Number(d))
+/** Stops on the distance slider, in miles; 0 is "your town only" and the last stop is "any distance". The database keeps km. */
+export const DISTANCE_MILES = [0, 5, 10, 25, 50, 75, 100, 150, 200, 300, null] as const
+const KM_PER_MILE = 1.609344
+// The database counts people in your own town as always in range, so the
+// smallest distance it accepts (1 km) means "your town only".
+export const milesToKm = (miles: number | null): number | null => (miles === null ? null : Math.max(1, Math.round(miles * KM_PER_MILE)))
+/** The slider stop for a saved distance: the nearest one, or "any". */
+export function distanceStop(km: number | null): number {
+  if (km === null) return DISTANCE_MILES.length - 1
+  let best = 0
+  DISTANCE_MILES.forEach((m, i) => {
+    if (m !== null && Math.abs(m * KM_PER_MILE - km) < Math.abs((DISTANCE_MILES[best] ?? 0) * KM_PER_MILE - km)) best = i
+  })
+  return best
+}
+export const distanceLabel = (miles: number | null) => (miles === null ? 'Any distance' : miles === 0 ? 'Your town only' : `Up to ${miles} miles`)
 
 export const MIN_AGE = rules.age.min
 export const MAX_PREF_AGE = rules.age.maxPreferred

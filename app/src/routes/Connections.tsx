@@ -161,7 +161,9 @@ export function Connections() {
 
       {blocked && blocked.length > 0 && (
         <>
-          <h2 className="section-title">Blocked</h2>
+          <h2 className="section-title" id="blocked">
+            Blocked
+          </h2>
           <p className="hint section-hint">You can’t see each other. If you unblock someone, you’ll both see each other again.</p>
           <ul className="blocked-list">
             {blocked.map((b) => (

@@ -5,6 +5,7 @@ import { tripDates } from './dates'
 import { listLabels, suggestByInterests, suggestForTrip, type InterestSuggestion, type TripSuggestion } from './matching'
 import { listMyTrips } from './trips'
 import { rules } from './rules'
+import { supabase } from './supabase'
 
 export type FeedPerson = {
   profile_id: string
@@ -22,6 +23,8 @@ export type FeedPerson = {
   shared_interests: string[]
   shared_places: string[]
   distance_km: number | null
+  /** Used the app in the last day (rules.connections.recentlyOnlineHours). */
+  online: boolean
 }
 
 /** Shared interests needed for the “Similar interests” callout (out of the ones each member picks). */
@@ -46,6 +49,7 @@ export function mergeFeed(byTrip: { tripId: number; people: TripSuggestion[] }[]
     shared_interests: [],
     shared_places: [],
     distance_km: null,
+    online: false,
   })
   for (const { tripId, people: list } of byTrip) {
     for (const s of list) {
@@ -78,7 +82,17 @@ export async function loadFeed(): Promise<FeedPerson[]> {
     Promise.all(trips.map(async (t) => ({ tripId: t.id, people: await suggestForTrip(t.id).catch(() => []) }))),
     suggestByInterests(),
   ])
-  return mergeFeed(byTrip, byInterest)
+  const feed = mergeFeed(byTrip, byInterest)
+  const online = await recentlyOnline(feed.map((p) => p.profile_id))
+  for (const p of feed) p.online = online.has(p.profile_id)
+  return feed
+}
+
+/** Which of these people used the app recently. Empty if the database can't say yet. */
+export async function recentlyOnline(ids: string[]): Promise<Set<string>> {
+  if (!ids.length) return new Set()
+  const { data, error } = await supabase.rpc('recently_online', { p_ids: ids.slice(0, 100) })
+  return new Set(error ? [] : ((data ?? []) as string[]))
 }
 
 /** Why this person is in the feed, strongest reason first. */

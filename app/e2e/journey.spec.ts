@@ -34,11 +34,15 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.getByRole('button', { name: 'Continue' }).click()
     await fillCard(a)
     await expect(a.getByRole('heading', { name: 'Welcome to the Collective' })).toBeVisible()
-    await expect(a.getByText(/founding member No\. \d+/)).toBeVisible()
+    await expect(a.getByRole('heading', { name: /is on us for/ })).toBeVisible()
     await a.getByRole('link', { name: 'Start meeting people' }).click()
     // The tour opens first; look at the first step, then skip it.
     await expect(a.getByRole('heading', { name: 'Meet people one at a time' })).toBeVisible()
     await a.getByRole('button', { name: 'Skip' }).click()
+    // Then, once, the privacy choices.
+    await expect(a.getByRole('heading', { name: 'We value your privacy' })).toBeVisible()
+    await a.getByRole('button', { name: 'Accept all' }).click()
+    await expect(a.getByRole('heading', { name: 'We value your privacy' })).toBeHidden()
     await expect(a.getByRole('heading', { level: 1, name: 'Connections' })).toBeVisible()
     await expect(a.locator('.person-feed-card')).toBeVisible()
   })
@@ -64,12 +68,15 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
   })
 
   const lewis = await idOf(lewisEmail)
+  const { data: choices } = await admin.from('privacy_choices').select('measuring, marketing').eq('profile_id', lewis).single()
+  expect(choices).toEqual({ measuring: true, marketing: true })
   const { data: request } = await admin.from('connections').select('addressee_id').eq('requester_id', lewis).single()
   const otherEmail = await emailOf(request!.addressee_id)
   const b = await newPhone(browser)
 
   await test.step('they accept, and the two chat live', async () => {
     await signIn(b, otherEmail)
+    await b.getByRole('button', { name: 'Only what’s needed' }).click()
     await b.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: /Connections/ }).click()
     await b.getByRole('link', { name: /Matches/ }).click()
     await b.getByRole('button', { name: /Accept/ }).first().click()
@@ -174,7 +181,8 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
 
   await test.step('Lewis signs out, then back in with his password', async () => {
     await a.goto('/profile')
-    await a.getByRole('button', { name: 'Sign out' }).last().click()
+    await a.getByRole('link', { name: 'Settings' }).click()
+    await a.getByRole('button', { name: 'Sign out' }).click()
     await a.goto('/sign-in')
     await expect(a.getByRole('heading', { name: 'Welcome back' })).toBeVisible()
     await a.getByLabel('Email address').fill(lewisEmail)
