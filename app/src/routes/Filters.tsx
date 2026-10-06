@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { AgeRange } from '../components/AgeRange'
 import { FieldError } from '../components/Field'
@@ -8,7 +8,7 @@ import { Segmented } from '../components/Segmented'
 import { brand } from '../lib/brand'
 import { messageOf } from '../lib/errors'
 import { getFilters, saveFilters, type Filters as FilterValues } from '../lib/filters'
-import { BUDGETS, DISTANCES, distanceKm, distanceOption, MAX_PREF_AGE, MIN_AGE, PACES, SHOWN_GENDERS, TRAVEL_STYLES } from '../lib/options'
+import { BUDGETS, DISTANCE_MILES, distanceLabel, distanceStop, MAX_PREF_AGE, milesToKm, MIN_AGE, PACES, SHOWN_GENDERS, TRAVEL_STYLES } from '../lib/options'
 import { hasPlus } from '../lib/plan'
 import { useSession } from '../lib/session-context'
 import { checkAgeRange } from '../lib/validation'
@@ -103,13 +103,7 @@ export function Filters() {
           />
           <AgeRange legend="Aged" min={MIN_AGE} max={MAX_PREF_AGE} value={[values.age_min, values.age_max]} onChange={([age_min, age_max]) => set({ age_min, age_max })} />
           <FieldError error={agesError} />
-          <Segmented
-            name="distance"
-            legend="How far from home should we look?"
-            options={DISTANCES}
-            selected={[distanceOption(values.max_distance_km)]}
-            onChange={([d]) => set({ max_distance_km: distanceKm(d) })}
-          />
+          <DistanceSlider km={values.max_distance_km} onChange={(max_distance_km) => set({ max_distance_km })} />
         </section>
 
         <section className="card form-card plus-filters" aria-labelledby="plus-heading" data-locked={locked || undefined}>
@@ -141,5 +135,37 @@ export function Filters() {
         </div>
       </form>
     </Layout>
+  )
+}
+
+/** One slider from 5 miles to any distance (Lewis, 6 Oct). */
+function DistanceSlider({ km, onChange }: { km: number | null; onChange: (km: number | null) => void }) {
+  const id = useId()
+  const stop = distanceStop(km)
+  const last = DISTANCE_MILES.length - 1
+  const label = distanceLabel(DISTANCE_MILES[stop])
+  return (
+    <div className="field" data-field="distance">
+      <label htmlFor={id}>How far from home?</label>
+      <p className="range-readout" aria-hidden="true">
+        <strong>{label}</strong>
+      </p>
+      <div className="range" style={{ ['--from' as string]: '0%', ['--to' as string]: `${(stop / last) * 100}%` }}>
+        <input
+          id={id}
+          type="range"
+          min={0}
+          max={last}
+          step={1}
+          value={stop}
+          aria-valuetext={label}
+          onChange={(e) => onChange(milesToKm(DISTANCE_MILES[Number(e.target.value)]))}
+        />
+      </div>
+      <div className="range-scale" aria-hidden="true">
+        <span>{DISTANCE_MILES[0]} miles</span>
+        <span>Any</span>
+      </div>
+    </div>
   )
 }

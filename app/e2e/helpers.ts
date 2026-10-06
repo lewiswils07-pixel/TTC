@@ -101,7 +101,8 @@ export async function fillCard(page: Page): Promise<void> {
   ]
   for (const [i, [question, answer]] of picks.entries()) {
     const slot = page.locator('.card-question').nth(i)
-    await slot.getByLabel('Choose a question').selectOption({ label: question })
+    await slot.getByRole('button', { name: 'Choose a question' }).click()
+    await slot.getByRole('button', { name: question, exact: true }).click()
     await slot.getByRole('textbox').fill(answer)
   }
   await page.getByRole('button', { name: 'Finish sign-up' }).click()

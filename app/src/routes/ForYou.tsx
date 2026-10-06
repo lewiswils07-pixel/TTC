@@ -258,6 +258,11 @@ function PersonCard({
               {x > 40 && <span className="swipe-label swipe-yes">Connect</span>}
               {x < -40 && <span className="swipe-label swipe-no">Not now</span>}
               <div className="feed-who">
+                {person.online && (
+                  <p className="feed-online">
+                    <span aria-hidden="true" /> Recently online
+                  </p>
+                )}
                 <h2 id={`name-${person.profile_id}`}>
                   {person.display_name}
                   {person.birth_year ? <span className="feed-age">, {ageLabel(person.birth_year)}</span> : null}

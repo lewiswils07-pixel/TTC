@@ -48,7 +48,7 @@ describe('why we suggested someone with no trip in common', () => {
     score: 60,
   }
   it('names interests, places and roughly how far away', () => {
-    expect(interestReasons(person)).toEqual(['Both into Museums and Theatre', 'You both want to visit Kyoto', 'Lives about 35 km from you'])
+    expect(interestReasons(person)).toEqual(['Both into Museums and Theatre', 'You both want to visit Kyoto', 'Lives about 25 miles from you'])
   })
   it('says "near you" for the same town and leaves out places when none are shared', () => {
     expect(interestReasons({ ...person, distance_km: 0, shared_places: [] })).toEqual(['Both into Museums and Theatre', 'Lives near you'])

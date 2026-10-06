@@ -34,7 +34,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.getByRole('button', { name: 'Continue' }).click()
     await fillCard(a)
     await expect(a.getByRole('heading', { name: 'Welcome to the Collective' })).toBeVisible()
-    await expect(a.getByText(/founding member No\. \d+/)).toBeVisible()
+    await expect(a.getByRole('heading', { name: /is on us for/ })).toBeVisible()
     await a.getByRole('link', { name: 'Start meeting people' }).click()
     // The tour opens first; look at the first step, then skip it.
     await expect(a.getByRole('heading', { name: 'Meet people one at a time' })).toBeVisible()

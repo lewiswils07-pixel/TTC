@@ -1,7 +1,7 @@
 -- Written by `npm run rules` from app/rules.json. Don't edit by hand.
 -- Fails when the database's rules differ from the app's.
 begin;
-select plan(81);
+select plan(83);
 select is(private.rule('signIn.codeLength'), 6, 'signIn.codeLength is 6, as in rules.json');
 select is(private.rule('signIn.passwordMin'), 8, 'signIn.passwordMin is 8, as in rules.json');
 select is(private.rule('signIn.passwordMax'), 72, 'signIn.passwordMax is 72, as in rules.json');
@@ -31,6 +31,7 @@ select is(private.rule('profile.travellingWithMax'), 80, 'profile.travellingWith
 select is(private.rule('profile.languagesMax'), 10, 'profile.languagesMax is 10, as in rules.json');
 select is(private.rule('connections.noteMax'), 280, 'connections.noteMax is 280, as in rules.json');
 select is(private.rule('connections.notNowDays'), 30, 'connections.notNowDays is 30, as in rules.json');
+select is(private.rule('connections.recentlyOnlineHours'), 24, 'connections.recentlyOnlineHours is 24, as in rules.json');
 select is(private.rule('chat.messageMax'), 2000, 'chat.messageMax is 2000, as in rules.json');
 select is(private.rule('planBoard.ideaMax'), 120, 'planBoard.ideaMax is 120, as in rules.json');
 select is(private.rule('planBoard.linkMax'), 500, 'planBoard.linkMax is 500, as in rules.json');
@@ -44,8 +45,9 @@ select is(private.rule('meetups.maxOpen'), 10, 'meetups.maxOpen is 10, as in rul
 select is(private.rule('meetups.maxDaysAhead'), 90, 'meetups.maxDaysAhead is 90, as in rules.json');
 select is(private.rule('meetups.linkDays'), 2, 'meetups.linkDays is 2, as in rules.json');
 select is(private.rule('survey.commentMax'), 500, 'survey.commentMax is 500, as in rules.json');
+select is(private.rule('survey.heardFromAfterMinutes'), 30, 'survey.heardFromAfterMinutes is 30, as in rules.json');
 select is(private.rule('founding.plusMonths'), 3, 'founding.plusMonths is 3, as in rules.json');
-select is((select count(*)::int from private.rules), 43, 'no rules beyond rules.json');
+select is((select count(*)::int from private.rules), 45, 'no rules beyond rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_display_name_check'), '<= 40') > 0, 'profiles_display_name_check uses profile.nameMax (40)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_bio_check'), '<= 500') > 0, 'profiles_bio_check uses profile.bioMax (500)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_mobility_note_check'), '<= 200') > 0, 'profiles_mobility_note_check uses profile.mobilityNoteMax (200)');
@@ -68,7 +70,7 @@ select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conr
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.meetup_shares'::regclass and conname = 'meetup_shares_place_check'), '<= 120') > 0, 'meetup_shares_place_check uses meetups.placeMax (120)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.meetup_shares'::regclass and conname = 'meetup_shares_note_check'), '<= 300') > 0, 'meetup_shares_note_check uses meetups.noteMax (300)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.nps_responses'::regclass and conname = 'nps_responses_comment_check'), '<= 500') > 0, 'nps_responses_comment_check uses survey.commentMax (500)');
-select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_gender_check'), 'ARRAY[''woman''::text, ''man''::text, ''nonbinary''::text, ''unsaid''::text]') > 0, 'profiles_gender_check lists the gender answers in rules.json');
+select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_gender_check'), 'ARRAY[''woman''::text, ''man''::text, ''nonbinary''::text, ''genderfluid''::text, ''agender''::text, ''another''::text, ''unsaid''::text]') > 0, 'profiles_gender_check lists the gender answers in rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_travel_style_check'), 'ARRAY[''planner''::text, ''mix''::text, ''spontaneous''::text]') > 0, 'profiles_travel_style_check lists the travelStyle answers in rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_pace_check'), 'ARRAY[''slow''::text, ''steady''::text, ''packed''::text]') > 0, 'profiles_pace_check lists the pace answers in rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_budget_check'), 'ARRAY[''budget''::text, ''mid''::text, ''comfort''::text]') > 0, 'profiles_budget_check lists the budget answers in rules.json');
@@ -78,7 +80,7 @@ select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conr
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.preferences'::regclass and conname = 'preferences_styles_check'), '''{planner,mix,spontaneous}''') > 0, 'preferences_styles_check lists the travelStyle answers in rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.preferences'::regclass and conname = 'preferences_paces_check'), '''{slow,steady,packed}''') > 0, 'preferences_paces_check lists the pace answers in rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.preferences'::regclass and conname = 'preferences_budgets_check'), '''{budget,mid,comfort}''') > 0, 'preferences_budgets_check lists the budget answers in rules.json');
-select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.preferences'::regclass and conname = 'preferences_genders_check'), '''{woman,man,nonbinary}''') > 0, 'preferences_genders_check lists the gender answers in rules.json');
+select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.preferences'::regclass and conname = 'preferences_genders_check'), '''{woman,man,nonbinary}''') > 0, 'preferences_genders_check lists the genderShown answers in rules.json');
 select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_card_answers(jsonb)'::regprocedure), 'jsonb_array_length(answers) <= 3') > 0, 'valid_card_answers uses card.answers (3)');
 select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_card_answers(jsonb)'::regprocedure), 'between 1 and 200') > 0, 'valid_card_answers uses card.maxChars (200)');
 select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_card_answers(jsonb)'::regprocedure), '''\s+'')) > 30') > 0, 'valid_card_answers uses card.maxWords (30)');

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { RequireSession } from './components/Guards'
+import { HeardFromPrompt } from './components/HeardFromPrompt'
 import { Loading } from './components/Layout'
 import { SessionProvider } from './lib/session'
 import { useSession } from './lib/session-context'
@@ -86,6 +87,7 @@ export function AppRoutes() {
   usePreloadScreens()
   return (
     <Suspense fallback={<Loading />}>
+      <HeardFromPrompt />
       <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/sign-in" element={<SignIn />} />
