@@ -3,6 +3,7 @@ import { Link, Navigate, useSearchParams } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { CardBack } from '../components/CardBack'
 import { SafetyBox } from '../components/SafetyBox'
+import { SkeletonFeedCard } from '../components/Skeleton'
 import { SameTimeStrip } from '../components/SameTimeStrip'
 import { Tour } from '../components/Tour'
 import { SubNav } from '../components/SubNav'
@@ -121,7 +122,7 @@ export function ForYou() {
         </p>
       )}
       {people && <SameTimeStrip people={people} />}
-      {!error && (!people || !requests) && <p className="hint">Finding people for you…</p>}
+      {!error && (!people || !requests) && <SkeletonFeedCard label="Finding people for you…" />}
       {people && requests && person && (
         <>
           <PersonCard

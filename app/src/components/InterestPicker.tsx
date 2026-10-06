@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import type { Interest } from '../lib/profile'
 import { groupInterests } from '../lib/interests'
 import { FieldError } from './Field'
@@ -27,8 +27,19 @@ export function InterestPicker({ interests, selected, onChange, max, error }: Pr
   const atMax = selected.length >= max
   const chosen = interests.filter((i) => selected.includes(i.id))
 
-  const toggle = (interestId: number) =>
-    onChange(selected.includes(interestId) ? selected.filter((v) => v !== interestId) : [...selected, interestId])
+  // Tapping a new one once the limit is reached explains why nothing happened, near where they tapped.
+  const [nudge, setNudge] = useState(0)
+  useEffect(() => {
+    if (!nudge) return
+    const t = window.setTimeout(() => setNudge(0), 3500)
+    return () => window.clearTimeout(t)
+  }, [nudge])
+
+  const toggle = (interestId: number) => {
+    if (selected.includes(interestId)) return onChange(selected.filter((v) => v !== interestId))
+    if (atMax) return setNudge((n) => n + 1)
+    onChange([...selected, interestId])
+  }
 
   return (
     <div className="interests" data-field="interests">
@@ -60,7 +71,16 @@ export function InterestPicker({ interests, selected, onChange, max, error }: Pr
       )}
 
       <FieldError error={error} />
-      {atMax && <p className="hint">You’ve picked {max}, the most allowed. Remove one to choose another.</p>}
+      {atMax && (
+        <p className="interest-limit" role="status">
+          <span aria-hidden="true">✓</span> That’s all {max} picked. To choose a different one, remove one of your picks above first.
+        </p>
+      )}
+      {nudge > 0 && (
+        <p key={nudge} className="interest-limit-toast" role="alert">
+          You’ve already picked {max}. Remove one of your picks to choose this one.
+        </p>
+      )}
 
       {visible.length === 0 && <p className="hint">No interests match “{query}”.</p>}
       {visible.map((group) => {
@@ -75,8 +95,8 @@ export function InterestPicker({ interests, selected, onChange, max, error }: Pr
               {items.map((interest) => {
                 const checked = selected.includes(interest.id)
                 return (
-                  <label className="chip" key={interest.id}>
-                    <input type="checkbox" checked={checked} disabled={!checked && atMax} onChange={() => toggle(interest.id)} />
+                  <label className={!checked && atMax ? 'chip is-locked' : 'chip'} key={interest.id}>
+                    <input type="checkbox" checked={checked} aria-disabled={!checked && atMax ? true : undefined} onChange={() => toggle(interest.id)} />
                     <span>{interest.label}</span>
                   </label>
                 )

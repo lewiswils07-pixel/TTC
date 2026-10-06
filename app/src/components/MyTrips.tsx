@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { peek, remember } from '../lib/cache'
+import { SkeletonRows } from './Skeleton'
 import { Link } from 'react-router'
 import { cityLabel, type City } from '../lib/cities'
 import { tripDates } from '../lib/dates'
@@ -34,7 +35,7 @@ export function MyTrips() {
           {error}
         </p>
       )}
-      {trips === undefined && !error && <p className="hint">Loading your trips…</p>}
+      {trips === undefined && !error && <SkeletonRows rows={2} label="Loading your trips…" />}
       {trips && trips.length === 0 && (
         <div className="empty">
           <p>Add where you’re going and when. We’ll use it to find members travelling at the same time.</p>

@@ -28,9 +28,10 @@ describe('instant field checks', () => {
     expect(checkBirthYear('2008', now)).toBeNull()
   })
   it('interests and ages', () => {
-    expect(checkInterests([1, 2])).toMatch(/Pick 7.*picked 2, so 5 more/)
-    expect(checkInterests([1, 2, 3, 4, 5, 6, 7])).toBeNull()
-    expect(checkInterests([1, 2, 3, 4, 5, 6, 7, 8])).toMatch(/remove 1/)
+    expect(checkInterests([1, 2])).toMatch(/Pick 8.*picked 2, so 6 more/)
+    expect(checkInterests([1, 2, 3, 4, 5, 6, 7])).toMatch(/1 more/)
+    expect(checkInterests([1, 2, 3, 4, 5, 6, 7, 8])).toBeNull()
+    expect(checkInterests([1, 2, 3, 4, 5, 6, 7, 8, 9])).toMatch(/remove 1/)
     expect(checkAgeRange([18, 99])).toBeNull()
     expect(checkAgeRange([60, 40])).not.toBeNull()
   })

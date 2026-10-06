@@ -1,5 +1,6 @@
 // Which plan the member is on. Only the server can change it; this just
 // reads it so screens can show the right limits and unlock Sodalis+ filters.
+import { requestsLeft } from './connections'
 import { supabase } from './supabase'
 
 export const FREE_WEEKLY_REQUESTS = 5
@@ -12,3 +13,9 @@ export async function hasPlus(): Promise<boolean> {
 }
 
 export const weeklyRequests = (plus: boolean) => (plus ? PLUS_WEEKLY_REQUESTS : FREE_WEEKLY_REQUESTS)
+
+/** How many connection requests are left this week, out of how many. */
+export async function loadRequests(): Promise<{ left: number; limit: number }> {
+  const [left, plus] = await Promise.all([requestsLeft(), hasPlus()])
+  return { left, limit: weeklyRequests(plus) }
+}

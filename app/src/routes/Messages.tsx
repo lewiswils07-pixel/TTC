@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { Avatar } from '../components/Avatar'
-import { Layout, Loading } from '../components/Layout'
+import { Layout } from '../components/Layout'
+import { SkeletonRows } from '../components/Skeleton'
 import { SubNav } from '../components/SubNav'
 import { peek, remember } from '../lib/cache'
 import { CHAT_NAV } from '../lib/nav'
@@ -20,8 +21,6 @@ export function Messages() {
     heading.current?.focus()
   }, [])
 
-  if (items === undefined && !error) return <Loading />
-
   return (
     <Layout tab="chat">
       <h1 ref={heading} tabIndex={-1}>
@@ -38,6 +37,7 @@ export function Messages() {
           {error}
         </p>
       )}
+      {items === undefined && !error && <SkeletonRows label="Loading your chats…" />}
       {items && items.length === 0 && (
         <div className="card empty">
           <p>When someone accepts your request, or you accept theirs, you can message each other here.</p>

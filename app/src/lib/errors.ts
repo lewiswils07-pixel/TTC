@@ -13,7 +13,7 @@ const RULES: Array<[RegExp, string]> = [
   [/invalid email|unable to validate email|email address .* invalid/i, 'Please check your email address.'],
   [/failed to fetch|network|load failed/i, 'We couldn’t connect. Check your internet connection and try again.'],
   [/must be 18/i, 'You need to be 18 or over to join.'],
-  [/pick 3 to 10 interests/i, 'Please pick 7 interests.'],
+  [/pick 3 to 10 interests/i, 'Please pick 8 interests.'],
   [/profile is not finished/i, 'A few details are still missing. Please go back and fill them in.'],
   [/already ended/i, 'This trip has already ended. Please check the dates.'],
   [/up to 2 years ahead/i, 'Trips can be up to 2 years ahead.'],

@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
-import { requestsLeft, sendRequest } from '../lib/connections'
+import { keep, peek, remember } from '../lib/cache'
+import { sendRequest } from '../lib/connections'
 import { messageOf } from '../lib/errors'
 import { fitWords, homeLabel } from '../lib/matching'
 import { ageLabel } from '../lib/options'
-import { hasPlus, weeklyRequests } from '../lib/plan'
+import { loadRequests, weeklyRequests } from '../lib/plan'
 import { MAX_NOTE } from '../lib/validation'
 import { Avatar } from './Avatar'
 import { Field } from './Field'
@@ -42,15 +43,20 @@ export type Requests = { left: number; limit: number; used: () => void }
 
 /** How many connection requests the member has left this week, and their weekly limit. */
 export function useRequests(): Requests | null {
-  const [state, setState] = useState<{ left: number; limit: number } | null>(null)
+  const [state, setState] = useState<{ left: number; limit: number } | null>(() => peek('requests') ?? null)
   useEffect(() => {
-    Promise.all([requestsLeft(), hasPlus()]).then(
-      ([left, plus]) => setState({ left, limit: weeklyRequests(plus) }),
-      () => setState({ left: 0, limit: weeklyRequests(false) }),
-    )
+    remember('requests', loadRequests()).then(setState, () => setState({ left: 0, limit: weeklyRequests(false) }))
   }, [])
   if (!state) return null
-  return { ...state, used: () => setState((s) => s && { ...s, left: Math.max(0, s.left - 1) }) }
+  return {
+    ...state,
+    used: () =>
+      setState((s) => {
+        const next = s && { ...s, left: Math.max(0, s.left - 1) }
+        keep('requests', next)
+        return next
+      }),
+  }
 }
 
 export function RequestsHint({ requests }: { requests: Requests }) {
