@@ -12,7 +12,7 @@ describe('profile strength', () => {
   })
   it('reaches 100% with everything filled in', () => {
     const full = { ...empty, photo_path: 'x/1.jpg', bio: 'Hi', travel_style: 'mix', pace: 'slow', budget: 'mid', room_sharing: 'share', day_rhythm: 'early', walking: 'lots', languages: ['en'] } as Profile
-    expect(profileStrength(full, 7, true).percent).toBe(100)
-    expect(profileStrength(full, 7, false).percent).toBe(83)
+    expect(profileStrength(full, 8, true).percent).toBe(100)
+    expect(profileStrength(full, 8, false).percent).toBe(83)
   })
 })

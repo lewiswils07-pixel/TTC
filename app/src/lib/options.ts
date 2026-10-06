@@ -96,9 +96,9 @@ export const distanceKm = (d: Distance | undefined): number | null => (!d || d =
 
 export const MIN_AGE = 18
 export const MAX_PREF_AGE = 99
-// Everyone picks exactly 7 (Lewis, 5 Oct): a fixed number keeps profiles
+// Everyone picks exactly 8 (Lewis, 5 Oct, raised from 7 on 6 Oct): a fixed number keeps profiles
 // comparable and makes members choose what matters most to them.
-export const INTERESTS_TO_PICK = 7
+export const INTERESTS_TO_PICK = 8
 
 export function labelFor<T extends string>(options: readonly Option<T>[], value: T | null | undefined): string {
   return options.find((o) => o.value === value)?.label ?? 'Not set'

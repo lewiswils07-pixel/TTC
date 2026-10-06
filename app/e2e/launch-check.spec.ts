@@ -12,6 +12,15 @@ const demo = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0
 
 /** Accessibility problems and sideways overflow on the current screen, as readable lines. */
 async function problems(page: Page, name: string): Promise<string[]> {
+  // Let the screen finish fading in, so colours are checked as members see them.
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getTiming().iterations !== Infinity)
+        .map((a) => a.finished.catch(() => undefined)),
+    ),
+  )
   await page.addScriptTag({ path: AXE })
   const found: string[] = await page.evaluate(async () => {
     // @ts-expect-error axe is added to the page above
@@ -72,9 +81,15 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await page.getByRole('button', { name: /continue|skip/i }).click()
   await expect(page.getByText(/Step 3 of 4/)).toBeVisible()
   issues.push(...(await problems(page, '/onboarding step 3')))
-  for (const name of ['Museums', 'Wine', 'Walking', 'Photography', 'Theatre', 'Local cuisine', 'Gardens']) {
+  for (const name of ['Museums', 'Wine', 'Walking', 'Photography', 'Theatre', 'Local cuisine', 'Gardens', 'Architecture']) {
     await page.getByRole('checkbox', { name, exact: true }).evaluate((el: HTMLElement) => el.click())
   }
+  // At the limit: a notice, and a nudge when trying to pick a ninth.
+  await expect(page.getByText(/That’s all 8 picked/)).toBeVisible()
+  await page.getByRole('checkbox', { name: 'Art galleries', exact: true }).evaluate((el: HTMLElement) => el.click())
+  await expect(page.getByRole('alert').filter({ hasText: 'You’ve already picked 8' })).toBeVisible()
+  await expect(page.getByRole('checkbox', { name: 'Art galleries', exact: true })).not.toBeChecked()
+  issues.push(...(await problems(page, '/onboarding step 3 (at the limit)')))
   await page.getByRole('button', { name: 'Continue' }).click()
   await expect(page.getByText(/Step 4 of 4/)).toBeVisible()
   issues.push(...(await problems(page, '/onboarding step 4')))

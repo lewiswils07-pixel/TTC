@@ -28,7 +28,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await expect(a.getByRole('img', { name: 'Your profile photo' })).toBeVisible()
     await a.getByRole('button', { name: /continue|skip/i }).click()
     await expect(a.getByText(/Step 3 of 4/)).toBeVisible()
-    for (const name of ['Museums', 'Wine', 'Walking', 'Photography', 'Theatre', 'Local cuisine', 'Gardens']) {
+    for (const name of ['Museums', 'Wine', 'Walking', 'Photography', 'Theatre', 'Local cuisine', 'Gardens', 'Architecture']) {
       await a.getByRole('checkbox', { name, exact: true }).evaluate((el: HTMLElement) => el.click())
     }
     await a.getByRole('button', { name: 'Continue' }).click()

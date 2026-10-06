@@ -23,7 +23,7 @@ export type FeedPerson = {
   distance_km: number | null
 }
 
-/** Shared interests needed for the “Similar interests” callout (out of the 7 each member picks). */
+/** Shared interests needed for the “Similar interests” callout (out of the 8 each member picks). */
 export const SIMILAR_INTERESTS = 3
 
 export type Callout = { kind: 'trip' | 'interests' | 'home' | 'places'; text: string }
