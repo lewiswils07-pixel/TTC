@@ -4,6 +4,7 @@ import { RequireSession } from './components/Guards'
 import { Loading } from './components/Layout'
 import { SessionProvider } from './lib/session'
 import { useSession } from './lib/session-context'
+import { warmUp } from './lib/warm'
 import { Home } from './routes/Home'
 import { NotFound } from './routes/NotFound'
 import { SignIn } from './routes/SignIn'
@@ -71,13 +72,14 @@ const MEMBER_SCREENS = [
 ]
 
 function usePreloadScreens() {
-  const { session } = useSession()
+  const userId = useSession().session?.user.id
   useEffect(() => {
-    if (!session) return
+    if (!userId) return
+    warmUp(userId)
     const idle = window.requestIdleCallback ?? ((run: () => void) => window.setTimeout(run, 1200))
     const id = idle(() => MEMBER_SCREENS.forEach((load) => void load().catch(() => undefined)))
     return () => (window.cancelIdleCallback ?? window.clearTimeout)(id)
-  }, [session])
+  }, [userId])
 }
 
 export function AppRoutes() {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { keep, peek, remember } from '../lib/cache'
 import { Link, Navigate } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { dismissNotice, iAmAdmin, myNotices, type Notice } from '../lib/admin'
@@ -21,16 +22,19 @@ import { useMyProfile } from '../lib/useMyProfile'
 export function Profile() {
   const { session } = useSession()
   const { data, error, reload } = useMyProfile(session!.user.id)
-  const [interests, setInterests] = useState<Interest[]>([])
+  const [interests, setInterests] = useState<Interest[]>(() => peek('interests') ?? [])
   const [photo, setPhoto] = useState<string | null>(null)
-  const [hasTrip, setHasTrip] = useState<boolean | null>(null)
+  const [hasTrip, setHasTrip] = useState<boolean | null>(() => {
+    const trips = peek<unknown[] | null>('trips')
+    return trips === undefined ? null : !!trips?.length
+  })
 
   useEffect(() => {
-    listMyTrips().then((t) => setHasTrip(!!t?.length), () => setHasTrip(false))
+    remember('trips', listMyTrips()).then((t) => setHasTrip(!!t?.length), () => setHasTrip(false))
   }, [])
 
   useEffect(() => {
-    listInterests().then(setInterests, () => undefined)
+    remember('interests', listInterests()).then(setInterests, () => undefined)
   }, [])
 
   useEffect(() => {
@@ -193,14 +197,18 @@ const NOTICE_TEXT: Record<Notice['kind'], { title: string; text: string }> = {
 
 /** Warnings and account changes from the team. Warnings and "welcome back" can be closed; a pause shows while it lasts. */
 function Notices() {
-  const [notices, setNotices] = useState<Notice[]>([])
+  const [notices, setNotices] = useState<Notice[]>(() => peek('notices') ?? [])
 
   useEffect(() => {
-    myNotices().then(setNotices)
+    remember('notices', myNotices()).then(setNotices)
   }, [])
 
   async function close(id: number) {
-    setNotices((list) => list.filter((n) => n.id !== id))
+    setNotices((list) => {
+      const left = list.filter((n) => n.id !== id)
+      keep('notices', left)
+      return left
+    })
     await dismissNotice(id).catch(() => undefined)
   }
 
@@ -224,9 +232,9 @@ function Notices() {
 
 /** Link to the review page, for admins only. */
 function AdminLink() {
-  const [admin, setAdmin] = useState(false)
+  const [admin, setAdmin] = useState(() => peek<boolean>('admin') ?? false)
   useEffect(() => {
-    iAmAdmin().then(setAdmin)
+    remember('admin', iAmAdmin()).then(setAdmin)
   }, [])
   if (!admin) return null
   return (
@@ -244,12 +252,12 @@ function AdminLink() {
 
 /** "Did you meet?" after a trip a connection was about, one person at a time. */
 function MeetPrompts() {
-  const [prompts, setPrompts] = useState<MeetPrompt[]>([])
+  const [prompts, setPrompts] = useState<MeetPrompt[]>(() => peek('meetPrompts') ?? [])
   const [step, setStep] = useState<'met' | 'again' | 'thanks'>('met')
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    meetPrompts().then(setPrompts)
+    remember('meetPrompts', meetPrompts()).then(setPrompts)
   }, [])
 
   const p = prompts[0]
@@ -266,7 +274,11 @@ function MeetPrompts() {
   }
 
   function next() {
-    setPrompts((list) => list.slice(1))
+    setPrompts((list) => {
+      const left = list.slice(1)
+      keep('meetPrompts', left)
+      return left
+    })
     setStep('met')
   }
 
@@ -320,22 +332,25 @@ function MeetPrompts() {
 }
 
 
+function npsSnoozed(): boolean {
+  try {
+    return Date.now() < Number(localStorage.getItem('sodalis.npsSnooze') ?? 0)
+  } catch {
+    // Private browsing: ask anyway.
+    return false
+  }
+}
+
 /** "How likely are you to recommend us?" after 2 weeks, then every 90 days. "Not now" waits a week on this phone. */
 function RecommendCard() {
-  const [due, setDue] = useState(false)
+  const [due, setDue] = useState(() => !npsSnoozed() && (peek<boolean>('npsDue') ?? false))
   const [score, setScore] = useState<number | null>(null)
   const [comment, setComment] = useState('')
   const [state, setState] = useState<'ask' | 'busy' | 'thanks'>('ask')
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    let snoozed = false
-    try {
-      snoozed = Date.now() < Number(localStorage.getItem('sodalis.npsSnooze') ?? 0)
-    } catch {
-      // Private browsing: ask anyway.
-    }
-    if (!snoozed) npsDue().then(setDue)
+    if (!npsSnoozed()) remember('npsDue', npsDue()).then(setDue)
   }, [])
 
   if (!due) return null
@@ -346,6 +361,7 @@ function RecommendCard() {
     } catch {
       // Nothing to save.
     }
+    keep('npsDue', false)
     setDue(false)
   }
 
@@ -355,6 +371,7 @@ function RecommendCard() {
     setError(null)
     try {
       await answerNps(score, comment)
+      keep('npsDue', false)
       setState('thanks')
     } catch (e) {
       setError(messageOf(e))

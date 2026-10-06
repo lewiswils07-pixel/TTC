@@ -1,6 +1,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
+/* The scrollbar's space is always kept, so short and long pages line up on a laptop. */
+html { -webkit-text-size-adjust: 100%; scrollbar-gutter: stable; }
 
 body {
   margin: 0;
@@ -60,6 +61,23 @@ legend { padding: 0; }
   flex: 1; width: 100%; max-width: 640px; margin: 0 auto;
   padding: var(--space-5) calc(var(--safe-right) + var(--space-4)) calc(var(--safe-bottom) + var(--space-7)) calc(var(--safe-left) + var(--space-4));
 }
+/* Each screen fades in gently while the header and tabs stay still. */
+.main { animation: page-in 0.18s ease-out; }
+@keyframes page-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .main { animation: none; } }
+
+/* placeholders while a list loads */
+.skeleton { display: block; border-radius: 999px; background: linear-gradient(90deg, var(--line) 0%, color-mix(in srgb, var(--line) 40%, var(--card)) 50%, var(--line) 100%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+.skeleton-rows { display: flex; flex-direction: column; gap: var(--space-3); }
+.skeleton-row { display: flex; align-items: center; gap: var(--space-3); min-height: 80px; }
+.skeleton-circle { width: 48px; height: 48px; flex: none; border-radius: 50%; }
+.skeleton-lines { flex: 1; display: flex; flex-direction: column; gap: var(--space-2); }
+.skeleton-line { height: 14px; width: 70%; }
+.skeleton-line-short { width: 40%; }
+.skeleton-feed { gap: var(--space-3); }
+.skeleton-photo { height: clamp(300px, calc(100dvh - 420px), 560px); aspect-ratio: 3 / 4; max-width: 100%; margin-inline: auto; border-radius: var(--radius); }
+@media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
 .loading { display: flex; align-items: center; gap: var(--space-3); color: var(--muted); padding: var(--space-6) 0; opacity: 0; animation: appear 0.2s ease-out 0.35s forwards; }
 @keyframes appear { to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .loading { animation-duration: 0s; } }
@@ -371,7 +389,7 @@ legend { padding: 0; }
 .safety-box .action-row .btn { padding-inline: var(--space-4); white-space: nowrap; }
 
 /* Find people and filters */
-.page-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
 .page-head h1 { margin: 0; }
 .tag-plus { min-height: 26px; padding: 0 10px; font-size: 0.8125rem; background: color-mix(in srgb, var(--brand-gold) 24%, var(--card)); color: var(--ink); }
 .link-card-primary { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); box-shadow: inset 4px 0 0 var(--gold), var(--shadow-sm); }

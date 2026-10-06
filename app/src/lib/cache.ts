@@ -15,6 +15,11 @@ export async function remember<T>(key: string, load: Promise<T>): Promise<T> {
   return value
 }
 
+/** Updates what's remembered after a change on this screen, so going back doesn't briefly show the old version. */
+export function keep<T>(key: string, value: T): void {
+  store.set(key, value)
+}
+
 export function clearCache(): void {
   store.clear()
 }
