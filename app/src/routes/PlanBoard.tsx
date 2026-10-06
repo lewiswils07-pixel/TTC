@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router'
 import { CityPicks } from '../components/CityPicks'
 import { TextField } from '../components/Field'
+import { useConfirm } from '../lib/useConfirm'
 import { Layout, Loading } from '../components/Layout'
 import { PICKS, picksFor } from '../data/picks'
 import { addIdea, checkIdea, checkLink, dayLabel, deleteIdea, MAX_IDEA, normalizeLink, planBoard, setDone, toggleVote, type Idea } from '../lib/board'
@@ -15,6 +16,7 @@ type Trip = { start: string; days: number } | null
 
 /** The shared plan board for one chat: add ideas, vote, tick them off. */
 export function PlanBoard() {
+  const { ask, dialog: confirmDialog } = useConfirm()
   const conversationId = Number(useParams().id)
   const [chat, setChat] = useState<Conversation | null | undefined>(undefined)
   const [trip, setTrip] = useState<Trip>(null)
@@ -129,7 +131,7 @@ export function PlanBoard() {
             type="button"
             className="btn-link safety-link"
             disabled={busy === idea.id}
-            onClick={() => window.confirm(`Remove “${idea.title}” from the plan?`) && act(idea.id, () => deleteIdea(idea.id), `${idea.title} removed.`)}
+            onClick={async () => (await ask({ title: `Remove “${idea.title}” from the plan?`, confirmLabel: 'Remove', danger: true })) && act(idea.id, () => deleteIdea(idea.id), `${idea.title} removed.`)}
           >
             Remove
           </button>
@@ -140,6 +142,7 @@ export function PlanBoard() {
 
   return (
     <Layout>
+      {confirmDialog}
       <Link className="back-link" to={`/messages/${conversationId}`}>
         ‹ Back to the chat
       </Link>

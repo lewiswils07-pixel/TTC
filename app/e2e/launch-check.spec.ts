@@ -100,6 +100,8 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   issues.push(...(await problems(page, '/messages/:id (with guide)')))
   await closeGuide(page)
+  await page.getByRole('button', { name: 'More options' }).click()
+  issues.push(...(await problems(page, '/messages/:id (menu open)')))
   await visit(page, `/messages/${chat!.id}/plan`, /./, issues)
   await page.getByLabel('See our picks for a city').selectOption({ label: 'Lisbon' })
   await page.getByRole('button', { name: /^Add to the plan: / }).first().click()

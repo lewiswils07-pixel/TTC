@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { Avatar } from '../components/Avatar'
+import { useConfirm } from '../lib/useConfirm'
 import { Layout, Loading } from '../components/Layout'
 import { SafetyBox } from '../components/SafetyBox'
 import { SubNav } from '../components/SubNav'
@@ -17,6 +18,7 @@ import { myBlocks, unblockMember, type BlockedMember } from '../lib/safety'
 
 /** Requests for me, requests I've sent, and people I'm connected with. */
 export function Connections() {
+  const { ask, dialog: confirmDialog } = useConfirm()
   const [items, setItems] = useState<Connection[] | null>(() => peek('connections') ?? null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState<number | string | null>(null)
@@ -71,6 +73,7 @@ export function Connections() {
 
   return (
     <Layout tab="connections">
+      {confirmDialog}
       <h1 ref={heading} tabIndex={-1}>
         Connections
       </h1>
@@ -145,7 +148,9 @@ export function Connections() {
                 type="button"
                 className="btn-link"
                 disabled={busy === c.id}
-                onClick={() => window.confirm(`Withdraw your request to ${c.display_name}? It still counts towards this week’s requests.`) && act(c.id, () => withdrawRequest(c.id), `Request to ${c.display_name} withdrawn.`)}
+                onClick={async () =>
+                  (await ask({ title: `Withdraw your request to ${c.display_name}?`, message: 'It still counts towards this week’s requests.', confirmLabel: 'Withdraw request' })) &&
+                  act(c.id, () => withdrawRequest(c.id), `Request to ${c.display_name} withdrawn.`)}
               >
                 Withdraw request
               </button>

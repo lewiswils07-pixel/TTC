@@ -90,6 +90,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
   })
 
   await test.step('share the meet-up with someone they trust, then check in', async () => {
+    await a.getByRole('button', { name: 'More options' }).click()
     await a.getByRole('link', { name: 'Tell someone you trust' }).click()
     await a.getByRole('button', { name: 'Make the link' }).click()
     await expect(a.getByText('Please say where you’re meeting', { exact: false })).toBeVisible()

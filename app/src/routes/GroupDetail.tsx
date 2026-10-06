@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { Avatar } from '../components/Avatar'
+import { useConfirm } from '../lib/useConfirm'
 import { Layout, Loading } from '../components/Layout'
 import { SafetyBox } from '../components/SafetyBox'
 import { myConnections, type Connection } from '../lib/connections'
@@ -12,6 +13,7 @@ import { useSession } from '../lib/session-context'
 
 /** One group: where and when, who's in it, the chat, inviting, removing and leaving. */
 export function GroupDetail() {
+  const { ask, dialog: confirmDialog } = useConfirm()
   const groupId = Number(useParams().id)
   const { session } = useSession()
   const me = session!.user.id
@@ -81,6 +83,7 @@ export function GroupDetail() {
 
   return (
     <Layout>
+      {confirmDialog}
       <Link className="back-link" to="/groups">
         ‹ Groups
       </Link>
@@ -151,9 +154,12 @@ export function GroupDetail() {
                     type="button"
                     className="btn-link safety-link"
                     disabled={busy}
-                    onClick={() =>
-                      window.confirm(`Remove ${p.display_name} from ${group.name}?`) &&
-                      act(() => leaveGroup(group.id, p.profile_id), `${p.display_name} is no longer in the group.`)
+                    onClick={async () =>
+                      (await ask({
+                        title: p.status === 'invited' ? `Withdraw ${p.display_name}’s invite?` : `Remove ${p.display_name} from ${group.name}?`,
+                        confirmLabel: p.status === 'invited' ? 'Withdraw invite' : 'Remove',
+                        danger: true,
+                      })) && act(() => leaveGroup(group.id, p.profile_id), `${p.display_name} is no longer in the group.`)
                     }
                   >
                     {p.status === 'invited' ? 'Withdraw invite' : 'Remove from group'}
@@ -176,8 +182,8 @@ export function GroupDetail() {
           type="button"
           className="btn-link btn-danger-link group-leave"
           disabled={busy}
-          onClick={() =>
-            window.confirm(`Leave ${group.name}? You won’t see the group chat any more.`) &&
+          onClick={async () =>
+            (await ask({ title: `Leave ${group.name}?`, message: 'You won’t see the group chat any more.', confirmLabel: 'Leave group', danger: true })) &&
             act(() => leaveGroup(group.id), '', () => navigate('/groups', { replace: true, state: { message: `You left ${group.name}.` } }))
           }
         >

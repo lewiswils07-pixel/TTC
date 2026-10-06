@@ -63,7 +63,7 @@ export function Filters() {
     setBusy(true)
     setError(null)
     try {
-      await saveFilters(userId, values)
+      await saveFilters(userId, { ...values, verified_only: false }) // ID checks don’t exist yet
       navigate('/connections')
     } catch (e) {
       setError(messageOf(e))

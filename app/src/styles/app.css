@@ -805,3 +805,45 @@ legend { padding: 0; }
 
 /* chat links sit on one line and are easy to tap */
 .chat-tools > a, .chat-tools > .safety-link { display: inline-flex; align-items: center; min-height: 44px; margin: 0; }
+
+/* ------------------------------------------------- "Are you sure?" box */
+.confirm {
+  border: 0; padding: 0; background: transparent; max-width: none; max-height: none;
+  width: 100%; height: 100%; margin: 0; place-items: end center;
+}
+.confirm[open] { display: grid;
+}
+.confirm::backdrop { background: rgb(20 12 14 / 0.45); }
+.confirm-box {
+  width: min(100%, 440px); margin: 0 var(--space-3) calc(var(--safe-bottom) + var(--space-3));
+  background: var(--card); color: var(--ink); border-radius: var(--radius-lg, 20px);
+  padding: var(--space-5); box-shadow: 0 12px 40px rgb(0 0 0 / 0.25);
+  animation: confirm-in 0.18s ease-out;
+}
+.confirm-title { font-size: var(--text-lg); margin: 0 0 var(--space-2); }
+.confirm-text { margin: 0; color: var(--ink-soft); }
+.confirm-actions { display: flex; gap: var(--space-3); margin-top: var(--space-5); }
+.confirm-actions .btn { flex: 1; }
+@keyframes confirm-in { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (min-width: 600px) {
+  .confirm { place-items: center; }
+  .confirm-box { margin: 0; }
+}
+
+/* chat header: name, plan board and a "⋯" menu, as in familiar messaging apps */
+.chat-head h1 { flex: 1; min-width: 0; }
+.chat-head .chat-plan-link { flex: none; }
+.chat-more {
+  flex: none; display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 1.5rem; line-height: 1; cursor: pointer;
+}
+.chat-more[aria-expanded="true"] { background: color-mix(in srgb, var(--accent) 9%, var(--card)); color: var(--accent); }
+.chat-menu { margin-top: var(--space-2); padding: var(--space-2) var(--space-4) var(--space-3); background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+.chat-menu ul { list-style: none; margin: 0; padding: 0; }
+.chat-menu li a { display: flex; align-items: center; min-height: 48px; color: var(--ink); font-weight: 600; text-decoration: none; border-bottom: 1px solid var(--line); }
+.chat-menu li a:hover { color: var(--accent); }
+.chat-menu .safety-link { min-height: 48px; padding-inline: 0; }
+@media (max-width: 420px) {
+  .chat-plan-more { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+.chat-menu .safety-link { color: var(--ink); font-weight: 600; font-size: var(--text); text-decoration: none; }

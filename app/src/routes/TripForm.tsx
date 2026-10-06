@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { CityPicker } from '../components/CityPicker'
 import { Field, TextField } from '../components/Field'
 import { ActionBar, SaveError } from '../components/Form'
+import { useConfirm } from '../lib/useConfirm'
 import { Layout, Loading } from '../components/Layout'
 import { Segmented } from '../components/Segmented'
 import type { City } from '../lib/cities'
@@ -62,6 +63,7 @@ export function TripForm() {
 }
 
 function TripEditor({ trip }: { trip: Trip | null }) {
+  const { ask, dialog: confirmDialog } = useConfirm()
   const navigate = useNavigate()
   const [today] = useState(() => isoDate(new Date()))
   const heading = useRef<HTMLHeadingElement>(null)
@@ -112,7 +114,7 @@ function TripEditor({ trip }: { trip: Trip | null }) {
   }
 
   async function remove() {
-    if (!trip || !window.confirm(`Delete your trip to ${trip.city.name}?`)) return
+    if (!trip || !(await ask({ title: `Delete your trip to ${trip.city.name}?`, message: 'People going too will no longer see it.', confirmLabel: 'Delete trip', danger: true }))) return
     setBusy(true)
     setError(null)
     try {
@@ -126,6 +128,7 @@ function TripEditor({ trip }: { trip: Trip | null }) {
 
   return (
     <Layout>
+      {confirmDialog}
       <form onSubmit={submit} noValidate>
         <p className="eyebrow">{trip ? 'Edit trip' : 'New trip'}</p>
         <h1 ref={heading} tabIndex={-1}>
