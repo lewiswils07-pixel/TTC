@@ -712,3 +712,11 @@ legend { padding: 0; }
 .tag-shared { background: color-mix(in srgb, var(--brand-gold) 18%, var(--card)); border: 1px solid color-mix(in srgb, var(--brand-gold) 45%, transparent); }
 .match-card .shared-interests { padding: 0; }
 .kpi-bar.is-zero { background: var(--line) !important; }
+
+/* Your account and data */
+.account-card { display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-4); }
+.account-card h2 { margin: 0; font-size: var(--text-lg); }
+.account-card p { margin: 0; color: var(--ink-soft); }
+.account-danger { border-color: color-mix(in srgb, var(--danger) 35%, var(--line)); }
+.delete-confirm { display: flex; flex-direction: column; gap: var(--space-2); }
+.delete-confirm label { font-weight: 600; }

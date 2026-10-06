@@ -126,6 +126,7 @@ export function Profile() {
       <nav className="card settings-list" aria-label="Settings">
         <Link to="/filters">Who I’d like to meet</Link>
         <Link to="/meeting-safely">Meeting up safely</Link>
+        <Link to="/account">Your account and data</Link>
         <Link to="/community-rules">Community rules</Link>
         <Link to="/terms">Terms</Link>
         <Link to="/privacy">Privacy</Link>

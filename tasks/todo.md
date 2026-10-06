@@ -67,7 +67,8 @@ Unless a task says otherwise, every task is verified with
 - [ ] **T17 `safety`: Meeting-up guidance, trusted-contact share link, and the "Did you meet?" prompt.** (M)
   - Status 5 Oct: meeting-up guidance and "Did you meet?" are done (`20261021090000_meet_feedback.sql`, 11 pgTAP tests). The guide is a page at /meeting-safely, shown once as a short card in the first chat and linked from every chat and from Connections. "Did you meet?" appears on the dashboard 2 to 60 days after the trip a connection was about, and the answers are private. Still to do: the trusted-contact link, which needs email sending (an email domain or Resend).
 - [ ] **T18 `notifications`: Email nudges** (new request, accepted, unread message after 30 min), with unsubscribe settings. (S)
-- [ ] **T19 `identity`: Delete account and download my data** (Edge Functions). (S)
+- [x] **T19 `identity`: Delete account and download my data** (Edge Functions). (S)
+  - Done 6 Oct: `20261029090000_account_deletion.sql` (9 pgTAP tests) with `my_data()` and `delete_my_account()` as database functions instead of Edge Functions (no extra service to run). Photos are removed through Storage first; groups the member started pass to another member. "Your account and data" page from Profile; e2e test `account.spec.ts`.
 - [ ] **Checkpoint 23 Oct:** a full conversation, including a scam warning and a report visible on `/admin`.
 
 ## Week 4: groups and trip planner (26–30 Oct)
