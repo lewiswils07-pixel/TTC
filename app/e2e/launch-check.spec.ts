@@ -95,6 +95,11 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   const { data: trip } = await admin.from('trips').insert({ owner_id: me, city_id: 2267057, start_date: isoIn(30), end_date: isoIn(34) }).select('id').single()
   await visit(page, `/trips/${trip!.id}`, /Lisbon/, issues)
   await expect(page.getByRole('heading', { name: 'Things to do in Lisbon' })).toBeVisible()
+  // Someone going to Lisbon at the same time shows in the "Going when you are" tile.
+  await admin.from('profiles').update({ photo_path: `${demo(3)}/demo.jpg`, last_active_at: new Date().toISOString() }).eq('id', demo(3))
+  await admin.from('trips').insert({ owner_id: demo(3), city_id: 2267057, start_date: isoIn(31), end_date: isoIn(33) })
+  await visit(page, '/connections', 'Connections', issues)
+  await expect(page.getByRole('heading', { name: 'Going when you are' })).toBeVisible()
   await visit(page, '/messages', 'Chat', issues)
   await page.goto(`/messages/${chat!.id}`)
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()

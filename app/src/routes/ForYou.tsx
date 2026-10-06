@@ -2,12 +2,13 @@ import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { Link, Navigate } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { SafetyBox } from '../components/SafetyBox'
+import { SameTimeStrip } from '../components/SameTimeStrip'
 import { SubNav } from '../components/SubNav'
 import { CONNECTIONS_NAV } from '../lib/nav'
 import { ConnectBox, SharedInterests, useRequests, type Requests } from '../components/Suggestions'
 import { messageOf } from '../lib/errors'
 import { peek, remember } from '../lib/cache'
-import { callouts, clearNotNow, forgetNotNow, loadFeed, notNowIds, saveNotNow, type FeedPerson } from '../lib/feed'
+import { callouts, clearNotNow, sameTime, forgetNotNow, loadFeed, notNowIds, saveNotNow, type FeedPerson } from '../lib/feed'
 import { noteFirstMatch } from '../lib/kpis'
 import { fitWords, homeLabel } from '../lib/matching'
 import { ageLabel } from '../lib/options'
@@ -113,6 +114,7 @@ export function ForYou() {
           {error}
         </p>
       )}
+      {people && <SameTimeStrip people={people} />}
       {!error && (!people || !requests) && <p className="hint">Finding people for you…</p>}
       {people && requests && person && (
         <>
@@ -200,7 +202,7 @@ function PersonCard({
   }
 
   return (
-    <article className={connecting ? 'card person-feed-card is-connecting' : 'card person-feed-card'} aria-labelledby={`name-${person.profile_id}`}>
+    <article className={`card person-feed-card${connecting ? ' is-connecting' : ''}${sameTime(person) ? ' is-same-time' : ''}`} aria-labelledby={`name-${person.profile_id}`}>
       <div
         className={drag ? 'feed-photo is-dragging' : 'feed-photo'}
         style={{ transform: x ? `translateX(${x}px) rotate(${x / 25}deg)` : undefined }}
