@@ -18,6 +18,7 @@ const Filters = lazy(() => import('./routes/Filters').then((m) => ({ default: m.
 const Messages = lazy(() => import('./routes/Messages').then((m) => ({ default: m.Messages })))
 const Chat = lazy(() => import('./routes/Chat').then((m) => ({ default: m.Chat })))
 const Admin = lazy(() => import('./routes/Admin').then((m) => ({ default: m.Admin })))
+const Insights = lazy(() => import('./routes/Insights').then((m) => ({ default: m.Insights })))
 const MeetingSafely = lazy(() => import('./routes/MeetingSafely').then((m) => ({ default: m.MeetingSafely })))
 const Groups = lazy(() => import('./routes/Groups').then((m) => ({ default: m.Groups })))
 const GroupForm = lazy(() => import('./routes/GroupForm').then((m) => ({ default: m.GroupForm })))
@@ -142,6 +143,14 @@ export function AppRoutes() {
         element={
           <RequireSession>
             <Admin />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/admin/insights"
+        element={
+          <RequireSession>
+            <Insights />
           </RequireSession>
         }
       />

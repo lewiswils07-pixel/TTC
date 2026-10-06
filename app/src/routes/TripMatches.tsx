@@ -5,6 +5,7 @@ import { RequestsHint, SuggestionCard, useRequests } from '../components/Suggest
 import { cityLabel } from '../lib/cities'
 import { tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
+import { noteFirstMatch } from '../lib/kpis'
 import { reasons, suggestForTrip, type TripSuggestion } from '../lib/matching'
 import { flexibilityLabel, getTrip, type Trip } from '../lib/trips'
 
@@ -22,6 +23,7 @@ export function TripMatches() {
       ([t, p]) => {
         setTrip(t)
         setPeople(p)
+        if (p.length) noteFirstMatch()
       },
       (e) => setError(messageOf(e)),
     )

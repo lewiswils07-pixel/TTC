@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
+import { SubNav } from '../components/SubNav'
+import { ADMIN_NAV } from '../lib/nav'
 import {
   ACTION_LABELS,
   adminAct,
@@ -74,6 +76,7 @@ export function Admin() {
       <h1 ref={heading} tabIndex={-1}>
         Review
       </h1>
+      <SubNav label="Team" items={ADMIN_NAV} current="/admin" />
       <p className="lede">Reports and flagged messages, oldest first. Warn, suspend or remove closes everything open about that member.</p>
       {error && (
         <p className="notice notice-error" role="alert">
