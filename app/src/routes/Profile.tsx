@@ -14,6 +14,9 @@ import { profileStrength } from '../lib/strength'
 import { answerNps, npsDue } from '../lib/kpis'
 import { listMyTrips } from '../lib/trips'
 import { messageOf } from '../lib/errors'
+import { stepLink } from '../lib/onboarding'
+import { brand } from '../lib/brand'
+import { rules } from '../lib/rules'
 import { photoUrl } from '../lib/photo'
 import { listInterests, type Interest, type Profile } from '../lib/profile'
 import { useSession } from '../lib/session-context'
@@ -125,7 +128,7 @@ export function Profile() {
             </dd>
           </div>
         </dl>
-        <Link className="btn btn-secondary btn-block" to="/onboarding?step=1">
+        <Link className="btn btn-secondary btn-block" to={stepLink('basics')}>
           Edit my profile
         </Link>
       </section>
@@ -136,7 +139,7 @@ export function Profile() {
           </h2>
           <p className="hint section-hint">Members see this when they flip your card.</p>
           <CardBack name={profile.display_name ?? ''} answers={data.card.card_answers} mine />
-          <Link className="btn btn-secondary btn-block" to="/onboarding?step=4">
+          <Link className="btn btn-secondary btn-block" to={stepLink('card')}>
             {data.card.card_answers.length ? 'Change my answers' : 'Fill it in'}
           </Link>
         </section>
@@ -186,7 +189,7 @@ function Strength({ profile, interestCount, hasTrip, card }: { profile: Profile;
 
 
 const NOTICE_TEXT: Record<Notice['kind'], { title: string; text: string }> = {
-  warning: { title: 'A note from the Sodalis team', text: 'Please keep to our community rules so everyone feels safe.' },
+  warning: { title: `A note from the ${brand.shortName} team`, text: 'Please keep to our community rules so everyone feels safe.' },
   suspended: {
     title: 'Your account is paused',
     text: 'While it’s paused, other members can’t see you, and you can’t send requests or messages. We’ll be in touch by email.',
@@ -400,7 +403,7 @@ function RecommendCard() {
           {score !== null && (
             <label className="field">
               <span>Anything you’d like to tell us? (optional)</span>
-              <textarea className="textarea textarea-short" maxLength={500} value={comment} onChange={(e) => setComment(e.target.value)} />
+              <textarea className="textarea textarea-short" maxLength={rules.survey.commentMax} value={comment} onChange={(e) => setComment(e.target.value)} />
             </label>
           )}
           {error && (

@@ -45,8 +45,8 @@ select throws_ok($$insert into public.trips (city_id, start_date, end_date) valu
   '23514', null, 'a trip cannot end before it starts');
 select throws_ok($$insert into public.trips (city_id, start_date, end_date) values (2267057, current_date + 1, current_date + 100)$$,
   '23514', null, 'trips longer than 3 months are refused');
-select throws_ok($$insert into public.trips (city_id, start_date, end_date) values (2267057, current_date + 800, current_date + 801)$$,
-  '23514', 'Trips can be up to 2 years ahead', 'trips more than 2 years ahead are refused');
+select throws_ok($$insert into public.trips (city_id, start_date, end_date) values (2267057, current_date + 731, current_date + 732)$$,
+  '23514', 'Trips can be up to 730 days ahead', 'trips more than 2 years ahead are refused');
 select throws_ok($$insert into public.trips (city_id, start_date, end_date, flexible_days) values (2267057, current_date + 1, current_date + 2, 8)$$,
   '23514', null, 'flexibility is at most 7 days');
 

@@ -2,9 +2,10 @@
 // only, no blocks, 6 people at most) and how many groups a member can start.
 import { friendlyError } from './errors'
 import { supabase } from './supabase'
+import { rules } from './rules'
 
-export const MAX_GROUP = 6
-export const MAX_GROUP_NAME = 60
+export const MAX_GROUP = rules.groups.maxPeople
+export const MAX_GROUP_NAME = rules.groups.nameMax
 
 export type Group = {
   id: number

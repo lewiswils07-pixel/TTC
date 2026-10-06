@@ -3,8 +3,10 @@
 import { addDays } from './dates'
 import { friendlyError } from './errors'
 import { supabase } from './supabase'
+import { rules } from './rules'
 
-export const MAX_IDEA = 120
+export const MAX_IDEA = rules.planBoard.ideaMax
+export const MAX_LINK = rules.planBoard.linkMax
 
 export type Idea = {
   id: number
@@ -60,7 +62,7 @@ export function checkIdea(v: string): string | null {
 export function checkLink(v: string): string | null {
   const t = v.trim()
   if (!t) return null
-  if (!/^https:\/\/[^\s]+\.[^\s]+$/i.test(t) || t.length > 500) return 'Please paste a full web address starting with https://'
+  if (!/^https:\/\/[^\s]+\.[^\s]+$/i.test(t) || t.length > MAX_LINK) return 'Please paste a full web address starting with https://'
   return null
 }
 

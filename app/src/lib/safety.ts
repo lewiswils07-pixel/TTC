@@ -3,6 +3,7 @@
 import { friendlyError } from './errors'
 import type { Option } from './options'
 import { supabase } from './supabase'
+import { rules } from './rules'
 
 export type ReportReason = 'fake_profile' | 'asking_for_money' | 'harassment' | 'inappropriate' | 'feels_unsafe' | 'other'
 
@@ -15,7 +16,7 @@ export const REPORT_REASONS: readonly Option<ReportReason>[] = [
   { value: 'other', label: 'Something else' },
 ]
 
-export const MAX_REPORT_DETAILS = 1000
+export const MAX_REPORT_DETAILS = rules.safety.reportDetailsMax
 
 export type BlockedMember = { profile_id: string; display_name: string; created_at: string }
 

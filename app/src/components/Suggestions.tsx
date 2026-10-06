@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { keep, peek, remember } from '../lib/cache'
 import { sendRequest } from '../lib/connections'
 import { messageOf } from '../lib/errors'
+import { stepLink } from '../lib/onboarding'
 import { fitWords, homeLabel } from '../lib/matching'
 import { ageLabel } from '../lib/options'
 import { loadRequests, weeklyRequests } from '../lib/plan'
@@ -196,7 +197,7 @@ export function ConnectBox({
           {/photo/i.test(error) && (
             <>
               {' '}
-              <Link to="/onboarding?step=2">Add a photo</Link>
+              <Link to={stepLink('photo')}>Add a photo</Link>
             </>
           )}
         </p>

@@ -2,8 +2,9 @@
 // read and send; new messages arrive live through Supabase Realtime.
 import { friendlyError } from './errors'
 import { supabase } from './supabase'
+import { rules } from './rules'
 
-export const MAX_MESSAGE = 2000
+export const MAX_MESSAGE = rules.chat.messageMax
 export const PAGE_SIZE = 50
 
 export type Conversation = {

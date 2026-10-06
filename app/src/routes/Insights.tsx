@@ -5,6 +5,7 @@ import { Segmented } from '../components/Segmented'
 import { SubNav } from '../components/SubNav'
 import { iAmAdmin } from '../lib/admin'
 import { messageOf } from '../lib/errors'
+import { brand } from '../lib/brand'
 import { HEARD_FROM, adminKpis, npsScore, pct, type Kpis } from '../lib/kpis'
 import { ADMIN_NAV } from '../lib/nav'
 import { GENDERS, labelFor } from '../lib/options'
@@ -46,7 +47,7 @@ export function Insights() {
     return (
       <Layout>
         <h1>Insights</h1>
-        <p className="lede">This page is only for the Sodalis team.</p>
+        <p className="lede">This page is only for the {brand.shortName} team.</p>
         <Link className="btn btn-secondary" to="/profile">
           Back to my profile
         </Link>

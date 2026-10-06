@@ -5,6 +5,7 @@ import { HEARD_FROM, saveHeardFrom, type HeardFrom } from '../lib/kpis'
 import { useSession } from '../lib/session-context'
 import { brand } from '../lib/brand'
 import { longDate } from '../lib/dates'
+import { count, rules } from '../lib/rules'
 import { supabase } from '../lib/supabase'
 
 type Welcome = { member_number: number | null; plus_until: string | null }
@@ -38,9 +39,9 @@ export function WelcomeScreen() {
           <p className="member-number">You’re one of our founding members.</p>
         )}
         <div className="card welcome-gift">
-          <h2>3 months of {brand.plusName}, on us</h2>
+          <h2>{count(rules.founding.plusMonths, 'month')} of {brand.plusName}, on us</h2>
           <p>
-            As a thank-you for joining early: 50 connection requests a week, up to 3 groups and extra filters
+            As a thank-you for joining early: {rules.requests.perWeekPlus} connection requests a week, up to {count(rules.groups.maxOwnedPlus, 'group')} and extra filters
             {welcome?.plus_until ? `, until ${longDate(welcome.plus_until.slice(0, 10))}` : ''}. Nothing to pay, and no card needed.
           </p>
         </div>

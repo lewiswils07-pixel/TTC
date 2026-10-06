@@ -4,6 +4,7 @@
 import { CODE_LENGTH, isValidEmail, MAX_PASSWORD, MIN_PASSWORD } from './auth'
 import { addDays, daysBetween } from './dates'
 import { INTERESTS_TO_PICK, MAX_PREF_AGE, MIN_AGE, ageFromDate, latestBirthYear } from './options'
+import { roughly, rules } from './rules'
 
 export type Check<T> = (value: T) => string | null
 
@@ -34,7 +35,7 @@ export const checkPassword: Check<string> = (v) => (v ? null : 'Please enter you
 export const checkName: Check<string> = (v) => {
   const name = v.trim()
   if (!name) return 'Please tell us your first name.'
-  if (name.length > 40) return 'Please keep your name to 40 characters or fewer.'
+  if (name.length > rules.profile.nameMax) return `Please keep your name to ${rules.profile.nameMax} characters or fewer.`
   if (/\d/.test(name)) return 'Names can’t include numbers.'
   return null
 }
@@ -82,19 +83,20 @@ export function checkAgeRange([min, max]: readonly [number, number]): string | n
   return null
 }
 
-export const MAX_TRIP_DAYS = 91
-export const MAX_NOTE = 280
+/** Longest trip, counting both the first and last day. */
+export const MAX_TRIP_DAYS = rules.trips.maxNights + 1
+export const MAX_NOTE = rules.trips.noteMax
 
 /** Errors for a trip's first and last day. `today` is YYYY-MM-DD. */
 export function checkTripDates(start: string, end: string, today: string): { start: string | null; end: string | null } {
   let startError: string | null = null
   let endError: string | null = null
   if (!start) startError = 'Please choose your first day.'
-  else if (start > addDays(today, 730)) startError = 'Trips can be up to 2 years ahead.'
+  else if (start > addDays(today, rules.trips.maxDaysAhead)) startError = `Trips can be up to ${roughly(rules.trips.maxDaysAhead)} ahead.`
   if (!end) endError = 'Please choose your last day.'
   else if (end < today) endError = 'This date has passed. Please choose a future date.'
   else if (start && end < start) endError = 'Your last day needs to be on or after your first day.'
-  else if (start && daysBetween(start, end) + 1 > MAX_TRIP_DAYS) endError = 'Trips can be up to 3 months long.'
+  else if (start && daysBetween(start, end) + 1 > MAX_TRIP_DAYS) endError = `Trips can be up to ${roughly(rules.trips.maxNights)} long.`
   return { start: startError, end: endError }
 }
 

@@ -2,10 +2,12 @@
 // friend or relative before meeting someone. It shows who, where and when,
 // and whether the member has checked in as back safe.
 import { friendlyError } from './errors'
+import { brand } from './brand'
 import { supabase } from './supabase'
+import { rules } from './rules'
 
-export const MAX_PLACE = 120
-export const MAX_NOTE = 300
+export const MAX_PLACE = rules.meetups.placeMax
+export const MAX_NOTE = rules.meetups.noteMax
 
 export type Person = { name: string; age: number | null; home: string | null; member_number: number | null }
 
@@ -31,7 +33,7 @@ export type SharedMeetup = {
   ends_at: string
 }
 
-const ENDS_AFTER_MS = 2 * 24 * 60 * 60 * 1000
+const ENDS_AFTER_MS = rules.meetups.linkDays * 86_400_000
 
 /** The member's links for one chat that still work, soonest first. Empty when this database doesn't have them yet. */
 export async function myShares(conversationId: number): Promise<MeetupShare[]> {
@@ -82,7 +84,7 @@ export function shareUrl(token: string): string {
 /** Opens the phone's share sheet, or copies the link where there isn't one. Returns what happened. */
 export async function sendLink(share: Pick<MeetupShare, 'token' | 'place'>, member: string): Promise<'shared' | 'copied' | 'cancelled'> {
   const url = shareUrl(share.token)
-  const text = `${member} is meeting someone from Sodalis Collective at ${share.place}. This private link shows who, where and when, and whether ${member} is back safe.`
+  const text = `${member} is meeting someone from ${brand.name} at ${share.place}. This private link shows who, where and when, and whether ${member} is back safe.`
   if (navigator.share) {
     try {
       await navigator.share({ title: 'My meet-up', text, url })

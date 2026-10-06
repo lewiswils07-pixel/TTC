@@ -11,12 +11,14 @@ import { CONNECTIONS_NAV } from '../lib/nav'
 import { ConnectBox, SharedInterests, useRequests, type Requests } from '../components/Suggestions'
 import { loadCard, type CardAnswer } from '../lib/card'
 import { messageOf } from '../lib/errors'
+import { stepLink } from '../lib/onboarding'
 import { peek, remember } from '../lib/cache'
-import { callouts, clearNotNow, sameTime, forgetNotNow, loadFeed, notNowIds, saveNotNow, type FeedPerson } from '../lib/feed'
+import { callouts, clearNotNow, NOT_NOW_DAYS, sameTime, forgetNotNow, loadFeed, notNowIds, saveNotNow, type FeedPerson } from '../lib/feed'
 import { noteFirstMatch } from '../lib/kpis'
 import { fitWords, homeLabel } from '../lib/matching'
 import { ageLabel } from '../lib/options'
 import { photoUrl } from '../lib/photo'
+import { roughly } from '../lib/rules'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
 
@@ -74,7 +76,7 @@ export function ForYou() {
   function notNow(p: FeedPerson) {
     saveNotNow(me, p.profile_id)
     setSkipped((n) => n + 1)
-    next(`We won’t show ${p.display_name} again for 30 days.`, p)
+    next(`We won’t show ${p.display_name} again for ${roughly(NOT_NOW_DAYS)}.`, p)
   }
 
   function undo(p: FeedPerson) {
@@ -149,7 +151,7 @@ export function ForYou() {
               <Link to="/trips/new">Add a trip</Link> to meet people going to the same place
             </li>
             <li>
-              <Link to="/onboarding?step=3">Add more interests</Link>
+              <Link to={stepLink('interests')}>Add more interests</Link>
             </li>
             <li>
               <Link to="/filters">Widen your filters</Link>

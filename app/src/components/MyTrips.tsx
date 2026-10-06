@@ -5,10 +5,11 @@ import { Link } from 'react-router'
 import { cityLabel, type City } from '../lib/cities'
 import { tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
+import { rules } from '../lib/rules'
 import { addToWishlist, flexibilityLabel, listMyTrips, listWishlist, removeFromWishlist, type Trip, type WishlistItem } from '../lib/trips'
 import { CityPicker } from './CityPicker'
 
-const MAX_WISHLIST = 10
+const MAX_WISHLIST = rules.wishlist.max
 
 /** The member's upcoming trips, each linking to its edit screen. */
 export function MyTrips() {

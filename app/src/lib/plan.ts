@@ -2,9 +2,12 @@
 // reads it so screens can show the right limits and unlock Sodalis+ filters.
 import { requestsLeft } from './connections'
 import { supabase } from './supabase'
+import { rules } from './rules'
 
-export const FREE_WEEKLY_REQUESTS = 5
-export const PLUS_WEEKLY_REQUESTS = 50
+export const FREE_WEEKLY_REQUESTS = rules.requests.perWeekFree
+export const PLUS_WEEKLY_REQUESTS = rules.requests.perWeekPlus
+export const FREE_GROUPS = rules.groups.maxOwnedFree
+export const PLUS_GROUPS = rules.groups.maxOwnedPlus
 
 /** False when the database doesn't know about plans yet. */
 export async function hasPlus(): Promise<boolean> {
