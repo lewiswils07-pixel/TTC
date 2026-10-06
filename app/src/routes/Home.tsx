@@ -5,9 +5,9 @@ import { brand } from '../lib/brand'
 import { useSession } from '../lib/session-context'
 
 const STEPS = [
-  { title: 'Add a trip', text: 'Where you’re going and when.' },
-  { title: 'Meet people going too', text: 'Matched on what you enjoy.' },
-  { title: 'Plan together', text: 'Chat and plan once you both say yes.' },
+  { title: 'Meet people one at a time', text: 'Matched on what you enjoy, and where you’re going if you add a trip.' },
+  { title: 'Say hello', text: 'Chat once you both say yes.' },
+  { title: 'Plan together', text: 'Pick dates, share ideas and travel at your own pace.' },
 ]
 
 const POINTS = [

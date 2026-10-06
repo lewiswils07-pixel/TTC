@@ -170,7 +170,8 @@ legend { padding: 0; }
 .segmented[data-cols='4'] .segment span { padding-inline: 4px; }
 .segmented[data-cols='2'] .segment:nth-child(odd) { border-left: 0; }
 .segmented[data-cols='2'] .segment:nth-child(n + 3) { border-top: 1.5px solid var(--line); }
-.dob { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr) 5.5rem; gap: var(--space-2); }
+.dob { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.55fr) minmax(0, 1fr); gap: var(--space-2); }
+.dob .input { padding-inline: 10px; }
 @media (max-width: 380px) { .segment span { font-size: 0.8125rem; padding-inline: 4px; } }
 
 /* Interest chips */
@@ -319,6 +320,7 @@ legend { padding: 0; }
 .trip-summary .lede { margin: 0; }
 .section-title { font-size: var(--text-lg); margin-bottom: var(--space-2); }
 .section-hint { margin-bottom: var(--space-4); }
+.section-card > .section-hint { margin: calc(-1 * var(--space-2)) 0 0; }
 .match-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-4); }
 .match-card { display: flex; flex-direction: column; gap: var(--space-4); }
 .match-head { display: flex; align-items: center; gap: var(--space-3); }
@@ -437,7 +439,8 @@ legend { padding: 0; }
 .guide-card { margin-bottom: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); }
 .guide-card h2 { margin: 0; font-size: var(--text-lg); }
 .guide-card ul { margin: 0; padding-left: 1.25em; display: flex; flex-direction: column; gap: 2px; }
-.chat-tools { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 0 var(--space-4); }
+.chat-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 0 var(--space-5, 20px); }
+.chat-tools > .safety-link { align-self: center; padding-inline: 0; }
 .chat-tools .safety-box { flex-basis: 100%; }
 .meet-card { margin-bottom: var(--space-3); display: flex; flex-direction: column; gap: var(--space-3); }
 .meet-card h2 { margin: 0; font-size: var(--text-lg); }
@@ -585,10 +588,10 @@ legend { padding: 0; }
   font-size: 0.6875rem; font-weight: 800; box-shadow: 0 0 0 2px var(--card);
 }
 
-/* page-level tabs: "For you" / "Requests & matches", "Chats" / "Groups" */
+/* page-level tabs: "For you" / "Matches", "Chats" / "Groups" */
 .subnav { display: flex; gap: var(--space-1); margin: var(--space-4) 0; padding: 4px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 6%, var(--card)); }
 .subnav-item {
-  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 12px;
+  flex: 1; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 12px;
   border-radius: 999px; color: var(--ink-soft); font-weight: 700; font-size: 0.9375rem; text-decoration: none; text-align: center;
 }
 .subnav-item.is-current { background: var(--card); color: var(--accent); box-shadow: var(--shadow-sm); }

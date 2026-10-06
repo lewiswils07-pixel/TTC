@@ -357,7 +357,7 @@ function PhotoStep({ userId, data, onDone, onBack }: StepProps) {
           <li>Recent, and in good light</li>
           <li>No sunglasses, hats or group shots</li>
         </ul>
-        <p className="hint">We crop it to a square around the middle. You’ll need a photo before asking to connect with anyone.</p>
+        <p className="hint">We use a portrait crop around the middle, so a head-and-shoulders photo works best. You’ll need a photo before asking to connect with anyone.</p>
         <Field name="bio" label="A few words about you (optional)" hint={`Where you’ve been, where you’d love to go, or what makes a good travel companion. ${500 - bio.length} characters left.`}>
           {({ id, describedBy }) => (
             <textarea id={id} className="textarea" maxLength={500} aria-describedby={describedBy} value={bio} onChange={(e) => setBio(e.target.value)} />

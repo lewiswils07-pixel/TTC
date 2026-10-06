@@ -66,7 +66,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
   await test.step('they accept, and the two chat live', async () => {
     await signIn(b, otherEmail)
     await b.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: /Connections/ }).click()
-    await b.getByRole('link', { name: /Requests & matches/ }).click()
+    await b.getByRole('link', { name: /Matches/ }).click()
     await b.getByRole('button', { name: /Accept/ }).first().click()
     await b.getByRole('link', { name: 'Message Lewis' }).click()
     await expect(b.getByRole('heading', { level: 1, name: 'Lewis' })).toBeVisible()
