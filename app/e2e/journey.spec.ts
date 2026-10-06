@@ -10,9 +10,10 @@ const TINY_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8
 test('a new member joins, connects, chats, plans with a group, and reports', async ({ browser }) => {
   const a = await newPhone(browser)
   const lewisEmail = `journey${Date.now()}@example.com`
+  const password = 'paris in the spring'
 
   await test.step('join and build a profile', async () => {
-    await signIn(a, lewisEmail)
+    await signIn(a, lewisEmail, password)
     await expect(a.getByText(/Step 1 of 3/)).toBeVisible()
     await a.getByLabel('First name').fill('Lewis')
     await a.getByLabel('Day').selectOption('14')
@@ -164,5 +165,21 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await expect(r.getByRole('heading', { name: /To review/ })).toBeVisible()
     await expect(r.locator('.queue-card', { hasText: 'Reported by' })).toContainText('Lewis')
     await expect(r.locator('.queue-card', { hasText: 'Flagged message' })).toContainText('send me some money')
+  })
+
+  await test.step('Lewis signs out, then back in with his password', async () => {
+    await a.goto('/profile')
+    await a.getByRole('button', { name: 'Sign out' }).last().click()
+    await a.goto('/sign-in')
+    await expect(a.getByRole('heading', { name: 'Welcome back' })).toBeVisible()
+    await a.getByLabel('Email address').fill(lewisEmail)
+    await a.getByLabel('Password', { exact: true }).fill('not my password')
+    await a.getByRole('button', { name: 'Sign in', exact: true }).last().click()
+    await expect(a.getByText('That email and password don’t match', { exact: false })).toBeVisible()
+    await a.getByLabel('Password', { exact: true }).fill(password)
+    await a.getByRole('button', { name: 'Sign in', exact: true }).last().click()
+    await expect(a).toHaveURL(/\/connections/)
+    await a.reload()
+    await expect(a).toHaveURL(/\/connections/)
   })
 })

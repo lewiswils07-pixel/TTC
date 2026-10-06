@@ -31,7 +31,7 @@ export function Home() {
         <Link className="btn btn-primary btn-block btn-lg" to="/sign-in">
           Join or sign in
         </Link>
-        <p className="hint center">Free to join. No password needed: we email you a code.</p>
+        <p className="hint center">Free to join. Once you’re in, you stay signed in.</p>
       </section>
       <section aria-labelledby="how-heading">
         <h2 id="how-heading" className="section-title gold-rule">

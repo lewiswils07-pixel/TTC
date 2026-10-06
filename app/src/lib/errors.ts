@@ -4,6 +4,9 @@
 type ErrorLike = { message?: string; code?: string; status?: number } | null | undefined
 
 const RULES: Array<[RegExp, string]> = [
+  [/invalid login credentials/i, 'That email and password don’t match. Check them, or sign in with an emailed code instead.'],
+  [/password should be at least|weak.?password/i, 'Please choose a longer password, at least 8 characters.'],
+  [/should be different from the old password/i, 'That’s already your password.'],
   [/token has expired|otp.*expired|invalid.*(otp|token)/i, "That code didn't work. It may have expired, so ask for a new one."],
   [/rate limit|too many|security purposes/i, 'Too many tries in a short time. Please wait a minute, then try again.'],
   [/invalid email|unable to validate email|email address .* invalid/i, 'Please check your email address.'],

@@ -1,9 +1,13 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { Layout, Monogram } from '../components/Layout'
+import { PasswordField } from '../components/PasswordField'
 import { deleteMyAccount, downloadMyData, signOutHere } from '../lib/account'
+import { hasPassword, MIN_PASSWORD, setPassword } from '../lib/auth'
 import { messageOf } from '../lib/errors'
 import { useSession } from '../lib/session-context'
+import { useChecks } from '../lib/useChecks'
+import { checkNewPassword } from '../lib/validation'
 
 const CONFIRM_WORD = 'DELETE'
 
@@ -61,6 +65,8 @@ export function Account() {
         </p>
       )}
 
+      <PasswordCard email={session?.user.email ?? ''} had={hasPassword(session?.user)} />
+
       <section className="card section-card account-card" aria-labelledby="download-title">
         <h2 id="download-title">Download my data</h2>
         <p>A file with everything we hold about you: your profile, trips, connections, the messages you’ve sent and your settings.</p>
@@ -117,6 +123,63 @@ export function Account() {
         )}
       </section>
     </Layout>
+  )
+}
+
+/** Choose or change the password used to sign in. */
+function PasswordCard({ email, had }: { email: string; had: boolean }) {
+  const [value, setValue] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [saved, setSaved] = useState(false)
+  const { shown, touch, validateAll, reset } = useChecks({ password: checkNewPassword(value) })
+
+  async function save(e: FormEvent) {
+    e.preventDefault()
+    if (!validateAll()) return
+    setBusy(true)
+    setError(null)
+    try {
+      await setPassword(value)
+      setSaved(true)
+      setValue('')
+      reset()
+    } catch (err) {
+      setError(messageOf(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <form className="card section-card account-card" aria-labelledby="password-title" onSubmit={save} noValidate>
+      <h2 id="password-title">{had || saved ? 'Change your password' : 'Choose a password'}</h2>
+      <p>{had || saved ? 'You sign in with your email and password.' : 'Sign in with a password instead of waiting for an emailed code.'} You stay signed in on each device until you sign out.</p>
+      <input type="email" name="username" autoComplete="username" value={email} readOnly hidden />
+      <PasswordField
+        name="password"
+        label={had || saved ? 'New password' : 'Password'}
+        hint={`At least ${MIN_PASSWORD} characters.`}
+        autoComplete="new-password"
+        value={value}
+        error={shown('password') ?? error}
+        onChange={(e) => {
+          setValue(e.target.value)
+          setSaved(false)
+          setError(null)
+          if (shown('password')) touch('password')
+        }}
+        onBlur={() => value && touch('password')}
+      />
+      <button type="submit" className="btn btn-secondary btn-block" disabled={busy}>
+        {busy ? 'Saving…' : 'Save password'}
+      </button>
+      {saved && (
+        <p className="notice notice-success" role="status">
+          Password saved. Use it next time you sign in.
+        </p>
+      )}
+    </form>
   )
 }
 

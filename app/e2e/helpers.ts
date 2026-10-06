@@ -34,7 +34,8 @@ async function latestCode(email: string, since: number): Promise<string> {
   throw new Error(`No sign-in code arrived for ${email}`)
 }
 
-export async function signIn(page: Page, email: string): Promise<void> {
+/** Joins or signs in with an emailed code. With a password, it is chosen straight after; without, "Not now". */
+export async function signIn(page: Page, email: string, password?: string): Promise<void> {
   await page.goto('/sign-in')
   await page.getByLabel('Email address').fill(email)
   const since = Date.now()
@@ -42,7 +43,14 @@ export async function signIn(page: Page, email: string): Promise<void> {
   await expect(page.getByRole('heading', { name: 'Check your email' })).toBeVisible()
   // The code signs in on its own once all the digits are in.
   await page.getByLabel('Your code').fill(await latestCode(email, since))
-  await expect(page.getByRole('heading', { name: 'Check your email' })).toBeHidden()
+  await expect(page.getByRole('heading', { name: 'Choose a password' })).toBeVisible()
+  if (password) {
+    await page.getByLabel('Password', { exact: true }).fill(password)
+    await page.getByRole('button', { name: 'Save password' }).click()
+  } else {
+    await page.getByRole('button', { name: /Not now/ }).click()
+  }
+  await expect(page.getByRole('heading', { name: 'Choose a password' })).toBeHidden()
 }
 
 export async function emailOf(profileId: string): Promise<string> {
