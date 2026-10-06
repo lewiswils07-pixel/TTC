@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { useConfirm } from '../lib/useConfirm'
 import { Layout, Loading } from '../components/Layout'
@@ -23,7 +23,7 @@ export function Connections() {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState<number | string | null>(null)
   const [status, setStatus] = useState('')
-  const [done, setDone] = useState<string | null>(null)
+  const [done, setDone] = useState<string | null>((useLocation().state as { message?: string } | null)?.message ?? null)
   const [blocked, setBlocked] = useState<BlockedMember[] | null>(() => peek('blocks') ?? null)
   const [chats, setChats] = useState<Map<string, number>>(new Map())
   const heading = useRef<HTMLHeadingElement>(null)
@@ -124,7 +124,7 @@ export function Connections() {
       ) : (
         <ul className="person-list">
           {connected.map((c) => (
-            <PersonCard key={c.id} item={c} onBlocked={blockedOne}>
+            <PersonCard key={c.id} item={c} onBlocked={blockedOne} profileLink>
               {chats.has(c.profile_id) ? (
                 <Link className="btn btn-primary btn-block" to={`/messages/${chats.get(c.profile_id)}`}>
                   Message {c.display_name}
@@ -185,20 +185,41 @@ export function Connections() {
   )
 }
 
-function PersonCard({ item, children, onBlocked }: { item: Connection; children: React.ReactNode; onBlocked: (message: string) => void }) {
+function PersonCard({
+  item,
+  children,
+  onBlocked,
+  profileLink = false,
+}: {
+  item: Connection
+  children: React.ReactNode
+  onBlocked: (message: string) => void
+  /** Connected people: the name and photo open their full profile. */
+  profileLink?: boolean
+}) {
   const home = homeLabel(item)
+  const who = (
+    <>
+      <Avatar name={item.display_name} path={item.photo_path} />
+      <div className="match-who">
+        <h3>{item.display_name}</h3>
+        <p className="profile-meta">
+          {item.birth_year ? `Age ${ageLabel(item.birth_year)}` : null}
+          {home && ` · ${home}`}
+        </p>
+        {profileLink && <span className="match-view">View profile ›</span>}
+      </div>
+    </>
+  )
   return (
     <li className="card person-card">
-      <div className="match-head">
-        <Avatar name={item.display_name} path={item.photo_path} />
-        <div className="match-who">
-          <h3>{item.display_name}</h3>
-          <p className="profile-meta">
-            {item.birth_year ? `Age ${ageLabel(item.birth_year)}` : null}
-            {home && ` · ${home}`}
-          </p>
-        </div>
-      </div>
+      {profileLink ? (
+        <Link className="match-head match-head-link" to={`/connections/people/${item.profile_id}`} aria-label={`View ${item.display_name}’s profile`}>
+          {who}
+        </Link>
+      ) : (
+        <div className="match-head">{who}</div>
+      )}
       {item.trip_city && item.trip_start && item.trip_end && (
         <p className="hint">
           About {item.direction === 'sent' ? 'your' : 'their'} trip to {item.trip_city}, {tripDates(item.trip_start, item.trip_end)}

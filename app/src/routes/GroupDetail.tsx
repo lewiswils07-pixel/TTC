@@ -145,6 +145,11 @@ export function GroupDetail() {
                   {p.role === 'owner' && ' · started the group'}
                   {p.status === 'invited' && ' · invited'}
                 </p>
+                {p.profile_id !== me && p.status === 'joined' && group.my_status === 'joined' && (
+                  <Link className="match-view" to={`/connections/people/${p.profile_id}`} aria-label={`View ${p.display_name}’s profile`}>
+                    View profile ›
+                  </Link>
+                )}
               </div>
             </div>
             {p.profile_id !== me && (

@@ -227,7 +227,15 @@ function PersonCard({
   return (
     <article className={`card person-feed-card${connecting ? ' is-connecting' : ''}${sameTime(person) ? ' is-same-time' : ''}`} aria-labelledby={`name-${person.profile_id}`}>
       <div className={flipped ? 'feed-flip is-flipped' : 'feed-flip'}>
-        <div className="feed-flip-inner">
+        <div
+          className="feed-flip-inner"
+          onPointerDown={() => (moved.current = 0)}
+          // A tap anywhere on the card turns it over; a swipe or a tap on a link doesn't.
+          onClick={(e) => {
+            if (moved.current >= 8 || (e.target as HTMLElement).closest('a, button')) return
+            flip()
+          }}
+        >
           <div className="feed-face feed-front" inert={flipped}>
             <div
               className={drag ? 'feed-photo is-dragging' : 'feed-photo'}
@@ -236,8 +244,6 @@ function PersonCard({
               onPointerMove={move}
               onPointerUp={up}
               onPointerCancel={() => setDrag(null)}
-              // A tap on the photo flips the card, like the button below; a swipe doesn't.
-              onClick={() => moved.current < 8 && flip()}
             >
               {photo ? (
                 <img src={photo} alt="" draggable={false} />
@@ -257,36 +263,38 @@ function PersonCard({
               </div>
               <span className="feed-fit">{fitWords(person.score)}</span>
             </div>
+            {lines.length > 0 && (
+              <ul className="callouts" aria-label="Why we suggest them">
+                {lines.map((c) => (
+                  <li key={c.text} className={`callout callout-${c.kind}`}>
+                    {c.text}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {person.shared_interests.length > 0 && <SharedInterests labels={person.shared_interests} />}
+            {person.travelling_with && <p className="feed-detail">Travels with: {person.travelling_with}</p>}
           </div>
-          <section className="feed-face feed-back" inert={!flipped} aria-label={`More about ${person.display_name}`}>
-            <p className="feed-back-name">{person.display_name}</p>
+          <section className="feed-face feed-back" inert={!flipped} aria-label={`The back of ${person.display_name}’s card`}>
+            <p className="feed-back-name">
+              {person.display_name}
+              <span>In their own words</span>
+            </p>
             {back === null ? (
               <p className="card-back-empty">Loading…</p>
             ) : back === 'error' ? (
-              <p className="card-back-empty">We couldn’t load this. Flip the card to try again.</p>
+              <p className="card-back-empty">We couldn’t load this. Turn the card over to try again.</p>
             ) : (
               <CardBack name={person.display_name} answers={back} />
             )}
           </section>
         </div>
         {!connecting && (
-          <button type="button" className="flip-btn" onClick={flip}>
-            <span aria-hidden="true">↻</span> {flipped ? 'Back to photo' : 'Flip card'}
-            <span className="visually-hidden"> for {person.display_name}</span>
+          <button type="button" className="flip-corner" onClick={flip} aria-label={flipped ? `Turn ${person.display_name}’s card back to the front` : `Turn ${person.display_name}’s card over`}>
+            <FlipIcon />
           </button>
         )}
       </div>
-      {lines.length > 0 && (
-        <ul className="callouts" aria-label="Why we suggest them">
-          {lines.map((c) => (
-            <li key={c.text} className={`callout callout-${c.kind}`}>
-              {c.text}
-            </li>
-          ))}
-        </ul>
-      )}
-      {person.shared_interests.length > 0 && <SharedInterests labels={person.shared_interests} />}
-      {person.travelling_with && <p className="feed-detail">Travels with: {person.travelling_with}</p>}
       {connecting ? (
         <ConnectBox person={person} tripId={person.trip_id ?? undefined} requests={requests} startOpen onSent={onSent} onCancel={() => setConnecting(false)} />
       ) : (
@@ -310,5 +318,17 @@ function PersonCard({
       )}
       <SafetyBox profileId={person.profile_id} name={person.display_name} onBlocked={onBlocked} />
     </article>
+  )
+}
+
+/** Two curved arrows chasing each other: “turn this over”. */
+function FlipIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 10a8 8 0 0 1 14.3-4.3" />
+      <path d="M19 3v3.5h-3.5" />
+      <path d="M20 14a8 8 0 0 1-14.3 4.3" />
+      <path d="M5 21v-3.5h3.5" />
+    </svg>
   )
 }
