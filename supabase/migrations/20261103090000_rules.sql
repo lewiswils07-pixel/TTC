@@ -42,7 +42,8 @@ insert into private.rules (key, value) values
   ('signIn.passwordMax', 72),
   ('interests.pick', 8),
   ('requests.perWeekFree', 5),
-  ('requests.perWeekPlus', 50),
+  ('requests.plusSafetyCap', 50),
+  ('requests.plusShowLeftBelow', 5),
   ('groups.maxOwnedFree', 1),
   ('groups.maxOwnedPlus', 3),
   ('groups.maxPeople', 6),
@@ -80,7 +81,7 @@ insert into private.rules (key, value) values
   ('survey.commentMax', 500),
   ('founding.plusMonths', 3)
 on conflict (key) do update set value = excluded.value;
-delete from private.rules where key not in ('signIn.codeLength', 'signIn.passwordMin', 'signIn.passwordMax', 'interests.pick', 'requests.perWeekFree', 'requests.perWeekPlus', 'groups.maxOwnedFree', 'groups.maxOwnedPlus', 'groups.maxPeople', 'groups.nameMax', 'trips.maxNights', 'trips.maxDaysAhead', 'trips.maxUpcoming', 'trips.maxFlexDays', 'trips.noteMax', 'wishlist.max', 'age.min', 'age.maxPreferred', 'card.answers', 'card.maxWords', 'card.maxChars', 'profile.nameMax', 'profile.bioMax', 'profile.mobilityNoteMax', 'profile.travellingWithMax', 'profile.languagesMax', 'connections.noteMax', 'connections.notNowDays', 'chat.messageMax', 'planBoard.ideaMax', 'planBoard.linkMax', 'planBoard.maxIdeas', 'planBoard.maxDay', 'safety.reportDetailsMax', 'safety.adminNoteMax', 'meetups.placeMax', 'meetups.noteMax', 'meetups.maxOpen', 'meetups.maxDaysAhead', 'meetups.linkDays', 'survey.commentMax', 'founding.plusMonths');
+delete from private.rules where key not in ('signIn.codeLength', 'signIn.passwordMin', 'signIn.passwordMax', 'interests.pick', 'requests.perWeekFree', 'requests.plusSafetyCap', 'requests.plusShowLeftBelow', 'groups.maxOwnedFree', 'groups.maxOwnedPlus', 'groups.maxPeople', 'groups.nameMax', 'trips.maxNights', 'trips.maxDaysAhead', 'trips.maxUpcoming', 'trips.maxFlexDays', 'trips.noteMax', 'wishlist.max', 'age.min', 'age.maxPreferred', 'card.answers', 'card.maxWords', 'card.maxChars', 'profile.nameMax', 'profile.bioMax', 'profile.mobilityNoteMax', 'profile.travellingWithMax', 'profile.languagesMax', 'connections.noteMax', 'connections.notNowDays', 'chat.messageMax', 'planBoard.ideaMax', 'planBoard.linkMax', 'planBoard.maxIdeas', 'planBoard.maxDay', 'safety.reportDetailsMax', 'safety.adminNoteMax', 'meetups.placeMax', 'meetups.noteMax', 'meetups.maxOpen', 'meetups.maxDaysAhead', 'meetups.linkDays', 'survey.commentMax', 'founding.plusMonths');
 
 create or replace function public.set_my_interests(interest_ids smallint[])
 returns void
@@ -141,7 +142,7 @@ returns integer
 language sql
 stable
 set search_path = ''
-as $$ select case when public.has_plus(member) then private.rule('requests.perWeekPlus') else private.rule('requests.perWeekFree') end $$;
+as $$ select case when public.has_plus(member) then private.rule('requests.plusSafetyCap') else private.rule('requests.perWeekFree') end $$;
 
 create or replace function public.group_limit(member uuid)
 returns integer

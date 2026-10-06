@@ -1,13 +1,14 @@
 -- Written by `npm run rules` from app/rules.json. Don't edit by hand.
 -- Fails when the database's rules differ from the app's.
 begin;
-select plan(80);
+select plan(81);
 select is(private.rule('signIn.codeLength'), 6, 'signIn.codeLength is 6, as in rules.json');
 select is(private.rule('signIn.passwordMin'), 8, 'signIn.passwordMin is 8, as in rules.json');
 select is(private.rule('signIn.passwordMax'), 72, 'signIn.passwordMax is 72, as in rules.json');
 select is(private.rule('interests.pick'), 8, 'interests.pick is 8, as in rules.json');
 select is(private.rule('requests.perWeekFree'), 5, 'requests.perWeekFree is 5, as in rules.json');
-select is(private.rule('requests.perWeekPlus'), 50, 'requests.perWeekPlus is 50, as in rules.json');
+select is(private.rule('requests.plusSafetyCap'), 50, 'requests.plusSafetyCap is 50, as in rules.json');
+select is(private.rule('requests.plusShowLeftBelow'), 5, 'requests.plusShowLeftBelow is 5, as in rules.json');
 select is(private.rule('groups.maxOwnedFree'), 1, 'groups.maxOwnedFree is 1, as in rules.json');
 select is(private.rule('groups.maxOwnedPlus'), 3, 'groups.maxOwnedPlus is 3, as in rules.json');
 select is(private.rule('groups.maxPeople'), 6, 'groups.maxPeople is 6, as in rules.json');
@@ -44,7 +45,7 @@ select is(private.rule('meetups.maxDaysAhead'), 90, 'meetups.maxDaysAhead is 90,
 select is(private.rule('meetups.linkDays'), 2, 'meetups.linkDays is 2, as in rules.json');
 select is(private.rule('survey.commentMax'), 500, 'survey.commentMax is 500, as in rules.json');
 select is(private.rule('founding.plusMonths'), 3, 'founding.plusMonths is 3, as in rules.json');
-select is((select count(*)::int from private.rules), 42, 'no rules beyond rules.json');
+select is((select count(*)::int from private.rules), 43, 'no rules beyond rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_display_name_check'), '<= 40') > 0, 'profiles_display_name_check uses profile.nameMax (40)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_bio_check'), '<= 500') > 0, 'profiles_bio_check uses profile.bioMax (500)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_mobility_note_check'), '<= 200') > 0, 'profiles_mobility_note_check uses profile.mobilityNoteMax (200)');

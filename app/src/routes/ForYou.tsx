@@ -15,6 +15,7 @@ import { stepLink } from '../lib/onboarding'
 import { peek, remember } from '../lib/cache'
 import { callouts, clearNotNow, NOT_NOW_DAYS, sameTime, forgetNotNow, loadFeed, notNowIds, saveNotNow, type FeedPerson } from '../lib/feed'
 import { noteFirstMatch } from '../lib/kpis'
+import { requestsLeftText } from '../lib/plan'
 import { fitWords, homeLabel } from '../lib/matching'
 import { ageLabel } from '../lib/options'
 import { photoUrl } from '../lib/photo'
@@ -137,8 +138,7 @@ export function ForYou() {
             onBlocked={(message) => next(message)}
           />
           <p className="hint feed-count">
-            {people.length > 1 ? `${people.length - 1} more after this.` : 'Last one for now.'} You have {requests.left} of {requests.limit} requests left this week
-            {requests.left === 0 ? '; you get more on Monday' : ''}.
+            {people.length > 1 ? `${people.length - 1} more after this.` : 'Last one for now.'} {requestsLeftText(requests)}
           </p>
         </>
       )}

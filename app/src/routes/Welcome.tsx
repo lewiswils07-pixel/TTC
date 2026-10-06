@@ -41,7 +41,7 @@ export function WelcomeScreen() {
         <div className="card welcome-gift">
           <h2>{count(rules.founding.plusMonths, 'month')} of {brand.plusName}, on us</h2>
           <p>
-            As a thank-you for joining early: {rules.requests.perWeekPlus} connection requests a week, up to {count(rules.groups.maxOwnedPlus, 'group')} and extra filters
+            As a thank-you for joining early: unlimited connection requests, up to {count(rules.groups.maxOwnedPlus, 'group')} and extra filters
             {welcome?.plus_until ? `, until ${longDate(welcome.plus_until.slice(0, 10))}` : ''}. Nothing to pay, and no card needed.
           </p>
         </div>
