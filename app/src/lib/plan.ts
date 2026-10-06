@@ -29,3 +29,11 @@ export function requestsLeftText({ left, limit, plus }: { left: number; limit: n
   if (plus && left > rules.requests.plusShowLeftBelow) return ''
   return `You have ${left} of ${limit} requests left this week${left === 0 ? '; you get more on Monday' : ''}.`
 }
+
+/** When the member's Sodalis+ ends: a date, null if it doesn't, undefined if they don't have it. */
+export async function plusUntil(): Promise<string | null | undefined> {
+  const { data, error } = await supabase.from('entitlements').select('plan, expires_at').maybeSingle()
+  if (error || data?.plan !== 'plus') return undefined
+  if (data.expires_at && new Date(data.expires_at) < new Date()) return undefined
+  return data.expires_at
+}

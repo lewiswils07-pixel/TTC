@@ -94,10 +94,12 @@ export type RoomSharing = (typeof ROOM_SHARING)[number]['value']
 export type DayRhythm = (typeof DAY_RHYTHMS)[number]['value']
 export type Walking = (typeof WALKING)[number]['value']
 
-/** Stops on the distance slider, in miles; the last stop is "any distance". The database keeps km. */
-export const DISTANCE_MILES = [5, 10, 25, 50, 75, 100, 150, 200, 300, null] as const
+/** Stops on the distance slider, in miles; 0 is "your town only" and the last stop is "any distance". The database keeps km. */
+export const DISTANCE_MILES = [0, 5, 10, 25, 50, 75, 100, 150, 200, 300, null] as const
 const KM_PER_MILE = 1.609344
-export const milesToKm = (miles: number | null): number | null => (miles === null ? null : Math.round(miles * KM_PER_MILE))
+// The database counts people in your own town as always in range, so the
+// smallest distance it accepts (1 km) means "your town only".
+export const milesToKm = (miles: number | null): number | null => (miles === null ? null : Math.max(1, Math.round(miles * KM_PER_MILE)))
 /** The slider stop for a saved distance: the nearest one, or "any". */
 export function distanceStop(km: number | null): number {
   if (km === null) return DISTANCE_MILES.length - 1
@@ -107,7 +109,7 @@ export function distanceStop(km: number | null): number {
   })
   return best
 }
-export const distanceLabel = (miles: number | null) => (miles === null ? 'Any distance' : `Up to ${miles} miles`)
+export const distanceLabel = (miles: number | null) => (miles === null ? 'Any distance' : miles === 0 ? 'Your town only' : `Up to ${miles} miles`)
 
 export const MIN_AGE = rules.age.min
 export const MAX_PREF_AGE = rules.age.maxPreferred

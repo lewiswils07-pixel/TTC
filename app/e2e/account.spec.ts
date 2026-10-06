@@ -22,7 +22,8 @@ test('a member downloads their data, then deletes their account', async ({ brows
   await expect(page.getByRole('heading', { name: 'Welcome to the Collective' })).toBeVisible()
 
   await page.goto('/profile')
-  await page.getByRole('link', { name: 'Your account and data' }).click()
+  await page.getByRole('link', { name: 'Settings' }).click()
+  await page.getByRole('link', { name: /^Account and data/ }).click()
   const download = page.waitForEvent('download')
   await page.getByRole('button', { name: 'Download my data' }).click()
   const file = await download

@@ -180,6 +180,7 @@ begin
       and public.fits_preferences(public.age_from_year(p.birth_year), p.gender, my_prefs)
       and public.fits_preferences(public.age_from_year(my.birth_year), my.gender, pr)
       and (my_prefs.max_distance_km is null
+           or p.home_city_id = my.home_city_id
            or public.member_distance_km(p.id, my.id) <= my_prefs.max_distance_km)
       and public.passes_viewer_filters(my_prefs, plus, p)
   ),
@@ -297,6 +298,7 @@ begin
       and public.fits_preferences(public.age_from_year(p.birth_year), p.gender, my_prefs)
       and public.fits_preferences(public.age_from_year(my.birth_year), my.gender, pr)
       and (my_prefs.max_distance_km is null
+           or p.home_city_id = my.home_city_id
            or public.member_distance_km(p.id, my.id) <= my_prefs.max_distance_km)
       and public.passes_viewer_filters(my_prefs, plus, p)
   ),

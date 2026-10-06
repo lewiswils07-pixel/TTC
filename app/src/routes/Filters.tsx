@@ -163,7 +163,7 @@ function DistanceSlider({ km, onChange }: { km: number | null; onChange: (km: nu
         />
       </div>
       <div className="range-scale" aria-hidden="true">
-        <span>{DISTANCE_MILES[0]} miles</span>
+        <span>0 miles</span>
         <span>Any</span>
       </div>
     </div>

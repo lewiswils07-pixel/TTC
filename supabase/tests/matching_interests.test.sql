@@ -2,7 +2,7 @@
 -- interests, the hard filters, and the ranking order on fixed fixtures.
 -- Run with: npx supabase test db
 begin;
-select plan(9);
+select plan(10);
 
 create function pg_temp.sign_in_as(member uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', member, 'role', 'authenticated')::text, true);
@@ -66,6 +66,11 @@ update public.preferences set max_distance_km = 50 where profile_id = pg_temp.m(
 select pg_temp.sign_in_as(pg_temp.m(1));
 select results_eq('select display_name from public.suggest_by_interests()', $$values ('Bob'::text), ('Dan'), ('Cat')$$,
   'the distance filter leaves out Eve in Paris');
+reset role;
+update public.preferences set max_distance_km = 1 where profile_id = pg_temp.m(1);
+select pg_temp.sign_in_as(pg_temp.m(1));
+select results_eq('select display_name from public.suggest_by_interests()', $$values ('Dan'::text), ('Cat')$$,
+  '"your town only" keeps everyone in Leeds and leaves out Bob in York');
 reset role;
 
 set local role anon;
