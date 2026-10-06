@@ -41,6 +41,10 @@ const RULES: Array<[RegExp, string]> = [
   [/conversation not found/i, 'We couldn’t find that conversation. It may have ended.'],
   [/write a message first/i, 'Write a message first.'],
   [/messages_body_check/i, 'Messages can be up to 2,000 characters.'],
+  [/pick when you/i, 'Please pick when you’re meeting. It can’t be more than half a day ago.'],
+  [/say where you/i, 'Please say where you’re meeting.'],
+  [/10 links open/i, 'You have 10 links open. Stop one you no longer need first.'],
+  [/share a meet-up from one of your chats/i, 'You can only share a meet-up from one of your chats.'],
   [/payload too large|exceeded the maximum allowed size/i, 'That photo is too big. Please choose a smaller one.'],
 ]
 

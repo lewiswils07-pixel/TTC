@@ -144,6 +144,9 @@ export function Chat() {
           <Link className="safety-link" to="/meeting-safely">
             Meeting up safely
           </Link>
+          <Link className="safety-link" to={`/messages/${conversationId}/share`}>
+            Tell someone you trust
+          </Link>
           {group ? (
             <Link className="safety-link" to={`/groups/${other.group_id}`}>
               Group details and members

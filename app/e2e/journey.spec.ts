@@ -88,6 +88,35 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await expect(a.locator('.scam-warning')).toHaveCount(0)
   })
 
+  await test.step('share the meet-up with someone they trust, then check in', async () => {
+    await a.getByRole('link', { name: 'Tell someone you trust' }).click()
+    await a.getByRole('button', { name: 'Make the link' }).click()
+    await expect(a.getByText('Please say where you’re meeting', { exact: false })).toBeVisible()
+    await a.getByLabel('Where are you meeting?').fill('Café de Flore, Paris')
+    await a.getByLabel('When?').fill(`${isoIn(26)}T11:00`)
+    await a.getByLabel('Anything else? (optional)').fill('I’ll text you by 3pm')
+    await a.getByRole('button', { name: 'Make the link' }).click()
+    await expect(a.getByText('Your link is ready', { exact: false })).toBeVisible()
+
+    const { data: share } = await admin.from('meetup_shares').select('token').eq('owner_id', lewis).single()
+    const friend = await newPhone(browser)
+    await friend.goto(`/safe/${share!.token}`)
+    await expect(friend.getByRole('heading', { name: 'Lewis’s meet-up' })).toBeVisible()
+    await expect(friend.getByText('Café de Flore, Paris')).toBeVisible()
+    await expect(friend.getByText(new RegExp(`^${other}, \\d+, from`))).toBeVisible()
+    await expect(friend.getByText('hasn’t checked in yet', { exact: false })).toBeVisible()
+
+    await a.getByRole('button', { name: 'I’m back safe' }).click()
+    await expect(a.getByText('You’ve checked in as back safe', { exact: false })).toBeVisible()
+    await friend.reload()
+    await expect(friend.getByText('Lewis is back safe.')).toBeVisible()
+
+    await a.getByRole('button', { name: 'Stop sharing this link' }).click()
+    await friend.reload()
+    await expect(friend.getByRole('heading', { name: 'This link has ended' })).toBeVisible()
+    await friend.close()
+  })
+
   await test.step('start a group and plan together', async () => {
     await a.goto('/groups/new')
     await a.getByLabel('Group name').fill('Paris in spring')
