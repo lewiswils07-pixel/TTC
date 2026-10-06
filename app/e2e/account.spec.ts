@@ -1,6 +1,6 @@
 // Download my data and delete my account (task T19).
 import { expect, test } from '@playwright/test'
-import { admin, newPhone, pickPlace, signIn } from './helpers'
+import { admin, newPhone, pickPlace, signIn, fillCard } from './helpers'
 
 test('a member downloads their data, then deletes their account', async ({ browser }) => {
   const page = await newPhone(browser)
@@ -17,7 +17,8 @@ test('a member downloads their data, then deletes their account', async ({ brows
   for (const name of ['Museums', 'Wine', 'Walking', 'Photography', 'Theatre', 'Local cuisine', 'Gardens']) {
     await page.getByRole('checkbox', { name, exact: true }).evaluate((el: HTMLElement) => el.click())
   }
-  await page.getByRole('button', { name: 'Finish sign-up' }).click()
+  await page.getByRole('button', { name: 'Continue' }).click()
+  await fillCard(page)
   await expect(page.getByRole('heading', { name: 'Welcome to the Collective' })).toBeVisible()
 
   await page.goto('/profile')

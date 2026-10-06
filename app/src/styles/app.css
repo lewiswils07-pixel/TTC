@@ -880,3 +880,51 @@ legend { padding: 0; }
   .tabbar-top .tab { gap: var(--space-3); }
   .tabbar-top .tab-badge { top: -7px; right: -7px; }
 }
+
+/* ------------------------------------------- flip a card to see the back */
+.feed-flip { --photo-h: clamp(300px, calc(100dvh - 420px), 560px); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); perspective: 1600px; }
+.feed-flip-inner { display: grid; width: 100%; transform-style: preserve-3d; transition: transform 0.55s var(--ease-out); }
+.feed-flip.is-flipped .feed-flip-inner { transform: rotateY(180deg); }
+.feed-face { grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden; min-width: 0; }
+.feed-front .feed-photo { cursor: pointer; }
+.feed-back {
+  transform: rotateY(180deg); justify-self: center; align-self: start;
+  width: min(100%, calc(var(--photo-h) * 3 / 4)); min-height: var(--photo-h);
+  display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5) var(--space-4);
+  border-radius: var(--radius); color: #fff;
+  background: linear-gradient(160deg, var(--brand-disc), color-mix(in srgb, var(--brand-disc) 60%, #000));
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--brand-gold) 50%, transparent);
+}
+.feed-back-name { margin: 0; font-size: 1.5rem; font-weight: 800; color: var(--brand-gold); }
+.feed-back .card-back-list dt { color: var(--brand-gold); }
+.feed-back .card-back-list dd { color: #fff; }
+.feed-back .card-back-empty { color: #fff; }
+.person-feed-card.is-connecting .feed-back { display: none; }
+.flip-btn {
+  display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-5);
+  border-radius: 999px; border: 1px solid color-mix(in srgb, var(--brand-gold) 60%, transparent);
+  background: var(--card); color: var(--ink); font: inherit; font-weight: 700; font-size: var(--text-sm); cursor: pointer;
+}
+.flip-btn:hover { background: color-mix(in srgb, var(--brand-gold) 14%, var(--card)); }
+.flip-btn span[aria-hidden] { font-size: 1.15rem; color: var(--accent); }
+
+/* the back of a card, on For you and on your own profile */
+.card-back-list { margin: 0; display: flex; flex-direction: column; gap: var(--space-4); }
+.card-back-list dt { font-size: var(--text-sm); font-weight: 700; color: var(--accent); margin-bottom: 2px; }
+.card-back-list dd { margin: 0; font-size: 1rem; line-height: 1.45; overflow-wrap: anywhere; }
+.card-back-empty { margin: 0; color: var(--ink-soft); }
+.card-back-preview .card-back-list { margin-bottom: var(--space-4); }
+.card-back-preview .card-back-empty { margin-bottom: var(--space-4); }
+.card-question .card-answer { min-height: 96px; }
+
+/* ------------------------------------------------------------ the tour */
+.tour-box { text-align: center; }
+.tour-count { margin: 0 0 var(--space-3); font-size: var(--text-sm); font-weight: 700; color: var(--ink-soft); }
+.tour-icon {
+  display: inline-grid; place-items: center; width: 64px; height: 64px; margin-bottom: var(--space-3); border-radius: 50%;
+  background: var(--brand-disc); color: var(--brand-gold); font-size: 1.75rem;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--brand-gold) 55%, transparent);
+}
+.tour-dots { display: flex; justify-content: center; gap: 6px; margin-top: var(--space-4); }
+.tour-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.tour-dots span.is-on { width: 22px; border-radius: 4px; background: var(--accent); }

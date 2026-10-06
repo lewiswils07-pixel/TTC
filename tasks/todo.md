@@ -82,6 +82,9 @@ Unless a task says otherwise, every task is verified with
 - [ ] **T24b `trip-planner`: Booking links via `/go/<id>`.** Affiliate tag added when available,
       click recorded, disclosure line shown next to the link (spec §7a). (S)
 - [x] **T25: Full end-to-end Playwright path** (join → … → plan → block/report) in CI. (M) — app/e2e/journey.spec.ts runs two members through join, trip, request, accept, live chat with a scam warning, a group with a shared plan, report and block, and the review page, against a local Supabase. Runs in the "End to end" CI job. It found and fixed a live-chat sign-in delay.
+- [x] **T26: Card flip, "Going when you are" and app tour** (Lewis, 6 Oct). (M)
+  - Done 6 Oct: `20261101090000_member_card.sql` (12 pgTAP tests). Sign-up step 4 "The back of your card": 3 questions chosen from 25 in 5 groups (`app/src/lib/card.ts`, keys are stored so never rename one), up to 30 words each so all three fit. Flip on For you (tap the photo or "Flip card"), shown on Profile, counted in profile strength. 5-step tour after sign-up and from Profile. "Going when you are" strip on For you.
+- [ ] **T26b: Suggestions from card answers** (Lewis, 6 Oct: "further down the line"): use the chosen questions and answers in matching, e.g. same favourite season or dream trip. (M)
 - [ ] **Checkpoint 30 Oct:** a group of 3 plans a trip. **Beta invites go out** (web, TestFlight, Play internal testing).
 
 ## Week 5: Sodalis+, verification, apps (2–6 Nov)

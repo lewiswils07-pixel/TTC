@@ -3,7 +3,7 @@
 // fits a small phone (320 px wide) and a laptop without sideways scrolling.
 import { createRequire } from 'node:module'
 import { expect, test, type Page } from '@playwright/test'
-import { admin, closeGuide, idOf, isoIn, newPhone, pickPlace, signIn } from './helpers'
+import { admin, closeGuide, idOf, isoIn, newPhone, pickPlace, signIn, fillCard } from './helpers'
 
 const require = createRequire(import.meta.url)
 const AXE = require.resolve('axe-core/axe.min.js')
@@ -65,17 +65,20 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await page.getByRole('radio', { name: 'Woman', exact: true }).check({ force: true })
   await pickPlace(page, 'Leed', 'Leeds, United Kingdom')
   await page.getByRole('button', { name: /continue/i }).click()
-  await expect(page.getByText(/Step 2 of 3/)).toBeVisible()
+  await expect(page.getByText(/Step 2 of 4/)).toBeVisible()
   issues.push(...(await problems(page, '/onboarding step 2')))
   await page.locator('#photo').setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: Buffer.from(TINY_PNG, 'base64') })
   await expect(page.getByRole('img', { name: 'Your profile photo' })).toBeVisible()
   await page.getByRole('button', { name: /continue|skip/i }).click()
-  await expect(page.getByText(/Step 3 of 3/)).toBeVisible()
+  await expect(page.getByText(/Step 3 of 4/)).toBeVisible()
   issues.push(...(await problems(page, '/onboarding step 3')))
   for (const name of ['Museums', 'Wine', 'Walking', 'Photography', 'Theatre', 'Local cuisine', 'Gardens']) {
     await page.getByRole('checkbox', { name, exact: true }).evaluate((el: HTMLElement) => el.click())
   }
-  await page.getByRole('button', { name: 'Finish sign-up' }).click()
+  await page.getByRole('button', { name: 'Continue' }).click()
+  await expect(page.getByText(/Step 4 of 4/)).toBeVisible()
+  issues.push(...(await problems(page, '/onboarding step 4')))
+  await fillCard(page)
   await expect(page.getByRole('heading', { name: 'Welcome to the Collective' })).toBeVisible()
   issues.push(...(await problems(page, '/welcome')))
 
@@ -89,6 +92,16 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await admin.from('profiles').update({ role: 'admin' }).eq('id', me)
 
   await visit(page, '/connections', 'Connections', issues)
+  // The tour, then the back of a card.
+  await page.goto('/connections?tour=1')
+  await expect(page.getByRole('heading', { name: 'Meet people one at a time' })).toBeVisible()
+  issues.push(...(await problems(page, '/connections (tour)')))
+  await page.getByRole('button', { name: 'Skip' }).click()
+  await page.getByRole('button', { name: /^Flip card/ }).click()
+  await expect(page.locator('.feed-back')).toBeVisible()
+  await page.waitForTimeout(700)
+  issues.push(...(await problems(page, '/connections (card flipped)')))
+  await page.getByRole('button', { name: /^Back to photo/ }).click()
   await visit(page, '/connections/requests', 'Connections', issues)
   await visit(page, '/trips', /./, issues)
   await visit(page, '/trips/new', /./, issues)
@@ -118,7 +131,8 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await visit(page, '/profile', /Hello/, issues)
   await visit(page, '/filters', 'Filters', issues)
   await visit(page, '/account', 'Your account and data', issues)
-  await visit(page, '/onboarding?step=4', 'How you travel', issues)
+  await visit(page, '/onboarding?step=4', 'The back of your card', issues)
+  await visit(page, '/onboarding?step=5', 'How you travel', issues)
   await visit(page, '/admin', /./, issues)
   await visit(page, '/admin/insights', /./, issues)
 

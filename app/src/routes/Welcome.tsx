@@ -56,7 +56,7 @@ export function WelcomeScreen() {
           </li>
         </ol>
         <HeardFromQuestion />
-        <Link className="btn btn-primary btn-block btn-lg" to="/connections">
+        <Link className="btn btn-primary btn-block btn-lg" to="/connections?tour=1">
           Start meeting people
         </Link>
         <Link className="btn btn-secondary btn-block" to="/trips/new">

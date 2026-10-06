@@ -90,3 +90,19 @@ export async function pickPlace(page: Page, typed: string, option: string | RegE
   }).toPass({ timeout: 60_000 })
   await choice.click()
 }
+
+/** Sign-up step 4: picks 3 questions for the back of the card and answers them, then finishes sign-up. */
+export async function fillCard(page: Page): Promise<void> {
+  await expect(page.getByText(/Step 4 of 4/)).toBeVisible()
+  const picks = [
+    ['Describe your perfect holiday', 'A slow week in Lisbon with long lunches, old trams and sunsets over the river.'],
+    ['How often do you get away?', 'Four or five times a year, more if I can.'],
+    ['I never travel without…', 'A good book and comfortable shoes.'],
+  ]
+  for (const [i, [question, answer]] of picks.entries()) {
+    const slot = page.locator('.card-question').nth(i)
+    await slot.getByLabel('Choose a question').selectOption({ label: question })
+    await slot.getByRole('textbox').fill(answer)
+  }
+  await page.getByRole('button', { name: 'Finish sign-up' }).click()
+}
