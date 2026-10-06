@@ -18,6 +18,7 @@ function checkWhen(when: string): string | null {
   const t = new Date(when).getTime()
   if (Number.isNaN(t)) return 'Please pick the day and time you’re meeting.'
   if (t < Date.now() - 12 * 60 * 60 * 1000) return 'That time has already passed.'
+  if (t > Date.now() + 90 * 24 * 60 * 60 * 1000) return 'Links are for meet-ups in the next 3 months.'
   return null
 }
 

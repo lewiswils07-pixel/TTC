@@ -61,10 +61,11 @@ begin
   if me is null then
     raise exception 'Please sign in again' using errcode = '42501';
   end if;
-  if not public.in_conversation(p_conversation_id) then
+  -- The chat must still be open (not ended or blocked), and the member active.
+  if not public.in_conversation(p_conversation_id) or not public.can_message(p_conversation_id) then
     raise exception 'You can only share a meet-up from one of your chats' using errcode = '42501';
   end if;
-  if p_meet_at is null or p_meet_at < now() - interval '12 hours' or p_meet_at > now() + interval '1 year' then
+  if p_meet_at is null or p_meet_at < now() - interval '12 hours' or p_meet_at > now() + interval '90 days' then
     raise exception 'Please pick when you’re meeting' using errcode = 'check_violation';
   end if;
   if char_length(btrim(coalesce(p_place, ''))) < 2 then
@@ -84,7 +85,9 @@ begin
   from public.conversation_members cm
   join public.profiles p on p.id = cm.profile_id
   left join public.cities c on c.id = p.home_city_id
-  where cm.conversation_id = p_conversation_id and cm.profile_id <> me;
+  where cm.conversation_id = p_conversation_id and cm.profile_id <> me
+    and p.status = 'active'
+    and not (p.id = any ('{}'::uuid[] || public.blocked_with(me)));
 
   insert into public.meetup_shares (owner_id, conversation_id, meeting_with, place, meet_at, note)
   values (me, p_conversation_id, who, btrim(p_place), p_meet_at, nullif(btrim(coalesce(p_note, '')), ''))

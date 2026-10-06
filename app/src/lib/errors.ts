@@ -4,6 +4,7 @@
 type ErrorLike = { message?: string; code?: string; status?: number } | null | undefined
 
 const RULES: Array<[RegExp, string]> = [
+  [/nonce|reauthenticat/i, 'That code didn’t work. Check the latest email from us, or ask for a new code.'],
   [/invalid login credentials/i, 'That email and password don’t match. Check them, or sign in with an emailed code instead.'],
   [/password should be at least|weak.?password/i, 'Please choose a longer password, at least 8 characters.'],
   [/should be different from the old password/i, 'That’s already your password.'],
@@ -44,8 +45,9 @@ const RULES: Array<[RegExp, string]> = [
   [/conversation not found/i, 'We couldn’t find that conversation. It may have ended.'],
   [/write a message first/i, 'Write a message first.'],
   [/messages_body_check/i, 'Messages can be up to 2,000 characters.'],
-  [/pick when you/i, 'Please pick when you’re meeting. It can’t be more than half a day ago.'],
+  [/pick when you/i, 'Please pick when you’re meeting, from today up to 3 months ahead.'],
   [/say where you/i, 'Please say where you’re meeting.'],
+  [/sending messages very quickly/i, 'You’re sending messages very quickly. Please wait a few minutes.'],
   [/10 links open/i, 'You have 10 links open. Stop one you no longer need first.'],
   [/share a meet-up from one of your chats/i, 'You can only share a meet-up from one of your chats.'],
   [/payload too large|exceeded the maximum allowed size/i, 'That photo is too big. Please choose a smaller one.'],

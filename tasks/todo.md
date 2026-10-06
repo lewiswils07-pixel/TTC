@@ -93,8 +93,10 @@ Unless a task says otherwise, every task is verified with
 - [ ] **Checkpoint 6 Nov:** Sodalis+ works on web, iPhone and Android sandbox; apps submitted.
 
 ## Week 6: launch (9–13 Nov)
-- [ ] **T31: Security review** (security-and-hardening skill), plus a re-check of all row-level-security policies. (S)
-- [ ] **T32: Launch check**: axe, phone fit, contrast, CSP, performance across all app screens. (S)
+- [x] **T31: Security review** (security-and-hardening skill), plus a re-check of all row-level-security policies. (S)
+  - Done 6 Oct: database and app reviewed. Fixes in `20261031090000_security_hardening.sql` (16 pgTAP tests): paused members can't delete-and-rejoin, browse, chat or use admin tools; blocks hide photos; who blocked you is no longer readable; fake-report pauses need real contact; full date of birth required; 60 messages per 10 minutes. App: password change needs an emailed code after a day, tighter web headers, sign-out clears the device.
+- [x] **T32: Launch check**: axe, phone fit, contrast, CSP, performance across all app screens. (S)
+  - Done 6 Oct: `e2e/launch-check.spec.ts` runs axe (WCAG 2.1 AA, including contrast) on every screen and checks nothing is wider than a 320 px phone.
 - [ ] **T33: Beta fixes**: work through the beta feedback list. (varies)
 - [ ] **T34: Marketing site links** to `app.<domain>`, "App coming soon" or store badges, final legal pages. (S)
 - [ ] **T35: Go live.** Production keys, Sentry alerts, rollback plan tested, keep-awake check removed (Pro doesn't pause). (S)

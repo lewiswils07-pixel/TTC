@@ -1,5 +1,6 @@
 // A member's rights over their own data (task T19): download everything we
 // hold about them, and delete their account.
+import { clearDevice } from './auth'
 import { friendlyError } from './errors'
 import { PHOTO_BUCKET } from './photo'
 import { supabase } from './supabase'
@@ -21,7 +22,7 @@ export async function downloadMyData(): Promise<void> {
 
 /** Removes their photos, then their account and everything linked to it. Call signOutHere() afterwards. */
 export async function deleteMyAccount(userId: string): Promise<void> {
-  const { data: files } = await supabase.storage.from(PHOTO_BUCKET).list(userId)
+  const { data: files } = await supabase.storage.from(PHOTO_BUCKET).list(userId, { limit: 1000 })
   if (files?.length) await supabase.storage.from(PHOTO_BUCKET).remove(files.map((f) => `${userId}/${f.name}`))
   const { error } = await supabase.rpc('delete_my_account')
   if (error) throw friendlyError(error)
@@ -29,5 +30,6 @@ export async function deleteMyAccount(userId: string): Promise<void> {
 
 /** The sign-in no longer exists after deletion, so this only clears it from the phone. */
 export async function signOutHere(): Promise<void> {
+  clearDevice()
   await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined)
 }

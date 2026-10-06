@@ -1,13 +1,14 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router'
 import { Layout, Monogram } from '../components/Layout'
+import { TextField } from '../components/Field'
 import { PasswordField } from '../components/PasswordField'
 import { deleteMyAccount, downloadMyData, signOutHere } from '../lib/account'
-import { hasPassword, MIN_PASSWORD, setPassword } from '../lib/auth'
+import { CODE_LENGTH, hasPassword, MIN_PASSWORD, ReauthNeeded, setPassword } from '../lib/auth'
 import { messageOf } from '../lib/errors'
 import { useSession } from '../lib/session-context'
 import { useChecks } from '../lib/useChecks'
-import { checkNewPassword } from '../lib/validation'
+import { checkCode, checkNewPassword } from '../lib/validation'
 
 const CONFIRM_WORD = 'DELETE'
 
@@ -43,7 +44,7 @@ export function Account() {
     setError(null)
     try {
       await deleteMyAccount(session!.user.id)
-      navigate('/account-deleted', { replace: true })
+      navigate('/account-deleted', { replace: true, state: { deleted: true } })
     } catch (e) {
       setError(messageOf(e))
       setBusy(null)
@@ -132,7 +133,9 @@ function PasswordCard({ email, had }: { email: string; had: boolean }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
-  const { shown, touch, validateAll, reset } = useChecks({ password: checkNewPassword(value) })
+  // Set when the server wants the emailed code first.
+  const [code, setCode] = useState<string | null>(null)
+  const { shown, touch, validateAll, reset } = useChecks({ password: checkNewPassword(value), code: code === null ? null : checkCode(code) })
 
   async function save(e: FormEvent) {
     e.preventDefault()
@@ -140,12 +143,14 @@ function PasswordCard({ email, had }: { email: string; had: boolean }) {
     setBusy(true)
     setError(null)
     try {
-      await setPassword(value)
+      await setPassword(value, code ?? undefined)
       setSaved(true)
       setValue('')
+      setCode(null)
       reset()
     } catch (err) {
-      setError(messageOf(err))
+      if (err instanceof ReauthNeeded) setCode('')
+      else setError(messageOf(err))
     } finally {
       setBusy(false)
     }
@@ -171,6 +176,24 @@ function PasswordCard({ email, had }: { email: string; had: boolean }) {
         }}
         onBlur={() => value && touch('password')}
       />
+      {code !== null && (
+        <TextField
+          name="code"
+          label="Code from your email"
+          hint={`To keep your account safe, we’ve emailed you a ${CODE_LENGTH}-digit code. Enter it to save your new password.`}
+          className="input input-code"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          maxLength={CODE_LENGTH + 2}
+          value={code}
+          error={shown('code')}
+          onChange={(e) => {
+            setCode(e.target.value)
+            setError(null)
+          }}
+          onBlur={() => code && touch('code')}
+        />
+      )}
       <button type="submit" className="btn btn-secondary btn-block" disabled={busy}>
         {busy ? 'Saving…' : 'Save password'}
       </button>
@@ -185,9 +208,12 @@ function PasswordCard({ email, had }: { email: string; had: boolean }) {
 
 /** Shown once an account has been deleted (the member is signed out by then). */
 export function AccountDeleted() {
+  // Only reachable straight after deleting, so a link here can't sign anyone out.
+  const deleted = (useLocation().state as { deleted?: boolean } | null)?.deleted === true
   useEffect(() => {
-    void signOutHere()
-  }, [])
+    if (deleted) void signOutHere()
+  }, [deleted])
+  if (!deleted) return <Navigate to="/" replace />
   return (
     <Layout>
       <section className="welcome">

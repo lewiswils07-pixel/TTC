@@ -39,7 +39,7 @@ select ok(not public.fits_preferences(39, 'unsaid', row(null, 18, 99, '{woman}',
   'but not to members who chose particular genders');
 
 -- ------------------------------------------------------- founding members
-update public.profiles p set display_name = 'P' || right(p.id::text, 1), birth_year = 1960, gender = 'woman', home_city_id = 2644688
+update public.profiles p set display_name = 'P' || right(p.id::text, 1), birth_date = date '1960-05-01', gender = 'woman', home_city_id = 2644688
 where p.id in (pg_temp.m(2), pg_temp.m(3));
 update public.profiles set display_name = 'P1', home_city_id = 2644688 where id = pg_temp.m(1);
 insert into public.profile_interests (profile_id, interest_id)

@@ -40,9 +40,21 @@ export async function signInWithPassword(email: string, password: string): Promi
   return data.session
 }
 
-/** Sets or changes the signed-in member's password. */
-export async function setPassword(password: string): Promise<void> {
-  const { error } = await supabase.auth.updateUser({ password, data: { has_password: true } })
+/** Thrown when changing a password needs the emailed code first (it's been a while since they signed in). */
+export class ReauthNeeded extends Error {}
+
+/**
+ * Sets or changes the signed-in member's password. Someone who signed in more
+ * than a day ago must confirm with an emailed code first (pass it as `code`),
+ * so a borrowed phone can't be used to lock the real member out.
+ */
+export async function setPassword(password: string, code?: string): Promise<void> {
+  const { error } = await supabase.auth.updateUser({ password, nonce: code?.replace(/\D/g, '') || undefined, data: { has_password: true } })
+  if (error && !code && /reauthenticat/i.test(`${error.code ?? ''} ${error.message}`)) {
+    const sent = await supabase.auth.reauthenticate()
+    if (sent.error) throw friendlyError(sent.error)
+    throw new ReauthNeeded()
+  }
   if (error) throw friendlyError(error)
 }
 
@@ -51,6 +63,19 @@ export function hasPassword(user: User | null | undefined): boolean {
   return user?.user_metadata?.has_password === true
 }
 
+/** Signs out everywhere, and clears this member's saved choices from this device. */
 export async function signOut(): Promise<void> {
+  clearDevice()
   await supabase.auth.signOut()
+}
+
+/** Removes everything the app saved on this device except "has signed in before". */
+export function clearDevice(): void {
+  try {
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith('sodalis.') && key !== 'sodalis.signedInBefore') localStorage.removeItem(key)
+    }
+  } catch {
+    // Storage can be blocked; nothing to clear then.
+  }
 }
