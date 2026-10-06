@@ -9,7 +9,7 @@ const TIPS: { title: string; text: string }[] = [
   { title: 'Keep your own plans', text: 'Arrange your own transport and keep your own booking until you know each other well. You don’t need to share where you’re staying.' },
   { title: 'Never send money', text: 'Don’t send or lend money, buy gift cards, or share bank details with someone you haven’t met, whatever the story. Report anyone who asks.' },
   { title: 'Keep your essentials with you', text: 'Passport, cards and phone stay with you, and keep your phone charged.' },
-  { title: 'Trust your instincts', text: 'You can leave at any time, and you don’t owe anyone an explanation. Block or report from their profile or your chat.' },
+  { title: 'Trust your instincts', text: 'You can leave at any time, and you don’t owe anyone an explanation. Block or report them from their card or your chat.' },
   { title: 'Before you travel together', text: 'Agree your budget, pace and how you’ll split costs before you book anything, and start with something short.' },
 ]
 

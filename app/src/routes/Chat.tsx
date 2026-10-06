@@ -115,7 +115,7 @@ export function Chat() {
   if (other === null) {
     return (
       <Layout>
-        <h1>Conversation not found</h1>
+        <h1>Chat not found</h1>
         <p className="lede">It may have ended.</p>
         <Link className="btn btn-secondary" to="/messages">
           Back to messages
@@ -149,7 +149,7 @@ export function Chat() {
           </Link>
           {group ? (
             <Link className="safety-link" to={`/groups/${other.group_id}`}>
-              Group details and members
+              Group info
             </Link>
           ) : (
             <SafetyBox profileId={other.profile_id!} name={other.display_name} onBlocked={(message) => navigate('/messages', { state: { message } })} />

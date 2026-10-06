@@ -46,7 +46,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await pickPlace(a, 'Pari', /Paris, France/)
     await a.getByLabel('First day').fill(isoIn(20))
     await a.getByLabel('Last day').fill(isoIn(50))
-    await a.getByRole('radio', { name: '± 1 week' }).evaluate((el: HTMLElement) => el.click())
+    await a.getByRole('radio', { name: '1 week either way' }).evaluate((el: HTMLElement) => el.click())
     await a.getByRole('button', { name: 'Add trip' }).click()
     await expect(a.getByRole('heading', { name: /going too/ })).toBeVisible()
     other = await a.locator('.match-card h3').first().innerText()
@@ -108,7 +108,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await expect(friend.getByText('hasn’t checked in yet', { exact: false })).toBeVisible()
 
     await a.getByRole('button', { name: 'I’m back safe' }).click()
-    await expect(a.getByText('You’ve checked in as back safe', { exact: false })).toBeVisible()
+    await expect(a.getByText('You’ve said you’re back safe', { exact: false })).toBeVisible()
     await friend.reload()
     await expect(friend.getByText('Lewis is back safe.')).toBeVisible()
 

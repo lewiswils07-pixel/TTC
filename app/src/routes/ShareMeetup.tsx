@@ -136,7 +136,7 @@ export function ShareMeetup() {
                 <p className="share-place">{s.place}</p>
                 <p className="hint">With {s.meeting_with.map((p) => p.name).join(', ') || 'your chat'}</p>
                 {s.checked_in_at ? (
-                  <p className="notice notice-success">You’ve checked in as back safe. Whoever has the link can see it.</p>
+                  <p className="notice notice-success">You’ve said you’re back safe. Anyone with the link can see this.</p>
                 ) : null}
                 <div className="action-row">
                   <button type="button" className="btn btn-primary" disabled={busy !== null} onClick={() => send(s)}>
@@ -188,7 +188,7 @@ export function ShareMeetup() {
         <TextField
           name="place"
           label="Where are you meeting?"
-          hint="For example, “Café Nero by Leeds station”."
+          hint="For example, “the café opposite Leeds station”."
           maxLength={MAX_PLACE}
           value={place}
           error={shown('place')}

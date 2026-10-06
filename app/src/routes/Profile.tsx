@@ -349,7 +349,7 @@ function RecommendCard() {
 
   return (
     <section className="card recommend-card" aria-labelledby="recommend-title">
-      <h2 id="recommend-title">{state === 'thanks' ? 'Thank you' : 'How likely are you to recommend Sodalis to a friend?'}</h2>
+      <h2 id="recommend-title">{state === 'thanks' ? 'Thank you' : 'How likely are you to recommend the Collective to a friend?'}</h2>
       {state === 'thanks' ? (
         <p>Your answer helps us make the Collective better.</p>
       ) : (

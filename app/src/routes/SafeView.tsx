@@ -40,12 +40,17 @@ export function SafeView() {
         <section className="welcome">
           <Monogram size={56} />
           <h1 ref={heading} tabIndex={-1}>
-            This link has ended
+            {error ? 'We couldn’t load this page' : 'This link has ended'}
           </h1>
           {error ? (
-            <p className="notice notice-error" role="alert">
-              {error}
-            </p>
+            <>
+              <p className="notice notice-error" role="alert">
+                {error}
+              </p>
+              <button type="button" className="btn btn-primary" onClick={() => void load()}>
+                Try again
+              </button>
+            </>
           ) : (
             <p className="lede">Links stop working two days after the meet-up, or when the member stops sharing. If you’re worried, contact them directly.</p>
           )}

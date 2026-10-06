@@ -88,7 +88,7 @@ describe('sign in with an email code', () => {
     expect(auth.verifyOtp).not.toHaveBeenCalled()
     await userEvent.type(codeBox, '6')
     expect(auth.verifyOtp).toHaveBeenCalledWith({ email: 'jane@example.com', token: '123456', type: 'email' })
-    await waitFor(() => expect(codeBox).toHaveAccessibleDescription(/didn't work/))
+    await waitFor(() => expect(codeBox).toHaveAccessibleDescription(/didn’t work/))
   })
 })
 

@@ -15,10 +15,10 @@ import { MAX_NOTE, checkNote, checkTripDates } from '../lib/validation'
 
 type Flex = '0' | '1' | '3' | '7'
 const FLEXIBILITY: readonly Option<Flex>[] = [
-  { value: '0', label: 'Fixed' },
-  { value: '1', label: '± 1 day' },
-  { value: '3', label: '± 3 days' },
-  { value: '7', label: '± 1 week' },
+  { value: '0', label: 'Exact dates' },
+  { value: '1', label: '1 day either way' },
+  { value: '3', label: '3 days either way' },
+  { value: '7', label: '1 week either way' },
 ]
 const toFlex = (days: number): Flex => (FLEXIBILITY.find((f) => Number(f.value) >= days)?.value ?? '7')
 

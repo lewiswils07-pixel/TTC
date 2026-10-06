@@ -110,7 +110,7 @@ export function PlanBoard() {
           aria-label={`Vote for ${idea.title}. ${idea.votes} ${idea.votes === 1 ? 'vote' : 'votes'}.`}
           disabled={!chat.can_message || busy === idea.id}
           onClick={() =>
-            act(idea.id, () => toggleVote(idea.id), idea.i_voted ? 'Vote taken back.' : 'Vote added.', (i) => ({
+            act(idea.id, () => toggleVote(idea.id), idea.i_voted ? 'Vote removed.' : 'Vote added.', (i) => ({
               ...i,
               i_voted: !i.i_voted,
               votes: i.votes + (i.i_voted ? -1 : 1),

@@ -221,7 +221,7 @@ export function AccountDeleted() {
         <h1>Your account has been deleted</h1>
         <p className="lede">Thank you for being part of the Collective. You’re welcome back any time.</p>
         <Link className="btn btn-secondary btn-block" to="/">
-          Back to the start
+          Go to the home page
         </Link>
       </section>
     </Layout>

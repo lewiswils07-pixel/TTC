@@ -78,7 +78,7 @@ Unless a task says otherwise, every task is verified with
 - [ ] **T22 `trip-planner`: Planner screens.** Request form, day-by-day cards, "change something" follow-ups. (M)
 - [x] **T23 `trip-planner`: Shared plan board.** Add, vote, tick off; works in one-to-one chats and groups. (S)
   - Done 5 Oct: `20261023090000_plan_board.sql` (17 pgTAP tests). "Plan board" from every chat: ideas with an optional day (shown with dates in a group) and https link, votes (most votes first), ticks, and removing your own ideas. Read-only once a chat has ended. `plan_items.plan_id` is ready for the planner (T21) to add its suggestions.
-- [ ] **T24 `trip-planner`: Hand-picked activity lists** for the top 15 destinations, so the agent prefers our own picks. (S)
+- [x] **T24 `trip-planner`: Hand-picked activity lists** for the top 15 destinations, so the agent prefers our own picks. (S) Done 6 Oct: 8 picks each for 15 cities in `app/src/data/picks.ts`, shown on trip pages and plan boards with "Add to the plan", "More about it" and "Map". Links were written offline; check a handful before launch.
 - [ ] **T24b `trip-planner`: Booking links via `/go/<id>`.** Affiliate tag added when available,
       click recorded, disclosure line shown next to the link (spec §7a). (S)
 - [x] **T25: Full end-to-end Playwright path** (join → … → plan → block/report) in CI. (M) — app/e2e/journey.spec.ts runs two members through join, trip, request, accept, live chat with a scam warning, a group with a shared plan, report and block, and the review page, against a local Supabase. Runs in the "End to end" CI job. It found and fixed a live-chat sign-in delay.

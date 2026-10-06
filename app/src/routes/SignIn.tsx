@@ -281,7 +281,7 @@ export function SignIn() {
             </button>
             <div className="auth-links">
               <button type="button" className="btn-link" disabled={busy || wait > 0} onClick={() => requestCode(reason)}>
-                {wait > 0 ? `Send a new code in ${wait}s` : 'Send a new code'}
+                {wait > 0 ? `Send a new code in ${wait} seconds` : 'Send a new code'}
               </button>
               <button type="button" className="btn-link" onClick={() => go('start')}>
                 Use a different email

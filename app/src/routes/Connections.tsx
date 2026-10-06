@@ -127,7 +127,7 @@ export function Connections() {
                   Message {c.display_name}
                 </Link>
               ) : (
-                <p className="hint">Messaging opens soon.</p>
+                <p className="hint">Your chat is being set up. Check Chat in a moment.</p>
               )}
             </PersonCard>
           ))}
@@ -136,7 +136,7 @@ export function Connections() {
 
       <h2 className="section-title">Waiting for a reply</h2>
       {sent.length === 0 ? (
-        <p className="hint section-hint">You haven’t sent any requests that are waiting.</p>
+        <p className="hint section-hint">No requests waiting for a reply.</p>
       ) : (
         <ul className="person-list">
           {sent.map((c) => (
@@ -157,7 +157,7 @@ export function Connections() {
       {blocked && blocked.length > 0 && (
         <>
           <h2 className="section-title">Blocked</h2>
-          <p className="hint section-hint">You and they can’t see each other. Unblocking lets you both appear again.</p>
+          <p className="hint section-hint">You can’t see each other. If you unblock someone, you’ll both see each other again.</p>
           <ul className="blocked-list">
             {blocked.map((b) => (
               <li key={b.profile_id} className="card">

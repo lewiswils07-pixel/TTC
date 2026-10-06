@@ -67,7 +67,7 @@ export function ForYou() {
   function notNow(p: FeedPerson) {
     saveNotNow(me, p.profile_id)
     setSkipped((n) => n + 1)
-    next(`${p.display_name} is hidden for 30 days.`, p)
+    next(`We won’t show ${p.display_name} again for 30 days.`, p)
   }
 
   function undo(p: FeedPerson) {
@@ -99,8 +99,8 @@ export function ForYou() {
         {status?.text}
       </p>
       {status && (
-        <p className="feed-toast" aria-hidden="true">
-          {status.text}
+        <p className="feed-toast">
+          <span aria-hidden="true">{status.text}</span>
           {status.undo && (
             <button type="button" className="btn-link" onClick={() => undo(status.undo!)}>
               Undo
@@ -148,7 +148,7 @@ export function ForYou() {
           </ul>
           {skipped > 0 && (
             <button type="button" className="btn btn-secondary btn-block" onClick={showSkipped}>
-              Show the {skipped} {skipped === 1 ? 'person' : 'people'} I said “Not now” to
+              Show the {skipped} {skipped === 1 ? 'person' : 'people'} you skipped
             </button>
           )}
         </div>
@@ -252,7 +252,7 @@ function PersonCard({
             onClick={() => setConnecting(true)}
             aria-label={`Ask to connect with ${person.display_name}`}
           >
-            <span aria-hidden="true">✓</span> {requests.left > 0 ? 'Connect' : 'No requests left'}
+            <span aria-hidden="true">✓</span> {requests.left > 0 ? 'Connect' : 'No requests left this week'}
           </button>
         </div>
       )}
