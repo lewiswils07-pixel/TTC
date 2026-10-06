@@ -18,7 +18,7 @@ update public.profiles p set photo_path = p.id || '/photo.jpg', display_name = v
 from (values (1, 'Ann'), (2, 'Bob'), (3, 'Cat'), (4, 'Dan'), (5, 'Eve')) as v(n, name)
 where p.id = pg_temp.m(v.n);
 update public.profiles set display_name = 'Fay', gender = 'woman', birth_year = 1960, home_city_id = 2644688 where id = pg_temp.m(6);
-insert into public.profile_interests (profile_id, interest_id) select pg_temp.m(n), i from generate_series(1, 6) n, generate_series(1, 3) i;
+insert into public.profile_interests (profile_id, interest_id) select pg_temp.m(n), i from generate_series(1, 6) n, generate_series(1, 8) i;
 
 select pg_temp.sign_in_as(pg_temp.m(1));
 select public.send_connection_request(pg_temp.m(2), 'Hello Bob');

@@ -18,6 +18,8 @@ import {
 } from '../lib/admin'
 import { messageTime } from '../lib/chat'
 import { messageOf } from '../lib/errors'
+import { brand } from '../lib/brand'
+import { rules } from '../lib/rules'
 
 type Data = { queue: QueueItem[]; paused: PausedMember[]; log: LogEntry[] }
 
@@ -59,7 +61,7 @@ export function Admin() {
     return (
       <Layout>
         <h1>Review</h1>
-        <p className="lede">This page is only for the Sodalis team.</p>
+        <p className="lede">This page is only for the {brand.shortName} team.</p>
         <Link className="btn btn-secondary" to="/profile">
           Back to my profile
         </Link>
@@ -259,7 +261,7 @@ function ActionBox({
       </p>
       <div className="field">
         <label htmlFor={`${id}-note`}>{toMember ? `Note to ${name} (optional)` : 'Note for the log (optional)'}</label>
-        <textarea ref={box} id={`${id}-note`} className="textarea textarea-short" maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} />
+        <textarea ref={box} id={`${id}-note`} className="textarea textarea-short" maxLength={rules.safety.adminNoteMax} value={note} onChange={(e) => setNote(e.target.value)} />
         {toMember && <p className="hint">They see this on their profile page.</p>}
       </div>
       {error && (

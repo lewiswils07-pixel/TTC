@@ -5,8 +5,10 @@ import { SubNav } from '../components/SubNav'
 import { CHAT_NAV } from '../lib/nav'
 import { tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
+import { brand } from '../lib/brand'
+import { rules } from '../lib/rules'
 import { peek, remember } from '../lib/cache'
-import { groupsICanStart, myGroups, respondToInvite, type Group } from '../lib/groups'
+import { groupsICanStart, MAX_GROUP, myGroups, respondToInvite, type Group } from '../lib/groups'
 
 /** My groups, invites waiting for an answer, and a way to start one. */
 export function Groups() {
@@ -64,7 +66,7 @@ export function Groups() {
         )}
       </div>
       <SubNav label="Chat" items={CHAT_NAV} current="/groups" />
-      <p className="lede">Travel as a small group of up to 6, made from people you’re connected with. Each group has its own chat.</p>
+      <p className="lede">Travel as a small group of up to {MAX_GROUP}, made from people you’re connected with. Each group has its own chat.</p>
       {error && (
         <p className="notice notice-error" role="alert">
           {error}
@@ -106,7 +108,7 @@ export function Groups() {
         <div className="card empty">
           <p>You’re not in a group yet.</p>
           {canStart > 0 ? (
-            <p className="hint">Start one for a trip, and invite up to 5 people you’re connected with.</p>
+            <p className="hint">Start one for a trip, and invite up to {MAX_GROUP - 1} people you’re connected with.</p>
           ) : (
             <p className="hint">When someone invites you, it will appear here.</p>
           )}
@@ -128,7 +130,7 @@ export function Groups() {
         </ul>
       )}
       {canStart === 0 && joined.some((g) => g.i_own) && (
-        <p className="hint section-hint">You can start another group once your current group’s trip is over, or have up to 3 with Sodalis+.</p>
+        <p className="hint section-hint">You can start another group once your current group’s trip is over, or have up to {rules.groups.maxOwnedPlus} with {brand.plusName}.</p>
       )}
     </Layout>
   )

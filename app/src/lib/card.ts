@@ -3,10 +3,11 @@
 // kept short so all three fit on the card.
 import { friendlyError } from './errors'
 import { supabase } from './supabase'
+import { rules } from './rules'
 
-export const ANSWERS_TO_PICK = 3
-export const ANSWER_MAX_WORDS = 30
-export const ANSWER_MAX_CHARS = 200
+export const ANSWERS_TO_PICK = rules.card.answers
+export const ANSWER_MAX_WORDS = rules.card.maxWords
+export const ANSWER_MAX_CHARS = rules.card.maxChars
 
 export type CardAnswer = { q: string; a: string }
 export type Card = { card_answers: CardAnswer[] }

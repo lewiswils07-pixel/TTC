@@ -1,0 +1,28 @@
+{
+  "$comment": "The ONE place for the club's rules: limits, lengths and answer lists. The app reads this file directly. The database keeps the same numbers in its private.rules table: after changing a value here, run `npm run rules` to write the matching database change and test. A test fails if the two ever differ. Sodalis+ requests are sold as unlimited: plusSafetyCap is only a guard against spam, and members only see a count when they get near it. Changing an answer list also needs its label in src/lib/options.ts.",
+  "signIn": { "codeLength": 6, "passwordMin": 8, "passwordMax": 72 },
+  "interests": { "pick": 8 },
+  "requests": { "perWeekFree": 5, "plusSafetyCap": 50, "plusShowLeftBelow": 5 },
+  "groups": { "maxOwnedFree": 1, "maxOwnedPlus": 3, "maxPeople": 6, "nameMax": 60 },
+  "trips": { "maxNights": 90, "maxDaysAhead": 730, "maxUpcoming": 20, "maxFlexDays": 7, "noteMax": 280 },
+  "wishlist": { "max": 10 },
+  "age": { "min": 18, "maxPreferred": 99 },
+  "card": { "answers": 3, "maxWords": 30, "maxChars": 200 },
+  "profile": { "nameMax": 40, "bioMax": 500, "mobilityNoteMax": 200, "travellingWithMax": 80, "languagesMax": 10 },
+  "connections": { "noteMax": 280, "notNowDays": 30 },
+  "chat": { "messageMax": 2000 },
+  "planBoard": { "ideaMax": 120, "linkMax": 500, "maxIdeas": 100, "maxDay": 91 },
+  "safety": { "reportDetailsMax": 1000, "adminNoteMax": 1000 },
+  "meetups": { "placeMax": 120, "noteMax": 300, "maxOpen": 10, "maxDaysAhead": 90, "linkDays": 2 },
+  "survey": { "commentMax": 500 },
+  "founding": { "plusMonths": 3 },
+  "choices": {
+    "gender": ["woman", "man", "nonbinary", "unsaid"],
+    "travelStyle": ["planner", "mix", "spontaneous"],
+    "pace": ["slow", "steady", "packed"],
+    "budget": ["budget", "mid", "comfort"],
+    "roomSharing": ["share", "unsure", "separate"],
+    "dayRhythm": ["early", "either", "late"],
+    "walking": ["gentle", "moderate", "lots"]
+  }
+}

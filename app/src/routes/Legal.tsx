@@ -5,6 +5,7 @@ import { useEffect, useRef, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Layout } from '../components/Layout'
 import { brand } from '../lib/brand'
+import { count, rules } from '../lib/rules'
 
 const UPDATED = '5 October 2026'
 
@@ -37,7 +38,7 @@ export function Terms() {
       </p>
       <h2>Joining</h2>
       <ul>
-        <li>You must be 18 or over, and the details you give about yourself must be true.</li>
+        <li>You must be {rules.age.min} or over, and the details you give about yourself must be true.</li>
         <li>One person per profile. If you travel with someone, add a note to your profile rather than sharing an account.</li>
         <li>Keep your sign-in email secure: anyone who can read it can sign in as you.</li>
       </ul>
@@ -49,7 +50,7 @@ export function Terms() {
       </ul>
       <h2>{brand.plusName}</h2>
       <p>
-        Founding members get 3 months of {brand.plusName} free. It ends on its own: you won’t be charged, and we’ll ask before
+        Founding members get {count(rules.founding.plusMonths, 'month')} of {brand.plusName} free. It ends on its own: you won’t be charged, and we’ll ask before
         offering any paid plan.
       </p>
       <h2>When we can step in</h2>

@@ -1,11 +1,13 @@
 import type { Session, User } from '@supabase/supabase-js'
 import { clearCache } from './cache'
 import { friendlyError } from './errors'
+import { rules } from './rules'
 import { supabase } from './supabase'
 
-export const CODE_LENGTH = 6
-export const MIN_PASSWORD = 8
-export const MAX_PASSWORD = 72
+// The sign-in settings in Supabase (code length, shortest password) must match these.
+export const CODE_LENGTH = rules.signIn.codeLength
+export const MIN_PASSWORD = rules.signIn.passwordMin
+export const MAX_PASSWORD = rules.signIn.passwordMax
 
 export function normaliseEmail(email: string): string {
   return email.trim().toLowerCase()
@@ -15,7 +17,7 @@ export function isValidEmail(email: string): boolean {
   return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(normaliseEmail(email))
 }
 
-/** Emails a 6-digit sign-in code. New members get an account at the same time. */
+/** Emails a sign-in code. New members get an account at the same time. */
 export async function sendCode(email: string): Promise<void> {
   const { error } = await supabase.auth.signInWithOtp({
     email: normaliseEmail(email),

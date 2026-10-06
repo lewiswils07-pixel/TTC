@@ -56,9 +56,9 @@ select throws_ok($$update public.profiles set photo_path = '22222222-2222-4222-8
 select throws_ok($$update public.preferences set age_min = 17 where profile_id = '11111111-1111-4111-8111-111111111111'$$, '23514', null, 'preferences cannot include under-18s');
 
 select throws_ok('select public.finish_onboarding()', '23514', 'Profile is not finished', 'onboarding cannot finish without interests');
-select throws_ok('select public.set_my_interests(array[1,2]::smallint[])', '23514', 'Pick 3 to 10 interests', 'fewer than 3 interests are refused');
-select throws_ok('select public.set_my_interests(array[1,2,3,4,5,6,7,8,9,10,11]::smallint[])', '23514', 'Pick 3 to 10 interests', 'more than 10 interests are refused');
-select lives_ok('select public.set_my_interests(array[3,4,5,5]::smallint[])', 'Ann can pick 3 interests');
+select throws_ok('select public.set_my_interests(array[1,2,3,4,5,6,7]::smallint[])', '23514', format('Pick %s interests', private.rule('interests.pick')), 'too few interests are refused');
+select throws_ok('select public.set_my_interests(array[1,2,3,4,5,6,7,8,9]::smallint[])', '23514', format('Pick %s interests', private.rule('interests.pick')), 'too many interests are refused');
+select lives_ok('select public.set_my_interests(array[3,4,5,5,6,7,8,9,10]::smallint[])', 'Ann can pick 8 interests');
 select lives_ok('select public.finish_onboarding()', 'Ann can finish onboarding');
 
 select ok((select 'Lisbon' = any (array(select name from public.search_cities('lisb')))), 'city search finds Lisbon');
@@ -66,7 +66,7 @@ select is((select name from public.search_cities('MALAGA') limit 1), 'Málaga', 
 
 reset role;
 select is((select display_name from public.profiles where id = '22222222-2222-4222-8222-222222222222'), 'Bob', 'Bob''s profile was not changed by Ann');
-select is((select count(*)::int from public.profile_interests where profile_id = '11111111-1111-4111-8111-111111111111'), 3, 'duplicate interests are stored once');
+select is((select count(*)::int from public.profile_interests where profile_id = '11111111-1111-4111-8111-111111111111'), 8, 'duplicate interests are stored once');
 
 select * from finish();
 rollback;

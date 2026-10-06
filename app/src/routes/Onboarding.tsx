@@ -9,7 +9,8 @@ import { Segmented } from '../components/Segmented'
 import { ANSWER_MAX_CHARS, ANSWER_MAX_WORDS, ANSWERS_TO_PICK, CARD_QUESTIONS, checkAnswer, questionText, saveCard, wordCount, type CardAnswer } from '../lib/card'
 import type { City } from '../lib/cities'
 import { messageOf } from '../lib/errors'
-import { firstUnfinishedStep } from '../lib/onboarding'
+import { firstUnfinishedStep, STEP } from '../lib/onboarding'
+import { rules } from '../lib/rules'
 import {
   BUDGETS,
   DAY_RHYTHMS,
@@ -63,7 +64,7 @@ const STEPS = [
 /** Sign-up is the first 4 steps (Lewis, 5 Oct: keep it quick; 6 Oct: add
  *  the back of the card). "How you travel" comes after, from the profile
  *  page. Until the card is live in the database, sign-up is 3 steps. */
-const CARD_STEP = 4
+const CARD_STEP = STEP.card
 const TOTAL = STEPS.length
 
 export function Onboarding() {
@@ -114,11 +115,11 @@ export function Onboarding() {
   return (
     <Layout>
       <StepFrame step={step} key={step} signingUp={firstTime} signUpSteps={signUpSteps}>
-        {step === 1 && <BasicsStep userId={userId} data={data} onDone={next} />}
-        {step === 2 && <PhotoStep userId={userId} data={data} onDone={next} onBack={back} />}
-        {step === 3 && <InterestsStep data={data} interests={interests} onDone={next} onBack={back} lastStep={signUpSteps === 3} />}
-        {step === 4 && <CardStep userId={userId} data={data} onDone={next} onBack={back} />}
-        {step === 5 && <PreferencesStep userId={userId} data={data} onDone={next} onBack={back} />}
+        {step === STEP.basics && <BasicsStep userId={userId} data={data} onDone={next} />}
+        {step === STEP.photo && <PhotoStep userId={userId} data={data} onDone={next} onBack={back} />}
+        {step === STEP.interests && <InterestsStep data={data} interests={interests} onDone={next} onBack={back} lastStep={signUpSteps === 3} />}
+        {step === STEP.card && <CardStep userId={userId} data={data} onDone={next} onBack={back} />}
+        {step === STEP.travel && <PreferencesStep userId={userId} data={data} onDone={next} onBack={back} />}
       </StepFrame>
     </Layout>
   )
@@ -200,7 +201,7 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
           name="name"
           label="First name"
           autoComplete="given-name"
-          maxLength={41}
+          maxLength={rules.profile.nameMax + 1}
           value={name}
           error={shown('name')}
           valid={!errors.name}
@@ -369,7 +370,7 @@ function PhotoStep({ userId, data, onDone, onBack }: StepProps) {
         <p className="hint">A head-and-shoulders photo works best. You’ll need a photo before you can connect with anyone.</p>
         <Field name="bio" label="A few words about you (optional)" hint={`Where you’ve been, where you’d love to go, or what makes a good travel companion. ${500 - bio.length} characters left.`}>
           {({ id, describedBy }) => (
-            <textarea id={id} className="textarea" maxLength={500} aria-describedby={describedBy} value={bio} onChange={(e) => setBio(e.target.value)} />
+            <textarea id={id} className="textarea" maxLength={rules.profile.bioMax} aria-describedby={describedBy} value={bio} onChange={(e) => setBio(e.target.value)} />
           )}
         </Field>
       </div>
@@ -460,7 +461,7 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
           name="mobility"
           label="Anything about getting around? (optional)"
           hint="For example, “I avoid lots of stairs”. Only used to plan trips, never shown on your profile."
-          maxLength={200}
+          maxLength={rules.profile.mobilityNoteMax}
           value={mobility}
           onChange={(e) => setMobility(e.target.value)}
         />
@@ -499,7 +500,7 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
           name="travelling-with"
           label="Travelling with someone? (optional)"
           hint="For example, “usually with my sister Jo”. Shown on your card. Each profile is for one person."
-          maxLength={80}
+          maxLength={rules.profile.travellingWithMax}
           value={travellingWith}
           onChange={(e) => setTravellingWith(e.target.value)}
         />

@@ -1,5 +1,7 @@
-// Fixed answer lists for the profile. The values must match the CHECK
-// constraints in supabase/migrations/*_identity_profiles.sql.
+// Fixed answer lists for the profile, with their wording. The values come
+// from app/rules.json (`choices`), which the database checks against; a test
+// fails if a list here doesn't match it.
+import { rules } from './rules'
 
 export type Option<T extends string> = { value: T; label: string; hint?: string }
 
@@ -74,7 +76,7 @@ export const LANGUAGES = [
   { value: 'zh', label: 'Chinese' },
   { value: 'ja', label: 'Japanese' },
 ] as const satisfies readonly Option<string>[]
-export const MAX_LANGUAGES = 10
+export const MAX_LANGUAGES = rules.profile.languagesMax
 
 export type Gender = (typeof GENDERS)[number]['value']
 export type TravelStyle = (typeof TRAVEL_STYLES)[number]['value']
@@ -94,11 +96,11 @@ export type Distance = (typeof DISTANCES)[number]['value']
 export const distanceOption = (km: number | null): Distance => DISTANCES.find((d) => d.value === String(km))?.value ?? 'any'
 export const distanceKm = (d: Distance | undefined): number | null => (!d || d === 'any' ? null : Number(d))
 
-export const MIN_AGE = 18
-export const MAX_PREF_AGE = 99
-// Everyone picks exactly 8 (Lewis, 5 Oct, raised from 7 on 6 Oct): a fixed number keeps profiles
-// comparable and makes members choose what matters most to them.
-export const INTERESTS_TO_PICK = 8
+export const MIN_AGE = rules.age.min
+export const MAX_PREF_AGE = rules.age.maxPreferred
+// Everyone picks the same number (Lewis: 7 on 5 Oct, 8 from 6 Oct): a fixed
+// number keeps profiles comparable and makes members choose what matters most.
+export const INTERESTS_TO_PICK = rules.interests.pick
 
 export function labelFor<T extends string>(options: readonly Option<T>[], value: T | null | undefined): string {
   return options.find((o) => o.value === value)?.label ?? 'Not set'

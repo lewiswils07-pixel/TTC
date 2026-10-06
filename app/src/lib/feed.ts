@@ -4,6 +4,7 @@
 import { tripDates } from './dates'
 import { listLabels, suggestByInterests, suggestForTrip, type InterestSuggestion, type TripSuggestion } from './matching'
 import { listMyTrips } from './trips'
+import { rules } from './rules'
 
 export type FeedPerson = {
   profile_id: string
@@ -23,7 +24,7 @@ export type FeedPerson = {
   distance_km: number | null
 }
 
-/** Shared interests needed for the “Similar interests” callout (out of the 8 each member picks). */
+/** Shared interests needed for the “Similar interests” callout (out of the ones each member picks). */
 export const SIMILAR_INTERESTS = 3
 
 export type Callout = { kind: 'trip' | 'interests' | 'home' | 'places'; text: string }
@@ -97,7 +98,7 @@ function union(a: string[], b: string[]): string[] {
 
 // "Not now" hides someone for 30 days. It's kept on this phone only, so it
 // doesn't need a database change; it never uses up a request.
-const NOT_NOW_DAYS = 30
+export const NOT_NOW_DAYS = rules.connections.notNowDays
 const key = (me: string) => `sodalis.notNow.${me}`
 
 export function notNowIds(me: string, now = Date.now()): Set<string> {

@@ -43,7 +43,7 @@ update public.profiles p set display_name = 'P' || right(p.id::text, 1), birth_d
 where p.id in (pg_temp.m(2), pg_temp.m(3));
 update public.profiles set display_name = 'P1', home_city_id = 2644688 where id = pg_temp.m(1);
 insert into public.profile_interests (profile_id, interest_id)
-select pg_temp.m(n), i from generate_series(1, 3) n, generate_series(1, 3) i;
+select pg_temp.m(n), i from generate_series(1, 3) n, generate_series(1, 8) i;
 
 select pg_temp.sign_in_as(pg_temp.m(2));
 select public.finish_onboarding();

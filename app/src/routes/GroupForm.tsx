@@ -9,6 +9,8 @@ import type { City } from '../lib/cities'
 import { myConnections, type Connection } from '../lib/connections'
 import { dateReadback, isoDate } from '../lib/dates'
 import { messageOf } from '../lib/errors'
+import { brand } from '../lib/brand'
+import { rules } from '../lib/rules'
 import { checkGroupName, createGroup, groupsICanStart, MAX_GROUP, MAX_GROUP_NAME } from '../lib/groups'
 import { useChecks } from '../lib/useChecks'
 import { checkTripDates } from '../lib/validation'
@@ -43,7 +45,7 @@ export function GroupForm() {
     return (
       <Layout>
         <h1>Start a group</h1>
-        <p className="lede">You’ve reached your limit of groups for now. You can start another when your current group’s trip is over, or have up to 3 with Sodalis+.</p>
+        <p className="lede">You’ve reached your limit of groups for now. You can start another when your current group’s trip is over, or have up to {rules.groups.maxOwnedPlus} with {brand.plusName}.</p>
         <Link className="btn btn-secondary" to="/groups">
           Back to groups
         </Link>
@@ -105,7 +107,7 @@ function GroupEditor({ people }: { people: Connection[] }) {
         <h1 ref={heading} tabIndex={-1}>
           Start a group
         </h1>
-        <p className="lede">Up to 6 people, including you. Everyone you invite chooses whether to join.</p>
+        <p className="lede">Up to {MAX_GROUP} people, including you. Everyone you invite chooses whether to join.</p>
 
         <div className="card form-card">
           <TextField

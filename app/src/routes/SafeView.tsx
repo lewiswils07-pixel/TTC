@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router'
 import { Layout, Loading, Monogram } from '../components/Layout'
 import { messageOf } from '../lib/errors'
+import { brand } from '../lib/brand'
 import { describePerson, meetTime, viewShare, type SharedMeetup } from '../lib/share'
 
 const REFRESH_MS = 60_000
@@ -66,7 +67,7 @@ export function SafeView() {
       <h1 ref={heading} tabIndex={-1}>
         {name}’s meet-up
       </h1>
-      <p className="lede">{name} is meeting someone they met on Sodalis Collective, a members’ community for people who like to travel with company, and wanted you to know.</p>
+      <p className="lede">{name} is meeting someone they met on {brand.name}, a members’ community for people who like to travel with company, and wanted you to know.</p>
 
       {share.checked_in_at ? (
         <p className="notice notice-success safe-status" role="status">

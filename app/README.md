@@ -16,6 +16,20 @@ The sign-in email (`../supabase/templates/sign-in-code.html`) also names the
 club; update it and paste it into Supabase again. The store id (`appId`)
 can't change after the first App Store / Google Play upload.
 
+## Changing a rule
+
+Every limit and answer list (interests to pick, weekly requests, group
+sizes, how far ahead trips can be, text lengths...) lives in
+**`rules.json`**. Screens, checks and messages all read it. After changing a
+value:
+
+    npm run rules         # writes the database change and its test
+
+That adds a migration under `../supabase/migrations/` to paste into the
+live database. `npm test` fails if the database files are out of date.
+Sign-in settings (code length, shortest password) also need changing in
+Supabase's Auth settings.
+
 ## Everyday commands
 
     npm ci                # install

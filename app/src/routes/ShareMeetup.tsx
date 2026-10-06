@@ -4,6 +4,7 @@ import { TextField } from '../components/Field'
 import { Layout, Loading } from '../components/Layout'
 import { myConversations, type Conversation } from '../lib/chat'
 import { messageOf } from '../lib/errors'
+import { roughly, rules } from '../lib/rules'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
 import { checkIn, createShare, localInputValue, MAX_NOTE, MAX_PLACE, meetTime, myShares, sendLink, stopSharing, type MeetupShare } from '../lib/share'
@@ -18,7 +19,7 @@ function checkWhen(when: string): string | null {
   const t = new Date(when).getTime()
   if (Number.isNaN(t)) return 'Please pick the day and time you’re meeting.'
   if (t < Date.now() - 12 * 60 * 60 * 1000) return 'That time has already passed.'
-  if (t > Date.now() + 90 * 24 * 60 * 60 * 1000) return 'Links are for meet-ups in the next 3 months.'
+  if (t > Date.now() + rules.meetups.maxDaysAhead * 86_400_000) return `Links are for meet-ups in the next ${roughly(rules.meetups.maxDaysAhead)}.`
   return null
 }
 

@@ -3,9 +3,10 @@ import { Link } from 'react-router'
 import { keep, peek, remember } from '../lib/cache'
 import { sendRequest } from '../lib/connections'
 import { messageOf } from '../lib/errors'
+import { stepLink } from '../lib/onboarding'
 import { fitWords, homeLabel } from '../lib/matching'
 import { ageLabel } from '../lib/options'
-import { loadRequests, weeklyRequests } from '../lib/plan'
+import { loadRequests, requestsLeftText, weeklyRequests } from '../lib/plan'
 import { MAX_NOTE } from '../lib/validation'
 import { Avatar } from './Avatar'
 import { Field } from './Field'
@@ -39,13 +40,13 @@ type Person = {
   shared_interests?: string[]
 }
 
-export type Requests = { left: number; limit: number; used: () => void }
+export type Requests = { left: number; limit: number; plus: boolean; used: () => void }
 
 /** How many connection requests the member has left this week, and their weekly limit. */
 export function useRequests(): Requests | null {
-  const [state, setState] = useState<{ left: number; limit: number } | null>(() => peek('requests') ?? null)
+  const [state, setState] = useState<{ left: number; limit: number; plus: boolean } | null>(() => peek('requests') ?? null)
   useEffect(() => {
-    remember('requests', loadRequests()).then(setState, () => setState({ left: 0, limit: weeklyRequests(false) }))
+    remember('requests', loadRequests()).then(setState, () => setState({ left: 0, limit: weeklyRequests(false), plus: false }))
   }, [])
   if (!state) return null
   return {
@@ -60,12 +61,7 @@ export function useRequests(): Requests | null {
 }
 
 export function RequestsHint({ requests }: { requests: Requests }) {
-  const { left, limit } = requests
-  return (
-    <p className="hint section-hint">
-      Best matches first. You have {left} of {limit} requests left this week{left === 0 ? '; you get more on Monday' : ''}.
-    </p>
-  )
+  return <p className="hint section-hint">Best matches first. {requestsLeftText(requests)}</p>
 }
 
 /** One suggested member: who they are, why we think you'd get on, and Ask to connect. */
@@ -196,7 +192,7 @@ export function ConnectBox({
           {/photo/i.test(error) && (
             <>
               {' '}
-              <Link to="/onboarding?step=2">Add a photo</Link>
+              <Link to={stepLink('photo')}>Add a photo</Link>
             </>
           )}
         </p>

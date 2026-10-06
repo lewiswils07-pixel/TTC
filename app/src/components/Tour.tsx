@@ -19,7 +19,7 @@ const STEPS: { icon: string; title: string; text: string }[] = [
   {
     icon: '✓',
     title: 'Plan together',
-    text: 'When you both say yes, you can chat. Each chat has a plan board for ideas, with our own picks for 15 popular cities.',
+    text: 'When you both say yes, you can chat. Each chat has a plan board for ideas, with our own picks for popular cities.',
   },
   {
     icon: '♡',
