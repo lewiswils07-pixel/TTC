@@ -142,8 +142,14 @@ export function Chat() {
           <Link className="back-link" to="/messages" aria-label="Back to messages">
             ‹
           </Link>
-          <Avatar name={other.display_name} path={other.photo_path} size="sm" />
-          <h1>{other.display_name}</h1>
+          <Link
+            className="chat-who"
+            to={group ? `/groups/${other.group_id}` : `/connections/people/${other.profile_id}`}
+            aria-label={group ? `${other.display_name}: group info` : `${other.display_name}: view profile`}
+          >
+            <Avatar name={other.display_name} path={other.photo_path} size="sm" />
+            <h1>{other.display_name}</h1>
+          </Link>
           <Link className="btn btn-secondary btn-small chat-plan-link" to={`/messages/${conversationId}/plan`}>
             Plan<span className="chat-plan-more"> board</span>
           </Link>
@@ -161,6 +167,11 @@ export function Chat() {
         {menuOpen && (
           <div id="chat-menu" className="chat-menu">
             <ul>
+              {!group && (
+                <li>
+                  <Link to={`/connections/people/${other.profile_id}`}>View {other.display_name}’s profile</Link>
+                </li>
+              )}
               <li>
                 <Link to="/meeting-safely">Meeting up safely</Link>
               </li>

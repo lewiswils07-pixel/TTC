@@ -882,31 +882,45 @@ legend { padding: 0; }
 }
 
 /* ------------------------------------------- flip a card to see the back */
-.feed-flip { --photo-h: clamp(300px, calc(100dvh - 420px), 560px); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); perspective: 1600px; }
-.feed-flip-inner { display: grid; width: 100%; transform-style: preserve-3d; transition: transform 0.55s var(--ease-out); }
+/* The whole card turns over: photo, reasons and shared interests on the
+   front; the 3 answers on the back, in the same space. */
+.feed-flip { position: relative; perspective: 1800px; }
+.feed-flip-inner { display: grid; width: 100%; transform-style: preserve-3d; transition: transform 0.6s var(--ease-out); cursor: pointer; }
 .feed-flip.is-flipped .feed-flip-inner { transform: rotateY(180deg); }
 .feed-face { grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden; min-width: 0; }
-.feed-front .feed-photo { cursor: pointer; }
+.feed-front { display: flex; flex-direction: column; gap: var(--space-4); }
 .feed-back {
-  transform: rotateY(180deg); justify-self: center; align-self: start;
-  width: min(100%, calc(var(--photo-h) * 3 / 4)); min-height: var(--photo-h);
-  display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5) var(--space-4);
+  transform: rotateY(180deg); align-self: stretch;
+  display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-5) var(--space-4);
   border-radius: var(--radius); color: #fff;
   background: linear-gradient(160deg, var(--brand-disc), color-mix(in srgb, var(--brand-disc) 60%, #000));
   box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--brand-gold) 50%, transparent);
 }
-.feed-back-name { margin: 0; font-size: 1.5rem; font-weight: 800; color: var(--brand-gold); }
+.feed-back-name { margin: 0; padding-right: 48px; font-size: 1.5rem; font-weight: 800; color: var(--brand-gold); line-height: 1.2; }
+.feed-back-name span { display: block; margin-top: 2px; font-size: var(--text-sm); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: rgb(255 255 255 / 75%); }
+.feed-back .card-back-list { flex: 1; gap: var(--space-3); }
+.feed-back .card-back-list > div {
+  flex: 1; display: flex; flex-direction: column; justify-content: center; padding: var(--space-4);
+  border-radius: var(--radius-sm); background: rgb(255 255 255 / 8%);
+  border: 1px solid color-mix(in srgb, var(--brand-gold) 35%, transparent);
+}
 .feed-back .card-back-list dt { color: var(--brand-gold); }
-.feed-back .card-back-list dd { color: #fff; }
+.feed-back .card-back-list dd { color: #fff; font-size: 1.0625rem; }
 .feed-back .card-back-empty { color: #fff; }
 .person-feed-card.is-connecting .feed-back { display: none; }
-.flip-btn {
-  display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-5);
-  border-radius: 999px; border: 1px solid color-mix(in srgb, var(--brand-gold) 60%, transparent);
-  background: var(--card); color: var(--ink); font: inherit; font-weight: 700; font-size: var(--text-sm); cursor: pointer;
+.person-feed-card.is-connecting .feed-flip-inner { cursor: auto; }
+/* A small “turn over” mark in the card's top corner. */
+.flip-corner {
+  position: absolute; top: var(--space-3); right: var(--space-3); z-index: 2;
+  display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--brand-gold) 70%, transparent);
+  background: color-mix(in srgb, var(--card) 88%, transparent); color: var(--accent);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 18%); cursor: pointer; transition: transform 0.2s var(--ease-out);
 }
-.flip-btn:hover { background: color-mix(in srgb, var(--brand-gold) 14%, var(--card)); }
-.flip-btn span[aria-hidden] { font-size: 1.15rem; color: var(--accent); }
+.flip-corner:hover { transform: rotate(-30deg); }
+.flip-corner:focus-visible { outline: 3px solid var(--brand-gold); outline-offset: 2px; }
+.feed-flip.is-flipped .flip-corner { background: color-mix(in srgb, var(--brand-gold) 22%, transparent); color: var(--brand-gold); }
+@media (prefers-reduced-motion: reduce) { .feed-flip-inner, .flip-corner { transition: none; } }
 
 /* the back of a card, on For you and on your own profile */
 .card-back-list { margin: 0; display: flex; flex-direction: column; gap: var(--space-4); }
@@ -916,6 +930,30 @@ legend { padding: 0; }
 .card-back-preview .card-back-list { margin-bottom: var(--space-4); }
 .card-back-preview .card-back-empty { margin-bottom: var(--space-4); }
 .card-question .card-answer { min-height: 96px; }
+
+/* a connection's full profile */
+.member-page { display: flex; flex-direction: column; gap: var(--space-4); }
+.member-hero {
+  position: relative; width: min(100%, 420px); aspect-ratio: 4 / 5; margin-inline: auto; border-radius: var(--radius); overflow: hidden;
+  background: linear-gradient(160deg, var(--brand-disc), color-mix(in srgb, var(--brand-disc) 60%, #000));
+}
+.member-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.member-hero h1 { margin: 0; font-size: 1.75rem; line-height: 1.15; color: #fff; }
+.member-hero h1:focus { outline: none; }
+.member-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3); }
+.member-actions:empty { display: none; }
+.member-card-back { background: linear-gradient(160deg, var(--brand-disc), color-mix(in srgb, var(--brand-disc) 60%, #000)); color: #fff; border-color: color-mix(in srgb, var(--brand-gold) 50%, transparent); }
+.member-card-back .card-title { color: var(--brand-gold); }
+.member-card-back .card-back-list > div { padding: var(--space-4); border-radius: var(--radius-sm); background: rgb(255 255 255 / 8%); border: 1px solid color-mix(in srgb, var(--brand-gold) 35%, transparent); }
+.member-card-back .card-back-list dt { color: var(--brand-gold); }
+.member-card-back .card-back-empty { color: #fff; }
+.member-facts { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+.member-since { text-align: center; margin: 0; }
+.match-head-link { color: inherit; text-decoration: none; border-radius: var(--radius-sm); }
+.match-head-link:hover h3 { text-decoration: underline; }
+.match-view { display: inline-block; margin-top: 2px; font-size: var(--text-sm); font-weight: 700; color: var(--accent); text-decoration: none; }
+.chat-who { display: flex; align-items: center; gap: var(--space-3); flex: 1; min-width: 0; color: inherit; text-decoration: none; }
+.chat-who:hover h1 { text-decoration: underline; }
 
 /* ------------------------------------------------------------ the tour */
 .tour-box { text-align: center; }

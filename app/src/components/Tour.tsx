@@ -9,7 +9,7 @@ const STEPS: { icon: string; title: string; text: string }[] = [
   {
     icon: '↻',
     title: 'Flip the card',
-    text: 'Tap the photo or “Flip card” to see the back: three questions they chose to answer. You can see and change yours on your Profile.',
+    text: 'Tap a card, or the small turn-over mark in its top corner, to see the back: three questions they chose to answer. Once you’re connected, tap their name to see their full profile.',
   },
   {
     icon: '✈',
