@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { peek, remember } from '../lib/cache'
 import { Link } from 'react-router'
 import { cityLabel, type City } from '../lib/cities'
 import { tripDates } from '../lib/dates'
@@ -10,11 +11,11 @@ const MAX_WISHLIST = 10
 
 /** The member's upcoming trips, each linking to its edit screen. */
 export function MyTrips() {
-  const [trips, setTrips] = useState<Trip[] | null | undefined>(undefined)
+  const [trips, setTrips] = useState<Trip[] | null | undefined>(() => peek('trips'))
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    listMyTrips().then(setTrips, (e) => setError(messageOf(e)))
+    remember('trips', listMyTrips()).then(setTrips, (e) => setError(messageOf(e)))
   }, [])
 
   if (trips === null) return null
@@ -74,13 +75,13 @@ export function MyTrips() {
 
 /** Places the member would love to visit one day, used to match people with no trip booked yet. */
 export function Wishlist() {
-  const [items, setItems] = useState<WishlistItem[] | null | undefined>(undefined)
+  const [items, setItems] = useState<WishlistItem[] | null | undefined>(() => peek('wishlist'))
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   // Changing the key resets the picker after each add.
   const [pickerKey, setPickerKey] = useState(0)
 
-  const load = useCallback(() => listWishlist().then(setItems, (e) => setError(messageOf(e))), [])
+  const load = useCallback(() => remember('wishlist', listWishlist()).then(setItems, (e) => setError(messageOf(e))), [])
   useEffect(() => {
     void load()
   }, [load])

@@ -3,19 +3,20 @@ import { Link, useLocation } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { Layout, Loading } from '../components/Layout'
 import { SubNav } from '../components/SubNav'
+import { peek, remember } from '../lib/cache'
 import { CHAT_NAV } from '../lib/nav'
 import { messageTime, myConversations, type Conversation } from '../lib/chat'
 import { messageOf } from '../lib/errors'
 
 /** Everyone the member can chat with, most recent first. */
 export function Messages() {
-  const [items, setItems] = useState<Conversation[] | null | undefined>(undefined)
+  const [items, setItems] = useState<Conversation[] | null | undefined>(() => peek('conversations'))
   const [error, setError] = useState<string | null>(null)
   const heading = useRef<HTMLHeadingElement>(null)
   const done = (useLocation().state as { message?: string } | null)?.message
 
   useEffect(() => {
-    myConversations().then(setItems, (e) => setError(messageOf(e)))
+    remember('conversations', myConversations()).then(setItems, (e) => setError(messageOf(e)))
     heading.current?.focus()
   }, [])
 

@@ -10,24 +10,25 @@ import { myConversations } from '../lib/chat'
 import { tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { homeLabel } from '../lib/matching'
+import { peek, remember } from '../lib/cache'
 import { myConnections, respondToRequest, withdrawRequest, type Connection } from '../lib/connections'
 import { ageLabel } from '../lib/options'
 import { myBlocks, unblockMember, type BlockedMember } from '../lib/safety'
 
 /** Requests for me, requests I've sent, and people I'm connected with. */
 export function Connections() {
-  const [items, setItems] = useState<Connection[] | null>(null)
+  const [items, setItems] = useState<Connection[] | null>(() => peek('connections') ?? null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState<number | string | null>(null)
   const [status, setStatus] = useState('')
   const [done, setDone] = useState<string | null>(null)
-  const [blocked, setBlocked] = useState<BlockedMember[] | null>(null)
+  const [blocked, setBlocked] = useState<BlockedMember[] | null>(() => peek('blocks') ?? null)
   const [chats, setChats] = useState<Map<string, number>>(new Map())
   const heading = useRef<HTMLHeadingElement>(null)
 
   const load = useCallback(
     () =>
-      Promise.all([myConnections(), myBlocks(), myConversations().catch(() => null)]).then(
+      Promise.all([remember('connections', myConnections()), remember('blocks', myBlocks()), myConversations().catch(() => null)]).then(
         ([c, b, conv]) => {
           setItems(c)
           setBlocked(b)

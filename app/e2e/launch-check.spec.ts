@@ -1,9 +1,9 @@
 // Launch check (task T32): every screen passes an accessibility audit in a
 // real browser (including colour contrast, which unit tests can't check) and
-// fits a small phone (320 px wide) without sideways scrolling.
+// fits a small phone (320 px wide) and a laptop without sideways scrolling.
 import { createRequire } from 'node:module'
 import { expect, test, type Page } from '@playwright/test'
-import { admin, closeGuide, idOf, newPhone, pickPlace, signIn } from './helpers'
+import { admin, closeGuide, idOf, isoIn, newPhone, pickPlace, signIn } from './helpers'
 
 const require = createRequire(import.meta.url)
 const AXE = require.resolve('axe-core/axe.min.js')
@@ -23,6 +23,9 @@ async function problems(page: Page, name: string): Promise<string[]> {
   await page.setViewportSize({ width: 320, height: 640 })
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
   if (overflow > 0) found.push(`overflow: ${overflow}px wider than a 320px phone`)
+  await page.setViewportSize({ width: 1280, height: 800 })
+  const wide = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+  if (wide > 0) found.push(`overflow: ${wide}px wider than a laptop screen`)
   await page.setViewportSize({ width: 390, height: 844 })
   return found.map((f) => `${name} → ${f}`)
 }
@@ -34,7 +37,7 @@ async function visit(page: Page, path: string, heading: RegExp | string, issues:
   issues.push(...(await problems(page, path)))
 }
 
-test('every screen is accessible and fits a small phone', async ({ browser }) => {
+test('every screen is accessible and fits a small phone and a laptop', async ({ browser }) => {
   test.setTimeout(180_000)
   const issues: string[] = []
   const page = await newPhone(browser)
@@ -89,12 +92,19 @@ test('every screen is accessible and fits a small phone', async ({ browser }) =>
   await visit(page, '/connections/requests', 'Connections', issues)
   await visit(page, '/trips', /./, issues)
   await visit(page, '/trips/new', /./, issues)
+  const { data: trip } = await admin.from('trips').insert({ owner_id: me, city_id: 2267057, start_date: isoIn(30), end_date: isoIn(34) }).select('id').single()
+  await visit(page, `/trips/${trip!.id}`, /Lisbon/, issues)
+  await expect(page.getByRole('heading', { name: 'Things to do in Lisbon' })).toBeVisible()
   await visit(page, '/messages', 'Chat', issues)
   await page.goto(`/messages/${chat!.id}`)
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   issues.push(...(await problems(page, '/messages/:id (with guide)')))
   await closeGuide(page)
   await visit(page, `/messages/${chat!.id}/plan`, /./, issues)
+  await page.getByLabel('See our picks for a city').selectOption({ label: 'Lisbon' })
+  await page.getByRole('button', { name: /^Add to the plan: / }).first().click()
+  await expect(page.getByText('✓ On the plan')).toBeVisible()
+  issues.push(...(await problems(page, '/messages/:id/plan (with city picks)')))
   await visit(page, `/messages/${chat!.id}/share`, 'Tell someone you trust', issues)
   await visit(page, '/groups', 'Chat', issues)
   await visit(page, '/groups/new', 'Start a group', issues)

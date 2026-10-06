@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router'
+import { CityPicks } from '../components/CityPicks'
 import { TextField } from '../components/Field'
 import { Layout, Loading } from '../components/Layout'
+import { PICKS, picksFor } from '../data/picks'
 import { addIdea, checkIdea, checkLink, dayLabel, deleteIdea, MAX_IDEA, normalizeLink, planBoard, setDone, toggleVote, type Idea } from '../lib/board'
 import { myConversations, type Conversation } from '../lib/chat'
 import { daysBetween } from '../lib/dates'
@@ -16,6 +18,8 @@ export function PlanBoard() {
   const conversationId = Number(useParams().id)
   const [chat, setChat] = useState<Conversation | null | undefined>(undefined)
   const [trip, setTrip] = useState<Trip>(null)
+  const [guide, setGuide] = useState<number | ''>('')
+  const [groupCity, setGroupCity] = useState<string | null>(null)
   const [ideas, setIdeas] = useState<Idea[]>([])
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState<number | null>(null)
@@ -30,7 +34,10 @@ export function PlanBoard() {
         const found = all?.find((c) => c.id === conversationId) ?? null
         if (found?.kind === 'group') {
           const g = (await myGroups())?.find((x) => x.id === found.group_id)
-          if (g) setTrip({ start: g.start_date, days: daysBetween(g.start_date, g.end_date) + 1 })
+          if (g) {
+            setTrip({ start: g.start_date, days: daysBetween(g.start_date, g.end_date) + 1 })
+            setGroupCity(g.city)
+          }
         }
         setChat(found)
         setIdeas(list)
@@ -165,6 +172,25 @@ export function PlanBoard() {
           <ul className="idea-list">{done.map(card)}</ul>
         </>
       )}
+
+      {chat.can_message && (
+        <Ideas
+          picks={groupCity ? picksFor(groupCity) : undefined}
+          guide={guide}
+          onGuide={setGuide}
+          added={ideas.map((i) => i.title)}
+          onAdd={async (title, url) => {
+            setError(null)
+            try {
+              await addIdea(conversationId, title, null, url)
+              await reload()
+              setStatus(`${title} added to the plan.`)
+            } catch (e) {
+              setError(messageOf(e))
+            }
+          }}
+        />
+      )}
     </Layout>
   )
 }
@@ -252,5 +278,44 @@ function AddIdea({ conversationId, days, start, onAdded }: { conversationId: num
         {busy ? 'Adding…' : 'Add to the plan'}
       </button>
     </form>
+  )
+}
+
+/** Hand-picked ideas: the group's city, or a city guide the pair chooses. */
+function Ideas({
+  picks,
+  guide,
+  onGuide,
+  added,
+  onAdd,
+}: {
+  picks?: ReturnType<typeof picksFor>
+  guide: number | ''
+  onGuide: (id: number | '') => void
+  added: string[]
+  onAdd: (title: string, url: string) => Promise<void>
+}) {
+  if (picks) return <CityPicks picks={picks} added={added} onAdd={onAdd} folded />
+  const chosen = guide === '' ? undefined : picksFor(guide)
+  return (
+    <section className="city-picks" aria-labelledby="guides">
+      <h2 id="guides" className="section-title">
+        Need ideas?
+      </h2>
+      <div className="field">
+        <label htmlFor="guide-city">See our picks for a city</label>
+        <select id="guide-city" className="input" value={guide} onChange={(e) => onGuide(e.target.value ? Number(e.target.value) : '')}>
+          <option value="">Choose a city</option>
+          {[...PICKS]
+            .sort((a, b) => a.city.localeCompare(b.city))
+            .map((c) => (
+              <option key={c.cityId} value={c.cityId}>
+                {c.city}
+              </option>
+            ))}
+        </select>
+      </div>
+      {chosen && <CityPicks picks={chosen} added={added} onAdd={onAdd} />}
+    </section>
   )
 }

@@ -1,8 +1,9 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { RequireSession } from './components/Guards'
 import { Loading } from './components/Layout'
 import { SessionProvider } from './lib/session'
+import { useSession } from './lib/session-context'
 import { Home } from './routes/Home'
 import { NotFound } from './routes/NotFound'
 import { SignIn } from './routes/SignIn'
@@ -46,7 +47,40 @@ export function App() {
   )
 }
 
+// Once a member is signed in, the other screens download quietly in the
+// background, so moving between them doesn't wait for the network.
+const MEMBER_SCREENS = [
+  () => import('./routes/ForYou'),
+  () => import('./routes/Connections'),
+  () => import('./routes/Trips'),
+  () => import('./routes/TripMatches'),
+  () => import('./routes/TripForm'),
+  () => import('./routes/Messages'),
+  () => import('./routes/Chat'),
+  () => import('./routes/Groups'),
+  () => import('./routes/GroupDetail'),
+  () => import('./routes/GroupForm'),
+  () => import('./routes/PlanBoard'),
+  () => import('./routes/ShareMeetup'),
+  () => import('./routes/Profile'),
+  () => import('./routes/Filters'),
+  () => import('./routes/Account'),
+  () => import('./routes/MeetingSafely'),
+  () => import('./routes/Onboarding'),
+]
+
+function usePreloadScreens() {
+  const { session } = useSession()
+  useEffect(() => {
+    if (!session) return
+    const idle = window.requestIdleCallback ?? ((run: () => void) => window.setTimeout(run, 1200))
+    const id = idle(() => MEMBER_SCREENS.forEach((load) => void load().catch(() => undefined)))
+    return () => (window.cancelIdleCallback ?? window.clearTimeout)(id)
+  }, [session])
+}
+
 export function AppRoutes() {
+  usePreloadScreens()
   return (
     <Suspense fallback={<Loading />}>
       <Routes>

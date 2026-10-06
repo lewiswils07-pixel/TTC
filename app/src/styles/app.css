@@ -60,7 +60,9 @@ legend { padding: 0; }
   flex: 1; width: 100%; max-width: 640px; margin: 0 auto;
   padding: var(--space-5) calc(var(--safe-right) + var(--space-4)) calc(var(--safe-bottom) + var(--space-7)) calc(var(--safe-left) + var(--space-4));
 }
-.loading { display: flex; align-items: center; gap: var(--space-3); color: var(--muted); padding: var(--space-6) 0; }
+.loading { display: flex; align-items: center; gap: var(--space-3); color: var(--muted); padding: var(--space-6) 0; opacity: 0; animation: appear 0.2s ease-out 0.35s forwards; }
+@keyframes appear { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .loading { animation-duration: 0s; } }
 .spinner { width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--accent); animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -752,3 +754,54 @@ legend { padding: 0; }
 .auth .subnav { margin-top: 0; }
 .auth-or { display: flex; align-items: center; gap: var(--space-3); color: var(--muted); font-size: var(--text-sm); }
 .auth-or::before, .auth-or::after { content: ''; flex: 1; border-top: 1px solid var(--line); }
+
+/* ------------------------------------------------- laptops and tablets
+   On wider screens the four main tabs move up into the top bar, like most
+   web apps, and pages get more room. Phones keep the bar along the bottom. */
+@media (min-width: 900px) {
+  .topbar-inner { max-width: 1040px; min-height: 68px; padding-inline: var(--space-6); }
+  .main { max-width: 760px; padding-top: var(--space-6); }
+  .main-wide { max-width: 1040px; }
+  .topbar-inner { justify-content: flex-start; }
+  .tabbar-top {
+    position: static; margin-left: auto; padding: 0;
+    background: none; border: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+  }
+  .tabbar-top ul { display: flex; align-items: center; gap: var(--space-1); max-width: none; margin: 0; }
+  .tabbar-top .tab {
+    flex-direction: row; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-4);
+    border-radius: 999px; font-size: 0.9375rem; color: var(--ink-soft);
+  }
+  .tabbar-top .tab:hover { background: color-mix(in srgb, var(--ink) 5%, transparent); color: var(--ink); }
+  .tabbar-top .tab.is-current { background: color-mix(in srgb, var(--accent) 9%, transparent); color: var(--accent); }
+  .tabbar-top .tab.is-current .tab-icon::after { display: none; }
+  .tabbar-top .tab-icon { width: 22px; height: 22px; }
+  .tabbar-top .tab-icon svg { width: 20px; height: 20px; }
+  .tabbar-top .tab-badge { box-shadow: 0 0 0 2px var(--paper); }
+
+  h1 { font-size: 2.25rem; }
+  .card { padding: var(--space-6); }
+}
+@media (min-width: 900px) and (hover: hover) {
+  .card-link:hover, .conversation-row:hover { box-shadow: var(--shadow-md, var(--shadow-sm)); transform: translateY(-1px); }
+}
+
+/* ---------------------------------------------------------- city picks */
+.city-picks { margin-top: var(--space-6); }
+.city-picks .city-picks { margin-top: var(--space-4); }
+.city-picks-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
+.pick-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.pick { display: flex; flex-direction: column; gap: var(--space-1); }
+.pick p { margin: 0; }
+.pick-kind { color: var(--muted); font-size: var(--text-sm); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.pick-title { font-size: var(--text-lg); margin: 0; }
+.pick-tip { color: var(--muted); font-size: var(--text-sm); }
+.pick-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin-top: var(--space-2); }
+.pick-added { color: var(--success, var(--accent)); font-weight: 600; font-size: var(--text-sm); }
+@media (min-width: 900px) {
+  .pick-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card.pick { padding: var(--space-5); }
+}
+
+/* chat links sit on one line and are easy to tap */
+.chat-tools > a, .chat-tools > .safety-link { display: inline-flex; align-items: center; min-height: 44px; margin: 0; }

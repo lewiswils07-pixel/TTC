@@ -6,6 +6,7 @@ import { SubNav } from '../components/SubNav'
 import { CONNECTIONS_NAV } from '../lib/nav'
 import { ConnectBox, SharedInterests, useRequests, type Requests } from '../components/Suggestions'
 import { messageOf } from '../lib/errors'
+import { peek, remember } from '../lib/cache'
 import { callouts, clearNotNow, forgetNotNow, loadFeed, notNowIds, saveNotNow, type FeedPerson } from '../lib/feed'
 import { noteFirstMatch } from '../lib/kpis'
 import { fitWords, homeLabel } from '../lib/matching'
@@ -20,7 +21,12 @@ export function ForYou() {
   const me = session!.user.id
   const { data, error: profileError } = useMyProfile(me)
   const requests = useRequests()
-  const [people, setPeople] = useState<FeedPerson[] | null>(null)
+  const [people, setPeople] = useState<FeedPerson[] | null>(() => {
+    const last = peek<FeedPerson[]>('feed')
+    if (!last) return null
+    const hidden = notNowIds(me)
+    return last.filter((p) => !hidden.has(p.profile_id))
+  })
   const [error, setError] = useState<string | null>(null)
   const [skipped, setSkipped] = useState(0)
   const [status, setStatus] = useState<{ text: string; undo?: FeedPerson } | null>(null)
@@ -28,7 +34,7 @@ export function ForYou() {
 
   useEffect(() => {
     heading.current?.focus()
-    loadFeed().then(
+    remember('feed', loadFeed()).then(
       (list) => {
         const hidden = notNowIds(me)
         setSkipped(list.filter((p) => hidden.has(p.profile_id)).length)

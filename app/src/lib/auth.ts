@@ -1,4 +1,5 @@
 import type { Session, User } from '@supabase/supabase-js'
+import { clearCache } from './cache'
 import { friendlyError } from './errors'
 import { supabase } from './supabase'
 
@@ -71,6 +72,7 @@ export async function signOut(): Promise<void> {
 
 /** Removes everything the app saved on this device except "has signed in before". */
 export function clearDevice(): void {
+  clearCache()
   try {
     for (const key of Object.keys(localStorage)) {
       if (key.startsWith('sodalis.') && key !== 'sodalis.signedInBefore') localStorage.removeItem(key)

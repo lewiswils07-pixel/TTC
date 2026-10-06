@@ -5,12 +5,13 @@ import { SubNav } from '../components/SubNav'
 import { CHAT_NAV } from '../lib/nav'
 import { tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
+import { peek, remember } from '../lib/cache'
 import { groupsICanStart, myGroups, respondToInvite, type Group } from '../lib/groups'
 
 /** My groups, invites waiting for an answer, and a way to start one. */
 export function Groups() {
-  const [groups, setGroups] = useState<Group[] | null | undefined>(undefined)
-  const [canStart, setCanStart] = useState(0)
+  const [groups, setGroups] = useState<Group[] | null | undefined>(() => peek('groups'))
+  const [canStart, setCanStart] = useState(() => peek<number>('canStart') ?? 0)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState<number | null>(null)
   const [done, setDone] = useState<string | null>((useLocation().state as { message?: string } | null)?.message ?? null)
@@ -18,7 +19,7 @@ export function Groups() {
 
   const load = useCallback(
     () =>
-      Promise.all([myGroups(), groupsICanStart().catch(() => 0)]).then(
+      Promise.all([remember('groups', myGroups()), remember('canStart', groupsICanStart().catch(() => 0))]).then(
         ([g, n]) => {
           setGroups(g)
           setCanStart(n)
