@@ -5,8 +5,10 @@ import { dismissNotice, iAmAdmin, myNotices, type Notice } from '../lib/admin'
 import { signOut } from '../lib/auth'
 import { answerMeet, meetPrompts, type MeetPrompt } from '../lib/meet'
 import { Avatar } from '../components/Avatar'
+import { CardBack } from '../components/CardBack'
 import { cityLabel } from '../lib/cities'
 import { BUDGETS, GENDERS, MAX_PREF_AGE, PACES, TRAVEL_STYLES, ageFromDate, ageLabel, labelFor } from '../lib/options'
+import type { Card } from '../lib/card'
 import { profileStrength } from '../lib/strength'
 import { answerNps, npsDue } from '../lib/kpis'
 import { listMyTrips } from '../lib/trips'
@@ -67,7 +69,7 @@ export function Profile() {
       <h1 className="gold-rule">Hello, {profile.display_name}</h1>
       {profile.member_number && <p className="founding-badge">Founding member No. {profile.member_number}</p>}
       <Notices />
-      {hasTrip !== null && <Strength profile={profile} interestCount={interestIds.length} hasTrip={hasTrip} />}
+      {hasTrip !== null && <Strength profile={profile} interestCount={interestIds.length} hasTrip={hasTrip} card={data.card} />}
       <MeetPrompts />
       <RecommendCard />
       <AdminLink />
@@ -123,9 +125,23 @@ export function Profile() {
           Edit my profile
         </Link>
       </section>
+      {data.card && (
+        <section className="card card-back-preview" aria-labelledby="my-card-back">
+          <h2 id="my-card-back" className="card-title">
+            The back of your card
+          </h2>
+          <p className="hint section-hint">Members see this when they flip your card.</p>
+          <CardBack name={profile.display_name ?? ''} answers={data.card.card_answers} mine />
+          <Link className="btn btn-secondary btn-block" to="/onboarding?step=4">
+            {data.card.card_answers.length ? 'Change my answers' : 'Fill it in'}
+          </Link>
+        </section>
+      )}
       <nav className="card settings-list" aria-label="Settings">
         <Link to="/filters">Who I’d like to meet</Link>
         <Link to="/meeting-safely">Meeting up safely</Link>
+        <Link to="/connections?tour=1">Take the tour again</Link>
+        <Link to="/account">Your account and data</Link>
         <Link to="/community-rules">Community rules</Link>
         <Link to="/terms">Terms</Link>
         <Link to="/privacy">Privacy</Link>
@@ -138,8 +154,8 @@ export function Profile() {
 }
 
 /** A bar showing how complete the profile is, with the next thing to add. Hidden once it's complete. */
-function Strength({ profile, interestCount, hasTrip }: { profile: Profile; interestCount: number; hasTrip: boolean }) {
-  const { percent, parts } = profileStrength(profile, interestCount, hasTrip)
+function Strength({ profile, interestCount, hasTrip, card }: { profile: Profile; interestCount: number; hasTrip: boolean; card: Card | null }) {
+  const { percent, parts } = profileStrength(profile, interestCount, hasTrip, card)
   const next = parts.filter((p) => !p.done)
   if (!next.length) return null
   return (
@@ -348,7 +364,7 @@ function RecommendCard() {
 
   return (
     <section className="card recommend-card" aria-labelledby="recommend-title">
-      <h2 id="recommend-title">{state === 'thanks' ? 'Thank you' : 'How likely are you to recommend Sodalis to a friend?'}</h2>
+      <h2 id="recommend-title">{state === 'thanks' ? 'Thank you' : 'How likely are you to recommend the Collective to a friend?'}</h2>
       {state === 'thanks' ? (
         <p>Your answer helps us make the Collective better.</p>
       ) : (

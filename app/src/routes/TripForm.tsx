@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { CityPicker } from '../components/CityPicker'
 import { Field, TextField } from '../components/Field'
 import { ActionBar, SaveError } from '../components/Form'
+import { useConfirm } from '../lib/useConfirm'
 import { Layout, Loading } from '../components/Layout'
 import { Segmented } from '../components/Segmented'
 import type { City } from '../lib/cities'
@@ -15,10 +16,10 @@ import { MAX_NOTE, checkNote, checkTripDates } from '../lib/validation'
 
 type Flex = '0' | '1' | '3' | '7'
 const FLEXIBILITY: readonly Option<Flex>[] = [
-  { value: '0', label: 'Fixed' },
-  { value: '1', label: '± 1 day' },
-  { value: '3', label: '± 3 days' },
-  { value: '7', label: '± 1 week' },
+  { value: '0', label: 'Exact dates' },
+  { value: '1', label: '1 day either way' },
+  { value: '3', label: '3 days either way' },
+  { value: '7', label: '1 week either way' },
 ]
 const toFlex = (days: number): Flex => (FLEXIBILITY.find((f) => Number(f.value) >= days)?.value ?? '7')
 
@@ -62,6 +63,7 @@ export function TripForm() {
 }
 
 function TripEditor({ trip }: { trip: Trip | null }) {
+  const { ask, dialog: confirmDialog } = useConfirm()
   const navigate = useNavigate()
   const [today] = useState(() => isoDate(new Date()))
   const heading = useRef<HTMLHeadingElement>(null)
@@ -112,7 +114,7 @@ function TripEditor({ trip }: { trip: Trip | null }) {
   }
 
   async function remove() {
-    if (!trip || !window.confirm(`Delete your trip to ${trip.city.name}?`)) return
+    if (!trip || !(await ask({ title: `Delete your trip to ${trip.city.name}?`, message: 'People going too will no longer see it.', confirmLabel: 'Delete trip', danger: true }))) return
     setBusy(true)
     setError(null)
     try {
@@ -126,6 +128,7 @@ function TripEditor({ trip }: { trip: Trip | null }) {
 
   return (
     <Layout>
+      {confirmDialog}
       <form onSubmit={submit} noValidate>
         <p className="eyebrow">{trip ? 'Edit trip' : 'New trip'}</p>
         <h1 ref={heading} tabIndex={-1}>

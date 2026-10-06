@@ -16,8 +16,8 @@ const emptyProfile: Profile = {
   member_number: null, home_city: null,
 }
 const prefs = { age_min: 18, age_max: 99, genders: [], max_distance_km: null }
-const make = (p: Partial<Profile>, interestIds: number[] = []): MyProfile => ({
-  profile: { ...emptyProfile, ...p }, interestIds, preferences: prefs,
+const make = (p: Partial<Profile>, interestIds: number[] = [], card: MyProfile['card'] = null): MyProfile => ({
+  profile: { ...emptyProfile, ...p }, interestIds, preferences: prefs, card,
 })
 const basics = { display_name: 'Jo', birth_year: 1960, gender: 'woman', home_city_id: 1 } as const
 

@@ -24,7 +24,7 @@ select ok((select relrowsecurity from pg_class where oid = 'public.cities'::regc
 select is((select count(*)::int from public.profiles where id in ('11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222')), 2, 'new accounts get a profile');
 select is((select count(*)::int from public.preferences where profile_id in ('11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222')), 2, 'new accounts get default preferences');
 
-update public.profiles set display_name = 'Bob', birth_year = 1960, gender = 'man', home_city_id = 2644688
+update public.profiles set display_name = 'Bob', birth_date = date '1960-04-01', gender = 'man', home_city_id = 2644688
  where id = '22222222-2222-4222-8222-222222222222';
 insert into public.profile_interests values ('22222222-2222-4222-8222-222222222222', 1), ('22222222-2222-4222-8222-222222222222', 2);
 
@@ -43,7 +43,7 @@ select is_empty($$select 1 from public.profiles where id = '22222222-2222-4222-8
 select is_empty($$select 1 from public.preferences where profile_id = '22222222-2222-4222-8222-222222222222'$$, 'Ann cannot read Bob''s preferences');
 select is_empty($$select 1 from public.profile_interests where profile_id = '22222222-2222-4222-8222-222222222222'$$, 'Ann cannot read Bob''s interests');
 
-select lives_ok($$update public.profiles set display_name = 'Ann', birth_year = 1958, gender = 'woman', home_city_id = 2267057 where id = '11111111-1111-4111-8111-111111111111'$$, 'Ann can fill in her own profile');
+select lives_ok($$update public.profiles set display_name = 'Ann', birth_date = date '1958-06-12', gender = 'woman', home_city_id = 2267057 where id = '11111111-1111-4111-8111-111111111111'$$, 'Ann can fill in her own profile');
 select lives_ok($$update public.profiles set display_name = 'Hacked' where id = '22222222-2222-4222-8222-222222222222'$$, 'updating Bob''s profile runs');
 select throws_ok($$update public.profiles set role = 'admin' where id = '11111111-1111-4111-8111-111111111111'$$, '42501', null, 'Ann cannot make herself an admin');
 select throws_ok($$update public.profiles set phone_verified_at = now() where id = '11111111-1111-4111-8111-111111111111'$$, '42501', null, 'Ann cannot mark her phone as checked');
@@ -51,7 +51,7 @@ select throws_ok($$update public.profiles set id_verified_at = now() where id = 
 select throws_ok($$update public.profiles set onboarded_at = now() where id = '11111111-1111-4111-8111-111111111111'$$, '42501', null, 'Ann cannot skip onboarding checks');
 select throws_ok($$insert into public.profiles (id) values (gen_random_uuid())$$, '42501', null, 'Ann cannot create profiles');
 select throws_ok($$delete from public.profiles where id = '11111111-1111-4111-8111-111111111111'$$, '42501', null, 'Ann cannot delete profiles directly');
-select throws_ok(format('update public.profiles set birth_year = %s where id = %L', extract(year from now())::int - 17, '11111111-1111-4111-8111-111111111111'), '23514', 'Members must be 18 or over', 'under-18s are refused');
+select throws_ok(format('update public.profiles set birth_date = %L where id = %L', (current_date - interval '17 years')::date, '11111111-1111-4111-8111-111111111111'), '23514', 'Members must be 18 or over', 'under-18s are refused');
 select throws_ok($$update public.profiles set photo_path = '22222222-2222-4222-8222-222222222222/x.jpg' where id = '11111111-1111-4111-8111-111111111111'$$, '23514', null, 'Ann cannot point her photo at Bob''s folder');
 select throws_ok($$update public.preferences set age_min = 17 where profile_id = '11111111-1111-4111-8111-111111111111'$$, '23514', null, 'preferences cannot include under-18s');
 

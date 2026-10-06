@@ -1,5 +1,6 @@
 // Everything the app reads or writes about the signed-in member's own
 // profile. Row-level security limits every query here to their own rows.
+import type { Card } from './card'
 import type { City } from './cities'
 import { friendlyError } from './errors'
 import type { Budget, DayRhythm, Gender, Pace, RoomSharing, TravelStyle, Walking } from './options'
@@ -37,7 +38,8 @@ export type Preferences = {
   max_distance_km: number | null
 }
 
-export type MyProfile = { profile: Profile; interestIds: number[]; preferences: Preferences }
+/** `card` is null until the database part with member cards is live. */
+export type MyProfile = { profile: Profile; interestIds: number[]; preferences: Preferences; card: Card | null }
 
 // The foreign key is named because profiles also reach cities through the
 // wishlist table, which would make a plain cities(...) embed ambiguous.
@@ -45,10 +47,12 @@ const PROFILE_COLUMNS =
   'id, display_name, birth_year, birth_date, gender, home_city_id, bio, photo_path, travel_style, pace, budget, mobility_note, travelling_with, room_sharing, day_rhythm, walking, languages, onboarded_at, member_number, home_city:cities!profiles_home_city_id_fkey(id, name, country_code)'
 
 export async function getMyProfile(userId: string): Promise<MyProfile> {
-  const [profile, interests, preferences] = await Promise.all([
+  const [profile, interests, preferences, card] = await Promise.all([
     supabase.from('profiles').select(PROFILE_COLUMNS).eq('id', userId).single(),
     supabase.from('profile_interests').select('interest_id').eq('profile_id', userId),
     supabase.from('preferences').select('age_min, age_max, genders, max_distance_km').eq('profile_id', userId).single(),
+    // Read on its own so the rest of the profile still loads before the card columns exist.
+    supabase.from('profiles').select('card_answers').eq('id', userId).single(),
   ])
   const error = profile.error ?? interests.error ?? preferences.error
   if (error) throw friendlyError(error)
@@ -56,6 +60,7 @@ export async function getMyProfile(userId: string): Promise<MyProfile> {
     profile: profile.data as unknown as Profile,
     interestIds: (interests.data ?? []).map((row) => row.interest_id as number),
     preferences: preferences.data as Preferences,
+    card: card.error ? null : (card.data as Card),
   }
 }
 

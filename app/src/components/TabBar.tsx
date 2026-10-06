@@ -31,8 +31,8 @@ const TABS: { tab: Tab; to: string; label: string; icon: string }[] = [
   },
 ]
 
-/** The bar along the bottom of the main screens. */
-export function TabBar({ current }: { current: Tab }) {
+/** The bar along the bottom of the main screens on a phone, or along the top on a laptop. */
+export function TabBar({ current, top = false }: { current: Tab; top?: boolean }) {
   const [counts, setCounts] = useState<Partial<Record<Tab, number>>>(cachedTabCounts() ?? {})
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export function TabBar({ current }: { current: Tab }) {
   }, [])
 
   return (
-    <nav className="tabbar" aria-label="Main">
+    <nav className={top ? 'tabbar tabbar-top' : 'tabbar'} aria-label="Main">
       <ul>
         {TABS.map(({ tab, to, label, icon }) => {
           const n = counts[tab] ?? 0

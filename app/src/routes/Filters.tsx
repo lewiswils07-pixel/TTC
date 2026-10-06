@@ -63,7 +63,7 @@ export function Filters() {
     setBusy(true)
     setError(null)
     try {
-      await saveFilters(userId, values)
+      await saveFilters(userId, { ...values, verified_only: false }) // ID checks don’t exist yet
       navigate('/connections')
     } catch (e) {
       setError(messageOf(e))
@@ -121,16 +121,10 @@ export function Filters() {
           </div>
           {locked && (
             <p className="hint" id="plus-locked">
-              These come with {brand.plusName}, which isn’t available yet. You can choose them now, and they’ll start working when you join.
+              These come with {brand.plusName}. You can set them now, and they’ll start working when you have {brand.plusName}.
             </p>
           )}
-          <label className="switch-row">
-            <input type="checkbox" role="switch" checked={values.verified_only} onChange={(e) => set({ verified_only: e.target.checked })} />
-            <span>
-              <strong>Verified members only</strong>
-              <span className="hint">People who have checked their ID with us.</span>
-            </span>
-          </label>
+          {/* “Verified members only” returns when members can check their ID with us. */}
           <Segmented name="styles" legend="Planning" hint="Leave all off to see everyone." options={TRAVEL_STYLES} selected={values.styles} onChange={(styles) => set({ styles })} multiple />
           <Segmented name="paces" legend="Pace" options={PACES} selected={values.paces} onChange={(paces) => set({ paces })} multiple />
           <Segmented name="budgets" legend="Budget" options={BUDGETS} selected={values.budgets} onChange={(budgets) => set({ budgets })} multiple />

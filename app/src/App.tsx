@@ -1,8 +1,9 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { RequireSession } from './components/Guards'
 import { Loading } from './components/Layout'
 import { SessionProvider } from './lib/session'
+import { useSession } from './lib/session-context'
 import { Home } from './routes/Home'
 import { NotFound } from './routes/NotFound'
 import { SignIn } from './routes/SignIn'
@@ -18,11 +19,16 @@ const Filters = lazy(() => import('./routes/Filters').then((m) => ({ default: m.
 const Messages = lazy(() => import('./routes/Messages').then((m) => ({ default: m.Messages })))
 const Chat = lazy(() => import('./routes/Chat').then((m) => ({ default: m.Chat })))
 const Admin = lazy(() => import('./routes/Admin').then((m) => ({ default: m.Admin })))
+const account = () => import('./routes/Account')
+const Account = lazy(() => account().then((m) => ({ default: m.Account })))
+const AccountDeleted = lazy(() => account().then((m) => ({ default: m.AccountDeleted })))
 const Insights = lazy(() => import('./routes/Insights').then((m) => ({ default: m.Insights })))
 const MeetingSafely = lazy(() => import('./routes/MeetingSafely').then((m) => ({ default: m.MeetingSafely })))
 const Groups = lazy(() => import('./routes/Groups').then((m) => ({ default: m.Groups })))
 const GroupForm = lazy(() => import('./routes/GroupForm').then((m) => ({ default: m.GroupForm })))
 const GroupDetail = lazy(() => import('./routes/GroupDetail').then((m) => ({ default: m.GroupDetail })))
+const ShareMeetup = lazy(() => import('./routes/ShareMeetup').then((m) => ({ default: m.ShareMeetup })))
+const SafeView = lazy(() => import('./routes/SafeView').then((m) => ({ default: m.SafeView })))
 const PlanBoard = lazy(() => import('./routes/PlanBoard').then((m) => ({ default: m.PlanBoard })))
 const legal = () => import('./routes/Legal')
 const Terms = lazy(() => legal().then((m) => ({ default: m.Terms })))
@@ -41,7 +47,40 @@ export function App() {
   )
 }
 
+// Once a member is signed in, the other screens download quietly in the
+// background, so moving between them doesn't wait for the network.
+const MEMBER_SCREENS = [
+  () => import('./routes/ForYou'),
+  () => import('./routes/Connections'),
+  () => import('./routes/Trips'),
+  () => import('./routes/TripMatches'),
+  () => import('./routes/TripForm'),
+  () => import('./routes/Messages'),
+  () => import('./routes/Chat'),
+  () => import('./routes/Groups'),
+  () => import('./routes/GroupDetail'),
+  () => import('./routes/GroupForm'),
+  () => import('./routes/PlanBoard'),
+  () => import('./routes/ShareMeetup'),
+  () => import('./routes/Profile'),
+  () => import('./routes/Filters'),
+  () => import('./routes/Account'),
+  () => import('./routes/MeetingSafely'),
+  () => import('./routes/Onboarding'),
+]
+
+function usePreloadScreens() {
+  const { session } = useSession()
+  useEffect(() => {
+    if (!session) return
+    const idle = window.requestIdleCallback ?? ((run: () => void) => window.setTimeout(run, 1200))
+    const id = idle(() => MEMBER_SCREENS.forEach((load) => void load().catch(() => undefined)))
+    return () => (window.cancelIdleCallback ?? window.clearTimeout)(id)
+  }, [session])
+}
+
 export function AppRoutes() {
+  usePreloadScreens()
   return (
     <Suspense fallback={<Loading />}>
       <Routes>
@@ -186,6 +225,24 @@ export function AppRoutes() {
           </RequireSession>
         }
       />
+      <Route
+        path="/messages/:id/share"
+        element={
+          <RequireSession>
+            <ShareMeetup />
+          </RequireSession>
+        }
+      />
+      <Route path="/safe/:token" element={<SafeView />} />
+      <Route
+        path="/account"
+        element={
+          <RequireSession>
+            <Account />
+          </RequireSession>
+        }
+      />
+      <Route path="/account-deleted" element={<AccountDeleted />} />
       <Route path="/meeting-safely" element={<MeetingSafely />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />

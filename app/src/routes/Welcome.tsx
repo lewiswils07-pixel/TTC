@@ -40,7 +40,7 @@ export function WelcomeScreen() {
         <div className="card welcome-gift">
           <h2>3 months of {brand.plusName}, on us</h2>
           <p>
-            As a thank-you for joining early: unlimited connection requests, up to 3 groups and extra filters
+            As a thank-you for joining early: 50 connection requests a week, up to 3 groups and extra filters
             {welcome?.plus_until ? `, until ${longDate(welcome.plus_until.slice(0, 10))}` : ''}. Nothing to pay, and no card needed.
           </p>
         </div>
@@ -56,7 +56,7 @@ export function WelcomeScreen() {
           </li>
         </ol>
         <HeardFromQuestion />
-        <Link className="btn btn-primary btn-block btn-lg" to="/connections">
+        <Link className="btn btn-primary btn-block btn-lg" to="/connections?tour=1">
           Start meeting people
         </Link>
         <Link className="btn btn-secondary btn-block" to="/trips/new">

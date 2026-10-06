@@ -16,7 +16,8 @@ export type FeedPerson = {
   score: number
   /** The member's trip this person matched, for the request (the first one if several). */
   trip_id: number | null
-  trips: { city: string; start: string; end: string }[]
+  /** `overlap` is true when they're there at the same time, not just on nearby dates. */
+  trips: { city: string; start: string; end: string; overlap: boolean }[]
   shared_interests: string[]
   shared_places: string[]
   distance_km: number | null
@@ -50,7 +51,7 @@ export function mergeFeed(byTrip: { tripId: number; people: TripSuggestion[] }[]
       const p = people.get(s.profile_id) ?? base(s)
       p.trip_id ??= tripId
       p.score = Math.max(p.score, s.score)
-      p.trips.push({ city: s.trip_city, start: s.overlap_start ?? s.trip_start, end: s.overlap_end ?? s.trip_end })
+      p.trips.push({ city: s.trip_city, start: s.overlap_start ?? s.trip_start, end: s.overlap_end ?? s.trip_end, overlap: !!(s.overlap_start && s.overlap_end) })
       p.shared_interests = union(p.shared_interests, s.shared_interests)
       people.set(s.profile_id, p)
     }
@@ -65,6 +66,9 @@ export function mergeFeed(byTrip: { tripId: number; people: TripSuggestion[] }[]
   }
   return [...people.values()].sort((a, b) => Number(b.trips.length > 0) - Number(a.trips.length > 0) || b.score - a.score)
 }
+
+/** The first trip where this person is there at the same time as the member, if any. */
+export const sameTime = (p: FeedPerson) => p.trips.find((t) => t.overlap)
 
 /** Everyone suggested for the member's next 5 trips and for their interests. */
 export async function loadFeed(): Promise<FeedPerson[]> {

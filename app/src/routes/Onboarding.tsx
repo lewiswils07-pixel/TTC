@@ -6,6 +6,7 @@ import { InterestPicker } from '../components/InterestPicker'
 import { Layout, Loading } from '../components/Layout'
 import { ActionBar, SaveError } from '../components/Form'
 import { Segmented } from '../components/Segmented'
+import { ANSWER_MAX_CHARS, ANSWER_MAX_WORDS, ANSWERS_TO_PICK, CARD_QUESTIONS, checkAnswer, questionText, saveCard, wordCount, type CardAnswer } from '../lib/card'
 import type { City } from '../lib/cities'
 import { messageOf } from '../lib/errors'
 import { firstUnfinishedStep } from '../lib/onboarding'
@@ -51,13 +52,18 @@ const STEPS = [
   { title: 'Your photo', intro: 'A clear, smiling photo helps other members feel comfortable. Only signed-in members can see it.' },
   { title: 'Your interests', intro: `Pick your top ${INTERESTS_TO_PICK}. We use them to suggest people you’ll get on with.` },
   {
+    title: 'The back of your card',
+    intro: `Choose ${ANSWERS_TO_PICK} questions and answer them in a sentence or two. Members see your answers when they flip your card.`,
+  },
+  {
     title: 'How you travel',
     intro: 'Optional, and there are no wrong answers. The more you add, the better we can suggest people who travel the way you do.',
   },
 ] as const
-/** Sign-up is the first 3 steps (Lewis, 5 Oct: keep it quick). "How you
- *  travel" comes after, from the profile page, to strengthen the profile. */
-const SIGN_UP_STEPS = 3
+/** Sign-up is the first 4 steps (Lewis, 5 Oct: keep it quick; 6 Oct: add
+ *  the back of the card). "How you travel" comes after, from the profile
+ *  page. Until the card is live in the database, sign-up is 3 steps. */
+const CARD_STEP = 4
 const TOTAL = STEPS.length
 
 export function Onboarding() {
@@ -86,48 +92,51 @@ export function Onboarding() {
   }
   if (!data || !interests) return <Loading />
 
+  const signUpSteps = data.card ? CARD_STEP : CARD_STEP - 1
   const requested = Number(params.get('step'))
-  const step = requested >= 1 && requested <= TOTAL ? requested : firstUnfinishedStep(data)
+  let step = requested >= 1 && requested <= TOTAL ? requested : firstUnfinishedStep(data)
+  if (step === CARD_STEP && !data.card) step = CARD_STEP + 1
   const goTo = (n: number) => setParams({ step: String(n) })
   const firstTime = !data.profile.onboarded_at
   const next = async () => {
-    if (firstTime && step >= SIGN_UP_STEPS) {
+    if (firstTime && step >= signUpSteps) {
       await finishOnboarding()
       await reload()
       navigate('/welcome', { replace: true })
       return
     }
     await reload()
-    if (step < TOTAL) goTo(step + 1)
+    if (step < TOTAL) goTo(step + 1 === CARD_STEP && !data.card ? step + 2 : step + 1)
     else navigate('/profile', { replace: true })
   }
-  const back = step > 1 ? () => goTo(step - 1) : undefined
+  const back = step > 1 ? () => goTo(step - 1 === CARD_STEP && !data.card ? step - 2 : step - 1) : undefined
 
   return (
     <Layout>
-      <StepFrame step={step} key={step} signingUp={firstTime}>
+      <StepFrame step={step} key={step} signingUp={firstTime} signUpSteps={signUpSteps}>
         {step === 1 && <BasicsStep userId={userId} data={data} onDone={next} />}
         {step === 2 && <PhotoStep userId={userId} data={data} onDone={next} onBack={back} />}
-        {step === 3 && <InterestsStep data={data} interests={interests} onDone={next} onBack={back} />}
-        {step === 4 && <PreferencesStep userId={userId} data={data} onDone={next} onBack={back} />}
+        {step === 3 && <InterestsStep data={data} interests={interests} onDone={next} onBack={back} lastStep={signUpSteps === 3} />}
+        {step === 4 && <CardStep userId={userId} data={data} onDone={next} onBack={back} />}
+        {step === 5 && <PreferencesStep userId={userId} data={data} onDone={next} onBack={back} />}
       </StepFrame>
     </Layout>
   )
 }
 
-function StepFrame({ step, signingUp, children }: { step: number; signingUp: boolean; children: ReactNode }) {
+function StepFrame({ step, signingUp, signUpSteps, children }: { step: number; signingUp: boolean; signUpSteps: number; children: ReactNode }) {
   const heading = useRef<HTMLHeadingElement>(null)
   useEffect(() => heading.current?.focus(), [])
   const { title, intro } = STEPS[step - 1]
-  const extra = step > SIGN_UP_STEPS
+  const extra = step > signUpSteps
   return (
     <div className="step">
       {signingUp && !extra && (
         <div className="progress" aria-hidden="true">
-          <div className="progress-bar" style={{ width: `${(step / SIGN_UP_STEPS) * 100}%` }} />
+          <div className="progress-bar" style={{ width: `${(step / signUpSteps) * 100}%` }} />
         </div>
       )}
-      <p className="eyebrow">{extra ? 'Strengthen your profile' : signingUp ? `Step ${step} of ${SIGN_UP_STEPS}` : 'Edit your profile'}</p>
+      <p className="eyebrow">{extra ? 'Add more to your profile' : signingUp ? `Step ${step} of ${signUpSteps}` : 'Edit your profile'}</p>
       <h1 ref={heading} tabIndex={-1}>
         {title}
       </h1>
@@ -357,7 +366,7 @@ function PhotoStep({ userId, data, onDone, onBack }: StepProps) {
           <li>Recent, and in good light</li>
           <li>No sunglasses, hats or group shots</li>
         </ul>
-        <p className="hint">We crop it to a square around the middle. You’ll need a photo before asking to connect with anyone.</p>
+        <p className="hint">A head-and-shoulders photo works best. You’ll need a photo before you can connect with anyone.</p>
         <Field name="bio" label="A few words about you (optional)" hint={`Where you’ve been, where you’d love to go, or what makes a good travel companion. ${500 - bio.length} characters left.`}>
           {({ id, describedBy }) => (
             <textarea id={id} className="textarea" maxLength={500} aria-describedby={describedBy} value={bio} onChange={(e) => setBio(e.target.value)} />
@@ -370,7 +379,7 @@ function PhotoStep({ userId, data, onDone, onBack }: StepProps) {
   )
 }
 
-function InterestsStep({ data, interests, onDone, onBack }: Omit<StepProps, 'userId'> & { interests: Interest[] }) {
+function InterestsStep({ data, interests, onDone, onBack, lastStep }: Omit<StepProps, 'userId'> & { interests: Interest[]; lastStep: boolean }) {
   const [selected, setSelected] = useState<number[]>(data.interestIds)
   const errors = { interests: checkInterests(selected) }
   const { shown, validateAll } = useChecks(errors)
@@ -389,7 +398,7 @@ function InterestsStep({ data, interests, onDone, onBack }: Omit<StepProps, 'use
       <ActionBar
         busy={busy}
         onBack={onBack}
-        label={data.profile.onboarded_at ? undefined : 'Finish sign-up'}
+        label={data.profile.onboarded_at || !lastStep ? undefined : 'Finish sign-up'}
         note={
           <span aria-live="polite">
             <strong>{selected.length}</strong> of {INTERESTS_TO_PICK} picked
@@ -501,6 +510,107 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
       </p>
       <SaveError error={error} />
       <ActionBar busy={busy} onBack={onBack} label="Save" />
+    </form>
+  )
+}
+
+const EMPTY_ANSWERS: CardAnswer[] = [
+  { q: '', a: '' },
+  { q: '', a: '' },
+  { q: '', a: '' },
+]
+
+function CardStep({ userId, data, onDone, onBack }: StepProps) {
+  const [answers, setAnswers] = useState<CardAnswer[]>(() => {
+    const saved = data.card?.card_answers ?? []
+    return EMPTY_ANSWERS.map((empty, i) => saved[i] ?? empty)
+  })
+  const errors = Object.fromEntries(
+    answers.flatMap((x, i) => [
+      [`q${i}`, x.q ? null : 'Please choose a question.'],
+      [`a${i}`, x.q ? checkAnswer(x) : null],
+    ]),
+  ) as Record<string, string | null>
+  const { shown, touch, validateAll } = useChecks(errors)
+  const { busy, error, submit } = useStepSubmit(() => saveCard(userId, answers), onDone)
+  const set = (i: number, change: Partial<CardAnswer>) => setAnswers((list) => list.map((x, j) => (j === i ? { ...x, ...change } : x)))
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (validateAll()) void submit()
+      }}
+      noValidate
+    >
+      {answers.map((answer, i) => {
+        const taken = new Set(answers.filter((_, j) => j !== i).map((x) => x.q))
+        const words = wordCount(answer.a)
+        return (
+          <section className="card form-card card-question" key={i} aria-labelledby={`card-q-${i}`}>
+            <h2 id={`card-q-${i}`} className="card-title">
+              Question {i + 1} of {ANSWERS_TO_PICK}
+            </h2>
+            <Field name={`q${i}`} label="Choose a question" error={shown(`q${i}`)}>
+              {({ id, describedBy, invalid }) => (
+                <select
+                  id={id}
+                  className="input"
+                  value={answer.q}
+                  aria-invalid={invalid || undefined}
+                  aria-describedby={describedBy}
+                  onChange={(e) => {
+                    set(i, { q: e.target.value })
+                    touch(`q${i}`)
+                  }}
+                >
+                  <option value="">Choose…</option>
+                  {CARD_QUESTIONS.map((g) => (
+                    <optgroup key={g.group} label={g.group}>
+                      {g.questions.map((q) => (
+                        <option key={q.key} value={q.key} disabled={taken.has(q.key)}>
+                          {q.text}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              )}
+            </Field>
+            {answer.q && (
+              <Field
+                name={`a${i}`}
+                label={`Your answer to “${questionText(answer.q)}”`}
+                hint={
+                  <span aria-live="polite">
+                    {words} of {ANSWER_MAX_WORDS} words
+                  </span>
+                }
+                error={shown(`a${i}`)}
+              >
+                {({ id, describedBy, invalid }) => (
+                  <textarea
+                    id={id}
+                    className="input textarea card-answer"
+                    rows={3}
+                    maxLength={ANSWER_MAX_CHARS}
+                    value={answer.a}
+                    aria-invalid={invalid || undefined}
+                    aria-describedby={describedBy}
+                    onChange={(e) => {
+                      set(i, { a: e.target.value })
+                      if (wordCount(e.target.value) > ANSWER_MAX_WORDS) touch(`a${i}`)
+                    }}
+                    onBlur={() => touch(`a${i}`)}
+                  />
+                )}
+              </Field>
+            )}
+          </section>
+        )
+      })}
+      <SaveError error={error} />
+      <ActionBar busy={busy} onBack={onBack} label={data.profile.onboarded_at ? 'Save' : 'Finish sign-up'} />
     </form>
   )
 }

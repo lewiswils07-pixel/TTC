@@ -7,6 +7,7 @@ import { axeViolations } from './a11y'
 const auth = vi.hoisted(() => ({
   signInWithOtp: vi.fn(),
   verifyOtp: vi.fn(),
+  signInWithPassword: vi.fn(),
   getSession: vi.fn(async () => ({ data: { session: null } })),
   onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: () => undefined } } })),
   signOut: vi.fn(),
@@ -30,6 +31,8 @@ function renderAt(path: string) {
 beforeEach(() => {
   auth.signInWithOtp.mockReset()
   auth.verifyOtp.mockReset()
+  auth.signInWithPassword.mockReset()
+  localStorage.clear()
 })
 
 describe('home screen', () => {
@@ -85,13 +88,36 @@ describe('sign in with an email code', () => {
     expect(auth.verifyOtp).not.toHaveBeenCalled()
     await userEvent.type(codeBox, '6')
     expect(auth.verifyOtp).toHaveBeenCalledWith({ email: 'jane@example.com', token: '123456', type: 'email' })
-    await waitFor(() => expect(codeBox).toHaveAccessibleDescription(/didn't work/))
+    await waitFor(() => expect(codeBox).toHaveAccessibleDescription(/didn’t work/))
+  })
+})
+
+describe('sign in with a password', () => {
+  it('signs in with email and password, and explains a mismatch', async () => {
+    auth.signInWithPassword.mockResolvedValue({ data: { session: null }, error: { message: 'Invalid login credentials' } })
+    const { container } = renderAt('/sign-in')
+    await userEvent.click(await screen.findByRole('button', { name: 'Sign in' }))
+    expect(await screen.findByRole('heading', { name: 'Welcome back' })).toHaveFocus()
+    expect(await axeViolations(container)).toEqual([])
+
+    await userEvent.type(screen.getByLabelText('Email address'), 'jane@example.com')
+    const submit = () => screen.getAllByRole('button', { name: 'Sign in' }).at(-1)!
+    await userEvent.click(submit())
+    expect(auth.signInWithPassword).not.toHaveBeenCalled()
+    expect(screen.getByLabelText('Password')).toHaveAccessibleDescription(/enter your password/)
+
+    await userEvent.type(screen.getByLabelText('Password'), 'wrong horse')
+    await userEvent.click(screen.getByRole('button', { name: 'Show password' }))
+    expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'text')
+    await userEvent.click(submit())
+    expect(auth.signInWithPassword).toHaveBeenCalledWith({ email: 'jane@example.com', password: 'wrong horse' })
+    await waitFor(() => expect(screen.getByLabelText('Password')).toHaveAccessibleDescription(/don’t match/))
   })
 })
 
 describe('protected screens', () => {
   it('send signed-out visitors to sign in', async () => {
     renderAt('/dashboard')
-    expect(await screen.findByRole('heading', { name: 'Join or sign in' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Join the Collective' })).toBeInTheDocument()
   })
 })

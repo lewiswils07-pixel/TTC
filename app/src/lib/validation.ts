@@ -1,7 +1,7 @@
 // Field checks shared by the forms. Each returns a message a member can act
 // on, or null when the value is fine. The database repeats the important
 // rules, so these are for helpful, instant feedback only.
-import { CODE_LENGTH, isValidEmail } from './auth'
+import { CODE_LENGTH, isValidEmail, MAX_PASSWORD, MIN_PASSWORD } from './auth'
 import { addDays, daysBetween } from './dates'
 import { INTERESTS_TO_PICK, MAX_PREF_AGE, MIN_AGE, ageFromDate, latestBirthYear } from './options'
 
@@ -18,6 +18,18 @@ export const checkCode: Check<string> = (v) => {
   if (/[^\d\s]/.test(v)) return 'The code only has numbers in it.'
   return digits.length === CODE_LENGTH ? null : `The code has ${CODE_LENGTH} digits. You’ve typed ${digits.length}.`
 }
+
+/** A new password. */
+export const checkNewPassword: Check<string> = (v) => {
+  if (!v) return 'Please choose a password.'
+  if (v.length < MIN_PASSWORD) return `Use at least ${MIN_PASSWORD} characters. You’ve typed ${v.length}.`
+  if (v.length > MAX_PASSWORD) return `Please keep it to ${MAX_PASSWORD} characters or fewer.`
+  if (v.trim() !== v) return 'Your password can’t start or end with a space.'
+  return null
+}
+
+/** A password typed to sign in. */
+export const checkPassword: Check<string> = (v) => (v ? null : 'Please enter your password.')
 
 export const checkName: Check<string> = (v) => {
   const name = v.trim()

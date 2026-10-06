@@ -5,11 +5,11 @@ import { Layout } from '../components/Layout'
 const TIPS: { title: string; text: string }[] = [
   { title: 'Get to know each other here first', text: 'Chat in the app, and have a video call before you meet. Someone who won’t talk on camera is a reason to be careful.' },
   { title: 'Meet somewhere busy, in daylight', text: 'A café, a museum or a hotel lobby is ideal. Never meet first at a private home or where you’re staying.' },
-  { title: 'Tell someone you trust', text: 'Share who you’re meeting, where and when, and check in with them afterwards.' },
+  { title: 'Tell someone you trust', text: 'Share who you’re meeting, where and when. In your chat, tap “Tell someone you trust” to send them a private link, then tap “I’m back safe” when you’re home.' },
   { title: 'Keep your own plans', text: 'Arrange your own transport and keep your own booking until you know each other well. You don’t need to share where you’re staying.' },
   { title: 'Never send money', text: 'Don’t send or lend money, buy gift cards, or share bank details with someone you haven’t met, whatever the story. Report anyone who asks.' },
   { title: 'Keep your essentials with you', text: 'Passport, cards and phone stay with you, and keep your phone charged.' },
-  { title: 'Trust your instincts', text: 'You can leave at any time, and you don’t owe anyone an explanation. Block or report from their profile or your chat.' },
+  { title: 'Trust your instincts', text: 'You can leave at any time, and you don’t owe anyone an explanation. Block or report them from their card or your chat.' },
   { title: 'Before you travel together', text: 'Agree your budget, pace and how you’ll split costs before you book anything, and start with something short.' },
 ]
 

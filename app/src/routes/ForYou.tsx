@@ -1,12 +1,17 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
-import { Link, Navigate } from 'react-router'
+import { Link, Navigate, useSearchParams } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
+import { CardBack } from '../components/CardBack'
 import { SafetyBox } from '../components/SafetyBox'
+import { SameTimeStrip } from '../components/SameTimeStrip'
+import { Tour } from '../components/Tour'
 import { SubNav } from '../components/SubNav'
 import { CONNECTIONS_NAV } from '../lib/nav'
 import { ConnectBox, SharedInterests, useRequests, type Requests } from '../components/Suggestions'
+import { loadCard, type CardAnswer } from '../lib/card'
 import { messageOf } from '../lib/errors'
-import { callouts, clearNotNow, forgetNotNow, loadFeed, notNowIds, saveNotNow, type FeedPerson } from '../lib/feed'
+import { peek, remember } from '../lib/cache'
+import { callouts, clearNotNow, sameTime, forgetNotNow, loadFeed, notNowIds, saveNotNow, type FeedPerson } from '../lib/feed'
 import { noteFirstMatch } from '../lib/kpis'
 import { fitWords, homeLabel } from '../lib/matching'
 import { ageLabel } from '../lib/options'
@@ -20,15 +25,22 @@ export function ForYou() {
   const me = session!.user.id
   const { data, error: profileError } = useMyProfile(me)
   const requests = useRequests()
-  const [people, setPeople] = useState<FeedPerson[] | null>(null)
+  const [people, setPeople] = useState<FeedPerson[] | null>(() => {
+    const last = peek<FeedPerson[]>('feed')
+    if (!last) return null
+    const hidden = notNowIds(me)
+    return last.filter((p) => !hidden.has(p.profile_id))
+  })
   const [error, setError] = useState<string | null>(null)
   const [skipped, setSkipped] = useState(0)
   const [status, setStatus] = useState<{ text: string; undo?: FeedPerson } | null>(null)
   const heading = useRef<HTMLHeadingElement>(null)
+  const [params, setParams] = useSearchParams()
+  const touring = params.get('tour') === '1'
 
   useEffect(() => {
     heading.current?.focus()
-    loadFeed().then(
+    remember('feed', loadFeed()).then(
       (list) => {
         const hidden = notNowIds(me)
         setSkipped(list.filter((p) => hidden.has(p.profile_id)).length)
@@ -61,7 +73,7 @@ export function ForYou() {
   function notNow(p: FeedPerson) {
     saveNotNow(me, p.profile_id)
     setSkipped((n) => n + 1)
-    next(`${p.display_name} is hidden for 30 days.`, p)
+    next(`We won’t show ${p.display_name} again for 30 days.`, p)
   }
 
   function undo(p: FeedPerson) {
@@ -80,6 +92,7 @@ export function ForYou() {
 
   return (
     <Layout tab="connections">
+      {touring && <Tour onClose={() => setParams({}, { replace: true })} />}
       <div className="page-head">
         <h1 ref={heading} tabIndex={-1}>
           Connections
@@ -93,8 +106,8 @@ export function ForYou() {
         {status?.text}
       </p>
       {status && (
-        <p className="feed-toast" aria-hidden="true">
-          {status.text}
+        <p className="feed-toast">
+          <span aria-hidden="true">{status.text}</span>
           {status.undo && (
             <button type="button" className="btn-link" onClick={() => undo(status.undo!)}>
               Undo
@@ -107,6 +120,7 @@ export function ForYou() {
           {error}
         </p>
       )}
+      {people && <SameTimeStrip people={people} />}
       {!error && (!people || !requests) && <p className="hint">Finding people for you…</p>}
       {people && requests && person && (
         <>
@@ -142,7 +156,7 @@ export function ForYou() {
           </ul>
           {skipped > 0 && (
             <button type="button" className="btn btn-secondary btn-block" onClick={showSkipped}>
-              Show the {skipped} {skipped === 1 ? 'person' : 'people'} I said “Not now” to
+              Show the {skipped} {skipped === 1 ? 'person' : 'people'} you skipped
             </button>
           )}
         </div>
@@ -171,7 +185,21 @@ function PersonCard({
   const [connecting, setConnecting] = useState(false)
   const [drag, setDrag] = useState<{ from: number; x: number } | null>(null)
   const [photo, setPhoto] = useState<string | null>(null)
+  const [flipped, setFlipped] = useState(false)
+  const [back, setBack] = useState<CardAnswer[] | 'error' | null>(null)
+  const moved = useRef(0)
   const home = homeLabel(person)
+
+  function flip() {
+    if (connecting) return
+    setFlipped((f) => !f)
+    if (back === null || back === 'error') {
+      loadCard(person.profile_id).then(
+        (c) => setBack(c.card_answers),
+        () => setBack('error'),
+      )
+    }
+  }
   const lines = callouts(person, myHome)
   const x = drag?.x ?? 0
 
@@ -180,11 +208,14 @@ function PersonCard({
   }, [person.photo_path])
 
   function down(e: PointerEvent<HTMLDivElement>) {
+    moved.current = 0
     if (connecting || e.pointerType === 'mouse') return
     setDrag({ from: e.clientX, x: 0 })
   }
   function move(e: PointerEvent<HTMLDivElement>) {
-    if (drag) setDrag({ ...drag, x: e.clientX - drag.from })
+    if (!drag) return
+    moved.current = Math.max(moved.current, Math.abs(e.clientX - drag.from))
+    setDrag({ ...drag, x: e.clientX - drag.from })
   }
   function up() {
     if (!drag) return
@@ -194,32 +225,56 @@ function PersonCard({
   }
 
   return (
-    <article className={connecting ? 'card person-feed-card is-connecting' : 'card person-feed-card'} aria-labelledby={`name-${person.profile_id}`}>
-      <div
-        className={drag ? 'feed-photo is-dragging' : 'feed-photo'}
-        style={{ transform: x ? `translateX(${x}px) rotate(${x / 25}deg)` : undefined }}
-        onPointerDown={down}
-        onPointerMove={move}
-        onPointerUp={up}
-        onPointerCancel={() => setDrag(null)}
-      >
-        {photo ? (
-          <img src={photo} alt="" draggable={false} />
-        ) : (
-          <span className="feed-initial" aria-hidden="true">
-            {person.display_name.slice(0, 1).toUpperCase()}
-          </span>
-        )}
-        {x > 40 && <span className="swipe-label swipe-yes">Connect</span>}
-        {x < -40 && <span className="swipe-label swipe-no">Not now</span>}
-        <div className="feed-who">
-          <h2 id={`name-${person.profile_id}`}>
-            {person.display_name}
-            {person.birth_year ? <span className="feed-age">, {ageLabel(person.birth_year)}</span> : null}
-          </h2>
-          {home && <p>{home}</p>}
+    <article className={`card person-feed-card${connecting ? ' is-connecting' : ''}${sameTime(person) ? ' is-same-time' : ''}`} aria-labelledby={`name-${person.profile_id}`}>
+      <div className={flipped ? 'feed-flip is-flipped' : 'feed-flip'}>
+        <div className="feed-flip-inner">
+          <div className="feed-face feed-front" inert={flipped}>
+            <div
+              className={drag ? 'feed-photo is-dragging' : 'feed-photo'}
+              style={{ transform: x ? `translateX(${x}px) rotate(${x / 25}deg)` : undefined }}
+              onPointerDown={down}
+              onPointerMove={move}
+              onPointerUp={up}
+              onPointerCancel={() => setDrag(null)}
+              // A tap on the photo flips the card, like the button below; a swipe doesn't.
+              onClick={() => moved.current < 8 && flip()}
+            >
+              {photo ? (
+                <img src={photo} alt="" draggable={false} />
+              ) : (
+                <span className="feed-initial" aria-hidden="true">
+                  {person.display_name.slice(0, 1).toUpperCase()}
+                </span>
+              )}
+              {x > 40 && <span className="swipe-label swipe-yes">Connect</span>}
+              {x < -40 && <span className="swipe-label swipe-no">Not now</span>}
+              <div className="feed-who">
+                <h2 id={`name-${person.profile_id}`}>
+                  {person.display_name}
+                  {person.birth_year ? <span className="feed-age">, {ageLabel(person.birth_year)}</span> : null}
+                </h2>
+                {home && <p>{home}</p>}
+              </div>
+              <span className="feed-fit">{fitWords(person.score)}</span>
+            </div>
+          </div>
+          <section className="feed-face feed-back" inert={!flipped} aria-label={`More about ${person.display_name}`}>
+            <p className="feed-back-name">{person.display_name}</p>
+            {back === null ? (
+              <p className="card-back-empty">Loading…</p>
+            ) : back === 'error' ? (
+              <p className="card-back-empty">We couldn’t load this. Flip the card to try again.</p>
+            ) : (
+              <CardBack name={person.display_name} answers={back} />
+            )}
+          </section>
         </div>
-        <span className="feed-fit">{fitWords(person.score)}</span>
+        {!connecting && (
+          <button type="button" className="flip-btn" onClick={flip}>
+            <span aria-hidden="true">↻</span> {flipped ? 'Back to photo' : 'Flip card'}
+            <span className="visually-hidden"> for {person.display_name}</span>
+          </button>
+        )}
       </div>
       {lines.length > 0 && (
         <ul className="callouts" aria-label="Why we suggest them">
@@ -243,10 +298,13 @@ function PersonCard({
             type="button"
             className="btn btn-primary feed-yes"
             disabled={requests.left <= 0}
-            onClick={() => setConnecting(true)}
+            onClick={() => {
+              setFlipped(false)
+              setConnecting(true)
+            }}
             aria-label={`Ask to connect with ${person.display_name}`}
           >
-            <span aria-hidden="true">✓</span> {requests.left > 0 ? 'Connect' : 'No requests left'}
+            <span aria-hidden="true">✓</span> {requests.left > 0 ? 'Connect' : 'No requests left this week'}
           </button>
         </div>
       )}

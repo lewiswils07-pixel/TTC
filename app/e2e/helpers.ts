@@ -34,7 +34,8 @@ async function latestCode(email: string, since: number): Promise<string> {
   throw new Error(`No sign-in code arrived for ${email}`)
 }
 
-export async function signIn(page: Page, email: string): Promise<void> {
+/** Joins or signs in with an emailed code. With a password, it is chosen straight after; without, "Not now". */
+export async function signIn(page: Page, email: string, password?: string): Promise<void> {
   await page.goto('/sign-in')
   await page.getByLabel('Email address').fill(email)
   const since = Date.now()
@@ -42,7 +43,14 @@ export async function signIn(page: Page, email: string): Promise<void> {
   await expect(page.getByRole('heading', { name: 'Check your email' })).toBeVisible()
   // The code signs in on its own once all the digits are in.
   await page.getByLabel('Your code').fill(await latestCode(email, since))
-  await expect(page.getByRole('heading', { name: 'Check your email' })).toBeHidden()
+  await expect(page.getByRole('heading', { name: 'Choose a password' })).toBeVisible()
+  if (password) {
+    await page.getByLabel('Password', { exact: true }).fill(password)
+    await page.getByRole('button', { name: 'Save password' }).click()
+  } else {
+    await page.getByRole('button', { name: /Not now/ }).click()
+  }
+  await expect(page.getByRole('heading', { name: 'Choose a password' })).toBeHidden()
 }
 
 export async function emailOf(profileId: string): Promise<string> {
@@ -81,4 +89,20 @@ export async function pickPlace(page: Page, typed: string, option: string | RegE
     await expect(choice).toBeVisible({ timeout: 5_000 })
   }).toPass({ timeout: 60_000 })
   await choice.click()
+}
+
+/** Sign-up step 4: picks 3 questions for the back of the card and answers them, then finishes sign-up. */
+export async function fillCard(page: Page): Promise<void> {
+  await expect(page.getByText(/Step 4 of 4/)).toBeVisible()
+  const picks = [
+    ['Describe your perfect holiday', 'A slow week in Lisbon with long lunches, old trams and sunsets over the river.'],
+    ['How often do you get away?', 'Four or five times a year, more if I can.'],
+    ['I never travel without…', 'A good book and comfortable shoes.'],
+  ]
+  for (const [i, [question, answer]] of picks.entries()) {
+    const slot = page.locator('.card-question').nth(i)
+    await slot.getByLabel('Choose a question').selectOption({ label: question })
+    await slot.getByRole('textbox').fill(answer)
+  }
+  await page.getByRole('button', { name: 'Finish sign-up' }).click()
 }

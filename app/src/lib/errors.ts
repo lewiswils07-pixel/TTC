@@ -4,12 +4,16 @@
 type ErrorLike = { message?: string; code?: string; status?: number } | null | undefined
 
 const RULES: Array<[RegExp, string]> = [
-  [/token has expired|otp.*expired|invalid.*(otp|token)/i, "That code didn't work. It may have expired, so ask for a new one."],
+  [/nonce|reauthenticat/i, 'That code didn’t work. Check the latest email from us, or ask for a new code.'],
+  [/invalid login credentials/i, 'That email and password don’t match. Check them, or sign in with an emailed code instead.'],
+  [/password should be at least|weak.?password/i, 'Please choose a longer password, at least 8 characters.'],
+  [/should be different from the old password/i, 'That’s already your password.'],
+  [/token has expired|otp.*expired|invalid.*(otp|token)/i, 'That code didn’t work. It may have expired, so ask for a new one.'],
   [/rate limit|too many|security purposes/i, 'Too many tries in a short time. Please wait a minute, then try again.'],
   [/invalid email|unable to validate email|email address .* invalid/i, 'Please check your email address.'],
-  [/failed to fetch|network|load failed/i, "We couldn't reach the server. Check your internet connection and try again."],
+  [/failed to fetch|network|load failed/i, 'We couldn’t connect. Check your internet connection and try again.'],
   [/must be 18/i, 'You need to be 18 or over to join.'],
-  [/pick 3 to 10 interests/i, 'Please pick between 3 and 10 interests.'],
+  [/pick 3 to 10 interests/i, 'Please pick 7 interests.'],
   [/profile is not finished/i, 'A few details are still missing. Please go back and fill them in.'],
   [/already ended/i, 'This trip has already ended. Please check the dates.'],
   [/up to 2 years ahead/i, 'Trips can be up to 2 years ahead.'],
@@ -29,7 +33,7 @@ const RULES: Array<[RegExp, string]> = [
   [/group isn't available|group isn’t available/i, 'This group isn’t available any more.'],
   [/group not found|invite not found/i, 'We couldn’t find that group. The invite may have been withdrawn.'],
   [/idea not found/i, 'That idea has been removed.'],
-  [/plan board is full/i, 'The plan board is full. Remove a few ideas to add more.'],
+  [/plan board is full/i, 'Your plan board is full. Remove a few ideas to add more.'],
   [/only the person who added this/i, 'Only the person who added this idea can remove it.'],
   [/account is paused/i, 'Your account is paused, so you can’t do this right now. There’s a note about it on your profile page.'],
   [/admins only/i, 'This page is only for the Sodalis team.'],
@@ -41,6 +45,11 @@ const RULES: Array<[RegExp, string]> = [
   [/conversation not found/i, 'We couldn’t find that conversation. It may have ended.'],
   [/write a message first/i, 'Write a message first.'],
   [/messages_body_check/i, 'Messages can be up to 2,000 characters.'],
+  [/pick when you/i, 'Please pick when you’re meeting, from today up to 3 months ahead.'],
+  [/say where you/i, 'Please say where you’re meeting.'],
+  [/sending messages very quickly/i, 'You’re sending messages very quickly. Please wait a few minutes.'],
+  [/10 links open/i, 'You’re already sharing 10 meet-up links. Stop sharing one you no longer need first.'],
+  [/share a meet-up from one of your chats/i, 'You can only share a meet-up from one of your chats.'],
   [/payload too large|exceeded the maximum allowed size/i, 'That photo is too big. Please choose a smaller one.'],
 ]
 

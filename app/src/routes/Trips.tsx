@@ -12,7 +12,7 @@ export function Trips() {
       <h1 ref={heading} tabIndex={-1}>
         Trips
       </h1>
-      <p className="lede">Optional. Add where you’re going and we’ll show you people going too, marked “Also going to…” on your Connections tab.</p>
+      <p className="lede">Optional. Add where you’re going and we’ll show you members going too.</p>
       <MyTrips />
       <Wishlist />
     </Layout>

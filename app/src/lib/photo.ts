@@ -18,7 +18,7 @@ export async function preparePhoto(file: File): Promise<Blob> {
   try {
     bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
   } catch {
-    throw new FriendlyError("We couldn't open that photo. Please try a different one.")
+    throw new FriendlyError('We couldn’t open that photo. Please try a different one.')
   }
   // A centred 3:4 portrait (Lewis, 5 Oct), so faces sit in the middle of the
   // tall match card; round photos show its centre.
@@ -31,7 +31,7 @@ export async function preparePhoto(file: File): Promise<Blob> {
   canvas.getContext('2d')!.drawImage(bitmap, (bitmap.width - width) / 2, (bitmap.height - height) / 2, width, height, 0, 0, canvas.width, canvas.height)
   bitmap.close()
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85))
-  if (!blob) throw new FriendlyError("We couldn't open that photo. Please try a different one.")
+  if (!blob) throw new FriendlyError('We couldn’t open that photo. Please try a different one.')
   return blob
 }
 

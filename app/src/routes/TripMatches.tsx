@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
+import { CityPicks } from '../components/CityPicks'
 import { RequestsHint, SuggestionCard, useRequests } from '../components/Suggestions'
+import { picksFor } from '../data/picks'
 import { cityLabel } from '../lib/cities'
 import { tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
@@ -47,6 +49,7 @@ export function TripMatches() {
   if (!trip || !people || !requests) return <Loading />
 
   const flex = flexibilityLabel(trip.flexible_days)
+  const picks = picksFor(trip.city_id)
   return (
     <Layout>
       <Link className="back-link" to="/trips">
@@ -78,7 +81,7 @@ export function TripMatches() {
               No one matches yet. As members add trips to {trip.city.name} around your dates, they’ll appear here, best match
               first.
             </p>
-            <p className="hint">Widening your dates with “How flexible are your dates?” can help.</p>
+            <p className="hint">Making your dates more flexible can help. Tap Edit trip to change them.</p>
           </div>
         ) : (
           <ul className="match-list">
@@ -88,6 +91,8 @@ export function TripMatches() {
           </ul>
         )}
       </section>
+
+      {picks && <CityPicks picks={picks} />}
     </Layout>
   )
 }

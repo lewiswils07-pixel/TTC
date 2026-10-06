@@ -57,7 +57,7 @@ export function RequestsHint({ requests }: { requests: Requests }) {
   const { left, limit } = requests
   return (
     <p className="hint section-hint">
-      Best fit first. You have {left} of {limit} requests left this week{left === 0 ? '; you get more on Monday' : ''}.
+      Best matches first. You have {left} of {limit} requests left this week{left === 0 ? '; you get more on Monday' : ''}.
     </p>
   )
 }

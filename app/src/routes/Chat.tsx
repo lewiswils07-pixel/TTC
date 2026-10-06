@@ -33,6 +33,14 @@ export function Chat() {
   const [error, setError] = useState<string | null>(null)
   const [warnings, setWarnings] = useState<Set<number>>(new Set())
   const [reporting, setReporting] = useState<number | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setMenuOpen(false)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [menuOpen])
   const [senders, setSenders] = useState<Map<string, string>>(new Map())
   const sendersRef = useRef(senders)
   // Opening a chat reads it, so the Chat tab's unread badge is recounted.
@@ -115,7 +123,7 @@ export function Chat() {
   if (other === null) {
     return (
       <Layout>
-        <h1>Conversation not found</h1>
+        <h1>Chat not found</h1>
         <p className="lede">It may have ended.</p>
         <Link className="btn btn-secondary" to="/messages">
           Back to messages
@@ -136,22 +144,40 @@ export function Chat() {
           </Link>
           <Avatar name={other.display_name} path={other.photo_path} size="sm" />
           <h1>{other.display_name}</h1>
-        </div>
-        <div className="chat-tools">
-          <Link className="safety-link chat-plan-link" to={`/messages/${conversationId}/plan`}>
-            Plan board
+          <Link className="btn btn-secondary btn-small chat-plan-link" to={`/messages/${conversationId}/plan`}>
+            Plan<span className="chat-plan-more"> board</span>
           </Link>
-          <Link className="safety-link" to="/meeting-safely">
-            Meeting up safely
-          </Link>
-          {group ? (
-            <Link className="safety-link" to={`/groups/${other.group_id}`}>
-              Group details and members
-            </Link>
-          ) : (
-            <SafetyBox profileId={other.profile_id!} name={other.display_name} onBlocked={(message) => navigate('/messages', { state: { message } })} />
-          )}
+          <button
+            type="button"
+            className="chat-more"
+            aria-expanded={menuOpen}
+            aria-controls="chat-menu"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            <span aria-hidden="true">⋯</span>
+            <span className="visually-hidden">More options</span>
+          </button>
         </div>
+        {menuOpen && (
+          <div id="chat-menu" className="chat-menu">
+            <ul>
+              <li>
+                <Link to="/meeting-safely">Meeting up safely</Link>
+              </li>
+              <li>
+                <Link to={`/messages/${conversationId}/share`}>Tell someone you trust</Link>
+              </li>
+              {group && (
+                <li>
+                  <Link to={`/groups/${other.group_id}`}>Group info</Link>
+                </li>
+              )}
+            </ul>
+            {!group && (
+              <SafetyBox profileId={other.profile_id!} name={other.display_name} onBlocked={(message) => navigate('/messages', { state: { message } })} />
+            )}
+          </div>
+        )}
 
         <section className="chat-body" aria-label={`Messages with ${other.display_name}`}>
           {more && (

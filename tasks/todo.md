@@ -64,10 +64,11 @@ Unless a task says otherwise, every task is verified with
   - Done 5 Oct: `20261019090000_scam_guard.sql`. `scam_reasons()` looks for money, bank details, gift cards, crypto, moving off the app, and a phone number in the first 24 hours. The checker lives only on the server, so its 36 example messages are pgTAP tests (48 in all). Flagged messages are still sent; the reader sees the warning card with "Report this message", the sender can't see the flag, and a copy goes to `message_flags` for review. Members can also report any message, and block or report from the chat.
 - [x] **T16 `safety`: `/admin` moderation page** (admins only): actions, an action log, and the 3-report automatic pause. (M)
   - Done 5 Oct: `20261020090000_admin.sql` (25 pgTAP tests). Open reports and flagged messages with context; dismiss, warn, suspend, remove, and reinstate; every action logged. Warnings and suspensions show as a notice on the member's dashboard (email waits for T18). Suspended or removed members can't send requests or messages. "Remove" closes the account; deleting the sign-in itself comes with T19. Lewis is made an admin with one line of SQL (in the paste steps).
-- [ ] **T17 `safety`: Meeting-up guidance, trusted-contact share link, and the "Did you meet?" prompt.** (M)
-  - Status 5 Oct: meeting-up guidance and "Did you meet?" are done (`20261021090000_meet_feedback.sql`, 11 pgTAP tests). The guide is a page at /meeting-safely, shown once as a short card in the first chat and linked from every chat and from Connections. "Did you meet?" appears on the dashboard 2 to 60 days after the trip a connection was about, and the answers are private. Still to do: the trusted-contact link, which needs email sending (an email domain or Resend).
+- [x] **T17 `safety`: Meeting-up guidance, trusted-contact share link, and the "Did you meet?" prompt.** (M)
+  - Status 5 Oct: meeting-up guidance and "Did you meet?" are done (`20261021090000_meet_feedback.sql`, 11 pgTAP tests). The guide is a page at /meeting-safely, shown once as a short card in the first chat and linked from every chat and from Connections. "Did you meet?" appears on the dashboard 2 to 60 days after the trip a connection was about, and the answers are private. Done 6 Oct: the trusted-contact link (`20261030090000_trusted_contact.sql`, 16 pgTAP tests) needs no email: the member makes a private link from their chat ("Tell someone you trust") and sends it from their own phone. The contact's page at /safe/:code shows who, where, when and the "I'm back safe" check-in, with no sign-in; it stops working when the member stops sharing or two days after the meet-up.
 - [ ] **T18 `notifications`: Email nudges** (new request, accepted, unread message after 30 min), with unsubscribe settings. (S)
-- [ ] **T19 `identity`: Delete account and download my data** (Edge Functions). (S)
+- [x] **T19 `identity`: Delete account and download my data** (Edge Functions). (S)
+  - Done 6 Oct: `20261029090000_account_deletion.sql` (9 pgTAP tests) with `my_data()` and `delete_my_account()` as database functions instead of Edge Functions (no extra service to run). Photos are removed through Storage first; groups the member started pass to another member. "Your account and data" page from Profile; e2e test `account.spec.ts`.
 - [ ] **Checkpoint 23 Oct:** a full conversation, including a scam warning and a report visible on `/admin`.
 
 ## Week 4: groups and trip planner (26–30 Oct)
@@ -77,10 +78,13 @@ Unless a task says otherwise, every task is verified with
 - [ ] **T22 `trip-planner`: Planner screens.** Request form, day-by-day cards, "change something" follow-ups. (M)
 - [x] **T23 `trip-planner`: Shared plan board.** Add, vote, tick off; works in one-to-one chats and groups. (S)
   - Done 5 Oct: `20261023090000_plan_board.sql` (17 pgTAP tests). "Plan board" from every chat: ideas with an optional day (shown with dates in a group) and https link, votes (most votes first), ticks, and removing your own ideas. Read-only once a chat has ended. `plan_items.plan_id` is ready for the planner (T21) to add its suggestions.
-- [ ] **T24 `trip-planner`: Hand-picked activity lists** for the top 15 destinations, so the agent prefers our own picks. (S)
+- [x] **T24 `trip-planner`: Hand-picked activity lists** for the top 15 destinations, so the agent prefers our own picks. (S) Done 6 Oct: 8 picks each for 15 cities in `app/src/data/picks.ts`, shown on trip pages and plan boards with "Add to the plan", "More about it" and "Map". Links were written offline; check a handful before launch.
 - [ ] **T24b `trip-planner`: Booking links via `/go/<id>`.** Affiliate tag added when available,
       click recorded, disclosure line shown next to the link (spec §7a). (S)
 - [x] **T25: Full end-to-end Playwright path** (join → … → plan → block/report) in CI. (M) — app/e2e/journey.spec.ts runs two members through join, trip, request, accept, live chat with a scam warning, a group with a shared plan, report and block, and the review page, against a local Supabase. Runs in the "End to end" CI job. It found and fixed a live-chat sign-in delay.
+- [x] **T26: Card flip, "Going when you are" and app tour** (Lewis, 6 Oct). (M)
+  - Done 6 Oct: `20261101090000_member_card.sql` (12 pgTAP tests). Sign-up step 4 "The back of your card": 3 questions chosen from 25 in 5 groups (`app/src/lib/card.ts`, keys are stored so never rename one), up to 30 words each so all three fit. Flip on For you (tap the photo or "Flip card"), shown on Profile, counted in profile strength. 5-step tour after sign-up and from Profile. "Going when you are" strip on For you.
+- [ ] **T26b: Suggestions from card answers** (Lewis, 6 Oct: "further down the line"): use the chosen questions and answers in matching, e.g. same favourite season or dream trip. (M)
 - [ ] **Checkpoint 30 Oct:** a group of 3 plans a trip. **Beta invites go out** (web, TestFlight, Play internal testing).
 
 ## Week 5: Sodalis+, verification, apps (2–6 Nov)
@@ -92,8 +96,10 @@ Unless a task says otherwise, every task is verified with
 - [ ] **Checkpoint 6 Nov:** Sodalis+ works on web, iPhone and Android sandbox; apps submitted.
 
 ## Week 6: launch (9–13 Nov)
-- [ ] **T31: Security review** (security-and-hardening skill), plus a re-check of all row-level-security policies. (S)
-- [ ] **T32: Launch check**: axe, phone fit, contrast, CSP, performance across all app screens. (S)
+- [x] **T31: Security review** (security-and-hardening skill), plus a re-check of all row-level-security policies. (S)
+  - Done 6 Oct: database and app reviewed. Fixes in `20261031090000_security_hardening.sql` (16 pgTAP tests): paused members can't delete-and-rejoin, browse, chat or use admin tools; blocks hide photos; who blocked you is no longer readable; fake-report pauses need real contact; full date of birth required; 60 messages per 10 minutes. App: password change needs an emailed code after a day, tighter web headers, sign-out clears the device.
+- [x] **T32: Launch check**: axe, phone fit, contrast, CSP, performance across all app screens. (S)
+  - Done 6 Oct: `e2e/launch-check.spec.ts` runs axe (WCAG 2.1 AA, including contrast) on every screen and checks nothing is wider than a 320 px phone.
 - [ ] **T33: Beta fixes**: work through the beta feedback list. (varies)
 - [ ] **T34: Marketing site links** to `app.<domain>`, "App coming soon" or store badges, final legal pages. (S)
 - [ ] **T35: Go live.** Production keys, Sentry alerts, rollback plan tested, keep-awake check removed (Pro doesn't pause). (S)

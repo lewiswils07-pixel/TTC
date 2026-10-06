@@ -5,9 +5,9 @@ export function NotFound() {
   return (
     <Layout>
       <h1>Page not found</h1>
-      <p>We couldn't find that page.</p>
+      <p>We couldn’t find that page.</p>
       <Link className="btn btn-primary" to="/">
-        Go to the start
+        Go to the home page
       </Link>
     </Layout>
   )

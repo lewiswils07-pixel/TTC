@@ -3,17 +3,18 @@
 // (with a scam warning), start a group, plan together, and report and block,
 // ending with the report on the review page.
 import { expect, test } from '@playwright/test'
-import { admin, closeGuide, emailOf, idOf, isoIn, newPhone, pickPlace, signIn } from './helpers'
+import { admin, closeGuide, emailOf, idOf, isoIn, newPhone, pickPlace, signIn, fillCard } from './helpers'
 
 const TINY_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
 
 test('a new member joins, connects, chats, plans with a group, and reports', async ({ browser }) => {
   const a = await newPhone(browser)
   const lewisEmail = `journey${Date.now()}@example.com`
+  const password = 'paris in the spring'
 
   await test.step('join and build a profile', async () => {
-    await signIn(a, lewisEmail)
-    await expect(a.getByText(/Step 1 of 3/)).toBeVisible()
+    await signIn(a, lewisEmail, password)
+    await expect(a.getByText(/Step 1 of 4/)).toBeVisible()
     await a.getByLabel('First name').fill('Lewis')
     await a.getByLabel('Day').selectOption('14')
     await a.getByLabel('Month').selectOption({ label: 'November' })
@@ -21,19 +22,23 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.getByRole('radio', { name: 'Man', exact: true }).check({ force: true })
     await pickPlace(a, 'Leed', 'Leeds, United Kingdom')
     await a.getByRole('button', { name: /continue/i }).click()
-    await expect(a.getByText(/Step 2 of 3/)).toBeVisible()
+    await expect(a.getByText(/Step 2 of 4/)).toBeVisible()
     // A photo is needed to ask to connect (a 1×1 PNG is enough here).
     await a.locator('#photo').setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: Buffer.from(TINY_PNG, 'base64') })
     await expect(a.getByRole('img', { name: 'Your profile photo' })).toBeVisible()
     await a.getByRole('button', { name: /continue|skip/i }).click()
-    await expect(a.getByText(/Step 3 of 3/)).toBeVisible()
+    await expect(a.getByText(/Step 3 of 4/)).toBeVisible()
     for (const name of ['Museums', 'Wine', 'Walking', 'Photography', 'Theatre', 'Local cuisine', 'Gardens']) {
       await a.getByRole('checkbox', { name, exact: true }).evaluate((el: HTMLElement) => el.click())
     }
-    await a.getByRole('button', { name: 'Finish sign-up' }).click()
+    await a.getByRole('button', { name: 'Continue' }).click()
+    await fillCard(a)
     await expect(a.getByRole('heading', { name: 'Welcome to the Collective' })).toBeVisible()
     await expect(a.getByText(/founding member No\. \d+/)).toBeVisible()
     await a.getByRole('link', { name: 'Start meeting people' }).click()
+    // The tour opens first; look at the first step, then skip it.
+    await expect(a.getByRole('heading', { name: 'Meet people one at a time' })).toBeVisible()
+    await a.getByRole('button', { name: 'Skip' }).click()
     await expect(a.getByRole('heading', { level: 1, name: 'Connections' })).toBeVisible()
     await expect(a.locator('.person-feed-card')).toBeVisible()
   })
@@ -45,7 +50,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await pickPlace(a, 'Pari', /Paris, France/)
     await a.getByLabel('First day').fill(isoIn(20))
     await a.getByLabel('Last day').fill(isoIn(50))
-    await a.getByRole('radio', { name: '± 1 week' }).evaluate((el: HTMLElement) => el.click())
+    await a.getByRole('radio', { name: '1 week either way' }).evaluate((el: HTMLElement) => el.click())
     await a.getByRole('button', { name: 'Add trip' }).click()
     await expect(a.getByRole('heading', { name: /going too/ })).toBeVisible()
     other = await a.locator('.match-card h3').first().innerText()
@@ -66,7 +71,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
   await test.step('they accept, and the two chat live', async () => {
     await signIn(b, otherEmail)
     await b.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: /Connections/ }).click()
-    await b.getByRole('link', { name: /Requests & matches/ }).click()
+    await b.getByRole('link', { name: /Matches/ }).click()
     await b.getByRole('button', { name: /Accept/ }).first().click()
     await b.getByRole('link', { name: 'Message Lewis' }).click()
     await expect(b.getByRole('heading', { level: 1, name: 'Lewis' })).toBeVisible()
@@ -86,6 +91,36 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await expect(b.getByText('Easier on WhatsApp.')).toBeVisible()
     await expect(b.locator('.scam-warning')).toBeVisible()
     await expect(a.locator('.scam-warning')).toHaveCount(0)
+  })
+
+  await test.step('share the meet-up with someone they trust, then check in', async () => {
+    await a.getByRole('button', { name: 'More options' }).click()
+    await a.getByRole('link', { name: 'Tell someone you trust' }).click()
+    await a.getByRole('button', { name: 'Make the link' }).click()
+    await expect(a.getByText('Please say where you’re meeting', { exact: false })).toBeVisible()
+    await a.getByLabel('Where are you meeting?').fill('Café de Flore, Paris')
+    await a.getByLabel('When?').fill(`${isoIn(26)}T11:00`)
+    await a.getByLabel('Anything else? (optional)').fill('I’ll text you by 3pm')
+    await a.getByRole('button', { name: 'Make the link' }).click()
+    await expect(a.getByText('Your link is ready', { exact: false })).toBeVisible()
+
+    const { data: share } = await admin.from('meetup_shares').select('token').eq('owner_id', lewis).single()
+    const friend = await newPhone(browser)
+    await friend.goto(`/safe/${share!.token}`)
+    await expect(friend.getByRole('heading', { name: 'Lewis’s meet-up' })).toBeVisible()
+    await expect(friend.getByText('Café de Flore, Paris')).toBeVisible()
+    await expect(friend.getByText(new RegExp(`^${other}, \\d+, from`))).toBeVisible()
+    await expect(friend.getByText('hasn’t checked in yet', { exact: false })).toBeVisible()
+
+    await a.getByRole('button', { name: 'I’m back safe' }).click()
+    await expect(a.getByText('You’ve said you’re back safe', { exact: false })).toBeVisible()
+    await friend.reload()
+    await expect(friend.getByText('Lewis is back safe.')).toBeVisible()
+
+    await a.getByRole('button', { name: 'Stop sharing this link' }).click()
+    await friend.reload()
+    await expect(friend.getByRole('heading', { name: 'This link has ended' })).toBeVisible()
+    await friend.close()
   })
 
   await test.step('start a group and plan together', async () => {
@@ -129,11 +164,27 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     const reviewer = `reviewer${Date.now()}@example.com`
     const r = await newPhone(browser)
     await signIn(r, reviewer)
-    await expect(r.getByText(/Step 1 of 3/)).toBeVisible()
+    await expect(r.getByText(/Step 1 of 4/)).toBeVisible()
     await admin.from('profiles').update({ role: 'admin' }).eq('id', await idOf(reviewer))
     await r.goto('/admin')
     await expect(r.getByRole('heading', { name: /To review/ })).toBeVisible()
     await expect(r.locator('.queue-card', { hasText: 'Reported by' })).toContainText('Lewis')
     await expect(r.locator('.queue-card', { hasText: 'Flagged message' })).toContainText('send me some money')
+  })
+
+  await test.step('Lewis signs out, then back in with his password', async () => {
+    await a.goto('/profile')
+    await a.getByRole('button', { name: 'Sign out' }).last().click()
+    await a.goto('/sign-in')
+    await expect(a.getByRole('heading', { name: 'Welcome back' })).toBeVisible()
+    await a.getByLabel('Email address').fill(lewisEmail)
+    await a.getByLabel('Password', { exact: true }).fill('not my password')
+    await a.getByRole('button', { name: 'Sign in', exact: true }).last().click()
+    await expect(a.getByText('That email and password don’t match', { exact: false })).toBeVisible()
+    await a.getByLabel('Password', { exact: true }).fill(password)
+    await a.getByRole('button', { name: 'Sign in', exact: true }).last().click()
+    await expect(a).toHaveURL(/\/connections/)
+    await a.reload()
+    await expect(a).toHaveURL(/\/connections/)
   })
 })

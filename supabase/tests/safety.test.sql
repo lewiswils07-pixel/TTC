@@ -63,6 +63,11 @@ select lives_ok($$select public.unblock_member(pg_temp.m(2))$$, 'Ann can unblock
 select is((select count(*)::int from public.suggest_for_trip((select id from trip_of where owner_id = pg_temp.m(1))) where display_name = 'Bob'), 1, 'Bob shows again after unblocking');
 
 -- ------------------------------------------------------------ reports
+-- Fay asked Ann and Dee to connect earlier (and they said no), so their
+-- reports count towards pausing her.
+reset role;
+insert into public.connections (requester_id, addressee_id, status) values (pg_temp.m(6), pg_temp.m(1), 'declined'), (pg_temp.m(6), pg_temp.m(4), 'declined');
+select pg_temp.sign_in_as(pg_temp.m(1));
 select lives_ok($$select public.report_member(pg_temp.m(6), 'asking_for_money', '  Asked me for a loan  ')$$, 'Ann can report Fay');
 select lives_ok($$select public.report_member(pg_temp.m(6), 'harassment')$$, 'reporting again updates the open report');
 select throws_ok($$select public.report_member(pg_temp.m(6), 'rude')$$, '23514', null, 'only the listed reasons are accepted');
