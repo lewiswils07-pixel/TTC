@@ -1,119 +1,5 @@
--- Sign-up polish (Lewis, 6 Oct).
--- 1. A wider list of genders. "Non-binary" in Filters also shows members who
---    are genderfluid, agender or another identity.
--- 2. "Recently online" on suggestion cards.
--- 3. "Use my location": distances from an exact spot, kept private.
-
--- 1 ---------------------------------------------------------------------
-alter table public.profiles drop constraint profiles_gender_check;
-alter table public.profiles add constraint profiles_gender_check
-  check (gender in ('woman', 'man', 'nonbinary', 'genderfluid', 'agender', 'another', 'unsaid'));
-
-create or replace function public.fits_preferences(age integer, gender text, prefs public.preferences)
-returns boolean
-language sql
-immutable
-set search_path = ''
-as $$
-  select age >= prefs.age_min
-     and (prefs.age_max >= 99 or age <= prefs.age_max)
-     and (gender = any (prefs.genders)
-          or (gender in ('genderfluid', 'agender', 'another') and 'nonbinary' = any (prefs.genders))
-          or (gender = 'unsaid' and prefs.genders @> '{woman,man,nonbinary}'::text[]))
-$$;
-
--- 2 ---------------------------------------------------------------------
--- Which of these members used the app recently. Only for signed-in members,
--- and never for someone blocked either way.
-create function public.recently_online(p_ids uuid[])
-returns setof uuid
-language sql
-stable
-security definer
-set search_path = ''
-as $$
-  select p.id
-  from public.profiles p
-  where auth.uid() is not null
-    and p.id = any (p_ids[1:100])
-    and p.status = 'active'
-    and p.onboarded_at is not null
-    and p.last_active_at > now() - make_interval(hours => private.rule('connections.recentlyOnlineHours'))
-    and not public.is_blocked(auth.uid(), p.id)
-$$;
-revoke all on function public.recently_online(uuid[]) from public, anon;
-grant execute on function public.recently_online(uuid[]) to authenticated;
-
--- 3 ---------------------------------------------------------------------
--- "Use my location" (Lewis, 6 Oct): an optional exact spot, used only to
--- work out distances. Nobody else can read it: other members see the
--- nearest town and country, set as the home city.
-create table public.member_locations (
-  profile_id  uuid primary key references public.profiles (id) on delete cascade,
-  lat         double precision not null check (lat between -90 and 90),
-  lng         double precision not null check (lng between -180 and 180),
-  updated_at  timestamptz not null default now()
-);
-alter table public.member_locations enable row level security;
-create policy "Members see their own location" on public.member_locations
-  for select to authenticated using (profile_id = auth.uid());
-create policy "Members can remove their own location" on public.member_locations
-  for delete to authenticated using (profile_id = auth.uid());
-revoke all on public.member_locations from anon;
-grant select, delete on public.member_locations to authenticated;
-
--- Saves the member's spot (rounded to about 100 m) and makes the nearest
--- town their home city. Returns that town.
-create function public.set_my_location(p_lat double precision, p_lng double precision)
-returns table (id integer, name text, country_code text)
-language plpgsql
-security definer
-set search_path = ''
-as $$
-declare
-  me uuid := auth.uid();
-  town public.cities;
-begin
-  if me is null then
-    raise exception 'Please sign in again' using errcode = '42501';
-  end if;
-  if p_lat is null or p_lng is null or p_lat not between -90 and 90 or p_lng not between -180 and 180 then
-    raise exception 'We couldn''t read your location' using errcode = 'check_violation';
-  end if;
-  select c.* into town from public.cities c
-  order by power(c.lat - p_lat, 2) + power((c.lng - p_lng) * cos(radians(p_lat)), 2)
-  limit 1;
-  insert into public.member_locations (profile_id, lat, lng, updated_at)
-  values (me, round(p_lat::numeric, 3), round(p_lng::numeric, 3), now())
-  on conflict (profile_id) do update set lat = excluded.lat, lng = excluded.lng, updated_at = now();
-  update public.profiles set home_city_id = town.id where profiles.id = me;
-  return query select town.id, town.name, town.country_code::text;
-end;
-$$;
-revoke all on function public.set_my_location(double precision, double precision) from public, anon;
-grant execute on function public.set_my_location(double precision, double precision) to authenticated;
-
--- How far apart two members live: between their exact spots when both have
--- one, otherwise between their home towns.
-create function public.member_distance_km(a uuid, b uuid)
-returns double precision
-language sql
-stable
-security definer
-set search_path = ''
-as $$
-  select coalesce(
-    (select 2 * 6371 * asin(least(1, sqrt(
-              power(sin(radians(lb.lat - la.lat) / 2), 2)
-              + cos(radians(la.lat)) * cos(radians(lb.lat)) * power(sin(radians(lb.lng - la.lng) / 2), 2))))
-       from public.member_locations la, public.member_locations lb
-      where la.profile_id = a and lb.profile_id = b),
-    (select public.city_distance_km(pa.home_city_id, pb.home_city_id)
-       from public.profiles pa, public.profiles pb
-      where pa.id = a and pb.id = b))
-$$;
-revoke all on function public.member_distance_km(uuid, uuid) from public, anon, authenticated;
-
+-- Distance "Your town only" (Lewis, 6 Oct): the slider starts at 0, saved
+-- as 1 km, and people in your own town always count as in range.
 create or replace function public.suggest_by_interests()
 returns table (
   profile_id       uuid,
@@ -180,6 +66,7 @@ begin
       and public.fits_preferences(public.age_from_year(p.birth_year), p.gender, my_prefs)
       and public.fits_preferences(public.age_from_year(my.birth_year), my.gender, pr)
       and (my_prefs.max_distance_km is null
+           or p.home_city_id = my.home_city_id
            or public.member_distance_km(p.id, my.id) <= my_prefs.max_distance_km)
       and public.passes_viewer_filters(my_prefs, plus, p)
   ),
@@ -297,6 +184,7 @@ begin
       and public.fits_preferences(public.age_from_year(p.birth_year), p.gender, my_prefs)
       and public.fits_preferences(public.age_from_year(my.birth_year), my.gender, pr)
       and (my_prefs.max_distance_km is null
+           or p.home_city_id = my.home_city_id
            or public.member_distance_km(p.id, my.id) <= my_prefs.max_distance_km)
       and public.passes_viewer_filters(my_prefs, plus, p)
   ),
@@ -343,4 +231,76 @@ begin
   left join public.cities hc on hc.id = (b.person).home_city_id
   order by (b.person).photo_path is null, b.total desc, (b.person).last_active_at desc;
 end;
+$$;
+
+-- "We value your privacy" (Lewis, 6 Oct): each member's choices about
+-- optional tools, asked once after sign-up and changeable in Settings. Tools
+-- that are strictly needed to run the app are always on and aren't stored.
+create table public.privacy_choices (
+  profile_id  uuid primary key references public.profiles (id) on delete cascade,
+  -- Measuring how many people use the app and how.
+  measuring   boolean not null default false,
+  -- Personalised ads and our own marketing.
+  marketing   boolean not null default false,
+  chosen_at   timestamptz not null default now()
+);
+alter table public.privacy_choices enable row level security;
+create policy "Members see their own privacy choices" on public.privacy_choices
+  for select to authenticated using (profile_id = auth.uid());
+revoke all on public.privacy_choices from anon;
+grant select on public.privacy_choices to authenticated;
+
+-- Saves the signed-in member's choices, with the time they made them.
+create function public.set_privacy_choices(p_measuring boolean, p_marketing boolean)
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  insert into public.privacy_choices (profile_id, measuring, marketing, chosen_at)
+  select auth.uid(), coalesce(p_measuring, false), coalesce(p_marketing, false), now()
+  where auth.uid() is not null
+  on conflict (profile_id) do update
+    set measuring = excluded.measuring, marketing = excluded.marketing, chosen_at = excluded.chosen_at;
+$$;
+revoke all on function public.set_privacy_choices(boolean, boolean) from public, anon;
+grant execute on function public.set_privacy_choices(boolean, boolean) to authenticated;
+
+-- "Download my data" also includes the saved location and these choices.
+create or replace function public.my_data()
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select jsonb_build_object(
+    'exported_at', now(),
+    'account', (select jsonb_build_object('email', u.email, 'created_at', u.created_at, 'last_sign_in_at', u.last_sign_in_at) from auth.users u where u.id = auth.uid()),
+    'profile', (select to_jsonb(p) - 'role' from public.profiles p where p.id = auth.uid()),
+    'preferences', (select to_jsonb(x) from public.preferences x where x.profile_id = auth.uid()),
+    'interests', (select coalesce(jsonb_agg(i.label order by i.label), '[]') from public.profile_interests pi join public.interests i on i.id = pi.interest_id where pi.profile_id = auth.uid()),
+    'trips', (select coalesce(jsonb_agg(to_jsonb(t) || jsonb_build_object('city', c.name) order by t.start_date), '[]') from public.trips t join public.cities c on c.id = t.city_id where t.owner_id = auth.uid()),
+    'wishlist', (select coalesce(jsonb_agg(c.name order by c.name), '[]') from public.wishlist w join public.cities c on c.id = w.city_id where w.profile_id = auth.uid()),
+    'connections', (
+      select coalesce(jsonb_agg(jsonb_build_object(
+        'with', o.display_name, 'you_asked', x.requester_id = auth.uid(), 'status', x.status, 'note', x.note,
+        'created_at', x.created_at, 'responded_at', x.responded_at) order by x.created_at), '[]')
+      from public.connections x
+      join public.profiles o on o.id = case when x.requester_id = auth.uid() then x.addressee_id else x.requester_id end
+      where auth.uid() in (x.requester_id, x.addressee_id)
+    ),
+    'messages_you_sent', (select coalesce(jsonb_agg(jsonb_build_object('conversation', m.conversation_id, 'body', m.body, 'sent_at', m.created_at) order by m.created_at), '[]') from public.messages m where m.sender_id = auth.uid()),
+    'groups', (select coalesce(jsonb_agg(jsonb_build_object('name', g.name, 'role', gm.role, 'status', gm.status, 'start', g.start_date, 'end', g.end_date)), '[]') from public.group_members gm join public.groups g on g.id = gm.group_id where gm.profile_id = auth.uid()),
+    'plan_ideas_you_added', (select coalesce(jsonb_agg(jsonb_build_object('title', pi.title, 'link', pi.source_url, 'added_at', pi.created_at)), '[]') from public.plan_items pi where pi.added_by = auth.uid()),
+    'people_you_blocked', (select coalesce(jsonb_agg(o.display_name), '[]') from public.blocks b join public.profiles o on o.id = b.blocked_id where b.blocker_id = auth.uid()),
+    'reports_you_made', (select coalesce(jsonb_agg(jsonb_build_object('reason', r.reason, 'details', r.details, 'status', r.status, 'created_at', r.created_at)), '[]') from public.reports r where r.reporter_id = auth.uid()),
+    'did_you_meet_answers', (select coalesce(jsonb_agg(jsonb_build_object('met', f.met, 'would_travel_again', f.would_travel_again, 'created_at', f.created_at)), '[]') from public.meet_feedback f where f.from_id = auth.uid()),
+    'recommend_scores', (select coalesce(jsonb_agg(jsonb_build_object('score', n.score, 'comment', n.comment, 'created_at', n.created_at)), '[]') from public.nps_responses n where n.profile_id = auth.uid()),
+    'plan', (select coalesce(jsonb_agg(jsonb_build_object('plan', e.plan, 'source', e.source, 'expires_at', e.expires_at)), '[]') from public.entitlements e where e.profile_id = auth.uid()),
+    'meetup_links_you_shared', (select coalesce(jsonb_agg(jsonb_build_object('place', s.place, 'meet_at', s.meet_at, 'note', s.note, 'meeting_with', s.meeting_with, 'checked_in_at', s.checked_in_at, 'stopped_at', s.stopped_at, 'created_at', s.created_at) order by s.created_at), '[]') from public.meetup_shares s where s.owner_id = auth.uid()),
+    'days_you_opened_the_app', (select count(*) from public.member_days d where d.profile_id = auth.uid()),
+    'your_location', (select jsonb_build_object('lat', l.lat, 'lng', l.lng, 'updated_at', l.updated_at) from public.member_locations l where l.profile_id = auth.uid()),
+    'privacy_choices', (select jsonb_build_object('measuring', c.measuring, 'marketing', c.marketing, 'chosen_at', c.chosen_at) from public.privacy_choices c where c.profile_id = auth.uid())
+  )
 $$;
