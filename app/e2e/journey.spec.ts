@@ -3,7 +3,7 @@
 // (with a scam warning), start a group, plan together, and report and block,
 // ending with the report on the review page.
 import { expect, test } from '@playwright/test'
-import { admin, closeGuide, emailOf, idOf, isoIn, newPhone, pickPlace, signIn, fillCard, choose } from './helpers'
+import { admin, closeGuide, emailOf, idOf, isoIn, newPhone, pickPlace, signIn, fillCard, choose, pickDates } from './helpers'
 
 const TINY_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
 
@@ -52,8 +52,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Trips' }).click()
     await a.getByRole('link', { name: 'Add your first trip' }).click()
     await pickPlace(a, 'Pari', /Paris, France/)
-    await a.getByLabel('First day').fill(isoIn(20))
-    await a.getByLabel('Last day').fill(isoIn(50))
+    await pickDates(a, isoIn(20), isoIn(50))
     await a.getByRole('radio', { name: '1 week either way' }).evaluate((el: HTMLElement) => el.click())
     await a.getByRole('button', { name: 'Add trip' }).click()
     await expect(a.getByRole('heading', { name: /going too/ })).toBeVisible()
@@ -64,7 +63,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await expect(a.getByText(/Request sent/)).toBeVisible()
     // The Connections tab now leads with people going to Paris too.
     await a.goto('/connections')
-    await expect(a.locator('.person-feed-card .callout-trip').first()).toContainText('Also going to Paris')
+    await expect(a.locator('.person-feed-card .callout-trip').first()).toContainText('Paris ·')
   })
 
   const lewis = await idOf(lewisEmail)
@@ -134,8 +133,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.goto('/groups/new')
     await a.getByLabel('Group name').fill('Paris in spring')
     await pickPlace(a, 'Pari', /Paris, France/)
-    await a.getByLabel('First day').fill(isoIn(25))
-    await a.getByLabel('Last day').fill(isoIn(28))
+    await pickDates(a, isoIn(25), isoIn(28))
     await a.getByText(other, { exact: true }).click()
     await a.getByRole('button', { name: 'Start group' }).click()
     await expect(a.getByText('Your group is ready')).toBeVisible()

@@ -1,7 +1,7 @@
 // The "For you" feed on the Connections tab: everyone the database suggests
 // for the member's trips and for their interests, merged into one list of
 // people, each with gold callouts saying why they're there (Lewis, 5 Oct).
-import { tripDates } from './dates'
+import { shortDates } from './dates'
 import { listLabels, suggestByInterests, suggestForTrip, type InterestSuggestion, type TripSuggestion } from './matching'
 import { listMyTrips } from './trips'
 import { rules } from './rules'
@@ -18,7 +18,7 @@ export type FeedPerson = {
   score: number
   /** The member's trip this person matched, for the request (the first one if several). */
   trip_id: number | null
-  /** `overlap` is true when they're there at the same time, not just on nearby dates. */
+  /** Their trip's dates. `overlap` is true when they're there at the same time as you, not just on nearby dates. */
   trips: { city: string; start: string; end: string; overlap: boolean }[]
   shared_interests: string[]
   shared_places: string[]
@@ -30,7 +30,9 @@ export type FeedPerson = {
 /** Shared interests needed for the “Similar interests” callout (out of the ones each member picks). */
 export const SIMILAR_INTERESTS = 3
 
-export type Callout = { kind: 'trip' | 'interests' | 'home' | 'places'; text: string }
+/** `trip` is a trip at the same time as one of yours; `trip-close` is on nearby dates.
+ *  `hint` is read out after the text, since the two differ only by colour on screen. */
+export type Callout = { kind: 'trip' | 'trip-close' | 'interests' | 'home' | 'places'; text: string; hint?: string }
 
 /** One list of people from trip and interest suggestions: trip matches first, then best score. */
 export function mergeFeed(byTrip: { tripId: number; people: TripSuggestion[] }[], byInterest: InterestSuggestion[]): FeedPerson[] {
@@ -56,7 +58,7 @@ export function mergeFeed(byTrip: { tripId: number; people: TripSuggestion[] }[]
       const p = people.get(s.profile_id) ?? base(s)
       p.trip_id ??= tripId
       p.score = Math.max(p.score, s.score)
-      p.trips.push({ city: s.trip_city, start: s.overlap_start ?? s.trip_start, end: s.overlap_end ?? s.trip_end, overlap: !!(s.overlap_start && s.overlap_end) })
+      p.trips.push({ city: s.trip_city, start: s.trip_start, end: s.trip_end, overlap: !!(s.overlap_start && s.overlap_end) })
       p.shared_interests = union(p.shared_interests, s.shared_interests)
       people.set(s.profile_id, p)
     }
@@ -95,14 +97,20 @@ export async function recentlyOnline(ids: string[]): Promise<Set<string>> {
   return new Set(error ? [] : ((data ?? []) as string[]))
 }
 
-/** Why this person is in the feed, strongest reason first. */
-export function callouts(p: FeedPerson, myHomeCity: string | null): Callout[] {
-  const lines: Callout[] = p.trips.map((t) => ({ kind: 'trip', text: `Also going to ${t.city}, ${tripDates(t.start, t.end)}` }))
+/** Why this person is in the feed, strongest reason first. Short and plain
+ *  (Lewis, 7 Oct): "London", not "Also from London"; a trip is its place and
+ *  dates, coloured by whether it's at the same time as yours. */
+export function callouts(p: FeedPerson, myHomeCity: string | null, today?: string): Callout[] {
+  const lines: Callout[] = p.trips.map((t) => ({
+    kind: t.overlap ? 'trip' : 'trip-close',
+    text: `${t.city} · ${shortDates(t.start, t.end, today)}`,
+    hint: t.overlap ? 'same dates as you' : 'close to your dates',
+  }))
   // Kept general on purpose (Lewis, 5 Oct): the card lists the interests themselves.
   if (p.shared_interests.length >= SIMILAR_INTERESTS) lines.push({ kind: 'interests', text: 'Similar interests' })
-  if (myHomeCity && p.home_city === myHomeCity) lines.push({ kind: 'home', text: `Also from ${p.home_city}` })
-  else if (p.distance_km !== null && p.distance_km < 30) lines.push({ kind: 'home', text: 'Lives near you' })
-  if (p.shared_places.length) lines.push({ kind: 'places', text: `Also wants to visit ${listLabels(p.shared_places)}` })
+  if (myHomeCity && p.home_city === myHomeCity) lines.push({ kind: 'home', text: p.home_city, hint: 'lives in your town' })
+  else if (p.distance_km !== null && p.distance_km < 30) lines.push({ kind: 'home', text: 'Near you' })
+  if (p.shared_places.length) lines.push({ kind: 'places', text: `Wants to visit ${listLabels(p.shared_places)}` })
   return lines
 }
 
