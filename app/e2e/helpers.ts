@@ -107,3 +107,10 @@ export async function fillCard(page: Page): Promise<void> {
   }
   await page.getByRole('button', { name: 'Finish sign-up' }).click()
 }
+
+/** Opens one of our dropdowns and picks an option from its list. */
+export async function choose(page: Page, field: string | RegExp, option: string | RegExp): Promise<void> {
+  await page.getByRole('button', { name: field }).first().click()
+  await page.locator('.dropdown-panel').getByRole('button', { name: option, exact: typeof option === 'string' }).first().click()
+  await expect(page.locator('.dropdown-panel')).toHaveCount(0)
+}

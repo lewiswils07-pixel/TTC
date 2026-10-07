@@ -3,7 +3,7 @@
 // (with a scam warning), start a group, plan together, and report and block,
 // ending with the report on the review page.
 import { expect, test } from '@playwright/test'
-import { admin, closeGuide, emailOf, idOf, isoIn, newPhone, pickPlace, signIn, fillCard } from './helpers'
+import { admin, closeGuide, emailOf, idOf, isoIn, newPhone, pickPlace, signIn, fillCard, choose } from './helpers'
 
 const TINY_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
 
@@ -16,8 +16,8 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await signIn(a, lewisEmail, password)
     await expect(a.getByText(/Step 1 of 4/)).toBeVisible()
     await a.getByLabel('First name').fill('Lewis')
-    await a.getByLabel('Day').selectOption('14')
-    await a.getByLabel('Month').selectOption({ label: 'November' })
+    await choose(a, /^Day/, '14')
+    await choose(a, /^Month/, 'November')
     await a.getByLabel('Year').fill('1970')
     await a.getByRole('radio', { name: 'Man', exact: true }).check({ force: true })
     await pickPlace(a, 'Leed', 'Leeds, United Kingdom')
@@ -146,7 +146,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await b.getByRole('link', { name: 'Open the group chat' }).click()
     await b.getByRole('link', { name: 'Plan board' }).click()
     await b.getByLabel('What’s the idea?').fill('Musée d’Orsay on the first morning')
-    await b.getByLabel('Which day? (optional)').selectOption('1')
+    await choose(b, 'Which day? (optional)', /^Day 1/)
     await b.getByRole('button', { name: 'Add to the plan' }).click()
     await expect(b.locator('.idea')).toHaveCount(1)
 

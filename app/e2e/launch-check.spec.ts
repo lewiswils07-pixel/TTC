@@ -3,7 +3,7 @@
 // fits a small phone (320 px wide) and a laptop without sideways scrolling.
 import { createRequire } from 'node:module'
 import { expect, test, type Page } from '@playwright/test'
-import { admin, closeGuide, idOf, isoIn, newPhone, pickPlace, signIn, fillCard } from './helpers'
+import { admin, closeGuide, idOf, isoIn, newPhone, pickPlace, signIn, fillCard, choose } from './helpers'
 
 const require = createRequire(import.meta.url)
 const AXE = require.resolve('axe-core/axe.min.js')
@@ -68,8 +68,11 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await signIn(page, email)
   issues.push(...(await problems(page, '/onboarding step 1')))
   await page.getByLabel('First name').fill('Lena')
-  await page.getByLabel('Day').selectOption('2')
-  await page.getByLabel('Month').selectOption({ label: 'May' })
+  await page.getByRole('button', { name: /^Day/ }).click()
+  issues.push(...(await problems(page, '/onboarding step 1 (day list open)')))
+  await page.keyboard.press('Escape')
+  await choose(page, /^Day/, '2')
+  await choose(page, /^Month/, 'May')
   await page.getByLabel('Year').fill('1962')
   await page.getByRole('radio', { name: 'Woman', exact: true }).check({ force: true })
   await pickPlace(page, 'Leed', 'Leeds, United Kingdom')
@@ -154,7 +157,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await page.getByRole('button', { name: 'More options' }).click()
   issues.push(...(await problems(page, '/messages/:id (menu open)')))
   await visit(page, `/messages/${chat!.id}/plan`, /./, issues)
-  await page.getByLabel('See our picks for a city').selectOption({ label: 'Lisbon' })
+  await choose(page, 'See our picks for a city', 'Lisbon')
   await page.getByRole('button', { name: /^Add to the plan: / }).first().click()
   await expect(page.getByText('✓ On the plan')).toBeVisible()
   issues.push(...(await problems(page, '/messages/:id/plan (with city picks)')))
