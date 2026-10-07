@@ -2,18 +2,19 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { CityPicker } from '../components/CityPicker'
+import { DateRangePicker } from '../components/DateRangePicker'
 import { FieldError, TextField } from '../components/Field'
 import { ActionBar, SaveError } from '../components/Form'
 import { Layout, Loading } from '../components/Layout'
 import type { City } from '../lib/cities'
 import { myConnections, type Connection } from '../lib/connections'
-import { dateReadback, isoDate } from '../lib/dates'
+import { addDays, isoDate } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { brand } from '../lib/brand'
 import { rules } from '../lib/rules'
 import { checkGroupName, createGroup, groupsICanStart, MAX_GROUP, MAX_GROUP_NAME } from '../lib/groups'
 import { useChecks } from '../lib/useChecks'
-import { checkTripDates } from '../lib/validation'
+import { MAX_TRIP_DAYS, checkTripDates } from '../lib/validation'
 
 /** Start a group: a name, where and when, and who to invite. */
 export function GroupForm() {
@@ -136,41 +137,20 @@ function GroupEditor({ people }: { people: Connection[] }) {
               error={shown('city')}
             />
           </div>
-          <div className="field-pair">
-            <TextField
-              name="start"
-              label="First day"
-              type="date"
-              min={today}
-              value={start}
-              error={shown('start')}
-              onChange={(e) => {
-                const v = e.target.value
-                setStart(v)
-                if (v && end && end < v) setEnd(v)
-                touch('start')
-              }}
-              onBlur={() => touch('start')}
-            />
-            <TextField
-              name="end"
-              label="Last day"
-              type="date"
-              min={start || today}
-              value={end}
-              error={shown('end')}
-              onChange={(e) => {
-                setEnd(e.target.value)
-                touch('end')
-              }}
-              onBlur={() => touch('end')}
-            />
-          </div>
-          {dateReadback(start, end) && (
-            <p className="hint date-readback" aria-live="polite">
-              {dateReadback(start, end)}
-            </p>
-          )}
+          <DateRangePicker
+            start={start}
+            end={end}
+            min={today}
+            max={addDays(today, rules.trips.maxDaysAhead)}
+            maxDays={MAX_TRIP_DAYS}
+            error={shown('start') ?? shown('end')}
+            onChange={(s, e) => {
+              setStart(s)
+              setEnd(e)
+              touch('start')
+              if (e) touch('end')
+            }}
+          />
           <fieldset className="field" data-field="invite" aria-describedby={shown('invite') ? 'invite-error' : 'invite-hint'}>
             <legend>Who to invite</legend>
             <p className="hint" id="invite-hint">

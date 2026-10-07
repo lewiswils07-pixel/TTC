@@ -668,12 +668,15 @@ legend { padding: 0; }
   border: 1px solid color-mix(in srgb, var(--brand-gold) 55%, transparent); font-weight: 700; font-size: 0.875rem;
 }
 .callout::before { font-size: 0.875rem; color: var(--gold-ink, var(--ink-soft)); }
-.callout-trip::before { content: '✈'; }
+.callout-trip::before, .callout-trip-close::before { content: '✈'; }
 .callout-interests::before { content: '✦'; }
 .callout-home::before { content: '⌂'; }
 .callout-places::before { content: '★'; }
 .callout-trip { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 .callout-trip::before { color: var(--brand-gold); }
+/* Nearby dates, not the same ones: outlined instead of filled. */
+.callout-trip-close { background: var(--card); color: var(--accent); border: 1.5px solid var(--accent); }
+.callout-trip-close::before { color: var(--accent); }
 .feed-detail { margin: 0; padding: 0 var(--space-2); color: var(--ink-soft); }
 .feed-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: var(--space-3); padding: 0 var(--space-2); }
 .feed-actions .btn { gap: 8px; min-height: 56px; font-size: 1.0625rem; white-space: nowrap; padding-inline: var(--space-3); }
@@ -1128,3 +1131,51 @@ a.hub-row:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px;
 }
 .privacy-actions { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-3); margin-top: var(--space-4); }
 .privacy-actions .btn-link { align-self: center; }
+
+/* Who's there when: everyone's dates on one timeline (Lewis, 7 Oct, after the website's picture). */
+.overlap { margin: 0 0 var(--space-5); }
+.overlap-label { margin: 0 0 var(--space-3); font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.overlap-chart { position: relative; display: flex; flex-direction: column; gap: 10px; }
+.overlap-row, .overlap-band-wrap { display: grid; grid-template-columns: 72px 1fr; align-items: center; gap: var(--space-2); }
+.overlap-band-wrap { position: absolute; inset: 24px 0 0; pointer-events: none; }
+.overlap-band-wrap .overlap-lane { height: 100%; }
+.overlap-name { font-size: var(--text-sm); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.overlap-lane { position: relative; height: 18px; }
+.overlap-track { background: var(--paper-tint); border-radius: 999px; }
+.overlap-ticks .overlap-lane small { position: absolute; transform: translateX(-2px); color: var(--muted); font-size: 0.8125rem; }
+.overlap-bar { position: absolute; top: 0; bottom: 0; border-radius: 999px; background: var(--ink-soft); }
+.overlap-bar.is-me { background: var(--accent); }
+.overlap-band {
+  position: absolute; top: -4px; bottom: -4px; border: 1.5px dashed var(--gold-ink); border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--brand-gold) 22%, transparent);
+}
+.overlap-foot { margin: var(--space-4) 0 0; color: var(--ink-soft); }
+.overlap-foot b { color: var(--ink); }
+
+/* Trip dates calendar: tap the first day, then the last. */
+.range-picker-legend { margin: 0; font-weight: 700; }
+.range-picker-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.range-picker-head h3 { margin: 0; font-size: var(--text); }
+.range-picker-head .icon-btn { border: 0; background: none; font: inherit; font-size: var(--text-xl); cursor: pointer; }
+.range-picker-head .icon-btn:hover:not(:disabled) { background: var(--paper-tint); }
+.range-picker-head .icon-btn:disabled { opacity: 0.3; cursor: default; background: none; }
+.range-grid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 2px; text-align: center; }
+.range-weekday { font-size: var(--text-sm); font-weight: 700; color: var(--muted); padding-bottom: var(--space-1); }
+.range-day {
+  height: 44px; border: 0; background: none; font: inherit; font-weight: 600; color: inherit;
+  border-radius: 999px; cursor: pointer; min-width: 0;
+}
+.range-day:hover:not(:disabled):not(.is-end):not(.is-in) { background: var(--paper-tint); }
+.range-day:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.range-day:disabled { color: var(--muted); opacity: 0.4; cursor: default; }
+.range-day.is-in { background: color-mix(in srgb, var(--accent) 12%, var(--card)); color: var(--accent); border-radius: 0; }
+.range-day.is-end { background: var(--accent); color: var(--card); }
+.range-day.is-start { border-radius: 999px 0 0 999px; }
+.range-day.is-last { border-radius: 0 999px 999px 0; }
+.range-day.is-start.is-last { border-radius: 999px; }
+.range-readback { margin: 0; font-weight: 600; }
+.range-readback.hint { font-weight: 400; }
+.more-options { border-top: 1px solid var(--line); padding-top: var(--space-3); }
+.more-options > summary { cursor: pointer; font-weight: 700; color: var(--accent); }
+.more-options[open] > summary { margin-bottom: var(--space-4); }
+.more-options-body { display: grid; gap: var(--space-5); }

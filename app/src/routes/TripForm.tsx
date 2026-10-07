@@ -1,18 +1,20 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { CityPicker } from '../components/CityPicker'
-import { Field, TextField } from '../components/Field'
+import { DateRangePicker } from '../components/DateRangePicker'
+import { Field } from '../components/Field'
 import { ActionBar, SaveError } from '../components/Form'
 import { useConfirm } from '../lib/useConfirm'
 import { Layout, Loading } from '../components/Layout'
 import { Segmented } from '../components/Segmented'
 import type { City } from '../lib/cities'
-import { dateReadback, isoDate } from '../lib/dates'
+import { addDays, isoDate } from '../lib/dates'
+import { rules } from '../lib/rules'
 import { messageOf } from '../lib/errors'
 import type { Option } from '../lib/options'
 import { deleteTrip, getTrip, saveTrip, type Trip } from '../lib/trips'
 import { useChecks } from '../lib/useChecks'
-import { MAX_NOTE, checkNote, checkTripDates } from '../lib/validation'
+import { MAX_NOTE, MAX_TRIP_DAYS, checkNote, checkTripDates } from '../lib/validation'
 
 type Flex = '0' | '1' | '3' | '7'
 const FLEXIBILITY: readonly Option<Flex>[] = [
@@ -150,41 +152,20 @@ function TripEditor({ trip }: { trip: Trip | null }) {
               error={shown('city')}
             />
           </div>
-          <div className="field-pair">
-            <TextField
-              name="start"
-              label="First day"
-              type="date"
-              min={today}
-              value={start}
-              error={shown('start')}
-              onChange={(e) => {
-                const v = e.target.value
-                setStart(v)
-                if (v && end && end < v) setEnd(v)
-                touch('start')
-              }}
-              onBlur={() => touch('start')}
-            />
-            <TextField
-              name="end"
-              label="Last day"
-              type="date"
-              min={start || today}
-              value={end}
-              error={shown('end')}
-              onChange={(e) => {
-                setEnd(e.target.value)
-                touch('end')
-              }}
-              onBlur={() => touch('end')}
-            />
-          </div>
-          {dateReadback(start, end) && (
-            <p className="hint date-readback" aria-live="polite">
-              {dateReadback(start, end)}
-            </p>
-          )}
+          <DateRangePicker
+            start={start}
+            end={end}
+            min={today}
+            max={addDays(today, rules.trips.maxDaysAhead)}
+            maxDays={MAX_TRIP_DAYS}
+            error={shown('start') ?? shown('end')}
+            onChange={(s, e) => {
+              setStart(s)
+              setEnd(e)
+              touch('start')
+              if (e) touch('end')
+            }}
+          />
           <Segmented
             name="flex"
             legend="How flexible are your dates?"
@@ -193,32 +174,37 @@ function TripEditor({ trip }: { trip: Trip | null }) {
             selected={[flex]}
             onChange={([v]) => setFlex(v)}
           />
-          <Field
-            name="note"
-            label="Anything to add? (optional)"
-            hint={`For example, “Hoping to see the tiles museum and eat lots of pastéis”. ${MAX_NOTE - note.length} characters left.`}
-            error={shown('note')}
-          >
-            {({ id, describedBy, invalid }) => (
-              <textarea
-                id={id}
-                className="textarea textarea-short"
-                maxLength={MAX_NOTE}
-                aria-describedby={describedBy}
-                aria-invalid={invalid || undefined}
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                onBlur={() => touch('note')}
-              />
-            )}
-          </Field>
-          <label className="switch-row">
-            <input type="checkbox" role="switch" checked={visible} onChange={(e) => setVisible(e.target.checked)} />
-            <span>
-              <strong>Show this trip in suggestions</strong>
-              <span className="hint">Turn this off to keep the trip just for you. You can turn it back on any time.</span>
-            </span>
-          </label>
+          <details className="more-options" open={!!trip?.note || (trip ? trip.visibility === 'hidden' : false)}>
+            <summary>Add a note or keep it private</summary>
+            <div className="more-options-body">
+              <Field
+                name="note"
+                label="Anything to add? (optional)"
+                hint={`For example, “Hoping to see the tiles museum and eat lots of pastéis”. ${MAX_NOTE - note.length} characters left.`}
+                error={shown('note')}
+              >
+                {({ id, describedBy, invalid }) => (
+                  <textarea
+                    id={id}
+                    className="textarea textarea-short"
+                    maxLength={MAX_NOTE}
+                    aria-describedby={describedBy}
+                    aria-invalid={invalid || undefined}
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    onBlur={() => touch('note')}
+                  />
+                )}
+              </Field>
+              <label className="switch-row">
+                <input type="checkbox" role="switch" checked={visible} onChange={(e) => setVisible(e.target.checked)} />
+                <span>
+                  <strong>Let other members see this trip</strong>
+                  <span className="hint">Turn this off to keep it just for you. You can turn it back on any time.</span>
+                </span>
+              </label>
+            </div>
+          </details>
           {trip && (
             <button type="button" className="btn-link btn-danger-link" onClick={remove} disabled={busy}>
               Delete this trip

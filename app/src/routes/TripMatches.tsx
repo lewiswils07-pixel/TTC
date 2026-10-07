@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { CityPicks } from '../components/CityPicks'
+import { DateOverlap } from '../components/DateOverlap'
 import { RequestsHint, SuggestionCard, useRequests } from '../components/Suggestions'
 import { picksFor } from '../data/picks'
 import { cityLabel } from '../lib/cities'
@@ -69,6 +70,16 @@ export function TripMatches() {
           Edit trip
         </Link>
       </div>
+
+      {people.length > 0 && (
+        <DateOverlap
+          city={trip.city.name}
+          mine={{ start: trip.start_date, end: trip.end_date }}
+          others={[...people]
+            .sort((a, b) => Number(!!b.overlap_start) - Number(!!a.overlap_start))
+            .map((p) => ({ name: p.display_name, start: p.trip_start, end: p.trip_end }))}
+        />
+      )}
 
       <section aria-labelledby="going-too">
         <h2 id="going-too" className="section-title">

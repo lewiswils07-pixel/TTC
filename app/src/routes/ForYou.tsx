@@ -276,6 +276,7 @@ function PersonCard({
                 {lines.map((c) => (
                   <li key={c.text} className={`callout callout-${c.kind}`}>
                     {c.text}
+                    {c.hint && <span className="visually-hidden">, {c.hint}</span>}
                   </li>
                 ))}
               </ul>

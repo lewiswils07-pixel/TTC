@@ -18,7 +18,7 @@ export function useChecks<K extends string>(errors: Record<K, string | null>) {
     const first = (Object.keys(errors) as K[]).find((k) => errors[k])
     if (!first) return true
     requestAnimationFrame(() => {
-      const el = document.querySelector<HTMLElement>(`[data-field="${first}"] input, [data-field="${first}"] textarea, [data-field="${first}"] select`)
+      const el = document.querySelector<HTMLElement>(`[data-field="${first}"] input, [data-field="${first}"] textarea, [data-field="${first}"] select, [data-field="${first}"] .range-day:not(:disabled)`)
       el?.focus()
       el?.closest('[data-field]')?.scrollIntoView?.({ block: 'center', behavior: 'smooth' })
     })

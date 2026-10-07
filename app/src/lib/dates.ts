@@ -25,6 +25,14 @@ export function tripDates(start: string, end: string): string {
   return dateFormat.formatRange(s, e)
 }
 
+const shortFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
+
+/** "14–20 May" without the year when it's this year, else as tripDates. */
+export function shortDates(start: string, end: string, today = isoDate(new Date())): string {
+  if (start.slice(0, 4) !== today.slice(0, 4) || end.slice(0, 4) !== today.slice(0, 4)) return tripDates(start, end)
+  return shortFormat.formatRange(new Date(`${start}T00:00:00Z`), new Date(`${end}T00:00:00Z`))
+}
+
 const longFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
 const dayFormat = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' })
 

@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { tripDates } from '../lib/dates'
+import { shortDates } from '../lib/dates'
 import { sameTime, type FeedPerson } from '../lib/feed'
 import { Avatar } from './Avatar'
 
@@ -24,7 +24,7 @@ export function SameTimeStrip({ people }: { people: FeedPerson[] }) {
                 <Avatar name={p.display_name} path={p.photo_path} size="lg" />
                 <span className="same-time-name">{p.display_name}</span>
                 <span className="same-time-trip">
-                  {trip.city}, {tripDates(trip.start, trip.end)}
+                  {trip.city} · {shortDates(trip.start, trip.end)}
                 </span>
               </Link>
             </li>

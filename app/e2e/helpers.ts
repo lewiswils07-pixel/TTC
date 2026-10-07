@@ -114,3 +114,20 @@ export async function choose(page: Page, field: string | RegExp, option: string 
   await page.locator('.dropdown-panel').getByRole('button', { name: option, exact: typeof option === 'string' }).first().click()
   await expect(page.locator('.dropdown-panel')).toHaveCount(0)
 }
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+/** Taps a day on the trip calendar, moving on a month at a time until it shows. */
+async function tapDay(page: Page, iso: string): Promise<void> {
+  const [y, m, d] = iso.split('-').map(Number)
+  const day = page.getByRole('button', { name: new RegExp(`\\b${d} ${MONTHS[m - 1]} ${y}$`) })
+  for (let i = 0; i < 24 && !(await day.isVisible()); i++) await page.getByRole('button', { name: 'Next month' }).click()
+  await day.click()
+}
+
+/** Picks a trip's first and last day on the calendar. */
+export async function pickDates(page: Page, start: string, end: string): Promise<void> {
+  await tapDay(page, start)
+  await tapDay(page, end)
+  await expect(page.locator('.range-readback')).toContainText('days')
+}
