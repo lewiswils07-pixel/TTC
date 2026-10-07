@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
-import { CityPicks } from '../components/CityPicks'
+import { CityReviews } from '../components/CityReviews'
 import { DateOverlap } from '../components/DateOverlap'
+import { TripPlanner } from '../components/TripPlanner'
 import { RequestsHint, SuggestionCard, useRequests } from '../components/Suggestions'
 import { picksFor } from '../data/picks'
 import { cityLabel } from '../lib/cities'
@@ -12,9 +13,18 @@ import { noteFirstMatch } from '../lib/kpis'
 import { reasons, suggestForTrip, type TripSuggestion } from '../lib/matching'
 import { flexibilityLabel, getTrip, type Trip } from '../lib/trips'
 
-/** One trip and the members going to the same place at the same time. */
+type Tab = 'people' | 'plan' | 'reviews'
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'people', label: 'People' },
+  { key: 'plan', label: 'My plan' },
+  { key: 'reviews', label: 'Reviews' },
+]
+
+/** One of your trips: the members going too, your own plan, and reviews of the place. */
 export function TripMatches() {
   const tripId = Number(useParams().id)
+  const [params, setParams] = useSearchParams()
+  const tab: Tab = TABS.some((t) => t.key === params.get('tab')) ? (params.get('tab') as Tab) : 'people'
   const [trip, setTrip] = useState<Trip | null | undefined>(undefined)
   const [people, setPeople] = useState<TripSuggestion[] | null>(null)
   const requests = useRequests()
@@ -71,39 +81,63 @@ export function TripMatches() {
         </Link>
       </div>
 
-      {people.length > 0 && (
-        <DateOverlap
-          city={trip.city.name}
-          mine={{ start: trip.start_date, end: trip.end_date }}
-          others={[...people]
-            .sort((a, b) => Number(!!b.overlap_start) - Number(!!a.overlap_start))
-            .map((p) => ({ name: p.display_name, start: p.trip_start, end: p.trip_end }))}
-        />
-      )}
+      <div className="hub-tabs trip-tabs" role="tablist" aria-label="Your trip">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            role="tab"
+            id={`trip-tab-${t.key}`}
+            aria-selected={tab === t.key}
+            aria-controls="trip-panel"
+            className={tab === t.key ? 'hub-tab is-current' : 'hub-tab'}
+            onClick={() => setParams(t.key === 'people' ? {} : { tab: t.key }, { replace: true })}
+          >
+            {t.label}
+            {t.key === 'people' && people.length > 0 && <span className="tab-count"> {people.length}</span>}
+          </button>
+        ))}
+      </div>
 
-      <section aria-labelledby="going-too">
-        <h2 id="going-too" className="section-title">
-          {people.length ? `${people.length} ${people.length === 1 ? 'person' : 'people'} going too` : 'People going too'}
-        </h2>
-        {people.length > 0 && <RequestsHint requests={requests} />}
-        {people.length === 0 ? (
-          <div className="card empty">
-            <p>
-              No one matches yet. As members add trips to {trip.city.name} around your dates, they’ll appear here, best match
-              first.
-            </p>
-            <p className="hint">Making your dates more flexible can help. Tap Edit trip to change them.</p>
-          </div>
-        ) : (
-          <ul className="match-list">
-            {people.map((person) => (
-              <SuggestionCard key={person.profile_id} person={person} reasons={reasons(person, trip.city.name)} tripId={trip.id} requests={requests} />
-            ))}
-          </ul>
+      <div id="trip-panel" role="tabpanel" aria-labelledby={`trip-tab-${tab}`}>
+        {tab === 'plan' && <TripPlanner tripId={trip.id} city={trip.city.name} start={trip.start_date} end={trip.end_date} picks={picks} />}
+        {tab === 'reviews' && <CityReviews cityId={trip.city_id} city={trip.city.name} />}
+        {tab === 'people' && (
+          <>
+            {people.length > 0 && (
+              <DateOverlap
+                city={trip.city.name}
+                mine={{ start: trip.start_date, end: trip.end_date }}
+                others={[...people]
+                  .sort((a, b) => Number(!!b.overlap_start) - Number(!!a.overlap_start))
+                  .map((p) => ({ name: p.display_name, start: p.trip_start, end: p.trip_end }))}
+              />
+            )}
+
+            <section aria-labelledby="going-too">
+              <h2 id="going-too" className="section-title">
+                {people.length ? `${people.length} ${people.length === 1 ? 'person' : 'people'} going too` : 'People going too'}
+              </h2>
+              {people.length > 0 && <RequestsHint requests={requests} />}
+              {people.length === 0 ? (
+                <div className="card empty">
+                  <p>
+                    No one matches yet. As members add trips to {trip.city.name} around your dates, they’ll appear here, best match
+                    first.
+                  </p>
+                  <p className="hint">Making your dates more flexible can help. Tap Edit trip to change them.</p>
+                </div>
+              ) : (
+                <ul className="match-list">
+                  {people.map((person) => (
+                    <SuggestionCard key={person.profile_id} person={person} reasons={reasons(person, trip.city.name)} tripId={trip.id} requests={requests} />
+                  ))}
+                </ul>
+              )}
+            </section>
+          </>
         )}
-      </section>
-
-      {picks && <CityPicks picks={picks} />}
+      </div>
     </Layout>
   )
 }

@@ -1,7 +1,7 @@
 -- Written by `npm run rules` from app/rules.json. Don't edit by hand.
 -- Fails when the database's rules differ from the app's.
 begin;
-select plan(83);
+select plan(88);
 select is(private.rule('signIn.codeLength'), 6, 'signIn.codeLength is 6, as in rules.json');
 select is(private.rule('signIn.passwordMin'), 8, 'signIn.passwordMin is 8, as in rules.json');
 select is(private.rule('signIn.passwordMax'), 72, 'signIn.passwordMax is 72, as in rules.json');
@@ -44,10 +44,11 @@ select is(private.rule('meetups.noteMax'), 300, 'meetups.noteMax is 300, as in r
 select is(private.rule('meetups.maxOpen'), 10, 'meetups.maxOpen is 10, as in rules.json');
 select is(private.rule('meetups.maxDaysAhead'), 90, 'meetups.maxDaysAhead is 90, as in rules.json');
 select is(private.rule('meetups.linkDays'), 2, 'meetups.linkDays is 2, as in rules.json');
+select is(private.rule('reviews.textMax'), 500, 'reviews.textMax is 500, as in rules.json');
 select is(private.rule('survey.commentMax'), 500, 'survey.commentMax is 500, as in rules.json');
 select is(private.rule('survey.heardFromAfterMinutes'), 30, 'survey.heardFromAfterMinutes is 30, as in rules.json');
 select is(private.rule('founding.plusMonths'), 3, 'founding.plusMonths is 3, as in rules.json');
-select is((select count(*)::int from private.rules), 45, 'no rules beyond rules.json');
+select is((select count(*)::int from private.rules), 46, 'no rules beyond rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_display_name_check'), '<= 40') > 0, 'profiles_display_name_check uses profile.nameMax (40)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_bio_check'), '<= 500') > 0, 'profiles_bio_check uses profile.bioMax (500)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_mobility_note_check'), '<= 200') > 0, 'profiles_mobility_note_check uses profile.mobilityNoteMax (200)');
@@ -64,6 +65,10 @@ select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conr
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.plan_items'::regclass and conname = 'plan_items_title_check'), '<= 120') > 0, 'plan_items_title_check uses planBoard.ideaMax (120)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.plan_items'::regclass and conname = 'plan_items_source_url_check'), '<= 500') > 0, 'plan_items_source_url_check uses planBoard.linkMax (500)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.plan_items'::regclass and conname = 'plan_items_day_check'), 'day <= 91') > 0, 'plan_items_day_check uses planBoard.maxDay (91)');
+select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.trip_plan_items'::regclass and conname = 'trip_plan_items_title_check'), '<= 120') > 0, 'trip_plan_items_title_check uses planBoard.ideaMax (120)');
+select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.trip_plan_items'::regclass and conname = 'trip_plan_items_source_url_check'), '<= 500') > 0, 'trip_plan_items_source_url_check uses planBoard.linkMax (500)');
+select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.trip_plan_items'::regclass and conname = 'trip_plan_items_day_check'), 'day <= 91') > 0, 'trip_plan_items_day_check uses planBoard.maxDay (91)');
+select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.city_reviews'::regclass and conname = 'city_reviews_body_check'), '<= 500') > 0, 'city_reviews_body_check uses reviews.textMax (500)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.reports'::regclass and conname = 'reports_details_check'), '<= 1000') > 0, 'reports_details_check uses safety.reportDetailsMax (1000)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.moderation_actions'::regclass and conname = 'moderation_actions_note_check'), '<= 1000') > 0, 'moderation_actions_note_check uses safety.adminNoteMax (1000)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.member_notices'::regclass and conname = 'member_notices_body_check'), '<= 1000') > 0, 'member_notices_body_check uses safety.adminNoteMax (1000)');

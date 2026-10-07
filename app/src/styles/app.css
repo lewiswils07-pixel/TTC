@@ -1179,3 +1179,41 @@ a.hub-row:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px;
 .more-options > summary { cursor: pointer; font-weight: 700; color: var(--accent); }
 .more-options[open] > summary { margin-bottom: var(--space-4); }
 .more-options-body { display: grid; gap: var(--space-5); }
+
+/* Trip page tabs, your own plan and reviews. */
+.trip-tabs { margin-top: var(--space-4); }
+.tab-count { color: var(--accent); }
+.trip-planner { display: grid; gap: var(--space-4); }
+.plan-add { display: grid; gap: var(--space-3); padding: var(--space-4); }
+.plan-add-label { font-weight: 700; }
+.plan-add-row { display: flex; gap: var(--space-2); }
+.plan-add-row .input { flex: 1; min-width: 0; }
+.plan-progress { margin: 0; font-weight: 600; color: var(--muted); font-size: var(--text-sm); }
+.plan-day { display: grid; gap: var(--space-2); }
+.plan-day-title { margin: 0; font-size: var(--text); color: var(--accent); }
+.plan-items { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.plan-item { display: flex; align-items: center; gap: var(--space-2); background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); }
+.plan-item-tick { display: flex; align-items: center; gap: var(--space-3); flex: 1; min-width: 0; min-height: 44px; cursor: pointer; font-weight: 600; }
+.plan-item-tick input { width: 22px; height: 22px; accent-color: var(--accent); flex: none; }
+.plan-item.is-done .plan-item-tick span { text-decoration: line-through; color: var(--muted); font-weight: 400; }
+.plan-remove { border: 0; background: none; font: inherit; font-size: var(--text-xl); color: var(--muted); cursor: pointer; width: 44px; height: 44px; }
+.city-reviews { display: grid; gap: var(--space-4); }
+.review-summary { display: flex; align-items: center; gap: var(--space-2); margin: 0; }
+.review-average { font-size: var(--text-2xl); line-height: 1; }
+.stars { color: var(--gold); letter-spacing: 1px; font-size: var(--text-lg); }
+.stars-off { color: var(--line); }
+.review { display: grid; gap: var(--space-2); padding: var(--space-4); }
+.review.is-mine { border: 1.5px solid var(--accent); }
+.review-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin: 0; }
+.review-meta { display: flex; align-items: center; gap: var(--space-2); margin: 0; flex-wrap: wrap; }
+.review-meta .tag-muted { margin: 0; }
+.review-body { margin: 0; white-space: pre-line; }
+.review-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.review-actions { display: flex; align-items: center; gap: var(--space-4); }
+.review-label { font-weight: 700; }
+.star-picker { border: 0; margin: 0; padding: 0; }
+.star-picker legend { font-weight: 700; margin-bottom: var(--space-2); }
+.star-picker-row { display: flex; gap: var(--space-1); }
+.star { display: grid; place-items: center; width: 48px; height: 48px; font-size: 2rem; color: var(--line); cursor: pointer; border-radius: 50%; }
+.star.is-on { color: var(--gold); }
+.star:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 1px; }
