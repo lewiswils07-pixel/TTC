@@ -1,14 +1,14 @@
 // Download my data and delete my account (task T19).
 import { expect, test } from '@playwright/test'
-import { admin, newPhone, pickPlace, signIn, fillCard } from './helpers'
+import { admin, newPhone, pickPlace, signIn, fillCard, choose } from './helpers'
 
 test('a member downloads their data, then deletes their account', async ({ browser }) => {
   const page = await newPhone(browser)
   const email = `leaving${Date.now()}@example.com`
   await signIn(page, email)
   await page.getByLabel('First name').fill('Dora')
-  await page.getByLabel('Day').selectOption('3')
-  await page.getByLabel('Month').selectOption({ label: 'March' })
+  await choose(page, /^Day/, '3')
+  await choose(page, /^Month/, 'March')
   await page.getByLabel('Year').fill('1958')
   await page.getByRole('radio', { name: 'Woman', exact: true }).check({ force: true })
   await pickPlace(page, 'Leed', 'Leeds, United Kingdom')

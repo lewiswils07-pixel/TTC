@@ -192,6 +192,10 @@ legend { padding: 0; }
 .segmented[data-cols='2'] .segment:nth-child(n + 3) { border-top: 1.5px solid var(--line); }
 .dob { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.55fr) minmax(0, 1fr); gap: var(--space-2); }
 .dob .input { padding-inline: 10px; }
+/* The day and month lists open full width under the three boxes. */
+.dob { position: relative; }
+.dob .dropdown { position: static; }
+.dob .dropdown-panel { position: absolute; left: 0; right: 0; z-index: 5; }
 @media (max-width: 380px) { .segment span { font-size: 0.8125rem; padding-inline: 4px; } }
 
 /* Interest chips */
@@ -999,34 +1003,36 @@ legend { padding: 0; }
 .tour-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
 .tour-dots span.is-on { width: 22px; border-radius: 4px; background: var(--accent); }
 
-/* ------------------------------------------- choosing a card question */
-.question-picker { position: relative; }
-.question-button {
+/* ------------------------------------------- our own dropdown (card questions, dates, plan board) */
+.dropdown { position: relative; }
+.dropdown-button {
   display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); width: 100%;
   text-align: left; cursor: pointer; font: inherit; font-weight: 600; color: var(--ink);
 }
-.question-button.is-empty { color: var(--muted); font-weight: 500; }
-.question-button svg { flex: none; color: var(--accent); transition: transform 0.2s var(--ease-out); }
-.question-button[aria-expanded='true'] svg { transform: rotate(180deg); }
-.question-panel {
+.dropdown-button.is-empty { color: var(--muted); font-weight: 500; }
+.dropdown-button svg { flex: none; color: var(--accent); transition: transform 0.2s var(--ease-out); }
+.dropdown-button[aria-expanded='true'] svg { transform: rotate(180deg); }
+.dropdown-panel {
   margin-top: var(--space-2); max-height: 340px; overflow-y: auto; overscroll-behavior: contain;
   padding: var(--space-2); border: 1px solid var(--line); border-radius: var(--radius); background: var(--card);
   box-shadow: 0 8px 24px rgb(0 0 0 / 10%); animation: panel-in 0.15s ease-out;
 }
 @keyframes panel-in { from { opacity: 0; transform: translateY(-4px); } }
-.question-group + .question-group { margin-top: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--line); }
-.question-group-title { margin: var(--space-1, 4px) var(--space-3) var(--space-1, 4px); font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--gold-ink, var(--muted)); }
-.question-option {
+.dropdown-group + .dropdown-group { margin-top: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--line); }
+.dropdown-group-title { margin: var(--space-1, 4px) var(--space-3) var(--space-1, 4px); font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--gold-ink, var(--muted)); }
+.dropdown-option {
   display: block; width: 100%; min-height: 44px; padding: 10px var(--space-3); border: 0; border-radius: var(--radius-sm);
   background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer;
 }
-.question-option:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 7%, var(--card)); }
-.question-option:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
-.question-option[aria-pressed='true'] { background: var(--accent); color: var(--on-accent); font-weight: 600; }
-.question-option:disabled { color: var(--muted); cursor: default; }
-.question-used { font-size: var(--text-sm); }
+.dropdown-option:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 7%, var(--card)); }
+.dropdown-option:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+.dropdown-option[aria-pressed='true'] { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+.dropdown-option:disabled { color: var(--muted); cursor: default; }
+.dropdown-note { font-size: var(--text-sm); }
+.dropdown-grid { display: grid; gap: 2px; }
+.dropdown-grid .dropdown-option { text-align: center; padding-inline: var(--space-1); }
 .word-limit { color: var(--danger); font-weight: 600; }
-@media (prefers-reduced-motion: reduce) { .question-panel { animation: none; } .question-button svg { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .dropdown-panel { animation: none; } .dropdown-button svg { transition: none; } }
 .feed-who .feed-online {
   display: inline-flex; align-items: center; gap: 6px; margin: 0 0 var(--space-2); padding: 3px 10px; border-radius: 999px;
   background: rgb(0 0 0 / 45%); color: #fff; font-size: 0.8125rem; font-weight: 700;

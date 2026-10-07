@@ -6,6 +6,7 @@ import { InterestPicker } from '../components/InterestPicker'
 import { Layout, Loading } from '../components/Layout'
 import { ActionBar, SaveError } from '../components/Form'
 import { QuestionPicker } from '../components/QuestionPicker'
+import { Dropdown } from '../components/Dropdown'
 import { Segmented } from '../components/Segmented'
 import { ANSWER_MAX_CHARS, ANSWER_MAX_WORDS, ANSWERS_TO_PICK, checkAnswer, questionText, saveCard, wordCount, type CardAnswer } from '../lib/card'
 import type { City } from '../lib/cities'
@@ -201,6 +202,10 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
     city: city ? null : 'Please choose your home city from the list.',
   }
   const { shown, touch, validateAll } = useChecks(errors)
+  // Once the year is in, check the date as soon as a day or month list closes.
+  const checkDob = () => {
+    if (dobYear.length === 4) touch('birthDate')
+  }
 
   const { busy, error, submit } = useStepSubmit(async () => {
     // A town typed in by hand replaces any exact spot saved before.
@@ -233,38 +238,26 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
             You must be {MIN_AGE} or over.
           </p>
           <div className="dob">
-            <select
-              aria-label="Day"
-              className="input"
-              autoComplete="bday-day"
+            <Dropdown
+              label="Day"
+              placeholder="Day"
               value={dobDay}
-              aria-invalid={shown('birthDate') ? true : undefined}
-              onChange={(e) => setDobDay(e.target.value)}
-              onBlur={() => dobDay && dobMonth && dobYear.length === 4 && touch('birthDate')}
-            >
-              <option value="">Day</option>
-              {Array.from({ length: 31 }, (_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  {i + 1}
-                </option>
-              ))}
-            </select>
-            <select
-              aria-label="Month"
-              className="input"
-              autoComplete="bday-month"
+              columns={7}
+              invalid={!!shown('birthDate')}
+              groups={[{ options: Array.from({ length: 31 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) })) }]}
+              onChange={setDobDay}
+              onClose={checkDob}
+            />
+            <Dropdown
+              label="Month"
+              placeholder="Month"
               value={dobMonth}
-              aria-invalid={shown('birthDate') ? true : undefined}
-              onChange={(e) => setDobMonth(e.target.value)}
-              onBlur={() => dobDay && dobMonth && dobYear.length === 4 && touch('birthDate')}
-            >
-              <option value="">Month</option>
-              {MONTHS.map((m, i) => (
-                <option key={m} value={i + 1}>
-                  {m}
-                </option>
-              ))}
-            </select>
+              columns={3}
+              invalid={!!shown('birthDate')}
+              groups={[{ options: MONTHS.map((m, i) => ({ value: String(i + 1), label: m })) }]}
+              onChange={setDobMonth}
+              onClose={checkDob}
+            />
             <input
               aria-label="Year"
               className="input"

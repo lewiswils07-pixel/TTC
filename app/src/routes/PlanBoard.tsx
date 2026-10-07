@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router'
+import { Dropdown } from '../components/Dropdown'
 import { CityPicks } from '../components/CityPicks'
 import { TextField } from '../components/Field'
 import { useConfirm } from '../lib/useConfirm'
@@ -245,14 +246,13 @@ function AddIdea({ conversationId, days, start, onAdded }: { conversationId: num
       />
       <div className="field">
         <label htmlFor="idea-day">Which day? (optional)</label>
-        <select id="idea-day" className="input" value={day} onChange={(e) => setDay(e.target.value)}>
-          <option value="">Any day</option>
-          {Array.from({ length: Math.min(days, 91) }, (_, i) => (
-            <option key={i + 1} value={i + 1}>
-              {dayLabel(i + 1, start)}
-            </option>
-          ))}
-        </select>
+        <Dropdown
+          id="idea-day"
+          value={day}
+          placeholder="Any day"
+          groups={[{ options: [{ value: '', label: 'Any day' }, ...Array.from({ length: Math.min(days, 91) }, (_, i) => ({ value: String(i + 1), label: dayLabel(i + 1, start) }))] }]}
+          onChange={setDay}
+        />
       </div>
       <TextField
         name="link"
@@ -307,16 +307,14 @@ function Ideas({
       </h2>
       <div className="field">
         <label htmlFor="guide-city">See our picks for a city</label>
-        <select id="guide-city" className="input" value={guide} onChange={(e) => onGuide(e.target.value ? Number(e.target.value) : '')}>
-          <option value="">Choose a city</option>
-          {[...PICKS]
-            .sort((a, b) => a.city.localeCompare(b.city))
-            .map((c) => (
-              <option key={c.cityId} value={c.cityId}>
-                {c.city}
-              </option>
-            ))}
-        </select>
+        <Dropdown
+          id="guide-city"
+          value={guide === '' ? '' : String(guide)}
+          placeholder="Choose a city"
+          columns={2}
+          groups={[{ options: [...PICKS].sort((a, b) => a.city.localeCompare(b.city)).map((c) => ({ value: String(c.cityId), label: c.city })) }]}
+          onChange={(v) => onGuide(v ? Number(v) : '')}
+        />
       </div>
       {chosen && <CityPicks picks={chosen} added={added} onAdd={onAdd} />}
     </section>
