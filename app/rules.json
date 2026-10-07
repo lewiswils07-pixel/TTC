@@ -14,6 +14,7 @@
   "planBoard": { "ideaMax": 120, "linkMax": 500, "maxIdeas": 100, "maxDay": 91 },
   "safety": { "reportDetailsMax": 1000, "adminNoteMax": 1000 },
   "meetups": { "placeMax": 120, "noteMax": 300, "maxOpen": 10, "maxDaysAhead": 90, "linkDays": 2 },
+  "reviews": { "textMax": 500 },
   "survey": { "commentMax": 500, "heardFromAfterMinutes": 30 },
   "founding": { "plusMonths": 3 },
   "choices": {
