@@ -32,15 +32,15 @@ describe('Going when you are', () => {
     expect(sameTime(feed.find((p) => p.profile_id === 'Bob')!)).toBeUndefined()
   })
 
-  it('shows them in their own tile, each opening the trip', async () => {
+  it('shows their faces in one quiet row that opens the Sodalis+ page', async () => {
     const { container } = render(
       <MemoryRouter>
         <SameTimeStrip people={feed} />
       </MemoryRouter>,
     )
-    expect(screen.getByRole('heading', { name: 'Going when you are' })).toBeInTheDocument()
     expect(screen.getAllByRole('link')).toHaveLength(1)
-    expect(screen.getByRole('link', { name: /Ann/ })).toHaveAttribute('href', '/trips/7')
+    expect(screen.getByRole('link', { name: /Going when you are.*1 member/ })).toHaveAttribute('href', '/connections/same-time')
+    expect(screen.queryByText('Lisbon', { exact: false })).not.toBeInTheDocument()
     expect(await axeViolations(container)).toEqual([])
   })
 

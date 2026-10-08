@@ -8,7 +8,7 @@ import { count, rules } from '../lib/rules'
 const QUESTIONS: { q: string; a: string; link?: { to: string; label: string } }[] = [
   {
     q: 'How do I meet people?',
-    a: 'Add a trip and we’ll show you members going to the same place at the same time. Or browse For you on Connections and tap Connect.',
+    a: 'Add a trip and we’ll show you members going to the same place at the same time. Or browse Connect and tap Connect on anyone you’d like to meet.',
     link: { to: '/trips/new', label: 'Add a trip' },
   },
   {

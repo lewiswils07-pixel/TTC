@@ -17,6 +17,7 @@ const TripMatches = lazy(() => import('./routes/TripMatches').then((m) => ({ def
 const Connections = lazy(() => import('./routes/Connections').then((m) => ({ default: m.Connections })))
 const TripForm = lazy(() => import('./routes/TripForm').then((m) => ({ default: m.TripForm })))
 const MemberProfile = lazy(() => import('./routes/MemberProfile').then((m) => ({ default: m.MemberProfile })))
+const SameTime = lazy(() => import('./routes/SameTime').then((m) => ({ default: m.SameTime })))
 const ForYou = lazy(() => import('./routes/ForYou').then((m) => ({ default: m.ForYou })))
 const Trips = lazy(() => import('./routes/Trips').then((m) => ({ default: m.Trips })))
 const Filters = lazy(() => import('./routes/Filters').then((m) => ({ default: m.Filters })))
@@ -164,6 +165,14 @@ export function AppRoutes() {
         element={
           <RequireSession>
             <ForYou />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/connections/same-time"
+        element={
+          <RequireSession>
+            <SameTime />
           </RequireSession>
         }
       />
