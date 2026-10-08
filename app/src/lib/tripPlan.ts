@@ -29,3 +29,9 @@ export async function deleteTripIdea(id: number): Promise<void> {
   const { error } = await supabase.rpc('delete_trip_idea', { p_item: id })
   if (error) throw friendlyError(error)
 }
+
+/** Change an idea's words or day. */
+export async function editTripIdea(id: number, title: string, day: number | null): Promise<void> {
+  const { error } = await supabase.rpc('edit_trip_idea', { p_item: id, p_title: title.trim(), p_day: day })
+  if (error) throw friendlyError(error)
+}

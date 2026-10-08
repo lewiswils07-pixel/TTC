@@ -7,7 +7,7 @@ import { myConversations } from '../lib/chat'
 import { messageOf } from '../lib/errors'
 import { homeLabel } from '../lib/matching'
 import { loadMemberProfile, type MemberProfile as Member } from '../lib/member'
-import { BUDGETS, DAY_RHYTHMS, LANGUAGES, PACES, ROOM_SHARING, TRAVEL_STYLES, WALKING, ageLabel, labelFor } from '../lib/options'
+import { BUDGETS, DAY_RHYTHMS, DIETS, LANGUAGES, PACES, ROOM_SHARING, TRAVEL_STYLES, WALKING, ageLabel, labelFor } from '../lib/options'
 import { photoUrl } from '../lib/photo'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
@@ -88,6 +88,7 @@ export function MemberProfile() {
     ['Walking', labelFor(WALKING, member.walking)],
   ].filter(([, v]) => v !== 'Not set')
   const languages = member.languages.map((code) => LANGUAGES.find((l) => l.value === code)?.label ?? code)
+  const diet = member.diet.map((d) => labelFor(DIETS, d))
 
   return (
     <Layout tab="connections">
@@ -117,8 +118,8 @@ export function MemberProfile() {
             </Link>
           )}
           {chatId && (
-            <Link className="btn btn-secondary" to={`/messages/${chatId}/plan`}>
-              Plan board
+            <Link className="btn btn-secondary" to={`/plan-together/${member.profile_id}`}>
+              Plan a trip together
             </Link>
           )}
         </div>
@@ -156,7 +157,7 @@ export function MemberProfile() {
           </section>
         )}
 
-        {(travel.length > 0 || languages.length > 0 || member.travelling_with) && (
+        {(travel.length > 0 || languages.length > 0 || diet.length > 0 || member.travelling_with) && (
           <section className="card" aria-labelledby="member-travel">
             <h2 id="member-travel" className="card-title">
               How {member.display_name} travels
@@ -172,6 +173,12 @@ export function MemberProfile() {
                 <div>
                   <dt>Speaks</dt>
                   <dd>{languages.join(', ')}</dd>
+                </div>
+              )}
+              {diet.length > 0 && (
+                <div>
+                  <dt>Food</dt>
+                  <dd>{diet.join(', ')}</dd>
                 </div>
               )}
               {member.travelling_with && (

@@ -7,7 +7,7 @@ import { answerMeet, meetPrompts, type MeetPrompt } from '../lib/meet'
 import { Avatar } from '../components/Avatar'
 import { CardBack } from '../components/CardBack'
 import { cityLabel } from '../lib/cities'
-import { BUDGETS, GENDERS, MAX_PREF_AGE, PACES, TRAVEL_STYLES, ageFromDate, ageLabel, labelFor } from '../lib/options'
+import { BUDGETS, GENDERS, MAX_PREF_AGE, MIN_AGE, PACES, TRAVEL_STYLES, ageFromDate, ageLabel, labelFor } from '../lib/options'
 import type { Card } from '../lib/card'
 import { profileStrength } from '../lib/strength'
 import { answerNps, npsDue } from '../lib/kpis'
@@ -20,8 +20,10 @@ import { photoUrl } from '../lib/photo'
 import { listInterests, type Interest, type MyProfile, type Profile } from '../lib/profile'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
-import { plusUntil } from '../lib/plan'
+import { plusPrice, plusUntil, stopMyPlus } from '../lib/plan'
+import { useConfirm } from '../lib/useConfirm'
 import { HubRow } from '../components/HubRow'
+import { EmergencyNumbers } from '../components/EmergencyNumbers'
 
 type HubTab = 'me' | 'safety' | 'plus'
 const HUB_TABS: { key: HubTab; label: string }[] = [
@@ -35,7 +37,8 @@ const ICONS = {
   gear: 'M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1l.4 2.6h4l.4-2.6c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5-2.3-1.6ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z',
   pencil: 'M4 17.3V20h2.7l8-8-2.7-2.7-8 8Zm12.7-7.4a.7.7 0 0 0 0-1l-1.6-1.6a.7.7 0 0 0-1 0l-1.3 1.3 2.7 2.7 1.2-1.4Z',
   hand: 'M18 7a1.5 1.5 0 0 0-1.5 1.5V12h-1V4.5a1.5 1.5 0 0 0-3 0V12h-1V3.5a1.5 1.5 0 0 0-3 0V12h-1V6.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h.5a7 7 0 0 0 6.6-4.7l1.4-4.3V8.5A1.5 1.5 0 0 0 18 7Z',
-  heart: 'M12 21s-7.5-4.6-9.6-9.3C.9 8.3 3 4.5 6.6 4.5c2 0 3.6 1.1 4.4 2.6.8-1.5 2.4-2.6 4.4-2.6 3.6 0 5.7 3.8 4.2 7.2C19.5 16.4 12 21 12 21Z',
+  people: 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7.5 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM1 20c0-3.3 3.6-6 8-6s8 2.7 8 6v1H1v-1Zm17.5 1v-1c0-2-.9-3.8-2.4-5.1 3.6.2 6.9 2.2 6.9 5.1v1h-4.5Z',
+  share: 'M18 16a3 3 0 0 0-2.4 1.2l-6.7-3.4a3 3 0 0 0 0-1.6l6.7-3.4A3 3 0 1 0 15 7l-6.7 3.4a3 3 0 1 0 0 3.2L15 17a3 3 0 1 0 3-1Z',
   rules: 'M5 3h11l3 3v15H5V3Zm3 6v2h8V9H8Zm0 4v2h8v-2H8Zm0 4v2h5v-2H8Z',
   phone: 'M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2Z',
   shield: 'M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm-1.2 13.6-3.4-3.4 1.4-1.4 2 2 4.6-4.6 1.4 1.4-6 6Z',
@@ -205,6 +208,12 @@ function MyProfilePanel({ data, hasPhoto }: { data: MyProfile; hasPhoto: boolean
             <dd>
               {preferences.genders.map((g) => labelFor(GENDERS, g)).join(', ')}, aged {preferences.age_min} to{' '}
               {preferences.age_max >= MAX_PREF_AGE ? `${MAX_PREF_AGE}+` : preferences.age_max}
+              {preferences.age_min <= MIN_AGE && preferences.age_max >= MAX_PREF_AGE && (
+                <>
+                  {' '}
+                  <Link to="/filters">Narrow this down</Link>
+                </>
+              )}
             </dd>
           </div>
         </dl>
@@ -227,9 +236,12 @@ function MyProfilePanel({ data, hasPhoto }: { data: MyProfile; hasPhoto: boolean
       <ul className="hub-list">
         {!hasPhoto && (
           <li>
-            <HubRow to={stepLink('photo')} icon={ICONS.photo} title="Add a photo" text="People are far more likely to say yes when they can see you." />
+            <HubRow to={stepLink('photo')} icon={ICONS.photo} title="Add a photo" text="People are far more likely to accept when they can see you." />
           </li>
         )}
+        <li>
+          <HubRow to="/profile/preview" icon={ICONS.photo} title="See your card as others do" text="Exactly what other members see in their suggestions" />
+        </li>
         <li>
           <HubRow to="/connections?tour=1" icon={ICONS.tour} title="How the Collective works" text="A quick tour of what you can do" />
         </li>
@@ -247,7 +259,7 @@ function SafetyPanel() {
           <HubRow to="/connections/requests#blocked" icon={ICONS.hand} title="Blocked members" text="See or unblock anyone you’ve blocked." />
         </li>
         <li>
-          <HubRow to="/meeting-safely" icon={ICONS.heart} title="Tell someone you trust" text="Share where and when you’re meeting with a friend." />
+          <HubRow to="/meeting-safely" icon={ICONS.share} title="Tell someone you trust" text="Share where and when you’re meeting with a friend." />
         </li>
         <li className="hub-row hub-row-static">
           <span className="hub-icon" aria-hidden="true">
@@ -281,10 +293,7 @@ function SafetyPanel() {
         </span>
         <div>
           <h2 id="emergency-title">If you need help now</h2>
-          <p>
-            In an emergency, call <a href="tel:999">999</a> in the UK or <a href="tel:112">112</a> anywhere in Europe. To talk to someone, Samaritans
-            are free any time on <a href="tel:116123">116 123</a>.
-          </p>
+          <EmergencyNumbers />
         </div>
       </section>
     </>
@@ -294,13 +303,34 @@ function SafetyPanel() {
 /** What Sodalis+ lets them do, and how long they have it. */
 function PlusPanel() {
   const [until, setUntil] = useState<string | null | undefined | 'loading'>('loading')
+  const [error, setError] = useState<string | null>(null)
+  const [stopped, setStopped] = useState(false)
+  const { ask, dialog } = useConfirm()
   useEffect(() => {
     plusUntil().then(setUntil, () => setUntil(undefined))
   }, [])
+
+  async function stop() {
+    const yes = await ask({
+      title: `Stop ${brand.plusName} now?`,
+      message: 'You’ll move to the free plan straight away. Your connections, chats and trips all stay.',
+      confirmLabel: `Stop ${brand.plusName}`,
+      cancelLabel: `Keep ${brand.plusName}`,
+    })
+    if (!yes) return
+    setError(null)
+    try {
+      await stopMyPlus()
+      setUntil(undefined)
+      setStopped(true)
+    } catch (e) {
+      setError(messageOf(e))
+    }
+  }
   if (until === 'loading') return <div className="skeleton-block" aria-hidden="true" />
   const has = until !== undefined
   const perks = [
-    { icon: ICONS.heart, title: 'Connect with as many people as you like', free: `Free: ${count(rules.requests.perWeekFree, 'request')} a week` },
+    { icon: ICONS.people, title: 'Connect with as many people as you like', free: `Free: ${count(rules.requests.perWeekFree, 'request')} a week` },
     { icon: ICONS.filters, title: 'Filter by planning style, pace and budget', free: 'Free: age, gender and distance' },
     { icon: ICONS.star, title: `Start up to ${count(rules.groups.maxOwnedPlus, 'group')} at once`, free: `Free: ${count(rules.groups.maxOwnedFree, 'group')}` },
   ]
@@ -309,14 +339,39 @@ function PlusPanel() {
       <section className="card plus-card" aria-labelledby="plus-title">
         <span className="tag tag-plus">{brand.plusName}</span>
         <h2 id="plus-title">{has ? `You have ${brand.plusName}` : `Do more with ${brand.plusName}`}</h2>
-        <p>
-          {has
-            ? until
-              ? `It’s yours until ${new Date(until).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.`
-              : 'It’s yours with no end date.'
-            : `${brand.plusName} is coming soon. We’ll let you know when you can join.`}
+        <p className="plus-price">
+          <strong>{plusPrice()}</strong> a month
         </p>
+        {has ? (
+          <>
+            <p>
+              {until
+                ? `It’s free for you until ${new Date(until).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.`
+                : 'It’s yours with no end date.'}
+            </p>
+            {until && (
+              <p className="hint">
+                When the free months end, you move to the free plan on your own. We never ask for a card for them, so there’s nothing to
+                cancel and you’ll never be charged without saying yes first.
+              </p>
+            )}
+            <button type="button" className="btn btn-secondary btn-small" onClick={stop}>
+              Stop {brand.plusName} now
+            </button>
+          </>
+        ) : (
+          <p>
+            {stopped ? `You’re on the free plan now. ` : ''}
+            {brand.plusName} is coming soon. When it starts you can stop it any time in one tap.
+          </p>
+        )}
+        {error && (
+          <p className="notice notice-error" role="alert">
+            {error}
+          </p>
+        )}
       </section>
+      {dialog}
       <ul className="hub-list">
         {perks.map((p) => (
           <li key={p.title} className="hub-row hub-row-static">
@@ -348,7 +403,7 @@ function Strength({ profile, interestCount, hasTrip, card }: { profile: Profile;
       <div className="strength-bar" role="progressbar" aria-labelledby="strength-heading" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
         <div style={{ width: `${percent}%` }} />
       </div>
-      <p className="hint">Complete profiles get more suggestions and more yeses. Next:</p>
+      <p className="hint">Complete profiles get more suggestions, and more people accept their requests. Next:</p>
       <ul className="strength-next">
         {next.slice(0, 2).map((p) => (
           <li key={p.label}>

@@ -6,7 +6,8 @@ import { TextField } from '../components/Field'
 import { useConfirm } from '../lib/useConfirm'
 import { Layout, Loading } from '../components/Layout'
 import { PICKS, picksFor } from '../data/picks'
-import { addIdea, checkIdea, checkLink, dayLabel, deleteIdea, MAX_IDEA, normalizeLink, planBoard, setDone, toggleVote, type Idea } from '../lib/board'
+import { addIdea, checkIdea, checkLink, dayLabel, deleteIdea, editIdea, MAX_IDEA, normalizeLink, planBoard, setDone, toggleVote, type Idea } from '../lib/board'
+import { IdeaEditor } from '../components/TripPlanner'
 import { myConversations, type Conversation } from '../lib/chat'
 import { daysBetween } from '../lib/dates'
 import { messageOf } from '../lib/errors'
@@ -22,7 +23,8 @@ export function PlanBoard() {
   const [chat, setChat] = useState<Conversation | null | undefined>(undefined)
   const [trip, setTrip] = useState<Trip>(null)
   const [guide, setGuide] = useState<number | ''>('')
-  const [groupCity, setGroupCity] = useState<string | null>(null)
+  const [groupCity, setGroupCity] = useState<string | number | null>(null)
+  const [editing, setEditing] = useState<number | null>(null)
   const [ideas, setIdeas] = useState<Idea[]>([])
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState<number | null>(null)
@@ -39,7 +41,7 @@ export function PlanBoard() {
           const g = (await myGroups())?.find((x) => x.id === found.group_id)
           if (g) {
             setTrip({ start: g.start_date, days: daysBetween(g.start_date, g.end_date) + 1 })
-            setGroupCity(g.city)
+            setGroupCity(g.city_id ?? g.city)
           }
         }
         setChat(found)
@@ -89,18 +91,33 @@ export function PlanBoard() {
 
   const card = (idea: Idea) => (
     <li key={idea.id} className={`card idea${idea.done ? ' is-done' : ''}`}>
-      <label className="idea-tick">
-        <input
-          type="checkbox"
-          checked={idea.done}
-          disabled={!chat.can_message || busy === idea.id}
-          onChange={(e) => {
-            const on = e.target.checked
-            void act(idea.id, () => setDone(idea.id, on), on ? `Ticked off ${idea.title}.` : `${idea.title} is back on the list.`, (i) => ({ ...i, done: on }))
+      {editing === idea.id ? (
+        <IdeaEditor
+          item={idea}
+          days={Math.min(trip?.days ?? 14, 91)}
+          start={trip?.start ?? null}
+          canEditTitle={idea.mine}
+          onCancel={() => setEditing(null)}
+          onSave={(title, day) => {
+            setEditing(null)
+            void act(idea.id, () => editIdea(idea.id, title, day), `${title} saved.`, (i) => ({ ...i, title, day }))
           }}
         />
-        <span className="idea-title">{idea.title}</span>
-      </label>
+      ) : (
+        <div className="idea-tick">
+          <input
+            type="checkbox"
+            checked={idea.done}
+            aria-label={idea.done ? `Done: ${idea.title}` : `Mark ${idea.title} done`}
+            disabled={!chat.can_message || busy === idea.id}
+            onChange={(e) => {
+              const on = e.target.checked
+              void act(idea.id, () => setDone(idea.id, on), on ? `Ticked off ${idea.title}.` : `${idea.title} is back on the list.`, (i) => ({ ...i, done: on }))
+            }}
+          />
+          <span className="idea-title">{idea.title}</span>
+        </div>
+      )}
       <p className="idea-meta">
         {idea.day ? dayLabel(idea.day, trip?.start) : 'Any day'}
         {idea.added_by && ` · added by ${idea.mine ? 'you' : idea.added_by}`}
@@ -126,6 +143,11 @@ export function PlanBoard() {
           <a className="idea-link" href={idea.source_url} target="_blank" rel="noopener noreferrer">
             Open link<span className="visually-hidden"> for {idea.title} (opens in a new tab)</span>
           </a>
+        )}
+        {chat.can_message && editing !== idea.id && (
+          <button type="button" className="btn-link safety-link" onClick={() => setEditing(idea.id)} aria-label={`Edit ${idea.title}`}>
+            Edit
+          </button>
         )}
         {idea.mine && chat.can_message && (
           <button

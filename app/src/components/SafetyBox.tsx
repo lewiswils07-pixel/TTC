@@ -26,7 +26,6 @@ export function SafetyBox({
   const [mode, setMode] = useState<Mode>(messageId ? 'report' : 'closed')
   const [reason, setReason] = useState<ReportReason | null>(messageId ? 'asking_for_money' : null)
   const [details, setDetails] = useState('')
-  const [alsoBlock, setAlsoBlock] = useState(true)
   const [tried, setTried] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -59,7 +58,8 @@ export function SafetyBox({
 
   const block = () => run(() => blockMember(profileId), () => onBlocked(`You blocked ${name}. You won’t see each other again.`))
 
-  function report() {
+  // Two plain buttons rather than a switch, so it's always clear whether they'll be blocked too.
+  function report(alsoBlock: boolean) {
     setTried(true)
     if (!reason) return
     void run(
@@ -155,20 +155,17 @@ export function SafetyBox({
               />
             )}
           </Field>
-          <label className="switch-row">
-            <input type="checkbox" role="switch" checked={alsoBlock} onChange={(e) => setAlsoBlock(e.target.checked)} />
-            <span>
-              <strong>Also block {name}</strong>
-              <span className="hint">You won’t see each other again.</span>
-            </span>
-          </label>
+          <p className="hint">Blocking too means you won’t see each other again. {name} isn’t told who reported them.</p>
           {errorRow}
-          <div className="action-row">
-            <button type="button" className="btn btn-secondary" onClick={close} disabled={busy}>
-              Cancel
+          <div className="safety-send">
+            <button type="button" className="btn btn-danger btn-block" onClick={() => report(true)} disabled={busy}>
+              {busy ? 'Sending…' : `Report and block ${name}`}
             </button>
-            <button type="button" className="btn btn-danger" onClick={report} disabled={busy}>
-              {busy ? 'Sending…' : 'Send report'}
+            <button type="button" className="btn btn-secondary btn-block" onClick={() => report(false)} disabled={busy}>
+              Report only
+            </button>
+            <button type="button" className="btn-link safety-link" onClick={close} disabled={busy}>
+              Cancel
             </button>
           </div>
         </>

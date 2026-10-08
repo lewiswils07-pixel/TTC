@@ -55,6 +55,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await visit(page, '/', /./, issues)
   await visit(page, '/sign-in', 'Join the Collective', issues)
   await visit(page, '/meeting-safely', 'Meeting up safely', issues)
+  await visit(page, '/help', /Help/, issues)
   for (const [path, title] of [
     ['/terms', /Terms/],
     ['/privacy', /Privacy/],
@@ -159,6 +160,11 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   // Reviews: someone else's, then her own.
   await page.getByRole('tab', { name: 'Reviews' }).click()
   await expect(page.getByText('Take the tram early, before the crowds.')).toBeVisible()
+  await expect(page.getByText(/You can add your own review once your trip starts/)).toBeVisible()
+  // Once the trip has started, she can add her own.
+  await admin.from('trips').update({ start_date: isoIn(0) }).eq('id', trip!.id)
+  await page.reload()
+  await page.getByRole('tab', { name: 'Reviews' }).click()
   await page.getByRole('button', { name: 'Post review' }).click()
   await expect(page.getByText('Please choose how many stars.')).toBeVisible()
   await page.getByRole('radio', { name: '4 stars' }).check({ force: true })
@@ -185,6 +191,10 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await expect(page.getByText('✓ On the plan')).toBeVisible()
   issues.push(...(await problems(page, '/messages/:id/plan (with city picks)')))
   await visit(page, `/messages/${chat!.id}/share`, 'Tell someone you trust', issues)
+  await visit(page, `/plan-together/${demo(1)}`, /Plan a trip with/, issues)
+  await page.getByRole('radio', { name: /Somewhere new/ }).check()
+  issues.push(...(await problems(page, '/plan-together/:id (somewhere new)')))
+  await visit(page, '/profile/preview', /./, issues)
   await visit(page, '/groups', 'Chat', issues)
   await visit(page, '/groups/new', 'Start a group', issues)
   await visit(page, '/profile', /./, issues)

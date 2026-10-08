@@ -7,10 +7,12 @@ import { TripPlanner } from '../components/TripPlanner'
 import { RequestsHint, SuggestionCard, useRequests } from '../components/Suggestions'
 import { picksFor } from '../data/picks'
 import { cityLabel } from '../lib/cities'
-import { tripDates } from '../lib/dates'
+import { isoDate, tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { noteFirstMatch } from '../lib/kpis'
-import { reasons, suggestForTrip, type TripSuggestion } from '../lib/matching'
+import { homeLabel, reasons, suggestForTrip, tripCompanions, type TripCompanion, type TripSuggestion } from '../lib/matching'
+import { ageLabel } from '../lib/options'
+import { Avatar } from '../components/Avatar'
 import { flexibilityLabel, getTrip, type Trip } from '../lib/trips'
 
 type Tab = 'people' | 'plan' | 'reviews'
@@ -27,15 +29,18 @@ export function TripMatches() {
   const tab: Tab = TABS.some((t) => t.key === params.get('tab')) ? (params.get('tab') as Tab) : 'people'
   const [trip, setTrip] = useState<Trip | null | undefined>(undefined)
   const [people, setPeople] = useState<TripSuggestion[] | null>(null)
+  const [companions, setCompanions] = useState<TripCompanion[]>([])
   const requests = useRequests()
   const [error, setError] = useState<string | null>(null)
   const heading = useRef<HTMLHeadingElement>(null)
+  const [today] = useState(() => isoDate(new Date()))
 
   useEffect(() => {
-    Promise.all([getTrip(tripId), suggestForTrip(tripId)]).then(
-      ([t, p]) => {
+    Promise.all([getTrip(tripId), suggestForTrip(tripId), tripCompanions(tripId).catch(() => [])]).then(
+      ([t, p, c]) => {
         setTrip(t)
         setPeople(p)
+        setCompanions(c)
         if (p.length) noteFirstMatch()
       },
       (e) => setError(messageOf(e)),
@@ -94,38 +99,65 @@ export function TripMatches() {
             onClick={() => setParams(t.key === 'people' ? {} : { tab: t.key }, { replace: true })}
           >
             {t.label}
-            {t.key === 'people' && people.length > 0 && <span className="tab-count"> {people.length}</span>}
+            {t.key === 'people' && people.length + companions.length > 0 && <span className="tab-count"> {people.length + companions.length}</span>}
           </button>
         ))}
       </div>
 
       <div id="trip-panel" role="tabpanel" aria-labelledby={`trip-tab-${tab}`}>
         {tab === 'plan' && <TripPlanner tripId={trip.id} city={trip.city.name} start={trip.start_date} end={trip.end_date} picks={picks} />}
-        {tab === 'reviews' && <CityReviews cityId={trip.city_id} city={trip.city.name} />}
+        {tab === 'reviews' && <CityReviews cityId={trip.city_id} city={trip.city.name} opensOn={trip.start_date > today ? trip.start_date : undefined} />}
         {tab === 'people' && (
           <>
-            {people.length > 0 && (
+            {people.length + companions.length > 0 && (
               <DateOverlap
                 city={trip.city.name}
                 mine={{ start: trip.start_date, end: trip.end_date }}
-                others={[...people]
-                  .sort((a, b) => Number(!!b.overlap_start) - Number(!!a.overlap_start))
-                  .map((p) => ({ name: p.display_name, start: p.trip_start, end: p.trip_end }))}
+                others={[...companions, ...[...people].sort((a, b) => Number(!!b.overlap_start) - Number(!!a.overlap_start))].map((p) => ({
+                  name: p.display_name,
+                  start: p.trip_start,
+                  end: p.trip_end,
+                }))}
               />
+            )}
+
+            {companions.length > 0 && (
+              <section aria-labelledby="in-touch">
+                <h2 id="in-touch" className="section-title">
+                  Already in touch
+                </h2>
+                <ul className="person-list">
+                  {companions.map((c) => (
+                    <CompanionRow key={c.profile_id} person={c} />
+                  ))}
+                </ul>
+                {companions.some((c) => c.status === 'connected') && (
+                  <Link className="btn btn-secondary btn-block" to={`/groups/new?trip=${trip.id}`}>
+                    Start a group for this trip
+                  </Link>
+                )}
+              </section>
             )}
 
             <section aria-labelledby="going-too">
               <h2 id="going-too" className="section-title">
-                {people.length ? `${people.length} ${people.length === 1 ? 'person' : 'people'} going too` : 'People going too'}
+                {people.length
+                  ? `${people.length} ${companions.length ? 'more ' : ''}${people.length === 1 ? 'person' : 'people'} going too`
+                  : companions.length
+                    ? 'More people going too'
+                    : 'People going too'}
               </h2>
               {people.length > 0 && <RequestsHint requests={requests} />}
               {people.length === 0 ? (
                 <div className="card empty">
-                  <p>
-                    No one matches yet. As members add trips to {trip.city.name} around your dates, they’ll appear here, best match
-                    first.
-                  </p>
-                  <p className="hint">Making your dates more flexible can help. Tap Edit trip to change them.</p>
+                  {companions.length ? (
+                    <p>No one else yet. As more members add trips to {trip.city.name} around your dates, they’ll appear here.</p>
+                  ) : (
+                    <>
+                      <p>No one yet. As members add trips to {trip.city.name} around your dates, they’ll appear here, best match first.</p>
+                      <p className="hint">Making your dates more flexible can help. Tap Edit trip to change them.</p>
+                    </>
+                  )}
                 </div>
               ) : (
                 <ul className="match-list">
@@ -139,5 +171,41 @@ export function TripMatches() {
         )}
       </div>
     </Layout>
+  )
+}
+
+const COMPANION_STATUS: Record<TripCompanion['status'], string> = {
+  connected: 'Connected',
+  group: 'In a group with you',
+  you_asked: 'Waiting for their reply',
+  they_asked: 'Asked to connect with you',
+}
+
+/** Someone on this trip you've already asked, been asked by, or connected with. */
+function CompanionRow({ person }: { person: TripCompanion }) {
+  const home = homeLabel(person)
+  return (
+    <li className="card person-card companion-row">
+      <Avatar name={person.display_name} path={person.photo_path} />
+      <div className="companion-who">
+        <h3>{person.display_name}</h3>
+        <p className="profile-meta">
+          {person.birth_year ? `Age ${ageLabel(person.birth_year)}` : null}
+          {home && ` · ${home}`}
+        </p>
+        <p className="profile-meta">
+          {COMPANION_STATUS[person.status]} · There {tripDates(person.trip_start, person.trip_end)}
+        </p>
+      </div>
+      {person.status === 'they_asked' ? (
+        <Link className="btn btn-primary btn-small" to="/connections/requests">
+          Answer
+        </Link>
+      ) : person.status === 'connected' || person.status === 'group' ? (
+        <Link className="btn btn-secondary btn-small" to={`/connections/people/${person.profile_id}`}>
+          Profile
+        </Link>
+      ) : null}
+    </li>
   )
 }

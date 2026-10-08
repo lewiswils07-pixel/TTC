@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { longDate } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { checkReview, cityReviews, deleteReview, MAX_REVIEW, reviewDate, saveReview, type Review } from '../lib/reviews'
 import { useConfirm } from '../lib/useConfirm'
@@ -18,8 +19,9 @@ export function Stars({ rating }: { rating: number }) {
   )
 }
 
-/** Members' star ratings and reviews of a place, and your own. */
-export function CityReviews({ cityId, city }: { cityId: number; city: string }) {
+/** Members' star ratings and reviews of a place, and your own. `opensOn` is the day your trip starts,
+ *  when that's still to come: reviews are for people who've been. */
+export function CityReviews({ cityId, city, opensOn }: { cityId: number; city: string; opensOn?: string }) {
   const { ask, dialog } = useConfirm()
   const [reviews, setReviews] = useState<Review[] | null>(null)
   const [editing, setEditing] = useState(false)
@@ -52,7 +54,7 @@ export function CityReviews({ cityId, city }: { cityId: number; city: string }) 
           </span>
         </p>
       ) : (
-        <p className="hint section-hint">No reviews of {city} yet. Been before? Yours could be the first.</p>
+        <p className="hint section-hint">No reviews of {city} yet.{opensOn ? '' : ' Yours could be the first.'}</p>
       )}
 
       {mine && !editing ? (
@@ -85,6 +87,10 @@ export function CityReviews({ cityId, city }: { cityId: number; city: string }) 
             </button>
           </div>
         </div>
+      ) : opensOn && !mine ? (
+        <p className="card review-later">
+          You can add your own review once your trip starts, on {longDate(opensOn)}.
+        </p>
       ) : (
         <ReviewForm
           city={city}

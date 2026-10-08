@@ -106,6 +106,9 @@ export async function fillCard(page: Page): Promise<void> {
     await slot.getByRole('textbox').fill(answer)
   }
   await page.getByRole('button', { name: 'Finish sign-up' }).click()
+  // "How you travel" is offered last; it's optional.
+  await expect(page.getByText('Last step, optional')).toBeVisible()
+  await page.getByRole('button', { name: 'Skip for now' }).click()
 }
 
 /** Opens one of our dropdowns and picks an option from its list. */

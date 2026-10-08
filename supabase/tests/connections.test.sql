@@ -2,7 +2,7 @@
 -- the weekly limit, accept, decline and withdraw, and privacy.
 -- Run with: npx supabase test db
 begin;
-select plan(24);
+select plan(26);
 
 create function pg_temp.sign_in_as(member uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', member, 'role', 'authenticated')::text, true);
@@ -51,7 +51,13 @@ select throws_ok($$update public.connections set status = 'accepted'$$, '42501',
 select pg_temp.sign_in_as(pg_temp.m(2));
 select results_eq($$select direction, status, display_name, note from public.my_connections()$$,
   $$values ('received'::text, 'pending'::text, 'Ann'::text, 'Hello Bob!'::text)$$, 'Bob sees Ann''s request');
-select throws_ok($$select public.send_connection_request(pg_temp.m(1))$$, '23514', 'You''re already in touch with this member', 'Bob cannot send Ann a second, crossing request');
+-- Asking back connects them, and a note goes into their new chat (tried, then undone).
+savepoint crossing;
+select is(public.send_connection_request(pg_temp.m(1), 'Hi Ann'), (select id from ids where name = 'ann-bob'), 'Bob asking Ann back accepts her request');
+select is((select status from public.connections where id = (select id from ids where name = 'ann-bob')), 'accepted', 'so they are connected');
+select is((select m.body from public.messages m join public.conversations c on c.id = m.conversation_id
+            where c.connection_id = (select id from ids where name = 'ann-bob')), 'Hi Ann', 'and Bob''s note is in their chat');
+rollback to savepoint crossing;
 
 select pg_temp.sign_in_as(pg_temp.m(3));
 select is_empty('select 1 from public.connections', 'Cat cannot see Ann and Bob''s request');

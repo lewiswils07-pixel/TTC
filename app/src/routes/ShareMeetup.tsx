@@ -7,7 +7,7 @@ import { messageOf } from '../lib/errors'
 import { roughly, rules } from '../lib/rules'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
-import { checkIn, createShare, localInputValue, MAX_NOTE, MAX_PLACE, meetTime, myShares, sendLink, stopSharing, type MeetupShare } from '../lib/share'
+import { checkIn, createShare, emailHref, localInputValue, MAX_NOTE, MAX_PLACE, meetTime, myShares, sendLink, stopSharing, textHref, type MeetupShare } from '../lib/share'
 import { useChecks } from '../lib/useChecks'
 
 function checkPlace(place: string): string | null {
@@ -139,9 +139,10 @@ export function ShareMeetup() {
                 {s.checked_in_at ? (
                   <p className="notice notice-success">You’ve said you’re back safe. Anyone with the link can see this.</p>
                 ) : null}
+                <FriendSend share={s} member={me} />
                 <div className="action-row">
-                  <button type="button" className="btn btn-primary" disabled={busy !== null} onClick={() => send(s)}>
-                    {busy === `send-${s.id}` ? 'Opening…' : 'Send the link'}
+                  <button type="button" className="btn btn-secondary" disabled={busy !== null} onClick={() => send(s)}>
+                    {busy === `send-${s.id}` ? 'Opening…' : 'Share or copy'}
                   </button>
                   {!s.checked_in_at && (
                     <button
@@ -206,6 +207,7 @@ export function ShareMeetup() {
           min={earliest}
           value={when}
           error={shown('when')}
+          hint={`Any day up to ${roughly(rules.meetups.maxDaysAhead)} ahead, in your own time.`}
           onChange={(e) => {
             setWhen(e.target.value)
             touch('when')
@@ -231,5 +233,25 @@ export function ShareMeetup() {
         <p className="hint center">The link stops working two days after you meet, or as soon as you stop sharing it.</p>
       </form>
     </Layout>
+  )
+}
+
+/** Send the link to a named friend by email or text, from the member's own apps. */
+function FriendSend({ share, member }: { share: MeetupShare; member: string }) {
+  const [email, setEmail] = useState('')
+  const id = `friend-${share.id}`
+  return (
+    <div className="friend-send">
+      <label htmlFor={id}>Your friend’s email (optional)</label>
+      <div className="friend-send-row">
+        <input id={id} className="input" type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <a className="btn btn-primary" href={emailHref(share, member, email)}>
+          Email it
+        </a>
+      </div>
+      <a className="btn btn-secondary btn-block" href={textHref(share, member)}>
+        Text it to a friend
+      </a>
+    </div>
   )
 }

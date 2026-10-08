@@ -25,6 +25,8 @@ export type MemberProfile = {
   interests: { id: number; label: string }[]
   card_answers: CardAnswer[]
   connected_at: string | null
+  /** Food preferences, e.g. vegetarian. */
+  diet: string[]
 }
 
 /** Null when the member can't be shown (not connected, blocked or gone). */
@@ -37,7 +39,15 @@ export async function loadMemberProfile(profileId: string): Promise<MemberProfil
   }
   const row = (data as MemberProfile[] | null)?.[0]
   if (!row) return null
-  return { ...row, languages: row.languages ?? [], interests: row.interests ?? [], card_answers: cleanAnswers(row.card_answers ?? []) }
+  // Food is a newer extra: a profile still shows if it can't be read.
+  const diet = await Promise.resolve(supabase.rpc('member_diet', { p_profile: profileId })).then((r) => r?.data, () => null)
+  return {
+    ...row,
+    languages: row.languages ?? [],
+    interests: row.interests ?? [],
+    card_answers: cleanAnswers(row.card_answers ?? []),
+    diet: (diet as string[] | null) ?? [],
+  }
 }
 
 async function basicProfile(profileId: string): Promise<MemberProfile | null> {
@@ -59,6 +69,7 @@ async function basicProfile(profileId: string): Promise<MemberProfile | null> {
     day_rhythm: null,
     walking: null,
     languages: [],
+    diet: [],
     travelling_with: null,
     interests: [],
     card_answers: card.card_answers,

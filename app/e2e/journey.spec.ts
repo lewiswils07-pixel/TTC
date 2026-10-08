@@ -158,7 +158,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await b.goto('/messages')
     await b.getByRole('link', { name: /^Lewis/ }).click()
     await b.getByRole('button', { name: 'Report this message' }).click()
-    await b.getByRole('button', { name: 'Send report' }).click()
+    await b.getByRole('button', { name: 'Report and block Lewis' }).click()
     await expect(b.getByText(/Thanks for telling us/)).toBeVisible()
     await expect(b.getByRole('heading', { level: 1, name: 'Chat' })).toBeVisible()
     const { data: blocks } = await admin.from('blocks').select('blocked_id').eq('blocked_id', lewis)

@@ -10,6 +10,7 @@ import { messageOf } from '../lib/errors'
 import { groupPeople, inviteToGroup, leaveGroup, MAX_GROUP, myGroups, respondToInvite, type Group, type GroupPerson } from '../lib/groups'
 import { ageLabel } from '../lib/options'
 import { useSession } from '../lib/session-context'
+import { SkeletonRows } from '../components/Skeleton'
 
 /** One group: where and when, who's in it, the chat, inviting, removing and leaving. */
 export function GroupDetail() {
@@ -253,7 +254,7 @@ function InviteMore({
         There’s room for {room} more. {chosen.length} chosen.
       </p>
       {!people ? (
-        <p className="hint">Loading your connections…</p>
+        <SkeletonRows rows={2} label="Loading your connections" />
       ) : people.length === 0 ? (
         <p className="hint">Everyone you’re connected with is already here.</p>
       ) : (

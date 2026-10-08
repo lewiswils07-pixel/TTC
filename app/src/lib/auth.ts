@@ -66,6 +66,16 @@ export function hasPassword(user: User | null | undefined): boolean {
   return user?.user_metadata?.has_password === true
 }
 
+/** Still to choose a password or say "Not now": asked again until they do (testers lost theirs on a refresh). */
+export function needsPasswordChoice(user: User | null | undefined): boolean {
+  return !!user && !hasPassword(user) && user.user_metadata?.password_skipped !== true
+}
+
+/** "Not now, I'll use emailed codes": remembered with the account so we don't ask again. */
+export async function skipPassword(): Promise<void> {
+  await supabase.auth.updateUser({ data: { password_skipped: true } })
+}
+
 /** Signs out everywhere, and clears this member's saved choices from this device. */
 export async function signOut(): Promise<void> {
   clearDevice()

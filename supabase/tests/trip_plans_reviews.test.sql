@@ -1,6 +1,6 @@
 -- pgTAP: the planner on your own trips, and destination reviews.
 begin;
-select plan(16);
+select plan(17);
 
 create function pg_temp.sign_in_as(member uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', member, 'role', 'authenticated')::text, true);
@@ -37,7 +37,14 @@ select is((select count(*)::int from public.trip_plan((select id from t))), 0, '
 select throws_ok($$select public.add_trip_idea((select id from t), 'Sneaky')$$, 'P0002', null, 'or add to it');
 select throws_ok($$select public.delete_trip_idea((select id from i))$$, 'P0002', null, 'or remove from it');
 
--- Reviews
+-- Reviews: once your trip has started, or for your home town.
+reset role;
+select pg_temp.sign_in_as(pg_temp.m(1));
+select throws_ok($$select public.save_city_review(2988507, 4::smallint)$$, '23514', 'You can review a place once your trip there has started', 'no reviews before the trip');
+reset role;
+insert into public.trips (owner_id, city_id, start_date, end_date) values (pg_temp.m(2), 2988507, current_date - 1, current_date + 2);
+update public.profiles set home_city_id = 2988507 where id = pg_temp.m(1);
+select pg_temp.sign_in_as(pg_temp.m(2));
 select lives_ok($$select public.save_city_review(2988507, 4::smallint, 'Lovely for slow walks.')$$, 'members can review a place');
 select public.save_city_review(2988507, 5::smallint, 'Even better the second time.');
 reset role;

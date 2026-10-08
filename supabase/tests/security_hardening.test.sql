@@ -80,7 +80,7 @@ select is((select count(*)::int from public.profiles where id = pg_temp.m(2)), 1
 -- ------------------------------------- shares leave out people who blocked you
 update public.profiles set status = 'active', role = 'member' where id = pg_temp.m(2);
 select pg_temp.sign_in_as(pg_temp.m(1));
-select throws_ok($$select public.create_meetup_share((select id from chat), 'Café', now() + interval '100 days')$$, '23514', null, 'shares are for meet-ups in the next 3 months');
+select throws_ok($$select public.create_meetup_share((select id from chat), 'Café', now() + interval '800 days')$$, '23514', null, 'shares are for meet-ups in the next 2 years');
 reset role;
 
 select * from finish();

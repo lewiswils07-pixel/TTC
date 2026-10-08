@@ -4,7 +4,7 @@ const STEPS: { icon: string; title: string; text: string }[] = [
   {
     icon: '✦',
     title: 'Meet people one at a time',
-    text: 'Each card is someone we think you’d get on with, with the reasons why. Tap Connect to say hello, or Not now to see the next person. On a phone you can also swipe right or left.',
+    text: 'Each card is someone we think you’d get on with, with the reasons why. Tap Connect to say hello, or Not now to see the next person.',
   },
   {
     icon: '↻',
@@ -19,7 +19,7 @@ const STEPS: { icon: string; title: string; text: string }[] = [
   {
     icon: '✓',
     title: 'Plan together',
-    text: 'When you both say yes, you can chat. Each chat has a plan board for ideas, with our own picks for popular cities.',
+    text: 'Once someone accepts your request, you can chat. Each chat has a plan board for ideas, with our own picks for popular cities.',
   },
   {
     icon: '♡',

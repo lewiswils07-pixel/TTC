@@ -3,7 +3,7 @@ import type { CityPicks as Picks } from '../data/picks'
 import { checkIdea, dayLabel, MAX_IDEA } from '../lib/board'
 import { daysBetween } from '../lib/dates'
 import { messageOf } from '../lib/errors'
-import { addTripIdea, deleteTripIdea, tripPlan, updateTripIdea, type PlanItem } from '../lib/tripPlan'
+import { addTripIdea, deleteTripIdea, editTripIdea, tripPlan, updateTripIdea, type PlanItem } from '../lib/tripPlan'
 import { CityPicks } from './CityPicks'
 import { Dropdown } from './Dropdown'
 import { FieldError } from './Field'
@@ -21,8 +21,16 @@ export function TripPlanner({ tripId, city, start, end, picks }: Props) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [status, setStatus] = useState('')
+  const [removed, setRemoved] = useState<PlanItem | null>(null)
+  const [editing, setEditing] = useState<number | null>(null)
 
   const reload = useCallback(() => tripPlan(tripId).then(setItems), [tripId])
+  // The Undo offer goes after a while.
+  useEffect(() => {
+    if (!removed) return
+    const t = window.setTimeout(() => setRemoved(null), 8000)
+    return () => window.clearTimeout(t)
+  }, [removed])
   useEffect(() => {
     reload().catch((e) => setError(messageOf(e)))
   }, [reload])
@@ -64,6 +72,22 @@ export function TripPlanner({ tripId, city, start, end, picks }: Props) {
       <p className="visually-hidden" role="status">
         {status}
       </p>
+      {removed && (
+        <p className="feed-toast plan-toast">
+          <span>{removed.title} removed.</span>
+          <button
+            type="button"
+            className="btn-link"
+            onClick={() => {
+              const item = removed
+              setRemoved(null)
+              void run(() => addTripIdea(tripId, item.title, item.day, item.source_url), `${item.title} is back on your plan.`)
+            }}
+          >
+            Undo
+          </button>
+        </p>
+      )}
       <form className="card plan-add" onSubmit={add} noValidate aria-label="Add to your plan">
         <label htmlFor="plan-title" className="plan-add-label">
           Add something to do
@@ -110,30 +134,58 @@ export function TripPlanner({ tripId, city, start, end, picks }: Props) {
             <section key={d ?? 'any'} className="plan-day" aria-label={d ? dayLabel(d, start) : 'Any day'}>
               <h3 className="plan-day-title">{d ? dayLabel(d, start) : 'Any day'}</h3>
               <ul className="plan-items">
-                {list.map((item) => (
-                  <li key={item.id} className={item.done ? 'plan-item is-done' : 'plan-item'}>
-                    <label className="plan-item-tick">
+                {list.map((item) =>
+                  editing === item.id ? (
+                    <li key={item.id} className="plan-item is-editing">
+                      <IdeaEditor
+                        item={item}
+                        days={days}
+                        start={start}
+                        onCancel={() => setEditing(null)}
+                        onSave={async (t, d) => {
+                          setEditing(null)
+                          setItems((all) => all && all.map((x) => (x.id === item.id ? { ...x, title: t, day: d } : x)))
+                          await run(() => editTripIdea(item.id, t, d), `${t} saved.`)
+                        }}
+                      />
+                    </li>
+                  ) : (
+                    <li key={item.id} className={item.done ? 'plan-item is-done' : 'plan-item'}>
                       <input
                         type="checkbox"
+                        className="plan-item-check"
                         checked={item.done}
+                        aria-label={item.done ? `Done: ${item.title}` : `Mark ${item.title} done`}
                         onChange={(e) => {
                           const on = e.target.checked
                           setItems((all) => all && all.map((x) => (x.id === item.id ? { ...x, done: on } : x)))
                           void run(() => updateTripIdea(item, { done: on }), on ? `Ticked off ${item.title}.` : `${item.title} is back on your plan.`)
                         }}
                       />
-                      <span>{item.title}</span>
-                    </label>
-                    {item.source_url && (
-                      <a className="idea-link" href={item.source_url} target="_blank" rel="noopener noreferrer">
-                        Open<span className="visually-hidden"> {item.title} (opens in a new tab)</span>
-                      </a>
-                    )}
-                    <button type="button" className="icon-btn plan-remove" aria-label={`Remove ${item.title}`} onClick={() => run(() => deleteTripIdea(item.id), `${item.title} removed.`)}>
-                      ×
-                    </button>
-                  </li>
-                ))}
+                      <span className="plan-item-title">{item.title}</span>
+                      {item.source_url && (
+                        <a className="idea-link" href={item.source_url} target="_blank" rel="noopener noreferrer">
+                          Open<span className="visually-hidden"> {item.title} (opens in a new tab)</span>
+                        </a>
+                      )}
+                      <button type="button" className="btn-link plan-edit" aria-label={`Edit ${item.title}`} onClick={() => setEditing(item.id)}>
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="icon-btn plan-remove"
+                        aria-label={`Remove ${item.title}`}
+                        onClick={() => {
+                          setItems((all) => all && all.filter((x) => x.id !== item.id))
+                          setRemoved(item)
+                          void run(() => deleteTripIdea(item.id), `${item.title} removed. You can undo this.`)
+                        }}
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ),
+                )}
               </ul>
             </section>
           ))}
@@ -150,5 +202,62 @@ export function TripPlanner({ tripId, city, start, end, picks }: Props) {
         <p className="hint section-hint">We haven’t written our picks for {city} yet, so add your own ideas above.</p>
       )}
     </div>
+  )
+}
+
+/** Change an idea's words and day, in place. */
+export function IdeaEditor({
+  item,
+  days,
+  start,
+  onSave,
+  onCancel,
+  canEditTitle = true,
+}: {
+  item: { id: number; title: string; day: number | null }
+  days: number
+  start: string | null
+  onSave: (title: string, day: number | null) => void
+  onCancel: () => void
+  canEditTitle?: boolean
+}) {
+  const [title, setTitle] = useState(item.title)
+  const [day, setDay] = useState(item.day ? String(item.day) : '')
+  const error = checkIdea(title)
+  return (
+    <form
+      className="idea-editor"
+      noValidate
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (!error) onSave(title.trim(), day ? Number(day) : null)
+      }}
+    >
+      {canEditTitle && (
+        <>
+          <label htmlFor={`idea-${item.id}`} className="visually-hidden">
+            Idea
+          </label>
+          <input id={`idea-${item.id}`} className="input" maxLength={MAX_IDEA} value={title} autoFocus aria-invalid={!!error || undefined} onChange={(e) => setTitle(e.target.value)} />
+          <FieldError error={error} />
+        </>
+      )}
+      <Dropdown
+        id={`idea-day-${item.id}`}
+        label="Day"
+        value={day}
+        placeholder="Any day"
+        groups={[{ options: [{ value: '', label: 'Any day' }, ...Array.from({ length: days }, (_, i) => ({ value: String(i + 1), label: dayLabel(i + 1, start) }))] }]}
+        onChange={setDay}
+      />
+      <div className="action-row">
+        <button type="button" className="btn btn-secondary btn-small" onClick={onCancel}>
+          Cancel
+        </button>
+        <button type="submit" className="btn btn-primary btn-small">
+          Save
+        </button>
+      </div>
+    </form>
   )
 }

@@ -82,9 +82,24 @@ export function shareUrl(token: string): string {
 }
 
 /** Opens the phone's share sheet, or copies the link where there isn't one. Returns what happened. */
+function shareText(share: Pick<MeetupShare, 'place'>, member: string): string {
+  return `${member} is meeting someone from ${brand.name} at ${share.place}. This private link shows who, where and when, and whether ${member} is back safe.`
+}
+
+/** Opens the member's email app with the link ready to send to a friend. */
+export function emailHref(share: Pick<MeetupShare, 'token' | 'place'>, member: string, to = ''): string {
+  const body = `${shareText(share, member)}\n\n${shareUrl(share.token)}`
+  return `mailto:${encodeURIComponent(to.trim())}?subject=${encodeURIComponent(`${member}’s meet-up`)}&body=${encodeURIComponent(body)}`
+}
+
+/** Opens the member's messages app with the link ready to text to a friend. */
+export function textHref(share: Pick<MeetupShare, 'token' | 'place'>, member: string): string {
+  return `sms:?&body=${encodeURIComponent(`${shareText(share, member)} ${shareUrl(share.token)}`)}`
+}
+
 export async function sendLink(share: Pick<MeetupShare, 'token' | 'place'>, member: string): Promise<'shared' | 'copied' | 'cancelled'> {
   const url = shareUrl(share.token)
-  const text = `${member} is meeting someone from ${brand.name} at ${share.place}. This private link shows who, where and when, and whether ${member} is back safe.`
+  const text = shareText(share, member)
   if (navigator.share) {
     try {
       await navigator.share({ title: 'My meet-up', text, url })
@@ -103,9 +118,18 @@ export function describePerson(p: Person): string {
   return p.member_number ? `${bits} (member no. ${p.member_number})` : bits
 }
 
-/** "Saturday 12 October at 14:00 BST", in the reader's own time zone. */
-export function meetTime(iso: string): string {
-  return new Date(iso).toLocaleString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' })
+/** "Saturday 12 October, 2:00pm", in the reader's own time (with the year when it isn't this year). */
+export function meetTime(iso: string, now = new Date()): string {
+  const d = new Date(iso)
+  return d.toLocaleString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: d.getFullYear() === now.getFullYear() ? undefined : 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
 }
 
 /** The value for a datetime-local input, in local time. */

@@ -3,7 +3,7 @@
 // answer lists in options.ts.
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { BUDGETS, DAY_RHYTHMS, GENDERS, PACES, ROOM_SHARING, SHOWN_GENDERS, TRAVEL_STYLES, WALKING } from '../src/lib/options'
+import { BUDGETS, DAY_RHYTHMS, DIETS, GENDERS, PACES, ROOM_SHARING, SHOWN_GENDERS, TRAVEL_STYLES, WALKING } from '../src/lib/options'
 import { count, roughly, rules } from '../src/lib/rules'
 // @ts-expect-error a plain JavaScript script, with no types
 import { rulesSql, rulesTest } from '../scripts/rules-sql.mjs'
@@ -24,6 +24,7 @@ describe('rules', () => {
     expect(values(ROOM_SHARING)).toEqual(rules.choices.roomSharing)
     expect(values(DAY_RHYTHMS)).toEqual(rules.choices.dayRhythm)
     expect(values(WALKING)).toEqual(rules.choices.walking)
+    expect(values(DIETS)).toEqual(rules.choices.diet)
     expect(values(SHOWN_GENDERS)).toEqual(rules.choices.genderShown)
   })
   it('words numbers the way members say them', () => {

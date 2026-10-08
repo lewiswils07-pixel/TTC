@@ -19,6 +19,9 @@ export type Group = {
   owner_name: string
   members: number
   conversation_id: number | null
+  /** A trip two connections are planning together (it can grow into a group). */
+  is_pair?: boolean
+  city_id?: number
 }
 
 export type GroupPerson = {

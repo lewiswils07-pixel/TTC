@@ -13,6 +13,7 @@ const LINKS: { to: string; title: string; text: string }[] = [
   { to: '/settings/privacy', title: 'Privacy choices', text: 'Choose which optional tools we use' },
   { to: '/account', title: 'Account and data', text: 'Password, download your data, delete your account' },
   { to: '/connections?tour=1', title: 'Take the tour again', text: 'A quick look at what you can do' },
+  { to: '/help', title: 'Help and contact', text: 'Questions, and how to reach us' },
 ]
 const LEGAL: { to: string; title: string }[] = [
   { to: '/community-rules', title: 'Community rules' },

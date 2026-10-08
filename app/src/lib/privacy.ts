@@ -13,8 +13,8 @@ export const PRIVACY_TOOLS: { key: keyof PrivacyChoices; title: string; text: st
   },
   {
     key: 'marketing',
-    title: 'Personalised marketing',
-    text: 'Lets us show you ads and offers that suit you, and measure how well our own marketing works.',
+    title: 'News and offers from us',
+    text: 'Lets us send you our own news and offers that suit you, and see how well they work. We never show you adverts.',
   },
 ]
 
