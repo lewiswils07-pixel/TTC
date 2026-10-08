@@ -1275,35 +1275,26 @@ html { scroll-padding-bottom: 7rem; }
 .skeleton-title { display: block; height: 1.9rem; width: 55%; border-radius: 8px; }
 .card-back-empty .skeleton-line { display: block; margin: var(--space-2) auto; }
 
-/* ------------------------------------------------ quick filters on Connections */
-.filter-bar {
-  display: flex; align-items: center; gap: var(--space-2); margin: 0 calc(var(--space-4) * -1) var(--space-3); padding: 2px var(--space-4) 6px;
-  overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+/* ------------------------------------------------ one Filters button on Connections */
+.connections-top { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); }
+.connections-top .subnav { flex: 1; margin: 0; }
+.filter-button {
+  flex: none; position: relative; display: inline-flex; align-items: center; gap: 6px; height: 48px; padding: 0 14px;
+  border: 1.5px solid color-mix(in srgb, var(--ink) 16%, transparent); border-radius: 999px; background: var(--card); color: var(--ink);
+  font: inherit; font-size: 0.9375rem; font-weight: 700; cursor: pointer;
+  transition: transform 160ms var(--ease-out), border-color 160ms ease;
 }
-.filter-bar::-webkit-scrollbar { display: none; }
-.filter-all {
-  flex: none; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 999px; color: var(--ink);
-  transition: transform 160ms var(--ease-out), background-color 160ms ease;
+.filter-button:active:not(:disabled) { transform: scale(0.96); }
+.filter-button:disabled { opacity: 0.6; cursor: default; }
+.filter-button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) { .filter-button:not(:disabled):hover { border-color: var(--ink); } }
+.filter-count {
+  display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px;
+  background: var(--brand-disc); color: #fff; font-size: 0.75rem; font-weight: 800;
 }
-.filter-pill {
-  flex: none; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px 0 16px;
-  border: 1.5px solid color-mix(in srgb, var(--ink) 18%, transparent); border-radius: 999px; background: var(--card); color: var(--ink);
-  font: inherit; font-size: 0.9375rem; font-weight: 700; white-space: nowrap; cursor: pointer;
-  transition: transform 160ms var(--ease-out), background-color 160ms ease, border-color 160ms ease, color 160ms ease;
-}
-.filter-pill svg { flex: none; opacity: 0.8; }
-.filter-pill.is-set { background: var(--ink); border-color: var(--ink); color: var(--paper); }
-.filter-pill:disabled { opacity: 0.6; cursor: default; }
-.filter-plus {
-  display: grid; place-items: center; width: 18px; height: 18px; border-radius: 999px; background: var(--gold); color: var(--ink);
-  font-size: 0.75rem; font-weight: 800; line-height: 1;
-}
-.filter-pill:active:not(:disabled), .filter-all:active { transform: scale(0.96); }
-.filter-pill:focus-visible, .filter-all:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
-@media (hover: hover) and (pointer: fine) {
-  .filter-pill:not(.is-set):not(:disabled):hover { border-color: var(--ink); }
-  .filter-all:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
-}
+.sheet-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.sheet-section { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--line); }
+.sheet-actions { position: sticky; bottom: calc(var(--space-5) * -1); margin: var(--space-4) calc(var(--space-5) * -1) calc(var(--space-5) * -1); padding: var(--space-3) var(--space-5) var(--space-5); background: var(--card); border-top: 1px solid var(--line); }
 /* The sheet a pill opens: rises from the bottom on a phone. */
 .sheet-box { position: relative; padding-top: var(--space-6); max-height: calc(100dvh - var(--space-6)); overflow-y: auto; }
 .sheet-handle { position: absolute; top: 10px; left: 50%; width: 40px; height: 5px; margin-left: -20px; border-radius: 3px; background: var(--line); }
@@ -1336,4 +1327,4 @@ html { scroll-padding-bottom: 7rem; }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .tabbar { background: color-mix(in srgb, var(--card) 96%, transparent); }
 }
-h1.visually-hidden + .subnav { margin-top: 0; }
+.sheet-body > .field + *, .sheet-body > * + .field { margin-top: var(--space-5); }

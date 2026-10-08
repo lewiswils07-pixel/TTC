@@ -6,7 +6,7 @@ import { SafetyBox } from '../components/SafetyBox'
 import { SkeletonFeedCard } from '../components/Skeleton'
 import { SameTimeStrip } from '../components/SameTimeStrip'
 import { Tour } from '../components/Tour'
-import { FilterBar } from '../components/FilterBar'
+import { FilterButton } from '../components/FilterBar'
 import { SubNav } from '../components/SubNav'
 import { CONNECTIONS_NAV } from '../lib/nav'
 import { ConnectBox, SharedInterests, useRequests, type Requests } from '../components/Suggestions'
@@ -116,8 +116,10 @@ export function ForYou() {
       <h1 ref={heading} tabIndex={-1} className="visually-hidden">
         Connections
       </h1>
-      <SubNav label="Connections" items={CONNECTIONS_NAV} current="/connections" />
-      <FilterBar userId={me} onChanged={refresh} />
+      <div className="connections-top">
+        <SubNav label="Connections" items={CONNECTIONS_NAV} current="/connections" />
+        <FilterButton userId={me} onChanged={refresh} />
+      </div>
       <div role="status">
         {status && (
           <p className="feed-toast">
