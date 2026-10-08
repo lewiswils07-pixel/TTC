@@ -51,7 +51,7 @@ export function FilterButton({ userId, onChanged }: { userId: string; onChanged:
             strokeLinecap="round"
           />
         </svg>
-        Filters
+        <span className="filter-label">Filters</span>
         {n > 0 && (
           <span className="filter-count">
             {n}

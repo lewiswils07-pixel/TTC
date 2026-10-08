@@ -48,7 +48,7 @@ export function MemberProfile() {
     </button>
   ) : (
     <Link className="back-link" to="/connections/requests">
-      ‹ Matches
+      ‹ Connections
     </Link>
   )
 
@@ -70,7 +70,7 @@ export function MemberProfile() {
         <h1>Profile not available</h1>
         <p className="lede">You can see someone’s full profile once you’re connected or in the same group.</p>
         <Link className="btn btn-primary" to="/connections/requests">
-          Go to Matches
+          Go to Connections
         </Link>
       </Layout>
     )

@@ -135,7 +135,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   issues.push(...(await problems(page, '/connections (card flipped)')))
   await page.getByRole('button', { name: /back to the front$/ }).click()
   await visit(page, '/connections/requests', 'Connections', issues)
-  // A connection's full profile, from Matches.
+  // A connection's full profile, from Connections.
   await page.getByRole('link', { name: /^View .+’s profile$/ }).first().click()
   await expect(page.getByRole('heading', { name: 'In their own words' })).toBeVisible()
   await page.waitForLoadState('networkidle')
@@ -177,7 +177,10 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await admin.from('profiles').update({ photo_path: `${demo(3)}/demo.jpg`, last_active_at: new Date().toISOString() }).eq('id', demo(3))
   await admin.from('trips').insert({ owner_id: demo(3), city_id: 2267057, start_date: isoIn(31), end_date: isoIn(33) })
   await visit(page, '/connections', 'Connections', issues)
-  await expect(page.getByRole('heading', { name: 'Going when you are' })).toBeVisible()
+  await page.getByRole('link', { name: /Going when you are/ }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Going when you are' })).toBeVisible()
+  await expect(page.locator('.plus-person').filter({ hasText: 'Lisbon' }).first()).toBeVisible()
+  issues.push(...(await problems(page, '/connections/same-time')))
   await visit(page, '/messages', 'Chat', issues)
   await page.goto(`/messages/${chat!.id}`)
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()

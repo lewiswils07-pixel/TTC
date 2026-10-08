@@ -1,36 +1,34 @@
 import { Link } from 'react-router'
-import { shortDates } from '../lib/dates'
+import { brand } from '../lib/brand'
 import { sameTime, type FeedPerson } from '../lib/feed'
 import { Avatar } from './Avatar'
 
-/** “Going when you are”: people on the same trip at the same time, in their own tile. Hidden when there's no one. */
+/** Members going to the same place as you, at the same time (with a trip to match one of yours). */
+export const goingWhenYouAre = (people: FeedPerson[]) => people.filter((p) => sameTime(p) && p.trip_id !== null)
+
+/** “Going when you are”: a quiet row of faces that opens the Sodalis+ page. Hidden when there's no one. */
 export function SameTimeStrip({ people }: { people: FeedPerson[] }) {
-  const going = people.filter((p) => sameTime(p) && p.trip_id !== null)
+  const going = goingWhenYouAre(people)
   if (going.length === 0) return null
+  const shown = going.slice(0, 3)
   return (
-    <section className="same-time" aria-labelledby="same-time-title">
-      <h2 id="same-time-title" className="same-time-title">
-        Going when you are
-      </h2>
-      <p className="same-time-hint">
-        {going.length === 1 ? '1 member is' : `${going.length} members are`} on one of your trips at the same time. Tap to see the trip.
-      </p>
-      <ul className="same-time-list">
-        {going.map((p) => {
-          const trip = sameTime(p)!
-          return (
-            <li key={p.profile_id}>
-              <Link className="same-time-person" to={`/trips/${p.trip_id}`}>
-                <Avatar name={p.display_name} path={p.photo_path} size="lg" />
-                <span className="same-time-name">{p.display_name}</span>
-                <span className="same-time-trip">
-                  {trip.city} · {shortDates(trip.start, trip.end)}
-                </span>
-              </Link>
-            </li>
-          )
-        })}
-      </ul>
-    </section>
+    <Link className="same-time" to="/connections/same-time">
+      <span className="same-time-text">
+        <span className="same-time-title">Going when you are</span>
+        <span className="tag tag-plus">{brand.plusName}</span>
+      </span>
+      <span className="same-time-faces" aria-hidden="true">
+        {shown.map((p) => (
+          <Avatar key={p.profile_id} name={p.display_name} path={p.photo_path} size="sm" />
+        ))}
+        {going.length > shown.length && <span className="same-time-more">+{going.length - shown.length}</span>}
+      </span>
+      <span className="visually-hidden">
+        , {going.length === 1 ? '1 member' : `${going.length} members`}
+      </span>
+      <svg className="same-time-chevron" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </Link>
   )
 }

@@ -1,8 +1,8 @@
 // The page-level tabs at the top of the Connections and Chat screens.
 
 export const CONNECTIONS_NAV = [
-  { to: '/connections', label: 'For you' },
-  { to: '/connections/requests', label: 'Matches' },
+  { to: '/connections', label: 'Connect' },
+  { to: '/connections/requests', label: 'Connections' },
 ]
 
 export const CHAT_NAV = [

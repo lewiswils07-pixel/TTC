@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 
-/** Two or three page-level tabs at the top of a screen, such as "For you" and "Matches". */
+/** Two or three page-level tabs at the top of a screen, such as "Connect" and "Connections". */
 export function SubNav({ label, items, current }: { label: string; items: { to: string; label: string; count?: number }[]; current: string }) {
   return (
     <nav className="subnav" aria-label={label}>

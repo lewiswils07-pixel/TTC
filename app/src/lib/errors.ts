@@ -24,7 +24,7 @@ const RULES: Array<[RegExp, string]> = [
   [/up to \d+ places/i, `You can save up to ${count(rules.wishlist.max, 'place')}. Remove one to add another.`],
   [/wishlist_pkey/i, 'That place is already on your list.'],
   [/weekly request limit/i, 'You’ve used all your requests for this week. You get more on Monday.'],
-  [/already in touch|connections_open_pair/i, 'You’re already connected with this member, or waiting for their reply. You’ll find them under Matches.'],
+  [/already in touch|connections_open_pair/i, 'You’re already connected with this member, or waiting for their reply. You’ll find them under Connections.'],
   [/isn't available|isn’t available/i, 'This member isn’t available right now.'],
   [/add a profile photo before asking to connect/i, 'Please add a profile photo before asking to connect. It helps members feel safe saying yes.'],
   [/finish your profile/i, 'Please finish your profile before sending requests.'],
