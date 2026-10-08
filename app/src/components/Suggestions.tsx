@@ -6,7 +6,7 @@ import { messageOf } from '../lib/errors'
 import { stepLink } from '../lib/onboarding'
 import { fitWords, homeLabel } from '../lib/matching'
 import { ageLabel } from '../lib/options'
-import { loadRequests, requestsLeftText, weeklyRequests } from '../lib/plan'
+import { loadRequests, PLUS_SHOW_LEFT_BELOW, requestsLeftText, weeklyRequests } from '../lib/plan'
 import { MAX_NOTE } from '../lib/validation'
 import { Avatar } from './Avatar'
 import { Field } from './Field'
@@ -120,13 +120,13 @@ export function ConnectBox({
   tripId?: number
   requests: Requests
   startOpen?: boolean
-  onSent?: () => void
+  onSent?: (connected: boolean) => void
   onCancel?: () => void
 }) {
   const [open, setOpen] = useState(startOpen)
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
-  const [sent, setSent] = useState(false)
+  const [sent, setSent] = useState<'sent' | 'connected' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const noteBox = useRef<HTMLTextAreaElement>(null)
   const { left } = requests
@@ -138,7 +138,13 @@ export function ConnectBox({
   if (sent) {
     return (
       <p className="notice notice-success" role="status">
-        Request sent. We’ll let you know when {person.display_name} replies.
+        {sent === 'connected' ? (
+          <>
+            {person.display_name} had already asked to connect with you, so you’re now connected. <Link to="/messages">Say hello in Chat</Link>
+          </>
+        ) : (
+          `Request sent. We’ll let you know when ${person.display_name} replies.`
+        )}
       </p>
     )
   }
@@ -154,10 +160,10 @@ export function ConnectBox({
     setBusy(true)
     setError(null)
     try {
-      await sendRequest(person.profile_id, note, tripId)
-      requests.used()
-      if (onSent) return onSent()
-      setSent(true)
+      const { connected } = await sendRequest(person.profile_id, note, tripId)
+      if (!connected) requests.used()
+      if (onSent) return onSent(connected)
+      setSent(connected ? 'connected' : 'sent')
     } catch (e) {
       setError(messageOf(e))
       setBusy(false)
@@ -184,7 +190,8 @@ export function ConnectBox({
         )}
       </Field>
       <p className="hint">
-        This uses 1 of your {left} request{left === 1 ? '' : 's'} left this week. Nothing else is shared until they say yes.
+        {requests.plus && left > PLUS_SHOW_LEFT_BELOW ? '' : `This uses 1 of your ${left} request${left === 1 ? '' : 's'} left this week. `}
+        Nothing else is shared until they accept.
       </p>
       {error && (
         <p className="notice notice-error" role="alert">

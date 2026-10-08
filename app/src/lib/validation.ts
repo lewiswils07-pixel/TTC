@@ -21,11 +21,20 @@ export const checkCode: Check<string> = (v) => {
 }
 
 /** A new password. */
+/** Passwords that are guessed first (testers: "password" was accepted). */
+const COMMON_PASSWORDS = new Set([
+  'password', 'password1', 'password12', 'password123', 'passw0rd', '12345678', '123456789', '1234567890', '87654321',
+  'qwertyui', 'qwerty123', 'iloveyou', 'sunshine', 'football', 'welcome1', 'abc12345', 'letmein1', 'trustno1',
+  'baseball', 'superman', 'princess', 'whatever', 'starwars', 'monkey12', 'liverpool', 'chelsea1', 'arsenal1',
+  'sodalis1', 'sodalis123', 'travel123', 'holiday1',
+])
+
 export const checkNewPassword: Check<string> = (v) => {
   if (!v) return 'Please choose a password.'
   if (v.length < MIN_PASSWORD) return `Use at least ${MIN_PASSWORD} characters. You’ve typed ${v.length}.`
   if (v.length > MAX_PASSWORD) return `Please keep it to ${MAX_PASSWORD} characters or fewer.`
   if (v.trim() !== v) return 'Your password can’t start or end with a space.'
+  if (COMMON_PASSWORDS.has(v.toLowerCase()) || /^(.)\1+$/.test(v)) return 'That password is too easy to guess. Try a short phrase only you would know.'
   return null
 }
 

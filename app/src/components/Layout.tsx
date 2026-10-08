@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router'
 import { useSession } from '../lib/session-context'
 import { brand } from '../lib/brand'
 import { TabBar, type Tab } from './TabBar'
+import { SkeletonRows } from './Skeleton'
 
 /** The club's initial in a burgundy disc with gold lettering. */
 export function Monogram({ size = 36 }: { size?: number }) {
@@ -65,16 +66,17 @@ function tabFor(path: string): Tab | undefined {
   return undefined
 }
 
-/** Shown while a screen loads. The spinner only appears if it takes more than a moment. */
+/** Shown while a screen loads: grey placeholders shaped like a page, never a spinner. */
 export function Loading({ label = 'Loading…' }: { label?: string }) {
   const { session } = useSession()
   const path = useLocation().pathname
   return (
     <Layout tab={session ? tabFor(path) : undefined}>
-      <div className="loading" role="status" aria-live="polite">
-        <span className="spinner" aria-hidden="true" />
-        {label}
+      <div className="skeleton-page" aria-hidden="true">
+        <span className="skeleton skeleton-title" />
+        <span className="skeleton skeleton-line" />
       </div>
+      <SkeletonRows rows={3} label={label} />
     </Layout>
   )
 }

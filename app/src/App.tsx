@@ -22,6 +22,9 @@ const Trips = lazy(() => import('./routes/Trips').then((m) => ({ default: m.Trip
 const Filters = lazy(() => import('./routes/Filters').then((m) => ({ default: m.Filters })))
 const Messages = lazy(() => import('./routes/Messages').then((m) => ({ default: m.Messages })))
 const Chat = lazy(() => import('./routes/Chat').then((m) => ({ default: m.Chat })))
+const CardPreview = lazy(() => import('./routes/CardPreview').then((m) => ({ default: m.CardPreview })))
+const PlanTogether = lazy(() => import('./routes/PlanTogether').then((m) => ({ default: m.PlanTogether })))
+const Help = lazy(() => import('./routes/Help').then((m) => ({ default: m.Help })))
 const Admin = lazy(() => import('./routes/Admin').then((m) => ({ default: m.Admin })))
 const account = () => import('./routes/Account')
 const Account = lazy(() => account().then((m) => ({ default: m.Account })))
@@ -252,6 +255,23 @@ export function AppRoutes() {
           </RequireSession>
         }
       />
+      <Route
+        path="/profile/preview"
+        element={
+          <RequireSession>
+            <CardPreview />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/plan-together/:id"
+        element={
+          <RequireSession>
+            <PlanTogether />
+          </RequireSession>
+        }
+      />
+      <Route path="/help" element={<Help />} />
       <Route path="/safe/:token" element={<SafeView />} />
       <Route
         path="/account"

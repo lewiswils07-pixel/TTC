@@ -72,8 +72,8 @@ export function PrivacyDialog({ onChoose, onManage }: { onChoose: (c: PrivacyCho
           We value your privacy
         </h2>
         <p id={text} className="confirm-text">
-          We use tools to measure the audience and use of our app, personalise ads, enhance our own marketing, enable social features and better understand
-          how {brand.name} is used as a whole. These tools don’t track you across other apps and websites.
+          With your OK, we use tools to see how many people use {brand.name} and which parts they use, and to send you our own news and
+          offers. We never show you adverts or sell your details, and these tools don’t track you across other apps and websites.
         </p>
         <div className="privacy-actions">
           <button type="button" className="btn btn-primary btn-block" autoFocus onClick={() => onChoose({ measuring: true, marketing: true })}>

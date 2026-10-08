@@ -13,11 +13,11 @@ import { loadCard, type CardAnswer } from '../lib/card'
 import { messageOf } from '../lib/errors'
 import { stepLink } from '../lib/onboarding'
 import { peek, remember } from '../lib/cache'
-import { callouts, clearNotNow, NOT_NOW_DAYS, sameTime, forgetNotNow, loadFeed, notNowIds, saveNotNow, type FeedPerson } from '../lib/feed'
+import { callouts, clearNotNow, NOT_NOW_DAYS, sameTime, forgetNotNow, loadFeed, notNowIds, saveNotNow, skipMember, skippedCount, unskipAll, unskipMember, type FeedPerson } from '../lib/feed'
 import { noteFirstMatch } from '../lib/kpis'
 import { requestsLeftText } from '../lib/plan'
 import { fitWords, homeLabel } from '../lib/matching'
-import { ageLabel } from '../lib/options'
+import { ageLabel, INTERESTS_TO_PICK } from '../lib/options'
 import { photoUrl } from '../lib/photo'
 import { roughly } from '../lib/rules'
 import { useSession } from '../lib/session-context'
@@ -44,10 +44,10 @@ export function ForYou() {
 
   useEffect(() => {
     heading.current?.focus()
-    remember('feed', loadFeed()).then(
-      (list) => {
+    Promise.all([remember('feed', loadFeed()), skippedCount()]).then(
+      ([list, saved]) => {
         const hidden = notNowIds(me)
-        setSkipped(list.filter((p) => hidden.has(p.profile_id)).length)
+        setSkipped(Math.max(saved, list.filter((p) => hidden.has(p.profile_id)).length))
         setPeople(list.filter((p) => !hidden.has(p.profile_id)))
         if (list.length) noteFirstMatch()
       },
@@ -76,12 +76,14 @@ export function ForYou() {
 
   function notNow(p: FeedPerson) {
     saveNotNow(me, p.profile_id)
+    void skipMember(p.profile_id)
     setSkipped((n) => n + 1)
     next(`We won’t show ${p.display_name} again for ${roughly(NOT_NOW_DAYS)}.`, p)
   }
 
   function undo(p: FeedPerson) {
     forgetNotNow(me, p.profile_id)
+    void unskipMember(p.profile_id)
     setSkipped((n) => Math.max(0, n - 1))
     setPeople((list) => [p, ...(list ?? [])])
     setStatus(null)
@@ -91,7 +93,9 @@ export function ForYou() {
     clearNotNow(me)
     setSkipped(0)
     setPeople(null)
-    loadFeed().then(setPeople, (e) => setError(messageOf(e)))
+    unskipAll()
+      .then(() => remember('feed', loadFeed()))
+      .then(setPeople, (e) => setError(messageOf(e)))
   }
 
   return (
@@ -106,19 +110,18 @@ export function ForYou() {
         </Link>
       </div>
       <SubNav label="Connections" items={CONNECTIONS_NAV} current="/connections" />
-      <p className="visually-hidden" role="status">
-        {status?.text}
-      </p>
-      {status && (
-        <p className="feed-toast">
-          <span aria-hidden="true">{status.text}</span>
-          {status.undo && (
-            <button type="button" className="btn-link" onClick={() => undo(status.undo!)}>
-              Undo
-            </button>
-          )}
-        </p>
-      )}
+      <div role="status">
+        {status && (
+          <p className="feed-toast">
+            <span>{status.text}</span>
+            {status.undo && (
+              <button type="button" className="btn-link" onClick={() => undo(status.undo!)}>
+                Undo
+              </button>
+            )}
+          </p>
+        )}
+      </div>
       {error && (
         <p className="notice notice-error" role="alert">
           {error}
@@ -134,7 +137,13 @@ export function ForYou() {
             myHome={data.profile.home_city?.name ?? null}
             requests={requests}
             onNotNow={() => notNow(person)}
-            onSent={() => next(`Request sent to ${person.display_name}. We’ll let you know when they reply.`)}
+            onSent={(connected) =>
+              next(
+                connected
+                  ? `${person.display_name} had already asked to connect with you, so you’re now connected. Say hello in Chat.`
+                  : `Request sent to ${person.display_name}. We’ll let you know when they reply.`,
+              )
+            }
             onBlocked={(message) => next(message)}
           />
           <p className="hint feed-count">
@@ -151,7 +160,7 @@ export function ForYou() {
               <Link to="/trips/new">Add a trip</Link> to meet people going to the same place
             </li>
             <li>
-              <Link to={stepLink('interests')}>Add more interests</Link>
+              <Link to={stepLink('interests')}>{data.interestIds.length >= INTERESTS_TO_PICK ? 'Swap some of your interests' : 'Add more interests'}</Link>
             </li>
             <li>
               <Link to="/filters">Widen your filters</Link>
@@ -182,7 +191,7 @@ function PersonCard({
   myHome: string | null
   requests: Requests
   onNotNow: () => void
-  onSent: () => void
+  onSent: (connected: boolean) => void
   onBlocked: (message: string) => void
 }) {
   const [connecting, setConnecting] = useState(false)
@@ -290,7 +299,11 @@ function PersonCard({
               <span>In their own words</span>
             </p>
             {back === null ? (
-              <p className="card-back-empty">Loading…</p>
+              <div className="card-back-empty" role="status">
+                <span className="visually-hidden">Loading their answers</span>
+                <span className="skeleton skeleton-line" aria-hidden="true" />
+                <span className="skeleton skeleton-line skeleton-line-short" aria-hidden="true" />
+              </div>
             ) : back === 'error' ? (
               <p className="card-back-empty">We couldn’t load this. Turn the card over to try again.</p>
             ) : (

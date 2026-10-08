@@ -78,7 +78,7 @@ export function Connections() {
         Connections
       </h1>
       <SubNav label="Connections" items={CONNECTIONS_NAV.map((i) => (i.to === '/connections/requests' ? { ...i, count: received.length } : i))} current="/connections/requests" />
-      <p className="lede">Nothing beyond your first name, age and home town is shared until you both say yes.</p>
+      <p className="lede">Nothing beyond your first name, age and home town is shared until you’re connected.</p>
       <p className="visually-hidden" role="status">
         {status}
       </p>

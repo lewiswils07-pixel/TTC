@@ -9,7 +9,8 @@ import { QuestionPicker } from '../components/QuestionPicker'
 import { Dropdown } from '../components/Dropdown'
 import { Segmented } from '../components/Segmented'
 import { ANSWER_MAX_CHARS, ANSWER_MAX_WORDS, ANSWERS_TO_PICK, checkAnswer, questionText, saveCard, wordCount, type CardAnswer } from '../lib/card'
-import type { City } from '../lib/cities'
+import { cityLabel, type City } from '../lib/cities'
+import { clearDrafts, useDraft } from '../lib/draft'
 import { messageOf } from '../lib/errors'
 import { clearMyLocation, locateMe } from '../lib/location'
 import { firstUnfinishedStep, STEP } from '../lib/onboarding'
@@ -17,6 +18,7 @@ import { rules } from '../lib/rules'
 import {
   BUDGETS,
   DAY_RHYTHMS,
+  DIETS,
   GENDERS,
   LANGUAGES,
   MAX_LANGUAGES,
@@ -39,8 +41,10 @@ import { photoUrl, preparePhoto, uploadPhoto } from '../lib/photo'
 import {
   finishOnboarding,
   listInterests,
+  myDiet,
   saveAboutMe,
   saveBasics,
+  saveDiet,
   saveInterests,
   saveStyleAndPreferences,
   type Interest,
@@ -52,7 +56,7 @@ import { useMyProfile } from '../lib/useMyProfile'
 import { birthDate, checkBirthDate, checkChosen, checkInterests, checkName } from '../lib/validation'
 
 const STEPS = [
-  { title: 'About you', intro: null },
+  { title: 'About you', intro: 'Other members see your first name, age and home town. Your date of birth and email always stay private.' },
   { title: 'Your photo', intro: null },
   { title: 'Your interests', intro: `Pick the ${INTERESTS_TO_PICK} you love most, and meet people who love them too.` },
   {
@@ -102,13 +106,17 @@ export function Onboarding() {
   if (step === CARD_STEP && !data.card) step = CARD_STEP + 1
   const goTo = (n: number) => setParams({ step: String(n) })
   const firstTime = !data.profile.onboarded_at
+  // Straight after sign-up: "How you travel" as an optional last step (testers: sign-up never asked).
+  const justJoined = params.get('new') === '1' && step === STEP.travel
+  const welcome = () => navigate('/welcome', { replace: true })
   const next = async () => {
     if (firstTime && step >= signUpSteps) {
       await finishOnboarding()
       await reload()
-      navigate('/welcome', { replace: true })
+      setParams({ step: String(STEP.travel), new: '1' }, { replace: true })
       return
     }
+    if (justJoined) return welcome()
     await reload()
     if (step < TOTAL) goTo(step + 1 === CARD_STEP && !data.card ? step + 2 : step + 1)
     else navigate('/profile', { replace: true })
@@ -117,18 +125,30 @@ export function Onboarding() {
 
   return (
     <Layout>
-      <StepFrame step={step} key={step} signingUp={firstTime} signUpSteps={signUpSteps}>
+      <StepFrame step={step} key={step} signingUp={firstTime} signUpSteps={signUpSteps} justJoined={justJoined}>
         {step === STEP.basics && <BasicsStep userId={userId} data={data} onDone={next} />}
         {step === STEP.photo && <PhotoStep userId={userId} data={data} onDone={next} onBack={back} />}
         {step === STEP.interests && <InterestsStep data={data} interests={interests} onDone={next} onBack={back} lastStep={signUpSteps === 3} />}
         {step === STEP.card && <CardStep userId={userId} data={data} onDone={next} onBack={back} />}
-        {step === STEP.travel && <PreferencesStep userId={userId} data={data} onDone={next} onBack={back} />}
+        {step === STEP.travel && <PreferencesStep userId={userId} data={data} onDone={next} onBack={justJoined ? undefined : back} onSkip={justJoined ? welcome : undefined} />}
       </StepFrame>
     </Layout>
   )
 }
 
-function StepFrame({ step, signingUp, signUpSteps, children }: { step: number; signingUp: boolean; signUpSteps: number; children: ReactNode }) {
+function StepFrame({
+  step,
+  signingUp,
+  signUpSteps,
+  justJoined,
+  children,
+}: {
+  step: number
+  signingUp: boolean
+  signUpSteps: number
+  justJoined: boolean
+  children: ReactNode
+}) {
   const heading = useRef<HTMLHeadingElement>(null)
   useEffect(() => heading.current?.focus(), [])
   const { title, intro } = STEPS[step - 1]
@@ -140,7 +160,9 @@ function StepFrame({ step, signingUp, signUpSteps, children }: { step: number; s
           <div className="progress-bar" style={{ width: `${(step / signUpSteps) * 100}%` }} />
         </div>
       )}
-      <p className="eyebrow">{extra ? 'Add more to your profile' : signingUp ? `Step ${step} of ${signUpSteps}` : 'Edit your profile'}</p>
+      <p className="eyebrow">
+        {justJoined ? 'Last step, optional' : extra ? 'Add more to your profile' : signingUp ? `Step ${step} of ${signUpSteps}` : 'Edit your profile'}
+      </p>
       <h1 ref={heading} tabIndex={-1}>
         {title}
       </h1>
@@ -172,12 +194,12 @@ type StepProps = { userId: string; data: MyProfile; onDone: () => Promise<void>;
 
 function BasicsStep({ userId, data, onDone }: StepProps) {
   const p = data.profile
-  const [name, setName] = useState(p.display_name ?? '')
-  const [dobDay, setDobDay] = useState(p.birth_date ? String(Number(p.birth_date.slice(8, 10))) : '')
-  const [dobMonth, setDobMonth] = useState(p.birth_date ? String(Number(p.birth_date.slice(5, 7))) : '')
-  const [dobYear, setDobYear] = useState(p.birth_date ? p.birth_date.slice(0, 4) : p.birth_year ? String(p.birth_year) : '')
-  const [gender, setGender] = useState<Gender[]>(p.gender ? [p.gender] : [])
-  const [city, setCity] = useState<City | null>(p.home_city)
+  const [name, setName] = useDraft('basics.name', p.display_name ?? '')
+  const [dobDay, setDobDay] = useDraft('basics.day', p.birth_date ? String(Number(p.birth_date.slice(8, 10))) : '')
+  const [dobMonth, setDobMonth] = useDraft('basics.month', p.birth_date ? String(Number(p.birth_date.slice(5, 7))) : '')
+  const [dobYear, setDobYear] = useDraft('basics.year', p.birth_date ? p.birth_date.slice(0, 4) : p.birth_year ? String(p.birth_year) : '')
+  const [gender, setGender] = useDraft<Gender[]>('basics.gender', p.gender ? [p.gender] : [])
+  const [city, setCity] = useDraft<City | null>('basics.city', p.home_city)
   // "Use my location" (Lewis, 6 Oct): sets the nearest town; can be used again after a move.
   const [locating, setLocating] = useState(false)
   const [located, setLocated] = useState(false)
@@ -211,6 +233,7 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
     // A town typed in by hand replaces any exact spot saved before.
     if (!located && city!.id !== p.home_city?.id) await clearMyLocation(userId)
     await saveBasics(userId, { display_name: name.trim(), birth_date: birthDate(dobDay, dobMonth, dobYear), gender: gender[0], home_city_id: city!.id })
+    clearDrafts('basics.')
   }, onDone)
 
   function onSubmit(e: FormEvent) {
@@ -307,8 +330,13 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
               <path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               <circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" strokeWidth="2" />
             </svg>
-            {locating ? 'Finding you…' : located ? 'Location updated' : 'Use my location'}
+            {locating ? 'Finding you…' : 'Use my location'}
           </button>
+          {located && city && (
+            <p className="hint" role="status">
+              We’ve set your home to {cityLabel(city)}. Not quite right? Type your town above instead.
+            </p>
+          )}
           <FieldError error={locateError} />
         </div>
       </div>
@@ -322,7 +350,7 @@ function PhotoStep({ userId, data, onDone, onBack }: StepProps) {
   const p = data.profile
   const [preview, setPreview] = useState<string | null>(null)
   const [photo, setPhoto] = useState<Blob | null>(null)
-  const [bio, setBio] = useState(p.bio ?? '')
+  const [bio, setBio] = useDraft('photo.bio', p.bio ?? '')
   const [preparing, setPreparing] = useState(false)
   const [photoError, setPhotoError] = useState<string | null>(null)
 
@@ -340,6 +368,7 @@ function PhotoStep({ userId, data, onDone, onBack }: StepProps) {
   const { busy, error, submit } = useStepSubmit(async () => {
     if (photo) await uploadPhoto(userId, photo, p.photo_path)
     await saveAboutMe(userId, { bio: bio.trim() || null })
+    clearDrafts('photo.')
   }, onDone)
 
   async function pick(file: File | undefined) {
@@ -431,7 +460,7 @@ function InterestsStep({ data, interests, onDone, onBack, lastStep }: Omit<StepP
   )
 }
 
-function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
+function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & { onSkip?: () => void }) {
   const p = data.profile
   const prefs = data.preferences
   const [style, setStyle] = useState<TravelStyle[]>(p.travel_style ? [p.travel_style] : [])
@@ -443,6 +472,10 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
   const [rhythm, setRhythm] = useState<DayRhythm[]>(p.day_rhythm ? [p.day_rhythm] : [])
   const [walking, setWalking] = useState<Walking[]>(p.walking ? [p.walking] : [])
   const [languages, setLanguages] = useState<string[]>(p.languages ?? [])
+  const [diet, setDiet] = useState<string[] | null>(null)
+  useEffect(() => {
+    myDiet(userId).then(setDiet, () => setDiet([]))
+  }, [userId])
 
   const { busy, error, submit } = useStepSubmit(async () => {
     await saveStyleAndPreferences(
@@ -460,6 +493,7 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
       },
       prefs,
     )
+    if (diet) await saveDiet(userId, diet)
   }, onDone)
 
   return (
@@ -515,6 +549,26 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
             })}
           </div>
         </fieldset>
+        <fieldset className="field" data-field="diet">
+          <legend>Food (optional)</legend>
+          <div className="chips chips-compact">
+            {DIETS.map((d) => {
+              const checked = !!diet?.includes(d.value)
+              return (
+                <label className="chip" key={d.value}>
+                  <input
+                    type="checkbox"
+                    name="diet"
+                    value={d.value}
+                    checked={checked}
+                    onChange={() => setDiet((list) => (checked ? (list ?? []).filter((x) => x !== d.value) : [...(list ?? []), d.value]))}
+                  />
+                  <span>{d.label}</span>
+                </label>
+              )
+            })}
+          </div>
+        </fieldset>
         <TextField
           name="travelling-with"
           label="Travelling with someone? (optional)"
@@ -529,7 +583,7 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
         Choose who you see (gender, age and distance) any time in Filters.
       </p>
       <SaveError error={error} />
-      <ActionBar busy={busy} onBack={onBack} label="Save" />
+      <ActionBar busy={busy} onBack={onBack} onSkip={onSkip} label={onSkip ? 'Finish' : 'Save'} />
     </form>
   )
 }
@@ -544,10 +598,11 @@ const EMPTY_ANSWERS: CardAnswer[] = [
 ]
 
 function CardStep({ userId, data, onDone, onBack }: StepProps) {
-  const [answers, setAnswers] = useState<CardAnswer[]>(() => {
-    const saved = data.card?.card_answers ?? []
-    return EMPTY_ANSWERS.map((empty, i) => saved[i] ?? empty)
-  })
+  const [answers, saveAnswers] = useDraft<CardAnswer[]>(
+    'card.answers',
+    EMPTY_ANSWERS.map((empty, i) => (data.card?.card_answers ?? [])[i] ?? empty),
+  )
+  const setAnswers = (change: (list: CardAnswer[]) => CardAnswer[]) => saveAnswers(change(answers))
   const errors = Object.fromEntries(
     answers.flatMap((x, i) => [
       [`q${i}`, x.q ? null : 'Please choose a question.'],
@@ -555,7 +610,10 @@ function CardStep({ userId, data, onDone, onBack }: StepProps) {
     ]),
   ) as Record<string, string | null>
   const { shown, touch, validateAll } = useChecks(errors)
-  const { busy, error, submit } = useStepSubmit(() => saveCard(userId, answers), onDone)
+  const { busy, error, submit } = useStepSubmit(async () => {
+    await saveCard(userId, answers)
+    clearDrafts('card.')
+  }, onDone)
   const set = (i: number, change: Partial<CardAnswer>) => setAnswers((list) => list.map((x, j) => (j === i ? { ...x, ...change } : x)))
 
   return (
@@ -594,10 +652,12 @@ function CardStep({ userId, data, onDone, onBack }: StepProps) {
                 name={`a${i}`}
                 label={`Your answer to “${questionText(answer.q)}”`}
                 hint={
-                  // Only once they're close to the limit (Lewis, 6 Oct).
-                  words >= WORDS_WARNING ? (
+                  // Only once they're close to a limit (Lewis, 6 Oct).
+                  words >= WORDS_WARNING || answer.a.length >= ANSWER_MAX_CHARS - 30 ? (
                     <span className="word-limit" aria-live="polite">
-                      Maximum of {ANSWER_MAX_WORDS} words
+                      {words >= WORDS_WARNING
+                        ? `Maximum of ${ANSWER_MAX_WORDS} words`
+                        : `${ANSWER_MAX_CHARS - answer.a.length} characters left`}
                     </span>
                   ) : undefined
                 }

@@ -83,6 +83,39 @@ export const LANGUAGES = [
   { value: 'ur', label: 'Urdu' },
   { value: 'zh', label: 'Chinese' },
   { value: 'ja', label: 'Japanese' },
+  // Added after testers (7 Oct): no Gujarati, among others.
+  { value: 'gu', label: 'Gujarati' },
+  { value: 'pa', label: 'Punjabi' },
+  { value: 'bn', label: 'Bengali' },
+  { value: 'ta', label: 'Tamil' },
+  { value: 'tr', label: 'Turkish' },
+  { value: 'ru', label: 'Russian' },
+  { value: 'uk', label: 'Ukrainian' },
+  { value: 'ro', label: 'Romanian' },
+  { value: 'cs', label: 'Czech' },
+  { value: 'hu', label: 'Hungarian' },
+  { value: 'da', label: 'Danish' },
+  { value: 'no', label: 'Norwegian' },
+  { value: 'fi', label: 'Finnish' },
+  { value: 'gd', label: 'Scottish Gaelic' },
+  { value: 'he', label: 'Hebrew' },
+  { value: 'fa', label: 'Persian' },
+  { value: 'ko', label: 'Korean' },
+  { value: 'th', label: 'Thai' },
+  { value: 'vi', label: 'Vietnamese' },
+  { value: 'tl', label: 'Tagalog' },
+  { value: 'sw', label: 'Swahili' },
+] as const satisfies readonly Option<string>[]
+
+/** Food preferences (rules.choices.diet), so nobody has to explain at dinner. */
+export const DIETS = [
+  { value: 'vegetarian', label: 'Vegetarian' },
+  { value: 'vegan', label: 'Vegan' },
+  { value: 'pescatarian', label: 'Pescatarian' },
+  { value: 'halal', label: 'Halal' },
+  { value: 'kosher', label: 'Kosher' },
+  { value: 'gluten-free', label: 'Gluten-free' },
+  { value: 'dairy-free', label: 'Dairy-free' },
 ] as const satisfies readonly Option<string>[]
 export const MAX_LANGUAGES = rules.profile.languagesMax
 

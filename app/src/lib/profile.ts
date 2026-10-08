@@ -98,6 +98,18 @@ export async function saveStyleAndPreferences(userId: string, style: Style, pref
   if (error) throw friendlyError(error)
 }
 
+/** The member's food preferences. Empty on a database without them yet. */
+export async function myDiet(userId: string): Promise<string[]> {
+  const { data, error } = await supabase.from('profiles').select('diet').eq('id', userId).maybeSingle()
+  return error ? [] : ((data?.diet as string[] | undefined) ?? [])
+}
+
+export async function saveDiet(userId: string, diet: string[]): Promise<void> {
+  const { error } = await supabase.from('profiles').update({ diet }).eq('id', userId)
+  // A database without food preferences yet: nothing to save.
+  if (error && error.code !== 'PGRST204' && error.code !== '42703') throw friendlyError(error)
+}
+
 /** Marks the profile finished. The database checks nothing required is missing. */
 export async function finishOnboarding(): Promise<void> {
   const { error } = await supabase.rpc('finish_onboarding')

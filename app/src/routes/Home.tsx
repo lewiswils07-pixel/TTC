@@ -1,18 +1,18 @@
 import { Link, Navigate } from 'react-router'
-import { Layout, Loading, Monogram } from '../components/Layout'
+import { Layout, Loading } from '../components/Layout'
 import { TravelArt } from '../components/TravelArt'
 import { brand } from '../lib/brand'
 import { useSession } from '../lib/session-context'
 
 const STEPS = [
   { title: 'Meet people one at a time', text: 'Matched on what you enjoy, and where you’re going if you add a trip.' },
-  { title: 'Say hello', text: 'Chat once you both say yes.' },
+  { title: 'Say hello', text: 'Chat once your request is accepted.' },
   { title: 'Plan together', text: 'Pick dates, share ideas and travel at your own pace.' },
 ]
 
 const POINTS = [
   { title: 'Matched on what matters', text: 'Suggestions based on where you’re going, when, and what you enjoy.' },
-  { title: 'Nothing shared until you both say yes', text: 'Connect first, then chat. Your details stay private.' },
+  { title: 'Nothing shared until you’re connected', text: 'Connect first, then chat. Your details stay private.' },
   { title: 'Safety built in', text: 'Block or report anyone, any time. A real person reviews every report.' },
 ]
 
@@ -24,7 +24,6 @@ export function Home() {
     <Layout>
       <section className="hero">
         <TravelArt />
-        <Monogram size={56} />
         <h1>{brand.tagline}</h1>
         <p className="lede">Meet like-minded people going to the same places as you, and travel together at your own pace.</p>
         <p className="hero-for">For solo travellers, and anyone whose friends can’t always come along.</p>

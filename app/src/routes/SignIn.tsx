@@ -3,7 +3,7 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { TextField } from '../components/Field'
 import { PasswordField } from '../components/PasswordField'
-import { CODE_LENGTH, hasPassword, MIN_PASSWORD, sendCode, setPassword, signInWithPassword, verifyCode } from '../lib/auth'
+import { CODE_LENGTH, hasPassword, MIN_PASSWORD, needsPasswordChoice, ReauthNeeded, sendCode, setPassword, signInWithPassword, skipPassword, verifyCode } from '../lib/auth'
 import { messageOf } from '../lib/errors'
 import { useSession } from '../lib/session-context'
 import { useChecks } from '../lib/useChecks'
@@ -42,6 +42,8 @@ export function SignIn() {
 
   const [mode, setMode] = useState<Mode>(() => (signedInBefore() ? 'signin' : 'join'))
   const [stage, setStage] = useState<Stage>('start')
+  // Signed in but never chose a password (or said Not now), e.g. after a refresh on that screen: ask now.
+  const choosing = stage === 'password' || (!!session && needsPasswordChoice(session.user))
   const [reason, setReason] = useState<CodeReason>('join')
   const [email, setEmail] = useState('')
   const [password, setPasswordValue] = useState('')
@@ -49,13 +51,16 @@ export function SignIn() {
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Set when the server wants an emailed code before saving (it's been a while since they signed in).
+  const [reauth, setReauth] = useState<string | null>(null)
   const [wait, setWait] = useState(0)
   const heading = useRef<HTMLHeadingElement>(null)
   const errors = {
-    email: stage === 'start' ? checkEmail(email) : null,
-    password: stage === 'start' && mode === 'signin' ? checkPassword(password) : null,
+    email: stage === 'start' && !choosing ? checkEmail(email) : null,
+    password: stage === 'start' && !choosing && mode === 'signin' ? checkPassword(password) : null,
+    reauth: reauth === null ? null : checkCode(reauth),
     code: stage === 'code' ? checkCode(code) : null,
-    newPassword: stage === 'password' ? checkNewPassword(newPassword) : null,
+    newPassword: choosing ? checkNewPassword(newPassword) : null,
   }
   const { shown, touch, validateAll, reset } = useChecks(errors)
 
@@ -71,7 +76,7 @@ export function SignIn() {
 
   if (loading) return <Loading />
   // Already signed in: carry on, unless they're choosing a password straight after their code.
-  if (session && stage !== 'password' && !busy) return <Navigate to={from} replace />
+  if (session && !choosing && !busy) return <Navigate to={from} replace />
 
   function go(next: Stage) {
     setStage(next)
@@ -82,6 +87,12 @@ export function SignIn() {
   function done() {
     rememberSignedIn()
     navigate(from, { replace: true })
+  }
+
+  async function notNow() {
+    setBusy(true)
+    await skipPassword()
+    done()
   }
 
   async function requestCode(why: CodeReason) {
@@ -152,10 +163,11 @@ export function SignIn() {
     setBusy(true)
     setError(null)
     try {
-      await setPassword(newPassword)
+      await setPassword(newPassword, reauth ?? undefined)
       done()
     } catch (err) {
-      setError(messageOf(err))
+      if (err instanceof ReauthNeeded) setReauth('')
+      else setError(messageOf(err))
       setBusy(false)
     }
   }
@@ -290,7 +302,7 @@ export function SignIn() {
           </form>
         )}
 
-        {stage === 'password' && (
+        {choosing && (
           <form className="card form-card" onSubmit={savePassword} noValidate>
             <h1 ref={heading} tabIndex={-1}>
               {reason === 'forgot' ? 'Choose a new password' : 'Choose a password'}
@@ -311,11 +323,29 @@ export function SignIn() {
               }}
               onBlur={() => newPassword && touch('newPassword')}
             />
+            {reauth !== null && (
+              <TextField
+                name="reauth"
+                label="Code from your email"
+                hint={`To keep your account safe, we’ve emailed you a ${CODE_LENGTH}-digit code. Enter it to save your password.`}
+                className="input input-code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={CODE_LENGTH + 2}
+                value={reauth}
+                error={shown('reauth')}
+                onChange={(e) => {
+                  setReauth(e.target.value)
+                  setError(null)
+                }}
+                onBlur={() => reauth && touch('reauth')}
+              />
+            )}
             <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
               {busy ? 'Saving…' : 'Save password'}
             </button>
             <div className="auth-links">
-              <button type="button" className="btn-link" disabled={busy} onClick={done}>
+              <button type="button" className="btn-link" disabled={busy} onClick={notNow}>
                 Not now, I’ll use emailed codes
               </button>
             </div>

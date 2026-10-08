@@ -22,18 +22,41 @@ export type TripSuggestion = {
   score: number
 }
 
-/** Up to 20 members going to the same place at the same time, best match first. */
+/** Members going to the same place at the same time, best match first. */
 export async function suggestForTrip(tripId: number): Promise<TripSuggestion[]> {
   const { data, error } = await supabase.rpc('suggest_for_trip', { p_trip_id: tripId })
   if (error) throw friendlyError(error)
   return (data ?? []) as TripSuggestion[]
 }
 
+/** People on this trip you're already in touch with: connected, asked either way, or in a group together. */
+export type TripCompanion = {
+  profile_id: string
+  display_name: string
+  birth_year: number | null
+  home_city: string | null
+  home_country: string | null
+  photo_path: string | null
+  status: 'connected' | 'you_asked' | 'they_asked' | 'group'
+  trip_start: string
+  trip_end: string
+  overlap_start: string | null
+  overlap_end: string | null
+}
+
+/** Empty when this database doesn't have the list yet. */
+export async function tripCompanions(tripId: number): Promise<TripCompanion[]> {
+  const { data, error } = await supabase.rpc('trip_companions', { p_trip_id: tripId })
+  if (error?.code === 'PGRST202') return []
+  if (error) throw friendlyError(error)
+  return (data ?? []) as TripCompanion[]
+}
+
 /** Words instead of a number on each card (Lewis, 5 Oct). Thresholds suit
  *  the 0 to 100 score from the database. */
 export function fitWords(score: number): string {
-  if (score >= 70) return 'Great match'
-  if (score >= 50) return 'Good match'
+  if (score >= 70) return 'Lots in common'
+  if (score >= 50) return 'Plenty in common'
   return 'Worth a look'
 }
 

@@ -56,6 +56,7 @@ const CHOICES = [
   ['profiles', 'profiles_room_sharing_check', 'roomSharing', array],
   ['profiles', 'profiles_day_rhythm_check', 'dayRhythm', array],
   ['profiles', 'profiles_walking_check', 'walking', array],
+  ['profiles', 'profiles_diet_check', 'diet', array],
   ['preferences', 'preferences_styles_check', 'travelStyle', set],
   ['preferences', 'preferences_paces_check', 'pace', set],
   ['preferences', 'preferences_budgets_check', 'budget', set],

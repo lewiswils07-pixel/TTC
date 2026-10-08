@@ -20,9 +20,12 @@ export type Connection = {
   trip_end: string | null
 }
 
-export async function sendRequest(to: string, note: string, tripId?: number): Promise<void> {
-  const { error } = await supabase.rpc('send_connection_request', { p_to: to, p_note: note.trim() || null, p_trip_id: tripId ?? null })
+/** Sends a request. If they'd already asked, it connects you instead: `connected` is then true. */
+export async function sendRequest(to: string, note: string, tripId?: number): Promise<{ connected: boolean }> {
+  const { data, error } = await supabase.rpc('send_connection_request', { p_to: to, p_note: note.trim() || null, p_trip_id: tripId ?? null })
   if (error) throw friendlyError(error)
+  const { data: row } = await supabase.from('connections').select('status').eq('id', data as number).maybeSingle()
+  return { connected: row?.status === 'accepted' }
 }
 
 export async function respondToRequest(id: number, accept: boolean): Promise<void> {

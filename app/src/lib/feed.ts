@@ -118,8 +118,9 @@ function union(a: string[], b: string[]): string[] {
   return [...new Set([...a, ...b])]
 }
 
-// "Not now" hides someone for 30 days. It's kept on this phone only, so it
-// doesn't need a database change; it never uses up a request.
+// "Not now" hides someone for 30 days. It's kept with the account, so it
+// holds on every device, and on this phone too so the card goes at once.
+// It never uses up a request.
 export const NOT_NOW_DAYS = rules.connections.notNowDays
 const key = (me: string) => `sodalis.notNow.${me}`
 
@@ -159,4 +160,23 @@ export function clearNotNow(me: string): void {
   } catch {
     // Nothing saved.
   }
+}
+
+/** Saves a "Not now" with the account. Quietly does nothing on a database without it yet. */
+export async function skipMember(profileId: string): Promise<void> {
+  await supabase.rpc('skip_member', { p_id: profileId })
+}
+
+export async function unskipMember(profileId: string): Promise<void> {
+  await supabase.rpc('unskip_member', { p_id: profileId })
+}
+
+export async function unskipAll(): Promise<void> {
+  await supabase.rpc('unskip_all')
+}
+
+/** How many people the member has skipped in the last 30 days, on any device. */
+export async function skippedCount(): Promise<number> {
+  const { data, error } = await supabase.rpc('skipped_count')
+  return error ? 0 : ((data as number) ?? 0)
 }

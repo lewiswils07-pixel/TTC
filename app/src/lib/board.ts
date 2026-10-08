@@ -47,6 +47,12 @@ export async function setDone(id: number, done: boolean): Promise<void> {
   if (error) throw friendlyError(error)
 }
 
+/** Change an idea's words (only the person who added it) or its day (anyone on the board). */
+export async function editIdea(id: number, title: string, day: number | null): Promise<void> {
+  const { error } = await supabase.rpc('edit_plan_item', { p_item: id, p_title: title.trim(), p_day: day })
+  if (error) throw friendlyError(error)
+}
+
 export async function deleteIdea(id: number): Promise<void> {
   const { error } = await supabase.rpc('delete_plan_item', { p_item: id })
   if (error) throw friendlyError(error)

@@ -4,8 +4,8 @@
 begin;
 select plan(6);
 
-select is((select count(*)::int from public.interests), 82, '82 interests');
-select is((select count(distinct lower(label))::int from public.interests), 82, 'every label is different');
+select is((select count(*)::int from public.interests), 88, '88 interests');
+select is((select count(distinct lower(label))::int from public.interests), 88, 'every label is different');
 select is_empty($$select label from public.interests where label ~ ' and ' or char_length(label) > 18$$,
   'labels are short enough for a chip and join nothing with "and"');
 select is((select count(distinct category_label)::int from public.interests), 9, '9 groups');

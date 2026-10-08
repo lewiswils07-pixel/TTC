@@ -1,7 +1,20 @@
 import type { ReactNode } from 'react'
 
 /** Sticky bar at the bottom of a form: an optional note, Back, and the main button. */
-export function ActionBar({ busy, onBack, label = 'Continue', note }: { busy: boolean; onBack?: () => void; label?: string; note?: ReactNode }) {
+export function ActionBar({
+  busy,
+  onBack,
+  onSkip,
+  label = 'Continue',
+  note,
+}: {
+  busy: boolean
+  onBack?: () => void
+  /** "Skip for now", in the Back button's place, for an optional step. */
+  onSkip?: () => void
+  label?: string
+  note?: ReactNode
+}) {
   return (
     <div className="action-bar">
       {note && <p className="action-note">{note}</p>}
@@ -9,6 +22,11 @@ export function ActionBar({ busy, onBack, label = 'Continue', note }: { busy: bo
         {onBack && (
           <button type="button" className="btn btn-secondary" onClick={onBack} disabled={busy}>
             Back
+          </button>
+        )}
+        {onSkip && (
+          <button type="button" className="btn btn-secondary" onClick={onSkip} disabled={busy}>
+            Skip for now
           </button>
         )}
         <button type="submit" className="btn btn-primary" disabled={busy}>

@@ -19,6 +19,9 @@ import {
   type Message,
 } from '../lib/chat'
 import { messageOf } from '../lib/errors'
+import { respondToInvite } from '../lib/groups'
+import { shortDates } from '../lib/dates'
+import { tripsTogether, type TripTogether } from '../lib/together'
 import { guideSeen, markGuideSeen } from '../lib/meet'
 import { useSession } from '../lib/session-context'
 
@@ -150,9 +153,11 @@ export function Chat() {
             <Avatar name={other.display_name} path={other.photo_path} size="sm" />
             <h1>{other.display_name}</h1>
           </Link>
-          <Link className="btn btn-secondary btn-small chat-plan-link" to={`/messages/${conversationId}/plan`}>
-            Plan<span className="chat-plan-more"> board</span>
-          </Link>
+          {group && (
+            <Link className="btn btn-secondary btn-small chat-plan-link" to={`/messages/${conversationId}/plan`}>
+              Plan board
+            </Link>
+          )}
           <button
             type="button"
             className="chat-more"
@@ -167,6 +172,11 @@ export function Chat() {
         {menuOpen && (
           <div id="chat-menu" className="chat-menu">
             <ul>
+              {!group && other.can_message && (
+                <li>
+                  <Link to={`/plan-together/${other.profile_id}`}>Plan a trip together</Link>
+                </li>
+              )}
               {!group && (
                 <li>
                   <Link to={`/connections/people/${other.profile_id}`}>View {other.display_name}’s profile</Link>
@@ -189,6 +199,8 @@ export function Chat() {
             )}
           </div>
         )}
+
+        {!group && other.profile_id && <TripsTogether profileId={other.profile_id} name={other.display_name} canPlan={other.can_message} />}
 
         <section className="chat-body" aria-label={`Messages with ${other.display_name}`}>
           {more && (
@@ -350,5 +362,78 @@ function GuideCard() {
         </button>
       </div>
     </aside>
+  )
+}
+
+/** Trips being planned with this person, at the top of your chat with them. */
+function TripsTogether({ profileId, name, canPlan }: { profileId: string; name: string; canPlan: boolean }) {
+  const [trips, setTrips] = useState<TripTogether[]>([])
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const load = useCallback(() => tripsTogether(profileId).then(setTrips), [profileId])
+  useEffect(() => {
+    void load()
+  }, [load])
+
+  async function answer(t: TripTogether, yes: boolean) {
+    setBusy(true)
+    setError(null)
+    try {
+      await respondToInvite(t.group_id, yes)
+      await load()
+    } catch (e) {
+      setError(messageOf(e))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (!trips.length) {
+    return canPlan ? (
+      <p className="together-banner together-start">
+        <span>Going somewhere together?</span>
+        <Link className="btn btn-secondary btn-small" to={`/plan-together/${profileId}`}>
+          Plan a trip together
+        </Link>
+      </p>
+    ) : null
+  }
+  return (
+    <>
+      {trips.map((t) => (
+        <div key={t.group_id} className="together-banner">
+          <p>
+            {t.my_status === 'invited'
+              ? `${name} would like to plan a trip to ${t.city} together, ${shortDates(t.start_date, t.end_date)}.`
+              : t.their_status === 'invited'
+                ? `Waiting for ${name} to join your ${t.city} trip, ${shortDates(t.start_date, t.end_date)}.`
+                : `Your ${t.city} trip together, ${shortDates(t.start_date, t.end_date)}.`}
+          </p>
+          <div className="action-row">
+            {t.my_status === 'invited' ? (
+              <>
+                <button type="button" className="btn btn-secondary btn-small" disabled={busy} onClick={() => answer(t, false)}>
+                  Not now
+                </button>
+                <button type="button" className="btn btn-primary btn-small" disabled={busy} onClick={() => answer(t, true)}>
+                  {busy ? 'Joining…' : 'Join'}
+                </button>
+              </>
+            ) : (
+              t.conversation_id && (
+                <Link className="btn btn-primary btn-small" to={`/messages/${t.conversation_id}/plan`}>
+                  Plan board
+                </Link>
+              )
+            )}
+          </div>
+        </div>
+      ))}
+      {error && (
+        <p className="notice notice-error" role="alert">
+          {error}
+        </p>
+      )}
+    </>
   )
 }

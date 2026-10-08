@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { Layout } from '../components/Layout'
+import { EmergencyNumbers } from '../components/EmergencyNumbers'
 
 const TIPS: { title: string; text: string }[] = [
   { title: 'Get to know each other here first', text: 'Chat in the app, and have a video call before you meet. Someone who won’t talk on camera is a reason to be careful.' },
@@ -43,9 +44,10 @@ export function MeetingSafely() {
           </li>
         ))}
       </ol>
-      <p className="notice">
-        <strong>In an emergency</strong> call 112 anywhere in Europe, or 999 in the UK.
-      </p>
+      <div className="notice">
+        <strong>If you need help now</strong>
+        <EmergencyNumbers />
+      </div>
     </Layout>
   )
 }

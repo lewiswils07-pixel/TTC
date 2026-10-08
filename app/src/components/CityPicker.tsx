@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { cityLabel, searchCities, type City } from '../lib/cities'
 import { messageOf } from '../lib/errors'
 import { FieldError } from './Field'
@@ -56,6 +56,11 @@ export function CityPicker({ label, hint, value, onChange, search = searchCities
   const listId = `${id}-list`
   const typedEnough = text.trim().length >= 2
   const showList = open && typedEnough && results.length > 0
+  // Keep the list clear of the sticky Continue bar.
+  const list = useRef<HTMLUListElement>(null)
+  useEffect(() => {
+    if (showList) list.current?.scrollIntoView?.({ block: 'nearest' })
+  }, [showList])
   const noMatch = open && typedEnough && searched === text.trim() && results.length === 0
 
   return (
@@ -103,7 +108,7 @@ export function CityPicker({ label, hint, value, onChange, search = searchCities
           }
         }}
       />
-      <ul className="options" id={listId} role="listbox" aria-label={label} hidden={!showList}>
+      <ul ref={list} className="options" id={listId} role="listbox" aria-label={label} hidden={!showList}>
         {results.map((city, i) => (
           <li
             key={city.id}

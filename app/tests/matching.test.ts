@@ -57,9 +57,9 @@ describe('why we suggested someone with no trip in common', () => {
 
 describe('words instead of a score', () => {
   it('turns the score into a few words', () => {
-    expect(fitWords(81)).toBe('Great match')
-    expect(fitWords(70)).toBe('Great match')
-    expect(fitWords(56)).toBe('Good match')
+    expect(fitWords(81)).toBe('Lots in common')
+    expect(fitWords(70)).toBe('Lots in common')
+    expect(fitWords(56)).toBe('Plenty in common')
     expect(fitWords(26)).toBe('Worth a look')
   })
 })

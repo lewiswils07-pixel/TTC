@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { CityPicker } from '../components/CityPicker'
 import { DateRangePicker } from '../components/DateRangePicker'
@@ -8,11 +8,12 @@ import { ActionBar, SaveError } from '../components/Form'
 import { Layout, Loading } from '../components/Layout'
 import type { City } from '../lib/cities'
 import { myConnections, type Connection } from '../lib/connections'
-import { addDays, isoDate } from '../lib/dates'
+import { addDays, isoDate, shortDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { brand } from '../lib/brand'
 import { rules } from '../lib/rules'
 import { checkGroupName, createGroup, groupsICanStart, MAX_GROUP, MAX_GROUP_NAME } from '../lib/groups'
+import { listMyTrips, type Trip } from '../lib/trips'
 import { useChecks } from '../lib/useChecks'
 import { MAX_TRIP_DAYS, checkTripDates } from '../lib/validation'
 
@@ -65,6 +66,8 @@ function GroupEditor({ people }: { people: Connection[] }) {
   const [start, setStart] = useState('')
   const [end, setEnd] = useState('')
   const [invite, setInvite] = useState<string[]>([])
+  const [trips, setTrips] = useState<Trip[]>([])
+  const fromTrip = Number(useSearchParams()[0].get('trip')) || null
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -81,6 +84,22 @@ function GroupEditor({ people }: { people: Connection[] }) {
   useEffect(() => {
     heading.current?.focus()
   }, [])
+
+  // Start from one of your trips instead of typing it all again (testers).
+  useEffect(() => {
+    listMyTrips().then((list) => {
+      setTrips(list ?? [])
+      const t = list?.find((x) => x.id === fromTrip)
+      if (t) fillFromTrip(t)
+    }, () => undefined)
+  }, [fromTrip])
+
+  function fillFromTrip(t: Trip) {
+    setCity(t.city)
+    setStart(t.start_date)
+    setEnd(t.end_date)
+    setName((n) => n || `${t.city.name} trip`.slice(0, MAX_GROUP_NAME))
+  }
 
   function toggle(id: string) {
     setInvite((list) => (list.includes(id) ? list.filter((x) => x !== id) : list.length < MAX_GROUP - 1 ? [...list, id] : list))
@@ -111,6 +130,23 @@ function GroupEditor({ people }: { people: Connection[] }) {
         <p className="lede">Up to {MAX_GROUP} people, including you. Everyone you invite chooses whether to join.</p>
 
         <div className="card form-card">
+          {trips.length > 0 && (
+            <fieldset className="field">
+              <legend>Start from one of your trips</legend>
+              <div className="chips chips-compact">
+                {trips.map((t) => (
+                  <button
+                    type="button"
+                    key={t.id}
+                    className={city?.id === t.city_id && start === t.start_date ? 'pill is-on' : 'pill'}
+                    onClick={() => fillFromTrip(t)}
+                  >
+                    {t.city.name} · {shortDates(t.start_date, t.end_date)}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          )}
           <TextField
             name="name"
             label="Group name"

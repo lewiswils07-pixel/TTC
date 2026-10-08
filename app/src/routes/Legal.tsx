@@ -2,7 +2,7 @@
 // first drafts for the beta (Lewis's sign-up review, item 1), to be checked
 // before public launch.
 import { useEffect, useRef, type ReactNode } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { Layout } from '../components/Layout'
 import { brand } from '../lib/brand'
 import { count, rules } from '../lib/rules'
@@ -11,9 +11,20 @@ const UPDATED = '5 October 2026'
 
 function LegalPage({ title, children }: { title: string; children: ReactNode }) {
   const heading = useRef<HTMLHeadingElement>(null)
+  const navigate = useNavigate()
   useEffect(() => heading.current?.focus(), [])
+  const canGoBack = typeof window !== 'undefined' && window.history.length > 1
   return (
     <Layout>
+      {canGoBack ? (
+        <button type="button" className="back-link btn-plain" onClick={() => navigate(-1)}>
+          ‹ Back
+        </button>
+      ) : (
+        <Link className="back-link" to="/">
+          ‹ Home
+        </Link>
+      )}
       <article className="legal">
         <p className="eyebrow gold-rule">{brand.name}</p>
         <h1 ref={heading} tabIndex={-1}>

@@ -1,7 +1,7 @@
 -- Written by `npm run rules` from app/rules.json. Don't edit by hand.
 -- Fails when the database's rules differ from the app's.
 begin;
-select plan(88);
+select plan(91);
 select is(private.rule('signIn.codeLength'), 6, 'signIn.codeLength is 6, as in rules.json');
 select is(private.rule('signIn.passwordMin'), 8, 'signIn.passwordMin is 8, as in rules.json');
 select is(private.rule('signIn.passwordMax'), 72, 'signIn.passwordMax is 72, as in rules.json');
@@ -42,13 +42,15 @@ select is(private.rule('safety.adminNoteMax'), 1000, 'safety.adminNoteMax is 100
 select is(private.rule('meetups.placeMax'), 120, 'meetups.placeMax is 120, as in rules.json');
 select is(private.rule('meetups.noteMax'), 300, 'meetups.noteMax is 300, as in rules.json');
 select is(private.rule('meetups.maxOpen'), 10, 'meetups.maxOpen is 10, as in rules.json');
-select is(private.rule('meetups.maxDaysAhead'), 90, 'meetups.maxDaysAhead is 90, as in rules.json');
+select is(private.rule('meetups.maxDaysAhead'), 730, 'meetups.maxDaysAhead is 730, as in rules.json');
 select is(private.rule('meetups.linkDays'), 2, 'meetups.linkDays is 2, as in rules.json');
 select is(private.rule('reviews.textMax'), 500, 'reviews.textMax is 500, as in rules.json');
 select is(private.rule('survey.commentMax'), 500, 'survey.commentMax is 500, as in rules.json');
 select is(private.rule('survey.heardFromAfterMinutes'), 30, 'survey.heardFromAfterMinutes is 30, as in rules.json');
 select is(private.rule('founding.plusMonths'), 3, 'founding.plusMonths is 3, as in rules.json');
-select is((select count(*)::int from private.rules), 46, 'no rules beyond rules.json');
+select is(private.rule('matching.maxSuggestions'), 100, 'matching.maxSuggestions is 100, as in rules.json');
+select is(private.rule('plus.pricePencePerMonth'), 599, 'plus.pricePencePerMonth is 599, as in rules.json');
+select is((select count(*)::int from private.rules), 48, 'no rules beyond rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_display_name_check'), '<= 40') > 0, 'profiles_display_name_check uses profile.nameMax (40)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_bio_check'), '<= 500') > 0, 'profiles_bio_check uses profile.bioMax (500)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_mobility_note_check'), '<= 200') > 0, 'profiles_mobility_note_check uses profile.mobilityNoteMax (200)');
@@ -82,6 +84,7 @@ select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conr
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_room_sharing_check'), 'ARRAY[''share''::text, ''unsure''::text, ''separate''::text]') > 0, 'profiles_room_sharing_check lists the roomSharing answers in rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_day_rhythm_check'), 'ARRAY[''early''::text, ''either''::text, ''late''::text]') > 0, 'profiles_day_rhythm_check lists the dayRhythm answers in rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_walking_check'), 'ARRAY[''gentle''::text, ''moderate''::text, ''lots''::text]') > 0, 'profiles_walking_check lists the walking answers in rules.json');
+select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_diet_check'), 'ARRAY[''vegetarian''::text, ''vegan''::text, ''pescatarian''::text, ''halal''::text, ''kosher''::text, ''gluten-free''::text, ''dairy-free''::text]') > 0, 'profiles_diet_check lists the diet answers in rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.preferences'::regclass and conname = 'preferences_styles_check'), '''{planner,mix,spontaneous}''') > 0, 'preferences_styles_check lists the travelStyle answers in rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.preferences'::regclass and conname = 'preferences_paces_check'), '''{slow,steady,packed}''') > 0, 'preferences_paces_check lists the pace answers in rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.preferences'::regclass and conname = 'preferences_budgets_check'), '''{budget,mid,comfort}''') > 0, 'preferences_budgets_check lists the budget answers in rules.json');
