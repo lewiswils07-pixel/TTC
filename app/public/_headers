@@ -12,9 +12,9 @@
   Cross-Origin-Resource-Policy: same-origin
 
 # The trusted-contact page holds a private code in its address: never pass
-# it on to other pages, and never keep a copy in a shared cache.
+# it on to other pages, and never keep a copy in a shared cache. Browsers use
+# the last Referrer-Policy value when two rules both set it, so no-referrer wins.
 /safe/*
-  ! Referrer-Policy
   Referrer-Policy: no-referrer
   Cache-Control: no-store
 
