@@ -6,6 +6,7 @@ import { SafetyBox } from '../components/SafetyBox'
 import { SkeletonFeedCard } from '../components/Skeleton'
 import { SameTimeStrip } from '../components/SameTimeStrip'
 import { Tour } from '../components/Tour'
+import { FilterBar } from '../components/FilterBar'
 import { SubNav } from '../components/SubNav'
 import { CONNECTIONS_NAV } from '../lib/nav'
 import { ConnectBox, SharedInterests, useRequests, type Requests } from '../components/Suggestions'
@@ -89,6 +90,17 @@ export function ForYou() {
     setStatus(null)
   }
 
+  function refresh() {
+    setPeople(null)
+    remember('feed', loadFeed()).then(
+      (list) => {
+        const hidden = notNowIds(me)
+        setPeople(list.filter((p) => !hidden.has(p.profile_id)))
+      },
+      (e) => setError(messageOf(e)),
+    )
+  }
+
   function showSkipped() {
     clearNotNow(me)
     setSkipped(0)
@@ -101,15 +113,11 @@ export function ForYou() {
   return (
     <Layout tab="connections">
       {touring && <Tour onClose={() => setParams({}, { replace: true })} />}
-      <div className="page-head">
-        <h1 ref={heading} tabIndex={-1}>
-          Connections
-        </h1>
-        <Link className="btn btn-secondary btn-small" to="/filters">
-          Filters
-        </Link>
-      </div>
+      <h1 ref={heading} tabIndex={-1} className="visually-hidden">
+        Connections
+      </h1>
       <SubNav label="Connections" items={CONNECTIONS_NAV} current="/connections" />
+      <FilterBar userId={me} onChanged={refresh} />
       <div role="status">
         {status && (
           <p className="feed-toast">

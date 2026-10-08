@@ -892,9 +892,9 @@ legend { padding: 0; }
 }
 .same-time-title { margin: 0; font-size: var(--text-lg); color: var(--brand-gold); }
 .same-time-hint { margin: var(--space-1) 0 var(--space-3); font-size: var(--text-sm); color: #fff; }
-.same-time-list { list-style: none; margin: 0 calc(var(--space-4) * -1); padding: 0 var(--space-4) var(--space-1); display: flex; gap: var(--space-3); overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; }
+.same-time-list { list-style: none; margin: 0 calc(var(--space-4) * -1); padding: 0 var(--space-4) var(--space-1); display: flex; gap: var(--space-3); overflow-x: auto; scrollbar-width: none; }
 .same-time-list::-webkit-scrollbar { display: none; }
-.same-time-list li { flex: none; scroll-snap-align: start; }
+.same-time-list li { flex: none; }
 .same-time-person {
   display: flex; flex-direction: column; align-items: center; gap: 2px; width: 92px; padding: var(--space-2) var(--space-1);
   border-radius: var(--radius); color: #fff; text-decoration: none; text-align: center;
@@ -1274,3 +1274,66 @@ html { scroll-padding-bottom: 7rem; }
 .skeleton-page { display: grid; gap: var(--space-2); margin: var(--space-2) 0 var(--space-4); }
 .skeleton-title { display: block; height: 1.9rem; width: 55%; border-radius: 8px; }
 .card-back-empty .skeleton-line { display: block; margin: var(--space-2) auto; }
+
+/* ------------------------------------------------ quick filters on Connections */
+.filter-bar {
+  display: flex; align-items: center; gap: var(--space-2); margin: 0 calc(var(--space-4) * -1) var(--space-3); padding: 2px var(--space-4) 6px;
+  overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+.filter-all {
+  flex: none; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 999px; color: var(--ink);
+  transition: transform 160ms var(--ease-out), background-color 160ms ease;
+}
+.filter-pill {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px 0 16px;
+  border: 1.5px solid color-mix(in srgb, var(--ink) 18%, transparent); border-radius: 999px; background: var(--card); color: var(--ink);
+  font: inherit; font-size: 0.9375rem; font-weight: 700; white-space: nowrap; cursor: pointer;
+  transition: transform 160ms var(--ease-out), background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+.filter-pill svg { flex: none; opacity: 0.8; }
+.filter-pill.is-set { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.filter-pill:disabled { opacity: 0.6; cursor: default; }
+.filter-plus {
+  display: grid; place-items: center; width: 18px; height: 18px; border-radius: 999px; background: var(--gold); color: var(--ink);
+  font-size: 0.75rem; font-weight: 800; line-height: 1;
+}
+.filter-pill:active:not(:disabled), .filter-all:active { transform: scale(0.96); }
+.filter-pill:focus-visible, .filter-all:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) {
+  .filter-pill:not(.is-set):not(:disabled):hover { border-color: var(--ink); }
+  .filter-all:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+}
+/* The sheet a pill opens: rises from the bottom on a phone. */
+.sheet-box { position: relative; padding-top: var(--space-6); max-height: calc(100dvh - var(--space-6)); overflow-y: auto; }
+.sheet-handle { position: absolute; top: 10px; left: 50%; width: 40px; height: 5px; margin-left: -20px; border-radius: 3px; background: var(--line); }
+.sheet .confirm-box { animation: sheet-in 240ms cubic-bezier(0.32, 0.72, 0, 1); }
+@keyframes sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* ------------------------------------------------ the photo fills the card */
+.feed-photo { width: 100%; height: auto; aspect-ratio: 4 / 5; max-height: calc(100dvh - 330px); min-height: 280px; }
+.person-feed-card.is-connecting .feed-photo { aspect-ratio: auto; min-height: 0; }
+
+/* ------------------------------------------------ frosted glass tab bar (phone) */
+@media (max-width: 899px) {
+  .tabbar {
+    left: var(--space-3); right: var(--space-3); bottom: calc(var(--safe-bottom) + var(--space-2));
+    padding: 6px; border-radius: 999px;
+    background: color-mix(in srgb, var(--card) 80%, transparent);
+    -webkit-backdrop-filter: blur(22px) saturate(1.8);
+    backdrop-filter: blur(22px) saturate(1.8);
+    border: 1px solid color-mix(in srgb, #fff 55%, transparent);
+    box-shadow: 0 10px 30px rgb(20 12 14 / 0.16), inset 0 1px 0 rgb(255 255 255 / 0.6);
+  }
+  .tabbar ul { gap: 2px; }
+  .tab { color: var(--ink-soft); min-height: 54px; padding: 6px 4px; border-radius: 999px; transition: transform 160ms var(--ease-out), background-color 200ms ease, color 200ms ease; }
+  .tab.is-current { color: var(--accent); background: color-mix(in srgb, var(--accent) 11%, var(--card)); }
+  .tab.is-current .tab-icon::after { display: none; }
+  .tab:active { transform: scale(0.95); }
+  .tab:focus-visible { border-radius: 999px; }
+  .has-tabs .main { padding-bottom: calc(var(--safe-bottom) + 104px); }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .tabbar { background: color-mix(in srgb, var(--card) 96%, transparent); }
+}
+h1.visually-hidden + .subnav { margin-top: 0; }
