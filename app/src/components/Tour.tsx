@@ -13,13 +13,13 @@ const STEPS: { icon: string; title: string; text: string }[] = [
   },
   {
     icon: '✈',
-    title: 'Going when you are',
+    title: 'Trips in common',
     text: 'Add a trip and anyone going to the same place at the same time appears in the burgundy strip at the top of Connect.',
   },
   {
     icon: '✓',
     title: 'Plan together',
-    text: 'Once someone accepts your request, you can chat. Each chat has a plan board for ideas, with our own picks for popular cities.',
+    text: 'Once someone accepts your request, you can chat. Trip groups have a plan board for ideas, with our own picks for popular cities.',
   },
   {
     icon: '♡',

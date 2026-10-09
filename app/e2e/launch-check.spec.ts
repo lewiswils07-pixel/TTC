@@ -174,12 +174,12 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await expect(page.getByText('Your review', { exact: true })).toBeVisible()
   await expect(page.locator('.review-average')).toHaveText('4.5')
   issues.push(...(await problems(page, '/trips/:id?tab=reviews')))
-  // Someone going to Lisbon at the same time shows in the "Going when you are" tile.
+  // Someone going to Lisbon at the same time shows in the "Trips in common" tile.
   await admin.from('profiles').update({ photo_path: `${demo(3)}/demo.jpg`, last_active_at: new Date().toISOString() }).eq('id', demo(3))
   await admin.from('trips').insert({ owner_id: demo(3), city_id: 2267057, start_date: isoIn(31), end_date: isoIn(33) })
   await visit(page, '/connections', 'Connect', issues)
-  await page.getByRole('link', { name: /Going when you are/ }).click()
-  await expect(page.getByRole('heading', { level: 1, name: 'Going when you are' })).toBeVisible()
+  await page.getByRole('link', { name: /Trips in common/ }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Trips in common' })).toBeVisible()
   await expect(page.locator('.plus-person').filter({ hasText: 'Lisbon' }).first()).toBeVisible()
   issues.push(...(await problems(page, '/connections/same-time')))
   await visit(page, '/messages', 'Chat', issues)

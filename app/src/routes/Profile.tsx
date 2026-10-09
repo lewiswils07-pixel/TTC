@@ -5,7 +5,6 @@ import { Layout, Loading } from '../components/Layout'
 import { dismissNotice, iAmAdmin, myNotices, type Notice } from '../lib/admin'
 import { answerMeet, meetPrompts, type MeetPrompt } from '../lib/meet'
 import { Avatar } from '../components/Avatar'
-import { CardBack } from '../components/CardBack'
 import { cityLabel } from '../lib/cities'
 import { BUDGETS, GENDERS, MAX_PREF_AGE, MIN_AGE, PACES, TRAVEL_STYLES, ageFromDate, ageLabel, labelFor } from '../lib/options'
 import type { Card } from '../lib/card'
@@ -40,7 +39,8 @@ const ICONS = {
   people: 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7.5 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM1 20c0-3.3 3.6-6 8-6s8 2.7 8 6v1H1v-1Zm17.5 1v-1c0-2-.9-3.8-2.4-5.1 3.6.2 6.9 2.2 6.9 5.1v1h-4.5Z',
   share: 'M18 16a3 3 0 0 0-2.4 1.2l-6.7-3.4a3 3 0 0 0 0-1.6l6.7-3.4A3 3 0 1 0 15 7l-6.7 3.4a3 3 0 1 0 0 3.2L15 17a3 3 0 1 0 3-1Z',
   rules: 'M5 3h11l3 3v15H5V3Zm3 6v2h8V9H8Zm0 4v2h8v-2H8Zm0 4v2h5v-2H8Z',
-  phone: 'M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2Z',
+  phone:
+    'M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2Z',
   shield: 'M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm-1.2 13.6-3.4-3.4 1.4-1.4 2 2 4.6-4.6 1.4 1.4-6 6Z',
   report: 'M5 21V4h9l.4 2H20v10h-7l-.4-2H7v7H5Z',
   photo: 'M4 5h16v14H4V5Zm2 2v8.6l3.5-3.6 2.5 2.5 3.5-4.5L18 13.5V7H6Zm2.5 3a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z',
@@ -155,7 +155,10 @@ function MyProfilePanel({ data, hasPhoto }: { data: MyProfile; hasPhoto: boolean
   })
 
   useEffect(() => {
-    remember('trips', listMyTrips()).then((t) => setHasTrip(!!t?.length), () => setHasTrip(false))
+    remember('trips', listMyTrips()).then(
+      (t) => setHasTrip(!!t?.length),
+      () => setHasTrip(false),
+    )
   }, [])
 
   useEffect(() => {
@@ -163,18 +166,13 @@ function MyProfilePanel({ data, hasPhoto }: { data: MyProfile; hasPhoto: boolean
   }, [])
 
   const { profile, interestIds, preferences } = data
-  const travel = [labelFor(TRAVEL_STYLES, profile.travel_style), labelFor(PACES, profile.pace), labelFor(BUDGETS, profile.budget)].filter(
-    (l) => l !== 'Not set',
-  )
+  const travel = [labelFor(TRAVEL_STYLES, profile.travel_style), labelFor(PACES, profile.pace), labelFor(BUDGETS, profile.budget)].filter((l) => l !== 'Not set')
   const myInterests = interests.filter((i) => interestIds.includes(i.id)).map((i) => i.label)
 
   return (
     <>
       <Notices />
       {hasTrip !== null && <Strength profile={profile} interestCount={interestIds.length} hasTrip={hasTrip} card={data.card} />}
-      <MeetPrompts />
-      <RecommendCard />
-      <AdminLink />
       <section className="card profile-card" aria-labelledby="my-profile">
         <h2 id="my-profile" className="card-title">
           About you
@@ -206,8 +204,7 @@ function MyProfilePanel({ data, hasPhoto }: { data: MyProfile; hasPhoto: boolean
           <div>
             <dt>Looking for</dt>
             <dd>
-              {preferences.genders.map((g) => labelFor(GENDERS, g)).join(', ')}, aged {preferences.age_min} to{' '}
-              {preferences.age_max >= MAX_PREF_AGE ? `${MAX_PREF_AGE}+` : preferences.age_max}
+              {preferences.genders.map((g) => labelFor(GENDERS, g)).join(', ')}, aged {preferences.age_min} to {preferences.age_max >= MAX_PREF_AGE ? `${MAX_PREF_AGE}+` : preferences.age_max}
               {preferences.age_min <= MIN_AGE && preferences.age_max >= MAX_PREF_AGE && (
                 <>
                   {' '}
@@ -221,18 +218,6 @@ function MyProfilePanel({ data, hasPhoto }: { data: MyProfile; hasPhoto: boolean
           Edit my profile
         </Link>
       </section>
-      {data.card && (
-        <section className="card card-back-preview" aria-labelledby="my-card-back">
-          <h2 id="my-card-back" className="card-title">
-            The back of your card
-          </h2>
-          <p className="hint section-hint">Members see this when they flip your card.</p>
-          <CardBack name={profile.display_name ?? ''} answers={data.card.card_answers} mine />
-          <Link className="btn btn-secondary btn-block" to={stepLink('card')}>
-            {data.card.card_answers.length ? 'Change my answers' : 'Fill it in'}
-          </Link>
-        </section>
-      )}
       <ul className="hub-list">
         {!hasPhoto && (
           <li>
@@ -246,6 +231,9 @@ function MyProfilePanel({ data, hasPhoto }: { data: MyProfile; hasPhoto: boolean
           <HubRow to="/connections?tour=1" icon={ICONS.tour} title="How the Collective works" text="A quick tour of what you can do" />
         </li>
       </ul>
+      <MeetPrompts />
+      <RecommendCard />
+      <AdminLink />
     </>
   )
 }
@@ -330,9 +318,9 @@ function PlusPanel() {
   if (until === 'loading') return <div className="skeleton-block" aria-hidden="true" />
   const has = until !== undefined
   const perks = [
-    { icon: ICONS.people, title: 'Connect with as many people as you like', free: `Free: ${count(rules.requests.perWeekFree, 'request')} a week` },
-    { icon: ICONS.filters, title: 'Filter by planning style, pace and budget', free: 'Free: age, gender and distance' },
-    { icon: ICONS.star, title: `Start up to ${count(rules.groups.maxOwnedPlus, 'group')} at once`, free: `Free: ${count(rules.groups.maxOwnedFree, 'group')}` },
+    { icon: ICONS.people, title: 'Connect with as many people as you like' },
+    { icon: ICONS.filters, title: 'Filter by planning style, pace and budget' },
+    { icon: ICONS.star, title: `Start up to ${count(rules.groups.maxOwnedPlus, 'group')} at once` },
   ]
   return (
     <>
@@ -344,15 +332,10 @@ function PlusPanel() {
         </p>
         {has ? (
           <>
-            <p>
-              {until
-                ? `It’s free for you until ${new Date(until).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.`
-                : 'It’s yours with no end date.'}
-            </p>
+            <p>{until ? `It’s free for you until ${new Date(until).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.` : 'It’s yours with no end date.'}</p>
             {until && (
               <p className="hint">
-                When the free months end, you move to the free plan on your own. We never ask for a card for them, so there’s nothing to
-                cancel and you’ll never be charged without saying yes first.
+                When the free months end, you move to the free plan on your own. We never ask for a card for them, so there’s nothing to cancel and you’ll never be charged without saying yes first.
               </p>
             )}
             <button type="button" className="btn btn-secondary btn-small" onClick={stop}>
@@ -380,7 +363,6 @@ function PlusPanel() {
             </span>
             <span className="hub-text">
               <strong>{p.title}</strong>
-              <span>{p.free}</span>
             </span>
           </li>
         ))}
@@ -414,8 +396,6 @@ function Strength({ profile, interestCount, hasTrip, card }: { profile: Profile;
     </section>
   )
 }
-
-
 
 const NOTICE_TEXT: Record<Notice['kind'], { title: string; text: string }> = {
   warning: { title: `A note from the ${brand.shortName} team`, text: 'Please keep to our community rules so everyone feels safe.' },
@@ -562,7 +542,6 @@ function MeetPrompts() {
     </section>
   )
 }
-
 
 function npsSnoozed(): boolean {
   try {

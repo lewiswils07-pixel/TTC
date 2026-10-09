@@ -81,7 +81,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await b.getByRole('navigation', { name: 'Chat' }).getByRole('link', { name: /Requests/ }).click()
     await b.getByRole('button', { name: /Accept/ }).first().click()
     // Until they talk, Lewis waits under Other connections on Chats.
-    await b.getByRole('navigation', { name: 'Chat' }).getByRole('link', { name: 'Chats' }).click()
+    await b.getByRole('navigation', { name: 'Chat' }).getByRole('link', { name: 'Connections' }).click()
     await b.getByRole('link', { name: 'Say hello to Lewis' }).click()
     await expect(b.getByRole('heading', { level: 1, name: 'Lewis' })).toBeVisible()
     await closeGuide(b)
@@ -135,6 +135,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
   await test.step('start a group and plan together', async () => {
     await a.goto('/groups/new')
     await a.getByLabel('Group name').fill('Paris in spring')
+    await a.getByText('A trip', { exact: true }).click()
     await pickPlace(a, 'Pari', /Paris, France/)
     await pickDates(a, isoIn(25), isoIn(28))
     await a.getByText(other, { exact: true }).click()
@@ -144,7 +145,6 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await b.goto('/groups')
     await b.getByRole('button', { name: 'Join' }).click()
     await b.getByRole('link', { name: /Paris in spring/ }).click()
-    await b.getByRole('link', { name: 'Open the group chat' }).click()
     await b.getByRole('link', { name: 'Plan board' }).click()
     await b.getByLabel('What’s the idea?').fill('Musée d’Orsay on the first morning')
     await choose(b, 'Which day? (optional)', /^Day 1/)

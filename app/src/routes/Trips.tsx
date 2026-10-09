@@ -14,7 +14,6 @@ export function Trips() {
       <h1 ref={heading} tabIndex={-1}>
         Trips
       </h1>
-      <p className="lede">Optional. Add where you’re going and we’ll show you members going too.</p>
       <MyTrips />
       <PopularPlaces />
       <ul className="hub-list trips-groups">

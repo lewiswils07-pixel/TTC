@@ -8,7 +8,6 @@ import { SafetyBox } from '../components/SafetyBox'
 import { SkeletonRows } from '../components/Skeleton'
 import { loadTabCounts, refreshTabCounts } from '../lib/tabCounts'
 import type { Conversation } from '../lib/chat'
-import { tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { homeLabel } from '../lib/matching'
 import { peek, remember } from '../lib/cache'
@@ -247,12 +246,7 @@ function PersonCard({
       ) : (
         <div className="match-head">{who}</div>
       )}
-      {item.trip_city && item.trip_start && item.trip_end && (
-        <p className="hint">
-          About {item.direction === 'sent' ? 'your' : 'their'} trip to {item.trip_city}, {tripDates(item.trip_start, item.trip_end)}
-        </p>
-      )}
-      {item.note && <blockquote className="person-note">“{item.note}”</blockquote>}
+      {item.note && <blockquote className="person-note">{item.note}</blockquote>}
       {children}
       <SafetyBox profileId={item.profile_id} name={item.display_name} onBlocked={onBlocked} />
     </li>
@@ -273,7 +267,6 @@ export function Requests() {
         Chat
       </h1>
       <ChatNav current="/requests" requests={count} />
-      <p className="lede">Nothing beyond your first name, age and home town is shared until you’re connected.</p>
       {done && (
         <p className="notice notice-success" role="status">
           {done}

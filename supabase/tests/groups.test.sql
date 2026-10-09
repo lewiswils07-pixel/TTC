@@ -28,6 +28,9 @@ grant select, insert on ids to authenticated;
 select ok((select bool_and(relrowsecurity) from pg_class where oid in ('public.groups'::regclass, 'public.group_members'::regclass)),
   'group tables have row-level security');
 
+-- These tests use the old limit of 6 people.
+update private.rules set value = 6 where key = 'groups.maxPeople';
+
 -- These tests start on the free plan, without the founding offer.
 delete from public.entitlements where source = 'founding';
 

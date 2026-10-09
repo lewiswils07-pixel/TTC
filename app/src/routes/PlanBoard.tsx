@@ -11,7 +11,8 @@ import { IdeaEditor } from '../components/TripPlanner'
 import { myConversations, type Conversation } from '../lib/chat'
 import { daysBetween } from '../lib/dates'
 import { messageOf } from '../lib/errors'
-import { myGroups } from '../lib/groups'
+import { groupPeople, isTripGroup, myGroups, type GroupPerson } from '../lib/groups'
+import { Avatar } from '../components/Avatar'
 import { useChecks } from '../lib/useChecks'
 
 type Trip = { start: string; days: number } | null
@@ -24,6 +25,7 @@ export function PlanBoard() {
   const [trip, setTrip] = useState<Trip>(null)
   const [guide, setGuide] = useState<number | ''>('')
   const [groupCity, setGroupCity] = useState<string | number | null>(null)
+  const [members, setMembers] = useState<GroupPerson[]>([])
   const [editing, setEditing] = useState<number | null>(null)
   const [ideas, setIdeas] = useState<Idea[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -39,7 +41,11 @@ export function PlanBoard() {
         const found = all?.find((c) => c.id === conversationId) ?? null
         if (found?.kind === 'group') {
           const g = (await myGroups())?.find((x) => x.id === found.group_id)
-          if (g) {
+          void groupPeople(found.group_id!).then(
+            (p) => setMembers(p.filter((x) => x.status === 'joined')),
+            () => undefined,
+          )
+          if (g && isTripGroup(g)) {
             setTrip({ start: g.start_date, days: daysBetween(g.start_date, g.end_date) + 1 })
             setGroupCity(g.city_id ?? g.city)
           }
@@ -100,7 +106,12 @@ export function PlanBoard() {
           onCancel={() => setEditing(null)}
           onSave={(title, day) => {
             setEditing(null)
-            void act(idea.id, () => editIdea(idea.id, title, day), `${title} saved.`, (i) => ({ ...i, title, day }))
+            void act(
+              idea.id,
+              () => editIdea(idea.id, title, day),
+              `${title} saved.`,
+              (i) => ({ ...i, title, day }),
+            )
           }}
         />
       ) : (
@@ -112,7 +123,12 @@ export function PlanBoard() {
             disabled={!chat.can_message || busy === idea.id}
             onChange={(e) => {
               const on = e.target.checked
-              void act(idea.id, () => setDone(idea.id, on), on ? `Ticked off ${idea.title}.` : `${idea.title} is back on the list.`, (i) => ({ ...i, done: on }))
+              void act(
+                idea.id,
+                () => setDone(idea.id, on),
+                on ? `Ticked off ${idea.title}.` : `${idea.title} is back on the list.`,
+                (i) => ({ ...i, done: on }),
+              )
             }}
           />
           <span className="idea-title">{idea.title}</span>
@@ -130,11 +146,16 @@ export function PlanBoard() {
           aria-label={`Vote for ${idea.title}. ${idea.votes} ${idea.votes === 1 ? 'vote' : 'votes'}.`}
           disabled={!chat.can_message || busy === idea.id}
           onClick={() =>
-            act(idea.id, () => toggleVote(idea.id), idea.i_voted ? 'Vote removed.' : 'Vote added.', (i) => ({
-              ...i,
-              i_voted: !i.i_voted,
-              votes: i.votes + (i.i_voted ? -1 : 1),
-            }))
+            act(
+              idea.id,
+              () => toggleVote(idea.id),
+              idea.i_voted ? 'Vote removed.' : 'Vote added.',
+              (i) => ({
+                ...i,
+                i_voted: !i.i_voted,
+                votes: i.votes + (i.i_voted ? -1 : 1),
+              }),
+            )
           }
         >
           <span aria-hidden="true">👍 {idea.votes}</span>
@@ -154,7 +175,9 @@ export function PlanBoard() {
             type="button"
             className="btn-link safety-link"
             disabled={busy === idea.id}
-            onClick={async () => (await ask({ title: `Remove “${idea.title}” from the plan?`, confirmLabel: 'Remove', danger: true })) && act(idea.id, () => deleteIdea(idea.id), `${idea.title} removed.`)}
+            onClick={async () =>
+              (await ask({ title: `Remove “${idea.title}” from the plan?`, confirmLabel: 'Remove', danger: true })) && act(idea.id, () => deleteIdea(idea.id), `${idea.title} removed.`)
+            }
           >
             Remove
           </button>
@@ -174,6 +197,22 @@ export function PlanBoard() {
         Plan board
       </h1>
       <p className="lede">Add ideas for things to do, vote for your favourites and tick them off as you go.</p>
+      {chat.kind === 'group' && members.length > 0 && (
+        <Link className="card link-card board-members" to={`/groups/${chat.group_id}`} aria-label={`Who’s in ${chat.display_name}`}>
+          <span className="board-faces" aria-hidden="true">
+            {members.slice(0, 5).map((p) => (
+              <Avatar key={p.profile_id} name={p.display_name} path={p.photo_path} size="sm" />
+            ))}
+          </span>
+          <span className="board-names">
+            <strong>Who’s in it</strong>
+            <span>{members.map((p) => p.display_name).join(', ')}</span>
+          </span>
+          <span className="trip-chevron" aria-hidden="true">
+            ›
+          </span>
+        </Link>
+      )}
       <p className="visually-hidden" role="status">
         {status}
       </p>

@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import { CHAT_NAV } from '../lib/nav'
 import { cachedTabCounts, loadTabCounts } from '../lib/tabCounts'
 
-/** Two or three page-level tabs at the top of a screen, such as "Chats", "Groups" and "Requests". */
+/** Two or three page-level tabs at the top of a screen, such as "Connections", "Groups" and "Requests". */
 export function SubNav({ label, items, current }: { label: string; items: { to: string; label: string; count?: number }[]; current: string }) {
   return (
     <nav className="subnav" aria-label={label}>
@@ -22,7 +22,7 @@ export function SubNav({ label, items, current }: { label: string; items: { to: 
   )
 }
 
-/** Chats, Groups and Requests, with the number of requests waiting for an answer. Pass `requests` when the page already knows it. */
+/** Connections, Groups and Requests, with the number of requests waiting for an answer. Pass `requests` when the page already knows it. */
 export function ChatNav({ current, requests }: { current: string; requests?: number }) {
   const [waiting, setWaiting] = useState(() => cachedTabCounts()?.requests ?? 0)
   useEffect(() => {

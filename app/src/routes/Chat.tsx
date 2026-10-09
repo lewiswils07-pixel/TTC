@@ -19,7 +19,8 @@ import {
   type Message,
 } from '../lib/chat'
 import { messageOf } from '../lib/errors'
-import { respondToInvite } from '../lib/groups'
+import { groupDates, isTripGroup, myGroups, respondToInvite, type Group, type GroupDates } from '../lib/groups'
+import { DateOverlap } from '../components/DateOverlap'
 import { shortDates } from '../lib/dates'
 import { tripsTogether, type TripTogether } from '../lib/together'
 import { guideSeen, markGuideSeen } from '../lib/meet'
@@ -37,6 +38,8 @@ export function Chat() {
   const [warnings, setWarnings] = useState<Set<number>>(new Set())
   const [reporting, setReporting] = useState<number | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [groupInfo, setGroupInfo] = useState<Group | null>(null)
+  const [datesOpen, setDatesOpen] = useState(false)
 
   useEffect(() => {
     if (!menuOpen) return
@@ -69,7 +72,13 @@ export function Chat() {
       ([all, first, warn]) => {
         const found = all?.find((c) => c.id === conversationId) ?? null
         setOther(found)
-        if (found?.kind === 'group') void conversationSenders(conversationId).then(setSenders)
+        if (found?.kind === 'group') {
+          void conversationSenders(conversationId).then(setSenders)
+          void myGroups().then(
+            (g) => setGroupInfo(g?.find((x) => x.id === found.group_id) ?? null),
+            () => undefined,
+          )
+        }
         setWarnings(warn)
         add(first)
         setMore(first.length === PAGE_SIZE)
@@ -80,13 +89,16 @@ export function Chat() {
     // Messages sent while the live connection was opening are fetched once it's ready.
     // The same check runs every little while as a safety net (see onNewMessage).
     const catchUp = () => {
-      void listMessages(conversationId).then((latest) => {
-        const fresh = latest.filter((m) => !seenRef.current.has(m.id))
-        if (fresh.length === 0) return
-        add(fresh)
-        void markRead(conversationId)
-        if (fresh.some((m) => m.sender_id !== me && !sendersRef.current.has(m.sender_id))) void conversationSenders(conversationId).then(setSenders)
-      }, () => undefined)
+      void listMessages(conversationId).then(
+        (latest) => {
+          const fresh = latest.filter((m) => !seenRef.current.has(m.id))
+          if (fresh.length === 0) return
+          add(fresh)
+          void markRead(conversationId)
+          if (fresh.some((m) => m.sender_id !== me && !sendersRef.current.has(m.sender_id))) void conversationSenders(conversationId).then(setSenders)
+        },
+        () => undefined,
+      )
       void messageWarnings(conversationId).then(setWarnings, () => undefined)
     }
     return onNewMessage(conversationId, catchUp, (m) => {
@@ -142,7 +154,7 @@ export function Chat() {
     <Layout>
       <div className="chat">
         <div className="chat-head">
-          <Link className="back-link" to="/messages" aria-label="Back to messages">
+          <Link className="back-link" to={group ? '/groups' : '/messages'} aria-label={group ? 'Back to groups' : 'Back to messages'}>
             ‹
           </Link>
           <Link
@@ -150,21 +162,10 @@ export function Chat() {
             to={group ? `/groups/${other.group_id}` : `/connections/people/${other.profile_id}`}
             aria-label={group ? `${other.display_name}: group info` : `${other.display_name}: view profile`}
           >
-            <Avatar name={other.display_name} path={other.photo_path} size="sm" />
+            {!group && <Avatar name={other.display_name} path={other.photo_path} size="sm" />}
             <h1>{other.display_name}</h1>
           </Link>
-          {group && (
-            <Link className="btn btn-secondary btn-small chat-plan-link" to={`/messages/${conversationId}/plan`}>
-              Plan board
-            </Link>
-          )}
-          <button
-            type="button"
-            className="chat-more"
-            aria-expanded={menuOpen}
-            aria-controls="chat-menu"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
+          <button type="button" className="chat-more" aria-expanded={menuOpen} aria-controls="chat-menu" onClick={() => setMenuOpen(!menuOpen)}>
             <span aria-hidden="true">⋯</span>
             <span className="visually-hidden">More options</span>
           </button>
@@ -194,11 +195,11 @@ export function Chat() {
                 </li>
               )}
             </ul>
-            {!group && (
-              <SafetyBox profileId={other.profile_id!} name={other.display_name} onBlocked={(message) => navigate('/messages', { state: { message } })} />
-            )}
+            {!group && <SafetyBox profileId={other.profile_id!} name={other.display_name} onBlocked={(message) => navigate('/messages', { state: { message } })} />}
           </div>
         )}
+
+        {group && <GroupOptions conversationId={conversationId} groupId={other.group_id!} group={groupInfo} datesOpen={datesOpen} onDates={() => setDatesOpen(!datesOpen)} me={me} />}
 
         {!group && other.profile_id && <TripsTogether profileId={other.profile_id} name={other.display_name} canPlan={other.can_message} />}
 
@@ -209,22 +210,14 @@ export function Chat() {
             </button>
           )}
           <GuideCard />
-          {messages.length === 0 && (
-            <p className="hint chat-empty">
-              {group ? 'This is your group chat. Say hello!' : 'You’re connected. Say hello!'}
-            </p>
-          )}
+          {messages.length === 0 && <p className="hint chat-empty">{group ? 'This is your group chat. Say hello!' : 'You’re connected. Say hello!'}</p>}
           <ol className="message-list" ref={list} aria-live="polite" aria-relevant="additions">
             {messages.map((m) => {
               const mine = m.sender_id === me
               return (
                 <Fragment key={m.id}>
                   <li className={`message ${mine ? 'message-mine' : 'message-theirs'}`}>
-                    {group && !mine ? (
-                      <span className="message-sender">{nameOf(m.sender_id)}</span>
-                    ) : (
-                      <span className="visually-hidden">{mine ? 'You' : other.display_name}: </span>
-                    )}
+                    {group && !mine ? <span className="message-sender">{nameOf(m.sender_id)}</span> : <span className="visually-hidden">{mine ? 'You' : other.display_name}: </span>}
                     <p className="message-body">{m.body}</p>
                     <time className="message-time" dateTime={m.created_at}>
                       {messageTime(m.created_at)}
@@ -263,6 +256,67 @@ export function Chat() {
         )}
       </div>
     </Layout>
+  )
+}
+
+/** Under a group chat's name: the plan board and everyone's dates for a trip group, and who's in it. */
+function GroupOptions({
+  conversationId,
+  groupId,
+  group,
+  datesOpen,
+  onDates,
+  me,
+}: {
+  conversationId: number
+  groupId: number
+  group: Group | null
+  datesOpen: boolean
+  onDates: () => void
+  me: string
+}) {
+  const trip = group && isTripGroup(group) ? group : null
+  return (
+    <>
+      <nav className="chat-options" aria-label="Group">
+        {trip && (
+          <Link className="pill" to={`/messages/${conversationId}/plan`}>
+            Plan board
+          </Link>
+        )}
+        {trip && (
+          <button type="button" className={datesOpen ? 'pill is-on' : 'pill'} aria-expanded={datesOpen} onClick={onDates}>
+            Check dates
+          </button>
+        )}
+        <Link className="pill" to={`/groups/${groupId}`}>
+          Members
+        </Link>
+        {group && !trip && group.i_own && (
+          <Link className="pill" to={`/groups/${groupId}?trip=1`}>
+            Make it a trip
+          </Link>
+        )}
+      </nav>
+      {trip && datesOpen && <GroupDatesView group={trip} me={me} />}
+    </>
+  )
+}
+
+/** Everyone's dates for a trip group, on one timeline. */
+function GroupDatesView({ group, me }: { group: Group & { city: string; start_date: string; end_date: string }; me: string }) {
+  const [dates, setDates] = useState<GroupDates[] | null>(null)
+  useEffect(() => {
+    groupDates(group.id).then(setDates, () => setDates([]))
+  }, [group.id])
+  if (!dates) return <p className="hint chat-dates">Loading everyone’s dates…</p>
+  const mine = dates.find((d) => d.profile_id === me)
+  const others = dates.filter((d) => d.profile_id !== me).map((d) => ({ start: d.start_date, end: d.end_date, name: d.display_name }))
+  return (
+    <div className="chat-dates">
+      <DateOverlap city={group.city} mine={mine ? { start: mine.start_date, end: mine.end_date } : { start: group.start_date, end: group.end_date }} others={others} />
+      {others.length === 0 && <p className="hint">No one else has added their dates for {group.city} yet.</p>}
+    </div>
   )
 }
 

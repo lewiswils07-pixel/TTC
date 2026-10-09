@@ -22,7 +22,11 @@ export function SameTime() {
     heading.current?.focus()
     hasPlus().then((p) => {
       setPlus(p)
-      if (p) loadFeed().then((list) => setPeople(goingWhenYouAre(list)), (e) => setError(messageOf(e)))
+      if (p)
+        loadFeed().then(
+          (list) => setPeople(goingWhenYouAre(list)),
+          (e) => setError(messageOf(e)),
+        )
     })
   }, [])
 
@@ -34,7 +38,7 @@ export function SameTime() {
         </Link>
         <span className="tag tag-plus">{brand.plusName}</span>
         <h1 ref={heading} tabIndex={-1}>
-          Going when you are
+          Trips in common
         </h1>
         {plus === false ? (
           <div className="plus-offer">
@@ -57,7 +61,7 @@ export function SameTime() {
                 {error}
               </p>
             )}
-            {!people && !error && <SkeletonRows rows={3} label="Finding who’s going when you are…" />}
+            {!people && !error && <SkeletonRows rows={3} label="Finding trips in common…" />}
             {people && people.length === 0 && <p className="hint">No one yet. We’ll show members here as soon as someone books the same place and dates as you.</p>}
             {people && people.length > 0 && (
               <ul className="plus-people">

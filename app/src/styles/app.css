@@ -877,7 +877,6 @@ legend { padding: 0; }
 
 /* chat header: name, plan board and a "⋯" menu, as in familiar messaging apps */
 .chat-head h1 { flex: 1; min-width: 0; }
-.chat-head .chat-plan-link { flex: none; }
 .chat-more {
   flex: none; display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
   border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 1.5rem; line-height: 1; cursor: pointer;
@@ -893,7 +892,7 @@ legend { padding: 0; }
 }
 .chat-menu .safety-link { color: var(--ink); font-weight: 600; font-size: var(--text); text-decoration: none; }
 
-/* ------------------------------------------------ "Going when you are": a quiet row of faces */
+/* ------------------------------------------------ "Trips in common": a quiet row of faces */
 .same-time {
   display: flex; align-items: center; gap: var(--space-3); margin: 0 0 var(--space-4); padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
   border-radius: var(--radius-lg); background: var(--card); color: var(--ink); text-decoration: none;
@@ -1360,3 +1359,21 @@ html { scroll-padding-bottom: 7rem; }
 .popular-place strong { font-size: 1.0625rem; }
 .popular-place span { color: var(--brand-gold); font-size: 0.875rem; font-weight: 700; }
 .popular-place:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+/* ------------------------------------------------ group chats: options under the name, dates, members on the plan board */
+.chat-options { display: flex; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-3) 0; border-bottom: 1px solid var(--line); }
+.chat-options .pill { display: inline-flex; align-items: center; text-decoration: none; }
+.chat-dates { padding-top: var(--space-3); }
+.chat-dates .overlap { margin: 0; }
+.group-trip-btn { margin-bottom: var(--space-3); }
+.board-members { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); }
+.board-faces { display: flex; flex: none; }
+.board-faces .avatar + .avatar { margin-left: -10px; box-shadow: 0 0 0 2px var(--card); }
+.board-names { display: grid; flex: 1; min-width: 0; }
+.board-names span { color: var(--ink-soft); font-size: var(--text-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The message box sits at the bottom of the screen, however few messages there are. */
+.main:has(> .chat) { padding-bottom: 0; }
+.no-topbar .chat { min-height: calc(100dvh - var(--safe-top) - var(--space-5)); }
+.topbar + .main > .chat { min-height: calc(100dvh - var(--safe-top) - 61px - var(--space-6)); }
+.no-topbar .chat-head { top: var(--safe-top); }
+.composer { margin-top: auto; }
