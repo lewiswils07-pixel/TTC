@@ -24,7 +24,7 @@ const trip = (id: string, extra: Partial<TripSuggestion> = {}): TripSuggestion =
   ...extra,
 })
 
-describe('Going when you are', () => {
+describe('Trips in common', () => {
   const feed = mergeFeed([{ tripId: 7, people: [trip('Ann'), trip('Bob', { overlap_start: null, overlap_end: null })] }], [])
 
   it('only counts people there at the same time, not nearby dates', () => {
@@ -39,7 +39,7 @@ describe('Going when you are', () => {
       </MemoryRouter>,
     )
     expect(screen.getAllByRole('link')).toHaveLength(1)
-    expect(screen.getByRole('link', { name: /Going when you are.*1 member/ })).toHaveAttribute('href', '/connections/same-time')
+    expect(screen.getByRole('link', { name: /Trips in common.*1 member/ })).toHaveAttribute('href', '/connections/same-time')
     expect(screen.queryByText('Lisbon', { exact: false })).not.toBeInTheDocument()
     expect(await axeViolations(container)).toEqual([])
   })

@@ -1,7 +1,7 @@
 -- Written by `npm run rules` from app/rules.json. Don't edit by hand.
 -- Fails when the database's rules differ from the app's.
 begin;
-select plan(91);
+select plan(93);
 select is(private.rule('signIn.codeLength'), 6, 'signIn.codeLength is 6, as in rules.json');
 select is(private.rule('signIn.passwordMin'), 8, 'signIn.passwordMin is 8, as in rules.json');
 select is(private.rule('signIn.passwordMax'), 72, 'signIn.passwordMax is 72, as in rules.json');
@@ -11,13 +11,15 @@ select is(private.rule('requests.plusSafetyCap'), 50, 'requests.plusSafetyCap is
 select is(private.rule('requests.plusShowLeftBelow'), 5, 'requests.plusShowLeftBelow is 5, as in rules.json');
 select is(private.rule('groups.maxOwnedFree'), 1, 'groups.maxOwnedFree is 1, as in rules.json');
 select is(private.rule('groups.maxOwnedPlus'), 3, 'groups.maxOwnedPlus is 3, as in rules.json');
-select is(private.rule('groups.maxPeople'), 6, 'groups.maxPeople is 6, as in rules.json');
+select is(private.rule('groups.maxPeople'), 12, 'groups.maxPeople is 12, as in rules.json');
 select is(private.rule('groups.nameMax'), 60, 'groups.nameMax is 60, as in rules.json');
 select is(private.rule('trips.maxNights'), 90, 'trips.maxNights is 90, as in rules.json');
 select is(private.rule('trips.maxDaysAhead'), 730, 'trips.maxDaysAhead is 730, as in rules.json');
 select is(private.rule('trips.maxUpcoming'), 20, 'trips.maxUpcoming is 20, as in rules.json');
 select is(private.rule('trips.maxFlexDays'), 7, 'trips.maxFlexDays is 7, as in rules.json');
 select is(private.rule('trips.noteMax'), 280, 'trips.noteMax is 280, as in rules.json');
+select is(private.rule('trips.popularMinMembers'), 2, 'trips.popularMinMembers is 2, as in rules.json');
+select is(private.rule('trips.popularShown'), 8, 'trips.popularShown is 8, as in rules.json');
 select is(private.rule('wishlist.max'), 10, 'wishlist.max is 10, as in rules.json');
 select is(private.rule('age.min'), 18, 'age.min is 18, as in rules.json');
 select is(private.rule('age.maxPreferred'), 99, 'age.maxPreferred is 99, as in rules.json');
@@ -50,7 +52,7 @@ select is(private.rule('survey.heardFromAfterMinutes'), 30, 'survey.heardFromAft
 select is(private.rule('founding.plusMonths'), 3, 'founding.plusMonths is 3, as in rules.json');
 select is(private.rule('matching.maxSuggestions'), 100, 'matching.maxSuggestions is 100, as in rules.json');
 select is(private.rule('plus.pricePencePerMonth'), 599, 'plus.pricePencePerMonth is 599, as in rules.json');
-select is((select count(*)::int from private.rules), 48, 'no rules beyond rules.json');
+select is((select count(*)::int from private.rules), 50, 'no rules beyond rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_display_name_check'), '<= 40') > 0, 'profiles_display_name_check uses profile.nameMax (40)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_bio_check'), '<= 500') > 0, 'profiles_bio_check uses profile.bioMax (500)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_mobility_note_check'), '<= 200') > 0, 'profiles_mobility_note_check uses profile.mobilityNoteMax (200)');

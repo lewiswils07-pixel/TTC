@@ -198,7 +198,7 @@ function CompanionRow({ person }: { person: TripCompanion }) {
         </p>
       </div>
       {person.status === 'they_asked' ? (
-        <Link className="btn btn-primary btn-small" to="/connections/requests">
+        <Link className="btn btn-primary btn-small" to="/requests">
           Answer
         </Link>
       ) : person.status === 'connected' || person.status === 'group' ? (

@@ -82,3 +82,17 @@ export function flexibilityLabel(days: number): string | null {
   // Non-breaking spaces keep "3 days" together on narrow screens.
   return days === 7 ? 'Give or take 1\u00a0week' : `Give or take ${days}\u00a0day${days === 1 ? '' : 's'}`
 }
+
+export type PopularPlace = { city_id: number; city: string; country_code: string; members: number }
+
+/** Cities several members are heading to soon, busiest first. Empty on a database without it yet. */
+export async function popularDestinations(): Promise<PopularPlace[]> {
+  const { data, error } = await supabase.rpc('popular_destinations')
+  return error ? [] : ((data ?? []) as PopularPlace[])
+}
+
+/** Another member's wishlist, for their card. Empty if hidden, or on a database without it yet. */
+export async function wishlistOf(profileId: string): Promise<string[]> {
+  const { data, error } = await supabase.rpc('wishlist_of', { p_profile: profileId })
+  return error ? [] : ((data ?? []) as string[])
+}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { CityPicker } from '../components/CityPicker'
 import { DateRangePicker } from '../components/DateRangePicker'
 import { Field } from '../components/Field'
@@ -69,7 +69,8 @@ function TripEditor({ trip }: { trip: Trip | null }) {
   const navigate = useNavigate()
   const [today] = useState(() => isoDate(new Date()))
   const heading = useRef<HTMLHeadingElement>(null)
-  const [city, setCity] = useState<City | null>(trip?.city ?? null)
+  const picked = (useLocation().state as { city?: City } | null)?.city
+  const [city, setCity] = useState<City | null>(trip?.city ?? picked ?? null)
   const [start, setStart] = useState(trip?.start_date ?? '')
   const [end, setEnd] = useState(trip?.end_date ?? '')
   const [flex, setFlex] = useState<Flex>(toFlex(trip?.flexible_days ?? 0))

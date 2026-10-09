@@ -47,8 +47,8 @@ export function MemberProfile() {
       ‹ Back
     </button>
   ) : (
-    <Link className="back-link" to="/connections/requests">
-      ‹ Connections
+    <Link className="back-link" to="/messages">
+      ‹ Chats
     </Link>
   )
 
@@ -69,8 +69,8 @@ export function MemberProfile() {
         {back}
         <h1>Profile not available</h1>
         <p className="lede">You can see someone’s full profile once you’re connected or in the same group.</p>
-        <Link className="btn btn-primary" to="/connections/requests">
-          Go to Connections
+        <Link className="btn btn-primary" to="/messages">
+          Go to Chats
         </Link>
       </Layout>
     )
@@ -196,7 +196,7 @@ export function MemberProfile() {
             Connected since {new Date(member.connected_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         )}
-        <SafetyBox profileId={member.profile_id} name={member.display_name} onBlocked={(message) => navigate('/connections/requests', { state: { message } })} />
+        <SafetyBox profileId={member.profile_id} name={member.display_name} onBlocked={(message) => navigate('/messages', { state: { message } })} />
       </article>
     </Layout>
   )

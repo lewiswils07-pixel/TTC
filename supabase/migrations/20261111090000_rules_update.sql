@@ -1,4 +1,4 @@
--- Written by `npm run rules` from app/rules.json. Don't edit by hand.
+-- The club's rules changed in app/rules.json.
 insert into private.rules (key, value) values
   ('signIn.codeLength', 6),
   ('signIn.passwordMin', 8),
@@ -9,7 +9,7 @@ insert into private.rules (key, value) values
   ('requests.plusShowLeftBelow', 5),
   ('groups.maxOwnedFree', 1),
   ('groups.maxOwnedPlus', 3),
-  ('groups.maxPeople', 12),
+  ('groups.maxPeople', 6),
   ('groups.nameMax', 60),
   ('trips.maxNights', 90),
   ('trips.maxDaysAhead', 730),
