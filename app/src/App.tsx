@@ -14,7 +14,7 @@ import { SignIn } from './routes/SignIn'
 // Screens for signed-in members load on demand, so the first screen is quick.
 const Onboarding = lazy(() => import('./routes/Onboarding').then((m) => ({ default: m.Onboarding })))
 const TripMatches = lazy(() => import('./routes/TripMatches').then((m) => ({ default: m.TripMatches })))
-const Connections = lazy(() => import('./routes/Connections').then((m) => ({ default: m.Connections })))
+const Requests = lazy(() => import('./routes/Connections').then((m) => ({ default: m.Requests })))
 const TripForm = lazy(() => import('./routes/TripForm').then((m) => ({ default: m.TripForm })))
 const MemberProfile = lazy(() => import('./routes/MemberProfile').then((m) => ({ default: m.MemberProfile })))
 const SameTime = lazy(() => import('./routes/SameTime').then((m) => ({ default: m.SameTime })))
@@ -176,11 +176,12 @@ export function AppRoutes() {
           </RequireSession>
         }
       />
+      <Route path="/connections/requests" element={<Navigate to="/requests" replace />} />
       <Route
-        path="/connections/requests"
+        path="/requests"
         element={
           <RequireSession>
-            <Connections />
+            <Requests />
           </RequireSession>
         }
       />

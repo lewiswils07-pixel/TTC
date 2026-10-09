@@ -43,7 +43,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await expect(a.getByRole('heading', { name: 'We value your privacy' })).toBeVisible()
     await a.getByRole('button', { name: 'Accept all' }).click()
     await expect(a.getByRole('heading', { name: 'We value your privacy' })).toBeHidden()
-    await expect(a.getByRole('heading', { level: 1, name: 'Connections' })).toBeVisible()
+    await expect(a.getByRole('heading', { level: 1, name: 'Connect' })).toBeVisible()
     await expect(a.locator('.person-feed-card')).toBeVisible()
   })
 
@@ -61,7 +61,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.getByLabel(/Add a note/).fill('Hello! Would you like to see the Musée d’Orsay together?')
     await a.getByRole('button', { name: 'Send request' }).click()
     await expect(a.getByText(/Request sent/)).toBeVisible()
-    // The Connections tab now leads with people going to Paris too.
+    // The Connect tab now leads with people going to Paris too.
     await a.goto('/connections')
     await expect(a.locator('.person-feed-card .callout-trip').first()).toContainText('Paris ·')
   })
@@ -76,15 +76,18 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
   await test.step('they accept, and the two chat live', async () => {
     await signIn(b, otherEmail)
     await b.getByRole('button', { name: 'Only what’s needed' }).click()
-    await b.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: /Connections/ }).click()
-    await b.getByRole('navigation', { name: 'Connections' }).getByRole('link', { name: /Connections/ }).click()
+    // Requests wait under Chat, with their number on the tab.
+    await b.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: /Chat/ }).click()
+    await b.getByRole('navigation', { name: 'Chat' }).getByRole('link', { name: /Requests/ }).click()
     await b.getByRole('button', { name: /Accept/ }).first().click()
-    await b.getByRole('link', { name: 'Message Lewis' }).click()
+    // Until they talk, Lewis waits under Other connections on Chats.
+    await b.getByRole('navigation', { name: 'Chat' }).getByRole('link', { name: 'Chats' }).click()
+    await b.getByRole('link', { name: 'Say hello to Lewis' }).click()
     await expect(b.getByRole('heading', { level: 1, name: 'Lewis' })).toBeVisible()
     await closeGuide(b)
 
     await a.goto('/messages')
-    await a.getByRole('link', { name: new RegExp(other) }).click()
+    await a.getByRole('link', { name: `Say hello to ${other}` }).click()
     await closeGuide(a)
     await b.getByLabel('Message Lewis').fill('Hello Lewis! Yes, I’d love that.')
     await b.keyboard.press('Enter')

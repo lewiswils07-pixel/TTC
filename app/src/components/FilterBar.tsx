@@ -10,19 +10,7 @@ import { BUDGETS, MAX_PREF_AGE, MIN_AGE, PACES, SHOWN_GENDERS, TRAVEL_STYLES } f
 import { hasPlus } from '../lib/plan'
 import { checkAgeRange } from '../lib/validation'
 
-/** How many filters differ from "show everyone", for the number on the button. */
-function activeCount(f: Filters): number {
-  return [
-    f.age_min > MIN_AGE || f.age_max < MAX_PREF_AGE,
-    f.max_distance_km !== null,
-    f.genders.length > 0 && f.genders.length < SHOWN_GENDERS.length,
-    f.styles.length > 0,
-    f.paces.length > 0,
-    f.budgets.length > 0,
-  ].filter(Boolean).length
-}
-
-/** One Filters button at the top of Connections. It opens a sheet with every filter; "Show people" saves and refreshes who's shown. */
+/** One Filters button at the top of Connect. It opens a sheet with every filter; "Show people" saves and refreshes who's shown. */
 export function FilterButton({ userId, onChanged }: { userId: string; onChanged: () => void }) {
   const [filters, setFilters] = useState<Filters | null>(null)
   const [plus, setPlus] = useState(false)
@@ -38,7 +26,6 @@ export function FilterButton({ userId, onChanged }: { userId: string; onChanged:
     )
   }, [userId])
 
-  const n = filters ? activeCount(filters) : 0
   return (
     <>
       <button type="button" className="filter-button" aria-haspopup="dialog" disabled={!filters} onClick={() => setOpen(true)}>
@@ -52,12 +39,6 @@ export function FilterButton({ userId, onChanged }: { userId: string; onChanged:
           />
         </svg>
         <span className="filter-label">Filters</span>
-        {n > 0 && (
-          <span className="filter-count">
-            {n}
-            <span className="visually-hidden"> on</span>
-          </span>
-        )}
       </button>
       {open && filters && (
         <FilterSheet

@@ -50,6 +50,8 @@ legend { padding: 0; }
   display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
   padding: 0 var(--space-4);
 }
+/* No logo bar on a member's phone screens: keep clear of the notch instead. */
+.no-topbar .main { padding-top: calc(var(--safe-top) + var(--space-5)); }
 .brand { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 800; font-size: 1.0625rem; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
 .monogram {
   display: inline-grid; place-items: center; flex: none;
@@ -1287,7 +1289,7 @@ html { scroll-padding-bottom: 7rem; }
 
 /* ------------------------------------------------ one Filters button on Connections */
 .connections-top { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); }
-.connections-top .subnav { flex: 1; margin: 0; }
+.connections-top h1 { flex: 1; margin: 0; }
 .filter-button {
   flex: none; position: relative; display: inline-flex; align-items: center; gap: 6px; height: 48px; padding: 0 14px;
   border: 1.5px solid color-mix(in srgb, var(--ink) 16%, transparent); border-radius: 999px; background: var(--card); color: var(--ink);
@@ -1298,10 +1300,6 @@ html { scroll-padding-bottom: 7rem; }
 .filter-button:disabled { opacity: 0.6; cursor: default; }
 .filter-button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 @media (hover: hover) and (pointer: fine) { .filter-button:not(:disabled):hover { border-color: var(--ink); } }
-.filter-count {
-  display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px;
-  background: var(--brand-disc); color: #fff; font-size: 0.75rem; font-weight: 800;
-}
 .sheet-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
 .sheet-section { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--line); }
 .sheet-actions { position: sticky; bottom: calc(var(--space-5) * -1); margin: var(--space-4) calc(var(--space-5) * -1) calc(var(--space-5) * -1); padding: var(--space-3) var(--space-5) var(--space-5); background: var(--card); border-top: 1px solid var(--line); }
@@ -1338,10 +1336,5 @@ html { scroll-padding-bottom: 7rem; }
   .tabbar { background: color-mix(in srgb, var(--card) 96%, transparent); }
 }
 .sheet-body > .field + *, .sheet-body > * + .field { margin-top: var(--space-5); }
-@media (max-width: 400px) {
-  .filter-button { padding: 0 12px; }
-  .filter-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  .connections-top .subnav-item { padding: 0 8px; }
-}
 .same-time-title { white-space: nowrap; }
 .plus-page .back-link { display: block; width: fit-content; margin-bottom: var(--space-3); }

@@ -113,7 +113,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   const { data: chat } = await admin.from('conversations').select('id').eq('connection_id', made!.id).single()
   await admin.from('profiles').update({ role: 'admin' }).eq('id', me)
 
-  await visit(page, '/connections', 'Connections', issues)
+  await visit(page, '/connections', 'Connect', issues)
   // The privacy box shows once, after sign-up; she chooses for herself.
   await expect(page.getByRole('heading', { name: 'We value your privacy' })).toBeVisible()
   issues.push(...(await problems(page, '/connections (privacy box)')))
@@ -134,8 +134,9 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await page.waitForTimeout(700)
   issues.push(...(await problems(page, '/connections (card flipped)')))
   await page.getByRole('button', { name: /back to the front$/ }).click()
-  await visit(page, '/connections/requests', 'Connections', issues)
-  // A connection's full profile, from Connections.
+  await visit(page, '/requests', 'Chat', issues)
+  await visit(page, '/messages', 'Chat', issues)
+  // A connection's full profile, from Other connections on Chats.
   await page.getByRole('link', { name: /^View .+’s profile$/ }).first().click()
   await expect(page.getByRole('heading', { name: 'In their own words' })).toBeVisible()
   await page.waitForLoadState('networkidle')
@@ -176,7 +177,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   // Someone going to Lisbon at the same time shows in the "Going when you are" tile.
   await admin.from('profiles').update({ photo_path: `${demo(3)}/demo.jpg`, last_active_at: new Date().toISOString() }).eq('id', demo(3))
   await admin.from('trips').insert({ owner_id: demo(3), city_id: 2267057, start_date: isoIn(31), end_date: isoIn(33) })
-  await visit(page, '/connections', 'Connections', issues)
+  await visit(page, '/connections', 'Connect', issues)
   await page.getByRole('link', { name: /Going when you are/ }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Going when you are' })).toBeVisible()
   await expect(page.locator('.plus-person').filter({ hasText: 'Lisbon' }).first()).toBeVisible()

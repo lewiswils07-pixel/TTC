@@ -7,8 +7,6 @@ import { SkeletonFeedCard } from '../components/Skeleton'
 import { SameTimeStrip } from '../components/SameTimeStrip'
 import { Tour } from '../components/Tour'
 import { FilterButton } from '../components/FilterBar'
-import { SubNav } from '../components/SubNav'
-import { CONNECTIONS_NAV } from '../lib/nav'
 import { ConnectBox, SharedInterests, useRequests, type Requests } from '../components/Suggestions'
 import { loadCard, type CardAnswer } from '../lib/card'
 import { messageOf } from '../lib/errors'
@@ -22,10 +20,9 @@ import { ageLabel, INTERESTS_TO_PICK } from '../lib/options'
 import { photoUrl } from '../lib/photo'
 import { roughly } from '../lib/rules'
 import { useSession } from '../lib/session-context'
-import { cachedTabCounts, loadTabCounts } from '../lib/tabCounts'
 import { useMyProfile } from '../lib/useMyProfile'
 
-/** The Connections tab: suggested people one at a time, with why they're suggested. */
+/** The Connect tab: suggested people one at a time, with why they're suggested. */
 export function ForYou() {
   const { session } = useSession()
   const me = session!.user.id
@@ -39,15 +36,10 @@ export function ForYou() {
   })
   const [error, setError] = useState<string | null>(null)
   const [skipped, setSkipped] = useState(0)
-  const [waiting, setWaiting] = useState(() => cachedTabCounts()?.connections ?? 0)
   const [status, setStatus] = useState<{ text: string; undo?: FeedPerson } | null>(null)
   const heading = useRef<HTMLHeadingElement>(null)
   const [params, setParams] = useSearchParams()
   const touring = params.get('tour') === '1'
-
-  useEffect(() => {
-    loadTabCounts().then((c) => setWaiting(c.connections ?? 0))
-  }, [])
 
   useEffect(() => {
     heading.current?.focus()
@@ -119,11 +111,10 @@ export function ForYou() {
   return (
     <Layout tab="connections">
       {touring && <Tour onClose={() => setParams({}, { replace: true })} />}
-      <h1 ref={heading} tabIndex={-1} className="visually-hidden">
-        Connections
-      </h1>
       <div className="connections-top">
-        <SubNav label="Connections" items={CONNECTIONS_NAV.map((i) => (i.to === '/connections/requests' ? { ...i, count: waiting } : i))} current="/connections" />
+        <h1 ref={heading} tabIndex={-1}>
+          Connect
+        </h1>
         <FilterButton userId={me} onChanged={refresh} />
       </div>
       <div role="status">

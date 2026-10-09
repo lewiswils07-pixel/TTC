@@ -1,32 +1,36 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { Layout } from '../components/Layout'
 import { SkeletonRows } from '../components/Skeleton'
-import { SubNav } from '../components/SubNav'
+import { ChatNav } from '../components/SubNav'
 import { peek, remember } from '../lib/cache'
-import { CHAT_NAV } from '../lib/nav'
 import { messageTime, myConversations, type Conversation } from '../lib/chat'
 import { messageOf } from '../lib/errors'
+import { ConnectionsSections } from './Connections'
 
-/** Everyone the member can chat with, most recent first. */
+/** Chats with messages, most recent first, then connections you haven't talked to yet. */
 export function Messages() {
   const [items, setItems] = useState<Conversation[] | null | undefined>(() => peek('conversations'))
   const [error, setError] = useState<string | null>(null)
   const heading = useRef<HTMLHeadingElement>(null)
-  const done = (useLocation().state as { message?: string } | null)?.message
+  const [done, setDone] = useState((useLocation().state as { message?: string } | null)?.message)
 
+  const load = useCallback(() => remember('conversations', myConversations()).then(setItems, (e) => setError(messageOf(e))), [])
   useEffect(() => {
-    remember('conversations', myConversations()).then(setItems, (e) => setError(messageOf(e)))
+    void load()
     heading.current?.focus()
-  }, [])
+  }, [load])
+
+  // Groups always show; a one-to-one chat shows here once either of you has written.
+  const active = items?.filter((c) => c.kind === 'group' || c.last_body)
 
   return (
     <Layout tab="chat">
       <h1 ref={heading} tabIndex={-1}>
         Chat
       </h1>
-      <SubNav label="Chat" items={CHAT_NAV} current="/messages" />
+      <ChatNav current="/messages" />
       {done && (
         <p className="notice notice-success" role="status">
           {done}
@@ -38,17 +42,17 @@ export function Messages() {
         </p>
       )}
       {items === undefined && !error && <SkeletonRows label="Loading your chats…" />}
-      {items && items.length === 0 && (
+      {active && active.length === 0 && (
         <div className="card empty">
-          <p>When someone accepts your request, or you accept theirs, you can message each other here.</p>
+          <p>When you and another member start talking, your chats appear here.</p>
           <Link className="btn btn-primary btn-block" to="/connections">
             Find people to travel with
           </Link>
         </div>
       )}
-      {items && items.length > 0 && (
+      {active && active.length > 0 && (
         <ul className="conversation-list">
-          {items.map((c) => (
+          {active.map((c) => (
             <li key={c.id}>
               <Link className="card conversation-row" to={`/messages/${c.id}`}>
                 {c.kind === 'group' ? (
@@ -78,6 +82,7 @@ export function Messages() {
           ))}
         </ul>
       )}
+      <ConnectionsSections show="other" conversations={items} onChanged={() => void load()} onMessage={setDone} />
     </Layout>
   )
 }

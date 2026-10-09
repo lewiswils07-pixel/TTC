@@ -8,7 +8,7 @@ const TABS: { tab: Tab; to: string; label: string; icon: string }[] = [
   {
     tab: 'connections',
     to: '/connections',
-    label: 'Connections',
+    label: 'Connect',
     icon: 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7.5 0a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM1.5 20c0-3.6 3.4-6.5 7.5-6.5s7.5 2.9 7.5 6.5v1h-15v-1Zm16.4 1v-1c0-2-.8-3.8-2.1-5.2.5-.1 1.1-.2 1.7-.2 3.3 0 6 2.3 6 5.4v1h-5.6Z',
   },
   {

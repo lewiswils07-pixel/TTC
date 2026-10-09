@@ -14,7 +14,7 @@ const STEPS: { icon: string; title: string; text: string }[] = [
   {
     icon: '✈',
     title: 'Going when you are',
-    text: 'Add a trip and anyone going to the same place at the same time appears in the burgundy strip at the top of Connections.',
+    text: 'Add a trip and anyone going to the same place at the same time appears in the burgundy strip at the top of Connect.',
   },
   {
     icon: '✓',

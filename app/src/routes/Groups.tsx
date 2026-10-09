@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
-import { SubNav } from '../components/SubNav'
-import { CHAT_NAV } from '../lib/nav'
+import { ChatNav } from '../components/SubNav'
 import { tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { brand } from '../lib/brand'
@@ -65,7 +64,7 @@ export function Groups() {
           </Link>
         )}
       </div>
-      <SubNav label="Chat" items={CHAT_NAV} current="/groups" />
+      <ChatNav current="/groups" />
       <p className="lede">Travel as a small group of up to {MAX_GROUP}, made from people you’re connected with. Each group has its own chat.</p>
       {error && (
         <p className="notice notice-error" role="alert">

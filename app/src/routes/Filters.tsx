@@ -76,7 +76,7 @@ export function Filters() {
   return (
     <Layout>
       <Link className="back-link" to="/connections">
-        ‹ Connections
+        ‹ Connect
       </Link>
       <h1 ref={heading} tabIndex={-1}>
         Filters

@@ -256,7 +256,7 @@ function SafetyPanel() {
     <>
       <ul className="hub-list">
         <li>
-          <HubRow to="/connections/requests#blocked" icon={ICONS.hand} title="Blocked members" text="See or unblock anyone you’ve blocked." />
+          <HubRow to="/requests#blocked" icon={ICONS.hand} title="Blocked members" text="See or unblock anyone you’ve blocked." />
         </li>
         <li>
           <HubRow to="/meeting-safely" icon={ICONS.share} title="Tell someone you trust" text="Share where and when you’re meeting with a friend." />
@@ -548,7 +548,7 @@ function MeetPrompts() {
       )}
       {step === 'thanks' && (
         <>
-          <p>Your answer is saved. If anything went wrong on the trip, you can report {p.display_name} from your Connections page.</p>
+          <p>Your answer is saved. If anything went wrong on the trip, you can report {p.display_name} from your chat with them.</p>
           <button type="button" className="btn btn-secondary btn-small" onClick={next}>
             Done
           </button>

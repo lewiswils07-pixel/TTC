@@ -34,21 +34,27 @@ export function Layout({ children, actions, wide = false, tab }: { children: Rea
   const isWide = useWide()
   // On a laptop the tabs stay along the top on every member screen, inner pages included.
   const topTab = isWide && session ? (tab ?? tabFor(path)) : undefined
+  // On a phone, members don't need the logo on every screen: the page gets the room instead.
+  const showBrand = isWide || !session
   return (
-    <div className={tab && !isWide ? 'shell has-tabs' : 'shell'}>
+    <div className={['shell', tab && !isWide && 'has-tabs', !showBrand && !actions && 'no-topbar'].filter(Boolean).join(' ')}>
       <a className="skip-link" href="#main">
         Skip to main content
       </a>
-      <header className="topbar">
-        <div className="topbar-inner">
-          <Link className="brand" to="/">
-            <Monogram size={32} />
-            <span>{brand.name}</span>
-          </Link>
-          {topTab && <TabBar current={topTab} top />}
-          {actions}
-        </div>
-      </header>
+      {(showBrand || actions) && (
+        <header className="topbar">
+          <div className="topbar-inner">
+            {showBrand && (
+              <Link className="brand" to="/">
+                <Monogram size={32} />
+                <span>{brand.name}</span>
+              </Link>
+            )}
+            {topTab && <TabBar current={topTab} top />}
+            {actions}
+          </div>
+        </header>
+      )}
       <main id="main" className={wide ? 'main main-wide' : 'main'} tabIndex={-1}>
         {children}
       </main>
@@ -61,7 +67,7 @@ export function Layout({ children, actions, wide = false, tab }: { children: Rea
 function tabFor(path: string): Tab | undefined {
   if (path.startsWith('/connections') || path.startsWith('/filters')) return 'connections'
   if (path.startsWith('/trips')) return 'trips'
-  if (path.startsWith('/messages') || path.startsWith('/groups')) return 'chat'
+  if (path.startsWith('/messages') || path.startsWith('/groups') || path.startsWith('/requests')) return 'chat'
   if (path.startsWith('/profile') || path.startsWith('/account') || path.startsWith('/settings')) return 'profile'
   return undefined
 }
