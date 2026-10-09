@@ -652,6 +652,12 @@ legend { padding: 0; }
 }
 .feed-who h2 { margin: 0; font-size: 1.75rem; line-height: 1.15; color: #fff; }
 .feed-age { font-weight: 500; }
+/* The card leads with their trip; the name and age sit smaller underneath. */
+.feed-who .feed-trip { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font-size: 1.5rem; font-weight: 800; line-height: 1.15; color: #fff; }
+.feed-trip svg { flex: none; color: var(--brand-gold); }
+.feed-trip:not(.is-same-time) svg { opacity: 0.8; }
+.feed-who h2.feed-name-small { font-size: 1.125rem; font-weight: 700; }
+.feed-name-small .feed-age { font-weight: 400; }
 .feed-who p { margin: 2px 0 0; color: rgb(255 255 255 / 88%); }
 .feed-fit {
   position: absolute; top: var(--space-3); left: var(--space-3); padding: 4px 12px; border-radius: 999px;
@@ -751,6 +757,8 @@ legend { padding: 0; }
 /* Every shared interest on a match card */
 .shared-interests { padding: 0 var(--space-2); }
 .shared-interests h4 { margin: 0 0 var(--space-2); font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.tag-place { background: var(--card); border: 1px solid var(--line); }
+.tag-place::before { content: '✈'; margin-right: 6px; color: var(--accent); }
 .tag-shared { background: color-mix(in srgb, var(--brand-gold) 18%, var(--card)); border: 1px solid color-mix(in srgb, var(--brand-gold) 45%, transparent); }
 .match-card .shared-interests { padding: 0; }
 .kpi-bar.is-zero { background: var(--line) !important; }
@@ -1052,7 +1060,7 @@ legend { padding: 0; }
   display: inline-flex; align-items: center; gap: 6px; margin: 0 0 var(--space-2); padding: 3px 10px; border-radius: 999px;
   background: rgb(0 0 0 / 45%); color: #fff; font-size: 0.8125rem; font-weight: 700;
 }
-.feed-online span { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 0 2px rgb(74 222 128 / 30%); }
+.feed-online span { width: 8px; height: 8px; border-radius: 50%; background: var(--brand-gold); box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-gold) 35%, transparent); }
 .home-city { display: flex; flex-direction: column; }
 .home-city .field { margin-bottom: 0; }
 .btn-link.locate { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-top: var(--space-1); }
@@ -1338,3 +1346,17 @@ html { scroll-padding-bottom: 7rem; }
 .sheet-body > .field + *, .sheet-body > * + .field { margin-top: var(--space-5); }
 .same-time-title { white-space: nowrap; }
 .plus-page .back-link { display: block; width: fit-content; margin-bottom: var(--space-3); }
+
+/* "Where members are heading" on Trips: a row of popular cities that scrolls sideways. */
+.popular { margin: var(--space-6) 0 var(--space-4); }
+.popular-list { display: flex; gap: var(--space-2); margin: 0 calc(var(--space-4) * -1); padding: 2px var(--space-4) var(--space-2); list-style: none; overflow-x: auto; scroll-snap-type: x proximity; scroll-padding-inline: var(--space-4); scrollbar-width: none; }
+.popular-list::-webkit-scrollbar { display: none; }
+.popular-list li { flex: none; scroll-snap-align: start; }
+.popular-place {
+  display: flex; flex-direction: column; gap: 2px; min-width: 132px; min-height: 76px; padding: var(--space-3) var(--space-4); border-radius: 16px;
+  background: linear-gradient(160deg, var(--brand-disc), color-mix(in srgb, var(--brand-disc) 70%, #000)); color: #fff; text-decoration: none;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-gold) 40%, transparent);
+}
+.popular-place strong { font-size: 1.0625rem; }
+.popular-place span { color: var(--brand-gold); font-size: 0.875rem; font-weight: 700; }
+.popular-place:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }

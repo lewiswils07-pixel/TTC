@@ -38,7 +38,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.getByRole('link', { name: 'Start meeting people' }).click()
     // The tour opens first; look at the first step, then skip it.
     await expect(a.getByRole('heading', { name: 'Meet people one at a time' })).toBeVisible()
-    await a.getByRole('button', { name: 'Skip' }).click()
+    await a.getByRole('button', { name: 'Skip', exact: true }).click()
     // Then, once, the privacy choices.
     await expect(a.getByRole('heading', { name: 'We value your privacy' })).toBeVisible()
     await a.getByRole('button', { name: 'Accept all' }).click()
@@ -61,9 +61,9 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.getByLabel(/Add a note/).fill('Hello! Would you like to see the Musée d’Orsay together?')
     await a.getByRole('button', { name: 'Send request' }).click()
     await expect(a.getByText(/Request sent/)).toBeVisible()
-    // The Connect tab now leads with people going to Paris too.
+    // The Connect tab now leads with people going to Paris too, their trip first on the card.
     await a.goto('/connections')
-    await expect(a.locator('.person-feed-card .callout-trip').first()).toContainText('Paris ·')
+    await expect(a.locator('.person-feed-card .feed-trip').first()).toContainText('Paris ·')
   })
 
   const lewis = await idOf(lewisEmail)
@@ -76,7 +76,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
   await test.step('they accept, and the two chat live', async () => {
     await signIn(b, otherEmail)
     await b.getByRole('button', { name: 'Only what’s needed' }).click()
-    // Requests wait under Chat, with their number on the tab.
+    // Requests wait under Chat, with their number on the Requests tab.
     await b.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: /Chat/ }).click()
     await b.getByRole('navigation', { name: 'Chat' }).getByRole('link', { name: /Requests/ }).click()
     await b.getByRole('button', { name: /Accept/ }).first().click()

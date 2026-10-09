@@ -1,4 +1,4 @@
-// Badge counts for the bottom tab bar: on Chat, unread messages plus requests waiting for an answer.
+// Badge counts: unread messages on the Chat tab, and requests waiting for an answer on the Requests tab inside Chat.
 import { myConversations } from './chat'
 import { myConnections } from './connections'
 
@@ -16,7 +16,7 @@ export async function loadTabCounts(): Promise<Counts> {
   const requests = connections.filter((c) => c.direction === 'received' && c.status === 'pending').length
   const counts = {
     requests,
-    chat: requests + (chats ?? []).reduce((n, c) => n + c.unread, 0),
+    chat: (chats ?? []).reduce((n, c) => n + c.unread, 0),
   }
   cached = { at: Date.now(), counts }
   return counts

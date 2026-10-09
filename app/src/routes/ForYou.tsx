@@ -9,6 +9,7 @@ import { Tour } from '../components/Tour'
 import { FilterButton } from '../components/FilterBar'
 import { ConnectBox, SharedInterests, useRequests, type Requests } from '../components/Suggestions'
 import { loadCard, type CardAnswer } from '../lib/card'
+import { shortDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { stepLink } from '../lib/onboarding'
 import { peek, remember } from '../lib/cache'
@@ -20,6 +21,7 @@ import { ageLabel, INTERESTS_TO_PICK } from '../lib/options'
 import { photoUrl } from '../lib/photo'
 import { roughly } from '../lib/rules'
 import { useSession } from '../lib/session-context'
+import { wishlistOf } from '../lib/trips'
 import { useMyProfile } from '../lib/useMyProfile'
 
 /** The Connect tab: suggested people one at a time, with why they're suggested. */
@@ -219,12 +221,19 @@ function PersonCard({
       )
     }
   }
-  const lines = callouts(person, myHome)
+  // The card leads with where they're going: a trip at the same time as yours if there is one.
+  const lead = sameTime(person) ?? person.trips[0]
+  const leadText = lead ? `${lead.city} · ${shortDates(lead.start, lead.end)}` : null
+  const lines = callouts(person, myHome).filter((c) => c.text !== leadText)
   const x = drag?.x ?? 0
+  const [places, setPlaces] = useState<string[]>([])
 
   useEffect(() => {
     if (person.photo_path) photoUrl(person.photo_path).then(setPhoto, () => undefined)
   }, [person.photo_path])
+  useEffect(() => {
+    wishlistOf(person.profile_id).then(setPlaces)
+  }, [person.profile_id])
 
   function down(e: PointerEvent<HTMLDivElement>) {
     moved.current = 0
@@ -271,15 +280,22 @@ function PersonCard({
                   {person.display_name.slice(0, 1).toUpperCase()}
                 </span>
               )}
-              {x > 40 && <span className="swipe-label swipe-yes">Connect</span>}
-              {x < -40 && <span className="swipe-label swipe-no">Not now</span>}
+              {x > 40 && <span className="swipe-label swipe-yes">Travel together</span>}
+              {x < -40 && <span className="swipe-label swipe-no">Skip</span>}
               <div className="feed-who">
                 {person.online && (
                   <p className="feed-online">
-                    <span aria-hidden="true" /> Recently online
+                    <span aria-hidden="true" /> Active today
                   </p>
                 )}
-                <h2 id={`name-${person.profile_id}`}>
+                {lead && (
+                  <p className={lead.overlap ? 'feed-trip is-same-time' : 'feed-trip'}>
+                    <PlaneIcon />
+                    {leadText}
+                    <span className="visually-hidden">{lead.overlap ? ', same dates as you' : ', close to your dates'}</span>
+                  </p>
+                )}
+                <h2 id={`name-${person.profile_id}`} className={lead ? 'feed-name-small' : undefined}>
                   {person.display_name}
                   {person.birth_year ? <span className="feed-age">, {ageLabel(person.birth_year)}</span> : null}
                 </h2>
@@ -298,6 +314,18 @@ function PersonCard({
               </ul>
             )}
             {person.shared_interests.length > 0 && <SharedInterests labels={person.shared_interests} />}
+            {places.length > 0 && (
+              <div className="shared-interests">
+                <h4>Places I’d love to go</h4>
+                <ul className="chip-list">
+                  {places.map((place) => (
+                    <li key={place} className="tag tag-place">
+                      {place}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {person.travelling_with && <p className="feed-detail">Travels with: {person.travelling_with}</p>}
           </div>
           <section className="feed-face feed-back" inert={!flipped} aria-label={`The back of ${person.display_name}’s card`}>
@@ -328,8 +356,8 @@ function PersonCard({
         <ConnectBox person={person} tripId={person.trip_id ?? undefined} requests={requests} startOpen onSent={onSent} onCancel={() => setConnecting(false)} />
       ) : (
         <div className="feed-actions">
-          <button type="button" className="btn btn-secondary feed-no" onClick={onNotNow} aria-label={`Not now, ${person.display_name}`}>
-            <span aria-hidden="true">✕</span> Not now
+          <button type="button" className="btn btn-secondary feed-no" onClick={onNotNow} aria-label={`Skip ${person.display_name}`}>
+            Skip
           </button>
           <button
             type="button"
@@ -339,14 +367,23 @@ function PersonCard({
               setFlipped(false)
               setConnecting(true)
             }}
-            aria-label={`Ask to connect with ${person.display_name}`}
+            aria-label={`Travel together with ${person.display_name}`}
           >
-            <span aria-hidden="true">✓</span> {requests.left > 0 ? 'Connect' : 'No requests left this week'}
+            {requests.left > 0 ? 'Travel together' : 'No requests left this week'}
           </button>
         </div>
       )}
       <SafetyBox profileId={person.profile_id} name={person.display_name} onBlocked={onBlocked} />
     </article>
+  )
+}
+
+/** A small plane, before the trip on a card. */
+function PlaneIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+      <path d="M21.5 15.5v-2l-8-5V3a1.5 1.5 0 0 0-3 0v5.5l-8 5v2l8-2.5V18.5l-2 1.5v1.5l3.5-1 3.5 1v-1.5l-2-1.5V13l8 2.5Z" fill="currentColor" />
+    </svg>
   )
 }
 

@@ -128,7 +128,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await page.goto('/connections?tour=1')
   await expect(page.getByRole('heading', { name: 'Meet people one at a time' })).toBeVisible()
   issues.push(...(await problems(page, '/connections (tour)')))
-  await page.getByRole('button', { name: 'Skip' }).click()
+  await page.getByRole('button', { name: 'Skip', exact: true }).click()
   await page.getByRole('button', { name: /card over$/ }).click()
   await expect(page.locator('.feed-back')).toBeVisible()
   await page.waitForTimeout(700)
