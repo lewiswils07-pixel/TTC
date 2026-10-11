@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { Fragment, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { AgeRange } from '../components/AgeRange'
 import { CityPicker } from '../components/CityPicker'
@@ -22,7 +22,6 @@ import { firstUnfinishedStep, STEP } from '../lib/onboarding'
 import { rules } from '../lib/rules'
 import {
   DIETS,
-  DRINKING,
   GENDERS,
   MAX_PREF_AGE,
   MIN_AGE,
@@ -31,7 +30,6 @@ import {
   MONTHS,
   HOLIDAY_QUESTIONS,
   PERSONAL_FIELDS,
-  SMOKING,
   STYLE_QUESTIONS,
   type Gender,
   type HolidayPrefs,
@@ -550,8 +548,6 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
   // Your travel style (Lewis, 11 Oct): one answer to each, all optional.
   const [style, setStyle] = useState<StyleAnswers>(() => Object.fromEntries(STYLE_QUESTIONS.map((q) => [q.key, p[q.key] ? [p[q.key]!] : []])) as StyleAnswers)
   const [travellingWith, setTravellingWith] = useState(p.travelling_with ?? '')
-  const [drinking, setDrinking] = useState<string[]>(p.drinking ? [p.drinking] : [])
-  const [smoking, setSmoking] = useState<string[]>(p.smoking ? [p.smoking] : [])
   const [holiday, setHoliday] = useState<HolidayPrefs>(() => more?.holiday_prefs ?? {})
   const [personal, setPersonal] = useState<Pick<More, PersonalField | 'shown_fields'>>(() => ({
     sexuality: more?.sexuality ?? null,
@@ -563,6 +559,10 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
   useEffect(() => {
     myDiet(userId).then(setDiet, () => setDiet([]))
   }, [userId])
+
+  // The holiday questions must be answered (Lewis, 11 Oct).
+  const [tried, setTried] = useState(false)
+  const missingHoliday = more ? HOLIDAY_QUESTIONS.filter((q) => !holiday[q.key]?.length).map((q) => q.key) : []
 
   const { busy, error, submit } = useStepSubmit(async () => {
     const one = (key: keyof StyleAnswers) => (style[key][0] ?? null) as never
@@ -577,8 +577,6 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
         booking: one('booking'),
         group_size: one('group_size'),
         travelling_with: travellingWith.trim() || null,
-        drinking: drinking[0] ?? null,
-        smoking: smoking[0] ?? null,
       },
       prefs,
     )
@@ -590,6 +588,11 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
     <form
       onSubmit={(e) => {
         e.preventDefault()
+        if (missingHoliday.length) {
+          setTried(true)
+          document.querySelector<HTMLInputElement>(`[data-field="holiday-${missingHoliday[0]}"] input`)?.focus()
+          return
+        }
         void submit()
       }}
       noValidate
@@ -612,17 +615,19 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
             </h2>
             <span className="tag tag-plus">{brand.plusName}</span>
           </div>
-          <p className="hint">Pick as many as apply. Members with {brand.plusName} can see these on your card.</p>
+          <p className="hint">More information about your travel interests helps us improve the quality of your matches. Pick as many as apply in each.</p>
           {HOLIDAY_QUESTIONS.map((q) => (
-            <ChipChoice<string>
-              key={q.key}
-              name={`holiday-${q.key}`}
-              legend={q.label}
-              options={q.options}
-              selected={holiday[q.key] ?? []}
-              onChange={(v) => setHoliday((h) => ({ ...h, [q.key]: v.length ? v : undefined }))}
-              multiple
-            />
+            <Fragment key={q.key}>
+              <ChipChoice<string>
+                name={`holiday-${q.key}`}
+                legend={q.label}
+                options={q.options}
+                selected={holiday[q.key] ?? []}
+                onChange={(v) => setHoliday((h) => ({ ...h, [q.key]: v.length ? v : undefined }))}
+                multiple
+              />
+              {tried && missingHoliday.includes(q.key) && <FieldError error="Please choose at least one." />}
+            </Fragment>
           ))}
         </section>
       )}
@@ -631,8 +636,6 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
         <h2 id="personal-heading" className="card-title">
           About you
         </h2>
-        <ChipChoice<string> name="drinking" legend="Drinking" options={DRINKING} selected={drinking} onChange={setDrinking} />
-        <ChipChoice<string> name="smoking" legend="Smoking" options={SMOKING} selected={smoking} onChange={setSmoking} />
         <fieldset className="field" data-field="diet">
           <legend>Food (optional)</legend>
           <div className="chips chips-compact chips-light">

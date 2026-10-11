@@ -127,7 +127,7 @@ export function MemberProfile() {
           )}
         </div>
 
-        {extras && (extras.photo_book.length > 0 || extras.holiday_prefs || extras.holiday_locked || extras.sexuality || extras.religion || extras.ethnicity || extras.drinking || extras.smoking) && (
+        {extras && (extras.photo_book.length > 0 || extras.holiday_prefs || extras.holiday_locked || extras.sexuality || extras.religion || extras.ethnicity) && (
           <section className="card member-extras" aria-label={`More about ${member.display_name}`}>
             <ProfileExtras extras={extras} name={member.display_name} headingLevel={3} />
           </section>

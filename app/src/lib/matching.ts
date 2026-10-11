@@ -56,8 +56,10 @@ export async function tripCompanions(tripId: number): Promise<TripCompanion[]> {
 
 /** Words instead of a number on each card (Lewis, 5 Oct). Thresholds suit
  *  the 0 to 100 score from the database (lowered 11 Oct after the simulation). */
+export const LOTS_IN_COMMON = 55
+
 export function fitWords(score: number): string {
-  if (score >= 55) return 'Lots in common'
+  if (score >= LOTS_IN_COMMON) return 'Lots in common'
   if (score >= 40) return 'Plenty in common'
   return 'Worth a look'
 }

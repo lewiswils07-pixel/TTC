@@ -86,8 +86,6 @@ export function CardPreview() {
               travel_often: profile.travel_often,
               booking: profile.booking,
               group_size: profile.group_size,
-              drinking: profile.drinking,
-              smoking: profile.smoking,
             }}
           />
         )}
