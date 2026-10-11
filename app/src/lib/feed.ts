@@ -105,10 +105,9 @@ export async function recentlyOnline(ids: string[]): Promise<Set<string>> {
   return new Set(error ? [] : ((data ?? []) as string[]))
 }
 
-/** Why this person is in the feed, strongest reason first. Short and plain
- *  (Lewis, 7 Oct): "London", not "Also from London"; a trip is its place and
- *  dates, coloured by whether it's at the same time as yours. */
-export function callouts(p: FeedPerson, myHomeCity: string | null, today?: string): Callout[] {
+/** Why this person is in the feed, strongest reason first: a trip is its place
+ *  and dates, coloured by whether it's at the same time as yours. */
+export function callouts(p: FeedPerson, today?: string): Callout[] {
   const lines: Callout[] = p.trips.map((t) =>
     // Exact dates are Sodalis+ (Lewis, 11 Oct): others see the month.
     !t.exact
@@ -121,11 +120,12 @@ export function callouts(p: FeedPerson, myHomeCity: string | null, today?: strin
   )
   // Kept general on purpose (Lewis, 5 Oct): the card lists the interests themselves.
   if (p.shared_interests.length >= SIMILAR_INTERESTS) lines.push({ kind: 'interests', text: 'Similar interests' })
-  // Their town is already on the photo (Lewis, 11 Oct), so only say when they're nearby but elsewhere.
-  if (p.distance_km !== null && p.distance_km < 30 && p.home_city !== myHomeCity) lines.push({ kind: 'home', text: 'Near you' })
   if (p.shared_places.length) lines.push({ kind: 'places', text: `Wants to visit ${listLabels(p.shared_places)}` })
   return lines
 }
+
+/** Lives within 30 km but not in your town (their town is already on the photo). Shown as a badge on the photo (Lewis, 11 Oct). */
+export const nearYou = (p: FeedPerson, myHomeCity: string | null) => p.distance_km !== null && p.distance_km < 30 && p.home_city !== myHomeCity
 
 function union(a: string[], b: string[]): string[] {
   return [...new Set([...a, ...b])]

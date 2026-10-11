@@ -659,8 +659,9 @@ legend { padding: 0; }
 .feed-who h2.feed-name-small { font-size: 1.125rem; font-weight: 700; }
 .feed-name-small .feed-age { font-weight: 400; }
 .feed-who p { margin: 2px 0 0; color: rgb(255 255 255 / 88%); }
+.feed-badges { position: absolute; top: var(--space-3); left: var(--space-3); right: var(--space-3); display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none; }
 .feed-fit {
-  position: absolute; top: var(--space-3); left: var(--space-3); padding: 4px 12px; border-radius: 999px;
+  padding: 4px 12px; border-radius: 999px;
   background: color-mix(in srgb, var(--card) 92%, transparent); color: var(--accent-deep, var(--accent)); font-weight: 800; font-size: 0.8125rem;
 }
 .swipe-label {

@@ -14,10 +14,10 @@ import { shortDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { stepLink } from '../lib/onboarding'
 import { peek, remember } from '../lib/cache'
-import { callouts, clearNotNow, NOT_NOW_DAYS, sameTime, forgetNotNow, loadFeed, notNowIds, saveNotNow, skipMember, skippedCount, unskipAll, unskipMember, type FeedPerson } from '../lib/feed'
+import { callouts, clearNotNow, nearYou, NOT_NOW_DAYS, sameTime, forgetNotNow, loadFeed, notNowIds, saveNotNow, skipMember, skippedCount, unskipAll, unskipMember, type FeedPerson } from '../lib/feed'
 import { noteFirstMatch } from '../lib/kpis'
 import { requestsLeftText } from '../lib/plan'
-import { fitWords, homeLabel } from '../lib/matching'
+import { LOTS_IN_COMMON, fitWords, homeLabel } from '../lib/matching'
 import { ageLabel, INTERESTS_TO_PICK } from '../lib/options'
 import { preloadPhotos, usePhotoUrl } from '../lib/photo'
 import { roughly } from '../lib/rules'
@@ -229,7 +229,7 @@ function PersonCard({
   // The card leads with where they're going: a trip at the same time as yours if there is one.
   const lead = sameTime(person) ?? person.trips[0]
   const leadText = lead ? `${lead.city} · ${shortDates(lead.start, lead.end)}` : null
-  const lines = callouts(person, myHome).filter((c) => c.text !== leadText)
+  const lines = callouts(person).filter((c) => c.text !== leadText)
   const x = drag?.x ?? 0
   const [places, setPlaces] = useState<string[]>([])
 
@@ -308,7 +308,13 @@ function PersonCard({
                 </h2>
                 {home && <p>{home}</p>}
               </div>
-              <span className="feed-fit">{fitWords(person.score)}</span>
+              {/* Top left: only the strongest signals (Lewis, 11 Oct). */}
+              {(person.score >= LOTS_IN_COMMON || nearYou(person, myHome)) && (
+                <div className="feed-badges">
+                  {person.score >= LOTS_IN_COMMON && <span className="feed-fit">{fitWords(person.score)}</span>}
+                  {nearYou(person, myHome) && <span className="feed-fit">Near you</span>}
+                </div>
+              )}
             </div>
             {lines.length > 0 && (
               <ul className="callouts" aria-label="Why we suggest them">
