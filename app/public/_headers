@@ -1,7 +1,7 @@
 # Security and caching headers for every page of the members app. Cloudflare
 # Pages reads this file from the built site. This is the one place these live.
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://uibywuqdbkubqqumwzuw.supabase.co; font-src 'self'; connect-src 'self' https://uibywuqdbkubqqumwzuw.supabase.co wss://uibywuqdbkubqqumwzuw.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://uibywuqdbkubqqumwzuw.supabase.co https://tile.openstreetmap.org; font-src 'self'; connect-src 'self' https://uibywuqdbkubqqumwzuw.supabase.co wss://uibywuqdbkubqqumwzuw.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin

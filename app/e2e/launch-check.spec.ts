@@ -26,7 +26,11 @@ async function problems(page: Page, name: string): Promise<string[]> {
     // @ts-expect-error axe is added to the page above
     const result = await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] } })
     return result.violations.map(
-      (v: { id: string; help: string; nodes: { target: string[] }[] }) => `${v.id}: ${v.help} [${v.nodes.map((n) => n.target.join(' ')).slice(0, 3).join(' | ')}]`,
+      (v: { id: string; help: string; nodes: { target: string[] }[] }) =>
+        `${v.id}: ${v.help} [${v.nodes
+          .map((n) => n.target.join(' '))
+          .slice(0, 3)
+          .join(' | ')}]`,
     )
   })
   await page.setViewportSize({ width: 320, height: 640 })
@@ -75,7 +79,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await choose(page, /^Day/, '2')
   await choose(page, /^Month/, 'May')
   await page.getByLabel('Year').fill('1962')
-  await page.getByRole('radio', { name: 'Woman', exact: true }).check({ force: true })
+  await choose(page, 'Gender', 'Woman')
   await pickPlace(page, 'Leed', 'Leeds, United Kingdom')
   await page.getByRole('button', { name: /continue/i }).click()
   await expect(page.getByText(/Step 2 of 4/)).toBeVisible()
@@ -89,7 +93,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
     await page.getByRole('checkbox', { name, exact: true }).evaluate((el: HTMLElement) => el.click())
   }
   // At the limit: a notice, and a nudge when trying to pick a ninth.
-  await expect(page.getByText(/That’s all 8 picked/)).toBeVisible()
+  await expect(page.getByText(/You’ve selected 8 of 8 interests/)).toBeVisible()
   await page.getByRole('checkbox', { name: 'Art galleries', exact: true }).evaluate((el: HTMLElement) => el.click())
   await expect(page.getByRole('alert').filter({ hasText: 'You’ve already picked 8' })).toBeVisible()
   await expect(page.getByRole('checkbox', { name: 'Art galleries', exact: true })).not.toBeChecked()
@@ -106,8 +110,16 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
 
   // Someone she's connected with, and someone waiting for an answer
   const me = await idOf(email)
-  for (const n of [1, 2]) await admin.from('profiles').update({ photo_path: `${demo(n)}/demo.jpg` }).eq('id', demo(n))
-  const { data: made } = await admin.from('connections').insert({ requester_id: demo(1), addressee_id: me, note: 'Hello!' }).select('id').single()
+  for (const n of [1, 2])
+    await admin
+      .from('profiles')
+      .update({ photo_path: `${demo(n)}/demo.jpg` })
+      .eq('id', demo(n))
+  const { data: made } = await admin
+    .from('connections')
+    .insert({ requester_id: demo(1), addressee_id: me, note: 'Hello!' })
+    .select('id')
+    .single()
   await admin.from('connections').update({ status: 'accepted', responded_at: new Date().toISOString() }).eq('id', made!.id)
   await admin.from('connections').insert({ requester_id: demo(2), addressee_id: me, note: 'Fancy Lisbon?' })
   const { data: chat } = await admin.from('conversations').select('id').eq('connection_id', made!.id).single()
@@ -137,19 +149,29 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await visit(page, '/requests', 'Chat', issues)
   await visit(page, '/messages', 'Chat', issues)
   // A connection's full profile, from Other connections on Chats.
-  await page.getByRole('link', { name: /^View .+’s profile$/ }).first().click()
+  await page
+    .getByRole('link', { name: /^View .+’s profile$/ })
+    .first()
+    .click()
   await expect(page.getByRole('heading', { name: 'In their own words' })).toBeVisible()
   await page.waitForLoadState('networkidle')
   issues.push(...(await problems(page, '/connections/people/:id')))
   await visit(page, '/trips', /./, issues)
   await visit(page, '/trips/new', /./, issues)
-  const { data: trip } = await admin.from('trips').insert({ owner_id: me, city_id: 2267057, start_date: isoIn(30), end_date: isoIn(34) }).select('id').single()
+  const { data: trip } = await admin
+    .from('trips')
+    .insert({ owner_id: me, city_id: 2267057, start_date: isoIn(30), end_date: isoIn(34) })
+    .select('id')
+    .single()
   await admin.from('city_reviews').insert({ profile_id: demo(2), city_id: 2267057, rating: 5, body: 'Take the tram early, before the crowds.' })
   await visit(page, `/trips/${trip!.id}`, /Lisbon/, issues)
   // Your own plan: add one of our picks and an idea of your own.
   await page.getByRole('tab', { name: 'My plan' }).click()
   await expect(page.getByRole('heading', { name: 'Things to do in Lisbon' })).toBeVisible()
-  await page.getByRole('button', { name: /^Add to the plan: / }).first().click()
+  await page
+    .getByRole('button', { name: /^Add to the plan: / })
+    .first()
+    .click()
   await expect(page.getByText('✓ On the plan')).toBeVisible()
   await page.getByLabel('Add something to do').fill('Sunset at a miradouro')
   await choose(page, /^Day/, /^Day 2/)
@@ -163,7 +185,10 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await expect(page.getByText('Take the tram early, before the crowds.')).toBeVisible()
   await expect(page.getByText(/You can add your own review once your trip starts/)).toBeVisible()
   // Once the trip has started, she can add her own.
-  await admin.from('trips').update({ start_date: isoIn(0) }).eq('id', trip!.id)
+  await admin
+    .from('trips')
+    .update({ start_date: isoIn(0) })
+    .eq('id', trip!.id)
   await page.reload()
   await page.getByRole('tab', { name: 'Reviews' }).click()
   await page.getByRole('button', { name: 'Post review' }).click()
@@ -175,7 +200,10 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await expect(page.locator('.review-average')).toHaveText('4.5')
   issues.push(...(await problems(page, '/trips/:id?tab=reviews')))
   // Someone going to Lisbon at the same time shows in the "Trips in common" tile.
-  await admin.from('profiles').update({ photo_path: `${demo(3)}/demo.jpg`, last_active_at: new Date().toISOString() }).eq('id', demo(3))
+  await admin
+    .from('profiles')
+    .update({ photo_path: `${demo(3)}/demo.jpg`, last_active_at: new Date().toISOString() })
+    .eq('id', demo(3))
   await admin.from('trips').insert({ owner_id: demo(3), city_id: 2267057, start_date: isoIn(31), end_date: isoIn(33) })
   await visit(page, '/connections', 'Connect', issues)
   await page.getByRole('link', { name: /Trips in common/ }).click()
@@ -191,7 +219,10 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   issues.push(...(await problems(page, '/messages/:id (menu open)')))
   await visit(page, `/messages/${chat!.id}/plan`, /./, issues)
   await choose(page, 'See our picks for a city', 'Lisbon')
-  await page.getByRole('button', { name: /^Add to the plan: / }).first().click()
+  await page
+    .getByRole('button', { name: /^Add to the plan: / })
+    .first()
+    .click()
   await expect(page.getByText('✓ On the plan')).toBeVisible()
   issues.push(...(await problems(page, '/messages/:id/plan (with city picks)')))
   await visit(page, `/messages/${chat!.id}/share`, 'Tell someone you trust', issues)
@@ -211,7 +242,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await visit(page, '/onboarding?step=4', 'The back of your card', issues)
   await visit(page, '/onboarding?step=5', 'How you travel', issues)
   await visit(page, '/admin', /./, issues)
-  await visit(page, '/admin/insights', /./, issues)
+  await visit(page, '/company', /./, issues)
 
   // The trusted contact's page
   await page.goto(`/messages/${chat!.id}/share`)

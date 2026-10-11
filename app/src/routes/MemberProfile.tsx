@@ -3,12 +3,13 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { CardBack } from '../components/CardBack'
 import { Layout, Loading } from '../components/Layout'
 import { SafetyBox } from '../components/SafetyBox'
+import { ProfileExtras } from '../components/ProfileExtras'
 import { myConversations } from '../lib/chat'
 import { messageOf } from '../lib/errors'
 import { homeLabel } from '../lib/matching'
-import { loadMemberProfile, type MemberProfile as Member } from '../lib/member'
-import { BUDGETS, DAY_RHYTHMS, DIETS, LANGUAGES, PACES, ROOM_SHARING, TRAVEL_STYLES, WALKING, ageLabel, labelFor } from '../lib/options'
-import { photoUrl } from '../lib/photo'
+import { loadExtras, loadMemberProfile, type MemberExtras, type MemberProfile as Member } from '../lib/member'
+import { BUDGETS, DAY_RHYTHMS, DIETS, LANGUAGES, PACES, ROOM_SHARING, WALKING, ageLabel, labelFor } from '../lib/options'
+import { usePhotoUrl } from '../lib/photo'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
 
@@ -20,17 +21,18 @@ export function MemberProfile() {
   const mine = useMyProfile(session!.user.id).data
   const [member, setMember] = useState<Member | null | undefined>(undefined)
   const [chatId, setChatId] = useState<number | null>(null)
-  const [photo, setPhoto] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const heading = useRef<HTMLHeadingElement>(null)
+  const photo = usePhotoUrl(member?.photo_path)
+  const [extras, setExtras] = useState<MemberExtras | null>(null)
+  useEffect(() => {
+    loadExtras(id).then(setExtras)
+  }, [id])
   const canGoBack = typeof window !== 'undefined' && window.history.length > 1
 
   useEffect(() => {
     loadMemberProfile(id).then(
-      (m) => {
-        setMember(m)
-        if (m?.photo_path) photoUrl(m.photo_path).then(setPhoto, () => undefined)
-      },
+      (m) => setMember(m),
       (e) => setError(messageOf(e)),
     )
     myConversations().then(
@@ -80,7 +82,6 @@ export function MemberProfile() {
   const myIds = new Set(mine?.interestIds ?? [])
   const shared = member.interests.filter((i) => myIds.has(i.id)).length
   const travel = [
-    ['Plans', labelFor(TRAVEL_STYLES, member.travel_style)],
     ['Pace', labelFor(PACES, member.pace)],
     ['Budget', labelFor(BUDGETS, member.budget)],
     ['Rooms', labelFor(ROOM_SHARING, member.room_sharing)],
@@ -123,6 +124,12 @@ export function MemberProfile() {
             </Link>
           )}
         </div>
+
+        {extras && (extras.photo_book.length > 0 || extras.holiday_prefs || extras.holiday_locked || extras.sexuality || extras.religion || extras.ethnicity) && (
+          <section className="card member-extras" aria-label={`More about ${member.display_name}`}>
+            <ProfileExtras extras={extras} name={member.display_name} headingLevel={3} />
+          </section>
+        )}
 
         {member.bio && (
           <section className="card" aria-labelledby="member-about">
@@ -191,11 +198,7 @@ export function MemberProfile() {
           </section>
         )}
 
-        {member.connected_at && (
-          <p className="hint member-since">
-            Connected since {new Date(member.connected_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-          </p>
-        )}
+        {member.connected_at && <p className="hint member-since">Connected since {new Date(member.connected_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>}
         <SafetyBox profileId={member.profile_id} name={member.display_name} onBlocked={(message) => navigate('/messages', { state: { message } })} />
       </article>
     </Layout>

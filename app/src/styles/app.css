@@ -1377,3 +1377,131 @@ html { scroll-padding-bottom: 7rem; }
 .topbar + .main > .chat { min-height: calc(100dvh - var(--safe-top) - 61px - var(--space-6)); }
 .no-topbar .chat-head { top: var(--safe-top); }
 .composer { margin-top: auto; }
+
+/* ------------------------------------------------ Lewis's 11 Oct list */
+/* Light, compact chips (holiday preferences, languages, food, pace and budget). */
+.chips-light .chip span { min-height: 38px; padding: 0 12px; border-width: 1px; font-size: 0.9375rem; font-weight: 500; }
+.chips-light .chip input:checked + span { background: color-mix(in srgb, var(--accent) 10%, var(--card)); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.chip-choice legend { font-size: var(--text-sm); }
+.chip-choice + .chip-choice { margin-top: calc(var(--space-2) * -1); }
+
+/* "I'm interested in": a row each, with the tick on the right (like Hinge). */
+.check-rows { gap: 0; }
+.check-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 52px; border-bottom: 1px solid var(--line); cursor: pointer; font-weight: 600; }
+.check-row:last-of-type { border-bottom: 0; }
+.check-row input { width: 22px; height: 22px; margin: 0; accent-color: var(--accent); cursor: pointer; flex: none; }
+
+/* Filters as rows: label, current setting, chevron; tap to open. */
+.filter-rows { display: flex; flex-direction: column; }
+.filter-group { display: flex; align-items: center; gap: var(--space-2); margin: var(--space-4) 0 var(--space-1); font-size: 0.8125rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.filter-group:first-child { margin-top: 0; }
+.filter-group h3 { margin: 0; font: inherit; }
+.filter-row { border-bottom: 1px solid var(--line); }
+.filter-row-head {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--space-3); width: 100%; min-height: 56px; padding: 0;
+  border: 0; background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer;
+}
+.filter-row-label { font-weight: 700; }
+.filter-row-value { color: var(--ink-soft); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.filter-row-head svg { color: var(--muted); transition: transform 0.2s var(--ease-out); }
+.filter-row.is-open .filter-row-head svg { transform: rotate(90deg); }
+.filter-row-head:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; border-radius: var(--radius-sm); }
+.filter-row-body { padding: 0 0 var(--space-4); }
+/* The row already names the setting. */
+.filter-row-body legend, .filter-row-body .field > label:first-child { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Home town map under the distance slider. */
+.home-map { margin: var(--space-3) 0 0; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); background: var(--card); }
+.home-map-tiles { position: relative; height: 200px; overflow: hidden; background: color-mix(in srgb, var(--ink) 6%, var(--card)); }
+.home-map-tiles img { position: absolute; width: 256px; height: 256px; max-width: none; }
+.home-map-circle {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 16%, transparent); border: 2px solid var(--accent); transition: width 0.25s var(--ease-out), height 0.25s var(--ease-out);
+}
+.home-map-pin { position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--card); }
+.home-map figcaption { display: flex; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) var(--space-3); font-weight: 600; font-size: var(--text-sm); }
+.home-map figcaption small { color: var(--muted); font-weight: 500; }
+
+/* Interests: a count, then categories with Show more. */
+.interest-count { margin: 0; color: var(--ink-soft); }
+.interest-count strong { color: var(--accent); }
+.interest-count.is-full strong { color: var(--accent); }
+.interest-more { margin-top: var(--space-3); }
+.interest-pool .interest-type { padding: 0; margin-bottom: var(--space-3); font-weight: 800; }
+
+/* Holiday preferences and personal details on cards and profiles. */
+.holiday-chips .tag-pref { gap: 6px; background: var(--card); border: 1px solid var(--line); font-weight: 600; }
+.holiday-chips .tag-pref span { color: var(--muted); font-weight: 500; font-size: 0.8125rem; }
+.personal-tags { margin-top: var(--space-3); }
+.plus-teaser {
+  display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-3); padding: var(--space-3); border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--brand-gold) 12%, var(--card)); border: 1px dashed color-mix(in srgb, var(--brand-gold) 60%, transparent); color: var(--ink); font-weight: 600; text-decoration: none;
+}
+.plus-teaser:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.member-extras .shared-interests + .shared-interests { margin-top: var(--space-4); }
+.personal-field { display: flex; flex-direction: column; gap: var(--space-2); }
+.personal-field .switch-row { margin-bottom: var(--space-2); }
+
+/* Photo book: a row of photos on cards and profiles, and a grid to edit. */
+.photo-book-strip { list-style: none; display: flex; gap: var(--space-2); margin: 0; padding: 0 0 var(--space-1); overflow-x: auto; scroll-snap-type: x mandatory; }
+.photo-book-strip li { flex: none; scroll-snap-align: start; }
+.photo-book-strip button { display: block; width: 96px; aspect-ratio: 3 / 4; padding: 0; border: 0; border-radius: var(--radius-sm); overflow: hidden; background: var(--line); cursor: zoom-in; }
+.photo-book-strip button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.photo-book-strip img, .photo-book-grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-book-strip .skeleton, .photo-book-grid .skeleton { width: 100%; height: 100%; border-radius: 0; }
+.photo-book-grid { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); margin: 0; padding: 0; }
+.photo-book-grid li { position: relative; aspect-ratio: 3 / 4; border-radius: var(--radius-sm); overflow: hidden; background: var(--line); }
+.photo-book-remove {
+  position: absolute; top: 6px; right: 6px; width: 32px; height: 32px; border-radius: 50%; border: 0; background: rgb(0 0 0 / 60%); color: #fff;
+  font-size: 1.25rem; line-height: 1; cursor: pointer;
+}
+.photo-book-remove:focus-visible { outline: 3px solid var(--paper); outline-offset: 1px; }
+.photo-book-add {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: 100%; height: 100%; cursor: pointer;
+  border: 1.5px dashed var(--line); border-radius: var(--radius-sm); background: var(--card); color: var(--accent); font-weight: 700; font-size: var(--text-sm);
+}
+.photo-book-add span { font-size: 1.75rem; line-height: 1; }
+.photo-book-add:focus-within { outline: 3px solid var(--ink); outline-offset: 2px; }
+.photo-viewer { width: min(92vw, 520px); max-height: 92dvh; padding: var(--space-3); border: 0; border-radius: var(--radius-lg); background: var(--card); color: var(--ink); }
+.photo-viewer::backdrop { background: rgb(0 0 0 / 70%); }
+.photo-viewer img, .photo-viewer .skeleton { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: var(--radius); display: block; }
+.photo-viewer-count { margin: var(--space-2) 0; text-align: center; color: var(--muted); font-size: var(--text-sm); }
+.photo-viewer-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
+
+/* ------------------------------------------------ company dashboard: its own screen, not the members' app */
+.company { min-height: 100dvh; background: #f4f2ef; color: #1f1d1b; }
+.company-denied { display: grid; place-content: center; gap: var(--space-3); padding: var(--space-6); text-align: center; }
+.company-top {
+  position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+  padding: calc(var(--safe-top) + var(--space-3)) var(--space-5) var(--space-3); background: #1f1d1b; color: #fff;
+}
+.company-brand { display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-sm); }
+.company-brand img { border-radius: 8px; }
+.company-brand strong { display: block; color: var(--brand-gold); font-size: 1rem; }
+.company-exit { color: #fff; font-weight: 600; font-size: var(--text-sm); }
+.company-body { display: grid; grid-template-columns: 1fr; }
+.company-nav { display: flex; gap: var(--space-1); padding: var(--space-2) var(--space-4); overflow-x: auto; background: #fff; border-bottom: 1px solid #e4e0db; }
+.company-nav button {
+  flex: none; min-height: 40px; padding: 0 var(--space-3); border: 0; border-radius: 999px; background: none; color: #5b5550; font: inherit; font-weight: 600; cursor: pointer;
+}
+.company-nav button[aria-current='page'] { background: #1f1d1b; color: #fff; }
+.company-nav button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.company-main { padding: var(--space-5) var(--space-4) var(--space-7); max-width: 1200px; width: 100%; margin: 0 auto; }
+.company-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); }
+.company-head h1 { margin: 0; font-size: var(--text-2xl); }
+.company-period { margin: 0; min-width: 260px; }
+.company-kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+.company-charts { display: grid; grid-template-columns: 1fr; gap: var(--space-3); margin-top: var(--space-3); }
+.company .card, .company .kpi-wide { background: #fff; border: 1px solid #e4e0db; border-radius: 16px; box-shadow: none; }
+.company .kpi-section:first-of-type { margin-top: 0; }
+.company .section-title { font-size: var(--text-lg); }
+.company-foot { margin-top: var(--space-6); color: #8a827b; font-size: 0.8125rem; }
+@media (min-width: 760px) {
+  .company-body { grid-template-columns: 220px 1fr; min-height: calc(100dvh - 64px); }
+  .company-nav { flex-direction: column; gap: var(--space-1); padding: var(--space-5) var(--space-3); border-bottom: 0; border-right: 1px solid #e4e0db; overflow: visible; }
+  .company-nav button { text-align: left; border-radius: 10px; }
+  .company-main { padding: var(--space-6); }
+  .company-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .company-charts { grid-template-columns: 1fr 1fr; }
+  .company .kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}

@@ -13,7 +13,7 @@ import { noteFirstMatch } from '../lib/kpis'
 import { homeLabel, reasons, suggestForTrip, tripCompanions, type TripCompanion, type TripSuggestion } from '../lib/matching'
 import { ageLabel } from '../lib/options'
 import { Avatar } from '../components/Avatar'
-import { flexibilityLabel, getTrip, type Trip } from '../lib/trips'
+import { getTrip, type Trip } from '../lib/trips'
 
 type Tab = 'people' | 'plan' | 'reviews'
 const TABS: { key: Tab; label: string }[] = [
@@ -64,7 +64,6 @@ export function TripMatches() {
   }
   if (!trip || !people || !requests) return <Loading />
 
-  const flex = flexibilityLabel(trip.flexible_days)
   const picks = picksFor(trip.city_id)
   return (
     <Layout>
@@ -78,7 +77,6 @@ export function TripMatches() {
       <div className="trip-summary">
         <p className="lede">
           {tripDates(trip.start_date, trip.end_date)}
-          {flex && ` · ${flex}`}
           {trip.visibility === 'hidden' && ' · Hidden from suggestions'}
         </p>
         <Link className="btn btn-secondary btn-small" to={`/trips/${trip.id}/edit`}>
@@ -155,7 +153,7 @@ export function TripMatches() {
                   ) : (
                     <>
                       <p>No one yet. As members add trips to {trip.city.name} around your dates, they’ll appear here, best match first.</p>
-                      <p className="hint">Making your dates more flexible can help. Tap Edit trip to change them.</p>
+                      <p className="hint">Changing your dates can help. Tap Edit trip to change them.</p>
                     </>
                   )}
                 </div>

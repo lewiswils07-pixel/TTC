@@ -1,4 +1,4 @@
--- Written by `npm run rules` from app/rules.json. Don't edit by hand.
+-- The club's rules changed in app/rules.json.
 insert into private.rules (key, value) values
   ('signIn.codeLength', 6),
   ('signIn.passwordMin', 8),

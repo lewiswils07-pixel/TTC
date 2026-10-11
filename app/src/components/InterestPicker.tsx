@@ -1,6 +1,5 @@
 import { useEffect, useId, useMemo, useState } from 'react'
 import type { Interest } from '../lib/profile'
-import { shuffled } from '../lib/shuffle'
 import { FieldError } from './Field'
 
 type Props = {
@@ -35,31 +34,22 @@ const ALSO: Record<string, string[]> = {
   sewing: ['crafts', 'knitting'],
 }
 
+/** Interests shown in each group before “Show more”. */
+const SHOWN = 8
+
 function matches(i: Interest, q: string): boolean {
   if (fold(i.label).includes(q) || i.slug.includes(q) || (i.category_label && fold(i.category_label).includes(q))) return true
   return Object.entries(ALSO).some(([word, slugs]) => word.startsWith(q) && q.length >= 3 && slugs.includes(i.slug))
 }
 
-/** The same mixed order every time, so chips don't jump between visits (testers). */
-function seeded(seed: number): () => number {
-  let a = seed
-  return () => {
-    a = (a + 0x6d2b79f5) | 0
-    let t = Math.imul(a ^ (a >>> 15), 1 | a)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
-
-/** One mixed list of interests with a search box. Each chip shows + until it's picked, then ✓. */
+/** Interests grouped by category, each showing a few with “Show more”, and a
+ *  search box (Lewis, 11 Oct, like Tinder). Each chip shows + until it's picked, then ✓. */
 export function InterestPicker({ interests, selected, onChange, max, error }: Props) {
   const id = useId()
   const [query, setQuery] = useState('')
-  const [byType, setByType] = useState(false)
-  // One mixed list (Lewis, 6 Oct), in the same order every time.
-  const mixed = useMemo(() => shuffled(interests, seeded(7)), [interests])
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const q = fold(query.trim())
-  const visible = q ? mixed.filter((i) => matches(i, q)) : mixed
+  const visible = q ? interests.filter((i) => matches(i, q)) : interests
   const types = useMemo(() => {
     const groups = new Map<string, Interest[]>()
     for (const i of interests) {
@@ -127,41 +117,45 @@ export function InterestPicker({ interests, selected, onChange, max, error }: Pr
         </section>
       )}
 
+      <p className={atMax ? 'interest-count is-full' : 'interest-count'} role="status">
+        You’ve selected <strong>{selected.length}</strong> of {max} interests
+      </p>
       <FieldError error={error} />
-      {atMax && (
-        <p className="interest-limit" role="status">
-          <span aria-hidden="true">✓</span> That’s all {max} picked. To choose a different one, remove one of your picks above first.
-        </p>
-      )}
       {nudge > 0 && (
         <p key={nudge} className="interest-limit-toast" role="alert">
           You’ve already picked {max}. Remove one of your picks to choose this one.
         </p>
       )}
 
-      <div className="interest-view" role="group" aria-label="Show interests">
-        <button type="button" className={byType ? 'pill' : 'pill is-on'} aria-pressed={!byType} onClick={() => setByType(false)}>
-          Mixed
-        </button>
-        <button type="button" className={byType ? 'pill is-on' : 'pill'} aria-pressed={byType} onClick={() => setByType(true)}>
-          By type
-        </button>
-      </div>
-
       {visible.length === 0 ? (
         <p className="hint">No interests match “{query}”.</p>
-      ) : byType && !q ? (
-        types.map(([type, list]) => (
-          <fieldset className="interest-pool" key={type}>
-            <legend className="interest-type">{type}</legend>
-            <div className="chips chips-compact">{list.map(chip)}</div>
-          </fieldset>
-        ))
-      ) : (
+      ) : q ? (
         <fieldset className="interest-pool">
           <legend className="visually-hidden">Interests</legend>
           <div className="chips chips-compact">{visible.map(chip)}</div>
         </fieldset>
+      ) : (
+        types.map(([type, list]) => {
+          const open = expanded.has(type)
+          // Picks always show, even in a closed group.
+          const shown = open ? list : list.filter((i, n) => n < SHOWN || selected.includes(i.id))
+          return (
+            <fieldset className="interest-pool" key={type}>
+              <legend className="interest-type">{type}</legend>
+              <div className="chips chips-compact">{shown.map(chip)}</div>
+              {list.length > SHOWN && (
+                <button
+                  type="button"
+                  className="btn-link interest-more"
+                  aria-expanded={open}
+                  onClick={() => setExpanded((e) => (open ? new Set([...e].filter((t) => t !== type)) : new Set([...e, type])))}
+                >
+                  {open ? 'Show less' : `Show ${list.length - shown.length} more`}
+                </button>
+              )}
+            </fieldset>
+          )
+        })
       )}
     </div>
   )

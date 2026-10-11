@@ -8,7 +8,7 @@
   "wishlist": { "max": 10 },
   "age": { "min": 18, "maxPreferred": 99 },
   "card": { "answers": 3, "maxWords": 30, "maxChars": 200 },
-  "profile": { "nameMax": 40, "bioMax": 500, "mobilityNoteMax": 200, "travellingWithMax": 80, "languagesMax": 10 },
+  "profile": { "nameMax": 40, "bioMax": 500, "mobilityNoteMax": 200, "travellingWithMax": 80, "languagesMax": 10, "photoBookMax": 6 },
   "connections": { "noteMax": 280, "notNowDays": 30, "recentlyOnlineHours": 24 },
   "chat": { "messageMax": 2000 },
   "planBoard": { "ideaMax": 120, "linkMax": 500, "maxIdeas": 100, "maxDay": 91 },
@@ -28,6 +28,21 @@
     "roomSharing": ["share", "unsure", "separate"],
     "dayRhythm": ["early", "either", "late"],
     "walking": ["gentle", "moderate", "lots"],
-    "diet": ["vegetarian", "vegan", "pescatarian", "halal", "kosher", "gluten-free", "dairy-free"]
+    "diet": ["vegetarian", "vegan", "pescatarian", "halal", "kosher", "gluten-free", "dairy-free"],
+    "sexuality": ["straight", "gay", "lesbian", "bisexual", "pansexual", "asexual", "demisexual", "queer", "questioning", "another"],
+    "religion": ["agnostic", "atheist", "buddhist", "catholic", "christian", "hindu", "jewish", "muslim", "sikh", "spiritual", "another"],
+    "ethnicity": ["black", "east_asian", "hispanic", "middle_eastern", "mixed", "pacific_islander", "south_asian", "southeast_asian", "white", "another"],
+    "holiday": {
+      "planning": ["planner", "mix", "spontaneous"],
+      "stay": ["hotel", "apartment", "bnb", "resort", "hostel", "camping"],
+      "transport": ["fly", "train", "drive", "ferry", "coach"],
+      "length": ["weekend", "week", "fortnight", "longer"],
+      "season": ["spring", "summer", "autumn", "winter", "any"],
+      "packing": ["light", "case", "everything"],
+      "evenings": ["early", "dinner", "late"],
+      "drinking": ["none", "sometimes", "socially", "often"],
+      "smoking": ["no", "social", "yes"],
+      "photos": ["lots", "few", "rarely"]
+    }
   }
 }

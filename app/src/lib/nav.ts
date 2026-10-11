@@ -8,5 +8,5 @@ export const CHAT_NAV = [
 
 export const ADMIN_NAV = [
   { to: '/admin', label: 'Reports' },
-  { to: '/admin/insights', label: 'Insights' },
+  { to: '/company', label: 'Company dashboard' },
 ]

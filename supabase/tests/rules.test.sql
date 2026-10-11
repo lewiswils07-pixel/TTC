@@ -1,7 +1,7 @@
 -- Written by `npm run rules` from app/rules.json. Don't edit by hand.
 -- Fails when the database's rules differ from the app's.
 begin;
-select plan(93);
+select plan(108);
 select is(private.rule('signIn.codeLength'), 6, 'signIn.codeLength is 6, as in rules.json');
 select is(private.rule('signIn.passwordMin'), 8, 'signIn.passwordMin is 8, as in rules.json');
 select is(private.rule('signIn.passwordMax'), 72, 'signIn.passwordMax is 72, as in rules.json');
@@ -31,6 +31,7 @@ select is(private.rule('profile.bioMax'), 500, 'profile.bioMax is 500, as in rul
 select is(private.rule('profile.mobilityNoteMax'), 200, 'profile.mobilityNoteMax is 200, as in rules.json');
 select is(private.rule('profile.travellingWithMax'), 80, 'profile.travellingWithMax is 80, as in rules.json');
 select is(private.rule('profile.languagesMax'), 10, 'profile.languagesMax is 10, as in rules.json');
+select is(private.rule('profile.photoBookMax'), 6, 'profile.photoBookMax is 6, as in rules.json');
 select is(private.rule('connections.noteMax'), 280, 'connections.noteMax is 280, as in rules.json');
 select is(private.rule('connections.notNowDays'), 30, 'connections.notNowDays is 30, as in rules.json');
 select is(private.rule('connections.recentlyOnlineHours'), 24, 'connections.recentlyOnlineHours is 24, as in rules.json');
@@ -52,7 +53,7 @@ select is(private.rule('survey.heardFromAfterMinutes'), 30, 'survey.heardFromAft
 select is(private.rule('founding.plusMonths'), 3, 'founding.plusMonths is 3, as in rules.json');
 select is(private.rule('matching.maxSuggestions'), 100, 'matching.maxSuggestions is 100, as in rules.json');
 select is(private.rule('plus.pricePencePerMonth'), 599, 'plus.pricePencePerMonth is 599, as in rules.json');
-select is((select count(*)::int from private.rules), 50, 'no rules beyond rules.json');
+select is((select count(*)::int from private.rules), 51, 'no rules beyond rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_display_name_check'), '<= 40') > 0, 'profiles_display_name_check uses profile.nameMax (40)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_bio_check'), '<= 500') > 0, 'profiles_bio_check uses profile.bioMax (500)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_mobility_note_check'), '<= 200') > 0, 'profiles_mobility_note_check uses profile.mobilityNoteMax (200)');
@@ -87,13 +88,27 @@ select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conr
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_day_rhythm_check'), 'ARRAY[''early''::text, ''either''::text, ''late''::text]') > 0, 'profiles_day_rhythm_check lists the dayRhythm answers in rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_walking_check'), 'ARRAY[''gentle''::text, ''moderate''::text, ''lots''::text]') > 0, 'profiles_walking_check lists the walking answers in rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_diet_check'), 'ARRAY[''vegetarian''::text, ''vegan''::text, ''pescatarian''::text, ''halal''::text, ''kosher''::text, ''gluten-free''::text, ''dairy-free''::text]') > 0, 'profiles_diet_check lists the diet answers in rules.json');
+select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_sexuality_check'), 'ARRAY[''straight''::text, ''gay''::text, ''lesbian''::text, ''bisexual''::text, ''pansexual''::text, ''asexual''::text, ''demisexual''::text, ''queer''::text, ''questioning''::text, ''another''::text]') > 0, 'profiles_sexuality_check lists the sexuality answers in rules.json');
+select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_religion_check'), 'ARRAY[''agnostic''::text, ''atheist''::text, ''buddhist''::text, ''catholic''::text, ''christian''::text, ''hindu''::text, ''jewish''::text, ''muslim''::text, ''sikh''::text, ''spiritual''::text, ''another''::text]') > 0, 'profiles_religion_check lists the religion answers in rules.json');
+select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_ethnicity_check'), 'ARRAY[''black''::text, ''east_asian''::text, ''hispanic''::text, ''middle_eastern''::text, ''mixed''::text, ''pacific_islander''::text, ''south_asian''::text, ''southeast_asian''::text, ''white''::text, ''another''::text]') > 0, 'profiles_ethnicity_check lists the ethnicity answers in rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.preferences'::regclass and conname = 'preferences_styles_check'), '''{planner,mix,spontaneous}''') > 0, 'preferences_styles_check lists the travelStyle answers in rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.preferences'::regclass and conname = 'preferences_paces_check'), '''{slow,steady,packed}''') > 0, 'preferences_paces_check lists the pace answers in rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.preferences'::regclass and conname = 'preferences_budgets_check'), '''{budget,mid,comfort}''') > 0, 'preferences_budgets_check lists the budget answers in rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.preferences'::regclass and conname = 'preferences_genders_check'), '''{woman,man,nonbinary}''') > 0, 'preferences_genders_check lists the genderShown answers in rules.json');
+select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_holiday_prefs(jsonb)'::regprocedure), 'when ''planning'' then array[''planner'', ''mix'', ''spontaneous'']') > 0, 'valid_holiday_prefs lists the planning answers in rules.json');
+select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_holiday_prefs(jsonb)'::regprocedure), 'when ''stay'' then array[''hotel'', ''apartment'', ''bnb'', ''resort'', ''hostel'', ''camping'']') > 0, 'valid_holiday_prefs lists the stay answers in rules.json');
+select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_holiday_prefs(jsonb)'::regprocedure), 'when ''transport'' then array[''fly'', ''train'', ''drive'', ''ferry'', ''coach'']') > 0, 'valid_holiday_prefs lists the transport answers in rules.json');
+select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_holiday_prefs(jsonb)'::regprocedure), 'when ''length'' then array[''weekend'', ''week'', ''fortnight'', ''longer'']') > 0, 'valid_holiday_prefs lists the length answers in rules.json');
+select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_holiday_prefs(jsonb)'::regprocedure), 'when ''season'' then array[''spring'', ''summer'', ''autumn'', ''winter'', ''any'']') > 0, 'valid_holiday_prefs lists the season answers in rules.json');
+select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_holiday_prefs(jsonb)'::regprocedure), 'when ''packing'' then array[''light'', ''case'', ''everything'']') > 0, 'valid_holiday_prefs lists the packing answers in rules.json');
+select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_holiday_prefs(jsonb)'::regprocedure), 'when ''evenings'' then array[''early'', ''dinner'', ''late'']') > 0, 'valid_holiday_prefs lists the evenings answers in rules.json');
+select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_holiday_prefs(jsonb)'::regprocedure), 'when ''drinking'' then array[''none'', ''sometimes'', ''socially'', ''often'']') > 0, 'valid_holiday_prefs lists the drinking answers in rules.json');
+select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_holiday_prefs(jsonb)'::regprocedure), 'when ''smoking'' then array[''no'', ''social'', ''yes'']') > 0, 'valid_holiday_prefs lists the smoking answers in rules.json');
+select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_holiday_prefs(jsonb)'::regprocedure), 'when ''photos'' then array[''lots'', ''few'', ''rarely'']') > 0, 'valid_holiday_prefs lists the photos answers in rules.json');
 select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_card_answers(jsonb)'::regprocedure), 'jsonb_array_length(answers) <= 3') > 0, 'valid_card_answers uses card.answers (3)');
 select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_card_answers(jsonb)'::regprocedure), 'between 1 and 200') > 0, 'valid_card_answers uses card.maxChars (200)');
 select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_card_answers(jsonb)'::regprocedure), '''\s+'')) > 30') > 0, 'valid_card_answers uses card.maxWords (30)');
 select ok(strpos((select prosrc from pg_proc where oid = 'public.meetup_share_ends(public.meetup_shares)'::regprocedure), 'interval ''2 days''') > 0, 'meetup_share_ends uses meetups.linkDays (2)');
+select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_photo_book(uuid, text[])'::regprocedure), 'cardinality(book) <= 6') > 0, 'valid_photo_book uses profile.photoBookMax (6)');
 select * from finish();
 rollback;

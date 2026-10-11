@@ -57,6 +57,9 @@ const CHOICES = [
   ['profiles', 'profiles_day_rhythm_check', 'dayRhythm', array],
   ['profiles', 'profiles_walking_check', 'walking', array],
   ['profiles', 'profiles_diet_check', 'diet', array],
+  ['profiles', 'profiles_sexuality_check', 'sexuality', array],
+  ['profiles', 'profiles_religion_check', 'religion', array],
+  ['profiles', 'profiles_ethnicity_check', 'ethnicity', array],
   ['preferences', 'preferences_styles_check', 'travelStyle', set],
   ['preferences', 'preferences_paces_check', 'pace', set],
   ['preferences', 'preferences_budgets_check', 'budget', set],
@@ -71,6 +74,7 @@ const FUNCTIONS = [
   ['valid_card_answers(jsonb)', 'card.maxChars', (v) => `between 1 and ${v}`],
   ['valid_card_answers(jsonb)', 'card.maxWords', (v) => `'\\s+')) > ${v}`],
   ['meetup_share_ends(public.meetup_shares)', 'meetups.linkDays', (v) => `interval '${v} days'`],
+  ['valid_photo_book(uuid, text[])', 'profile.photoBookMax', (v) => `cardinality(book) <= ${v}`],
 ]
 
 /** Every number in rules.json, as "section.name" keys. */
@@ -115,6 +119,11 @@ export function rulesTest(rules) {
       if (!rules.choices[key]) throw new Error(`rules.json has no choices.${key}`)
       return `select ok(strpos(${constraint(table, name)}, ${lit(text(rules.choices[key]))}) > 0, ${lit(`${name} lists the ${key} answers in rules.json`)});`
     }),
+    // Each holiday question's answers, as valid_holiday_prefs() lists them.
+    ...Object.entries(rules.choices.holiday).map(
+      ([key, values]) =>
+        `select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_holiday_prefs(jsonb)'::regprocedure), ${lit(`when '${key}' then array[${values.map((v) => `'${v}'`).join(', ')}]`)}) > 0, ${lit(`valid_holiday_prefs lists the ${key} answers in rules.json`)});`,
+    ),
     ...FUNCTIONS.map(
       ([fn, key, text]) =>
         `select ok(strpos((select prosrc from pg_proc where oid = ${lit(`public.${fn}`)}::regprocedure), ${lit(text(get(key)))}) > 0, ${lit(`${fn.split('(')[0]} uses ${key} (${get(key)})`)});`,

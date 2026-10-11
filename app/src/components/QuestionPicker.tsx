@@ -18,10 +18,14 @@ export function QuestionPicker({ id, value, taken, onChange, describedBy, invali
       id={id}
       value={value}
       placeholder="Choose a question"
-      groups={CARD_QUESTIONS.map((g) => ({
-        label: g.group,
-        options: g.questions.map((q) => ({ value: q.key, label: q.text, disabled: taken.has(q.key), note: taken.has(q.key) ? 'already used' : undefined })),
-      }))}
+      groups={[
+        // The questions are optional (Lewis, 11 Oct), so a chosen one can be cleared.
+        ...(value ? [{ options: [{ value: '', label: 'No question' }] }] : []),
+        ...CARD_QUESTIONS.map((g) => ({
+          label: g.group,
+          options: g.questions.map((q) => ({ value: q.key, label: q.text, disabled: taken.has(q.key), note: taken.has(q.key) ? 'already used' : undefined })),
+        })),
+      ]}
       onChange={onChange}
       describedBy={describedBy}
       invalid={invalid}
