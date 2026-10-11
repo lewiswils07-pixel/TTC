@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useEffectEvent, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { AgeRange } from '../components/AgeRange'
 import { CityPicker } from '../components/CityPicker'
+import { LocationMap } from '../components/LocationMap'
 import { DistanceSlider } from '../components/DistanceSlider'
 import { InterestedIn } from '../components/InterestedIn'
 import { Field, FieldError, TextField } from '../components/Field'
@@ -14,10 +15,11 @@ import { ChipChoice } from '../components/ChipChoice'
 import { Segmented } from '../components/Segmented'
 import { brand } from '../lib/brand'
 import { ANSWER_MAX_CHARS, ANSWER_MAX_WORDS, ANSWERS_TO_PICK, checkAnswer, questionText, saveCard, wordCount, type CardAnswer } from '../lib/card'
-import { cityLabel, type City } from '../lib/cities'
+import { useHomeSpot, type City } from '../lib/cities'
 import { clearDrafts, useDraft } from '../lib/draft'
 import { messageOf } from '../lib/errors'
-import { clearMyLocation, locateMe } from '../lib/location'
+import { clearMyLocation, findMe, placeMe } from '../lib/location'
+import type { Point } from '../lib/map'
 import { saveMeetPreferences } from '../lib/filters'
 import { firstUnfinishedStep, STEP } from '../lib/onboarding'
 import { rules } from '../lib/rules'
@@ -177,6 +179,9 @@ function useStepSubmit(save: () => Promise<void>, onDone: () => Promise<void>) {
   return { busy, error, setError, submit }
 }
 
+// Where the map opens before we know where someone lives.
+const UK: Point = { lat: 53.5, lng: -2.2 }
+
 type StepProps = { userId: string; data: MyProfile; onDone: () => Promise<void>; onBack?: () => void }
 
 function BasicsStep({ userId, data, onDone }: StepProps) {
@@ -187,22 +192,42 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
   const [dobYear, setDobYear] = useDraft('basics.year', p.birth_date ? p.birth_date.slice(0, 4) : p.birth_year ? String(p.birth_year) : '')
   const [gender, setGender] = useDraft<Gender[]>('basics.gender', p.gender ? [p.gender] : [])
   const [city, setCity] = useDraft<City | null>('basics.city', p.home_city)
-  // "Use my location" (Lewis, 6 Oct): sets the nearest town; can be used again after a move.
-  const [locating, setLocating] = useState(false)
+  // Where they live, on a map like Hinge's (Lewis, 11 Oct): the phone's
+  // location is asked for straight away, and the dot can be dragged or
+  // tapped somewhere else. Only the nearest town shows on their profile.
+  const [spot, setSpot] = useState<Point | null>(null)
+  const town = useHomeSpot(city?.id)
+  const [locating, setLocating] = useState(!city)
   const [located, setLocated] = useState(false)
   const [locateError, setLocateError] = useState<string | null>(null)
+  async function place(at: Point) {
+    setSpot(at)
+    setLocateError(null)
+    try {
+      setCity(await placeMe(at))
+      setLocated(true)
+    } catch (err) {
+      setLocateError(messageOf(err))
+    }
+  }
   async function locate() {
     setLocating(true)
     setLocateError(null)
     try {
-      setCity(await locateMe())
-      setLocated(true)
+      await place(await findMe())
     } catch (err) {
       setLocateError(messageOf(err))
     } finally {
       setLocating(false)
     }
   }
+  const askOnOpen = useEffectEvent(() => {
+    if (!locating) return
+    findMe()
+      .then(place, (err) => setLocateError(messageOf(err)))
+      .finally(() => setLocating(false))
+  })
+  useEffect(() => askOnOpen(), [])
 
   // Who they'd like to meet, asked at sign-up too (Lewis, 11 Oct, like Hinge).
   const prefs = data.preferences
@@ -319,25 +344,15 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
             value={city}
             onChange={(c) => {
               setCity(c)
+              setSpot(null)
               setLocated(false)
               if (c) touch('city')
             }}
             onBlur={() => touch('city')}
             error={shown('city')}
           />
-          <button type="button" className="btn btn-link locate" onClick={locate} disabled={locating}>
-            <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
-              <circle cx="10" cy="10" r="3" fill="currentColor" />
-              <path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              <circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" strokeWidth="2" />
-            </svg>
-            {locating ? 'Finding you…' : 'Use my location'}
-          </button>
-          {located && city && (
-            <p className="hint" role="status">
-              We’ve set your home to {cityLabel(city)}. Not quite right? Type your town above instead.
-            </p>
-          )}
+          <p className="hint">Only your town’s name shows on your profile. Drag the map or tap it to move your spot.</p>
+          <LocationMap center={spot ?? town ?? UK} zoom={spot || town ? undefined : 5} label={city?.name} onMove={place} onLocate={locate} locating={locating} />
           <FieldError error={locateError} />
         </div>
       </div>

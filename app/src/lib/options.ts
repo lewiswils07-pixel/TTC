@@ -295,21 +295,24 @@ export type DayRhythm = (typeof DAY_RHYTHMS)[number]['value']
 export type Walking = (typeof WALKING)[number]['value']
 
 /** Stops on the distance slider, in miles; 0 is "your town only" and the last stop is "any distance". The database keeps km. */
-export const DISTANCE_MILES = [0, 5, 10, 25, 50, 75, 100, 150, 200, 300, null] as const
+// The distance slider (Lewis, 11 Oct, like Hinge): a mile at a time up to 50,
+// then 5 at a time up to 100, then 10 at a time up to 150. Further than that
+// is the "Show people further away too" box, saved as no limit.
+const steps = (from: number, to: number, by: number) => Array.from({ length: (to - from) / by + 1 }, (_, i) => from + i * by)
+export const DISTANCE_MILES: readonly number[] = [...steps(1, 50, 1), ...steps(55, 100, 5), ...steps(110, 150, 10)]
 const KM_PER_MILE = 1.609344
-// The database counts people in your own town as always in range, so the
-// smallest distance it accepts (1 km) means "your town only".
-export const milesToKm = (miles: number | null): number | null => (miles === null ? null : Math.max(1, Math.round(miles * KM_PER_MILE)))
-/** The slider stop for a saved distance: the nearest one, or "any". */
+export const milesToKm = (miles: number): number => Math.max(1, Math.round(miles * KM_PER_MILE))
+/** The slider stop for a saved distance: the nearest one, or the last for no limit. */
 export function distanceStop(km: number | null): number {
   if (km === null) return DISTANCE_MILES.length - 1
   let best = 0
   DISTANCE_MILES.forEach((m, i) => {
-    if (m !== null && Math.abs(m * KM_PER_MILE - km) < Math.abs((DISTANCE_MILES[best] ?? 0) * KM_PER_MILE - km)) best = i
+    if (Math.abs(m * KM_PER_MILE - km) < Math.abs(DISTANCE_MILES[best] * KM_PER_MILE - km)) best = i
   })
   return best
 }
-export const distanceLabel = (miles: number | null) => (miles === null ? 'Any distance' : miles === 0 ? 'Your town only' : `Up to ${miles} miles`)
+const milesText = (miles: number) => (miles === 1 ? '1 mile' : `${miles} miles`)
+export const distanceLabel = (km: number | null) => (km === null ? 'Any distance' : `Up to ${milesText(DISTANCE_MILES[distanceStop(km)])}`)
 
 export const MIN_AGE = rules.age.min
 export const MAX_PREF_AGE = rules.age.maxPreferred

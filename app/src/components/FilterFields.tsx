@@ -3,12 +3,12 @@ import { AgeRange } from './AgeRange'
 import { ChipChoice } from './ChipChoice'
 import { DistanceSlider } from './DistanceSlider'
 import { FieldError } from './Field'
-import { HomeMap } from './HomeMap'
+import { LocationMap } from './LocationMap'
 import { useHomeSpot } from '../lib/cities'
 import { InterestedIn } from './InterestedIn'
 import { brand } from '../lib/brand'
 import { filterErrors, interestedInText, type Filters } from '../lib/filters'
-import { BUDGETS, DISTANCE_MILES, MAX_PREF_AGE, MIN_AGE, PACES, distanceLabel, distanceStop } from '../lib/options'
+import { BUDGETS, MAX_PREF_AGE, MIN_AGE, PACES, distanceLabel } from '../lib/options'
 
 const ageText = (min: number, max: number) => `${min} to ${max >= MAX_PREF_AGE ? `${MAX_PREF_AGE}+` : max}`
 const listText = (chosen: readonly string[], options: readonly { value: string; label: string }[]) =>
@@ -54,10 +54,10 @@ export function FilterFields({ value: f, onChange, plus, homeCityId }: { value: 
       {row(
         'distance',
         'Maximum distance',
-        distanceLabel(DISTANCE_MILES[distanceStop(f.max_distance_km)]),
+        distanceLabel(f.max_distance_km),
         <>
+          {spot && <LocationMap center={spot} label={spot.name} km={f.max_distance_km} />}
           <DistanceSlider km={f.max_distance_km} onChange={(max_distance_km) => set({ max_distance_km })} />
-          {spot && <HomeMap spot={spot} km={f.max_distance_km} />}
         </>,
       )}
       <div className="filter-group filter-group-plus">
