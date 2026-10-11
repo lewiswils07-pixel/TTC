@@ -24,8 +24,8 @@ export const SHOWN_GENDERS = [
   { value: 'nonbinary', label: 'Non-binary and other identities' },
 ] as const satisfies readonly Option<Gender>[]
 
-// Travel style, pace and budget are each in order, so "next to each other"
-// counts as a partial match in matching (spec §4.2).
+// Travel style, pace and budget are each in order, so close answers count as
+// a partial match in matching (spec §4.2). Pace and budget have 5 (Lewis, 11 Oct).
 export const TRAVEL_STYLES = [
   { value: 'planner', label: 'Planner', hint: 'I like to know the plan before I go.' },
   { value: 'mix', label: 'Bit of both', hint: 'A rough plan, with room for surprises.' },
@@ -33,15 +33,19 @@ export const TRAVEL_STYLES = [
 ] as const satisfies readonly Option<string>[]
 
 export const PACES = [
+  { value: 'easy', label: 'Take it easy', hint: 'Lots of rest, very little planned.' },
   { value: 'slow', label: 'Relaxed', hint: 'One or two things a day, plenty of rest.' },
   { value: 'steady', label: 'Steady', hint: 'A good mix of sightseeing and downtime.' },
+  { value: 'busy', label: 'Busy', hint: 'Out most of the day, with a break or two.' },
   { value: 'packed', label: 'Packed', hint: 'Up early, see as much as possible.' },
 ] as const satisfies readonly Option<string>[]
 
 export const BUDGETS = [
-  { value: 'budget', label: 'Budget', hint: 'Watching the pennies: hostels, guesthouses, picnics.' },
+  { value: 'shoestring', label: 'Shoestring', hint: 'As cheap as possible: hostels, picnics, free sights.' },
+  { value: 'budget', label: 'Budget', hint: 'Watching the pennies: guesthouses and simple meals.' },
   { value: 'mid', label: 'Mid-range', hint: 'Comfortable hotels and nice meals out.' },
   { value: 'comfort', label: 'Comfort', hint: 'Treat ourselves: good hotels and fine dining.' },
+  { value: 'luxury', label: 'Luxury', hint: 'Five stars, first class, the works.' },
 ] as const satisfies readonly Option<string>[]
 
 // Everyday habits (matching v2). Also in order: a clash lowers a score a

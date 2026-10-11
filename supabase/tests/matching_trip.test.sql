@@ -76,7 +76,8 @@ select results_eq(
   'Ann sees Bob, Cat and Eve, best match first');
 
 select is((select score from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Bob'), 81, 'Bob scores 81 (3 of 4 interests, full overlap, same style)');
-select is((select score from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Cat'), 26, 'Cat scores 26');
+-- Pace and budget have 5 steps since 11 Oct, so Cat's are closer to Ann's than before (26 on 3 steps).
+select is((select score from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Cat'), 31, 'Cat scores 31');
 select is((select score from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Eve'), 14, 'Eve scores 14 (nothing in common, neutral style)');
 
 select is((select cardinality(shared_interests) from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Bob'), 3, 'Bob''s card lists 3 shared interests');

@@ -629,8 +629,8 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
         <h2 id="style-heading" className="card-title">
           Your travel style
         </h2>
-        <Segmented name="pace" legend="Pace" options={PACES} selected={pace} onChange={setPace} describeSelection />
-        <Segmented name="budget" legend="Budget" options={BUDGETS} selected={budget} onChange={setBudget} describeSelection />
+        <ChipChoice name="pace" legend="Pace" options={PACES} selected={pace} onChange={setPace} />
+        <ChipChoice name="budget" legend="Budget" options={BUDGETS} selected={budget} onChange={setBudget} />
       </section>
 
       <section className="card form-card" aria-labelledby="habits-heading">

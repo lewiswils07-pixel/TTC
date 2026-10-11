@@ -6,6 +6,7 @@
 --     matching, and seeing other people's is a Sodalis+ feature.
 --   * A photo book: up to 6 more photos, of the member or their trips.
 --   * Interests kept to holidays: hobbies that aren't about travel go.
+--   * Pace and budget get 5 answers each, as chips (Lewis, 11 Oct morning).
 -- The answer lists match app/rules.json (`choices`); rules.test.sql checks.
 
 -- 1 ----------------------------------------------------------------------
@@ -115,11 +116,54 @@ grant execute on function public.member_extras(uuid) to authenticated;
 -- 3 ----------------------------------------------------------------------
 -- Interests are about holidays (Lewis, 11 Oct). Hobbies that aren't go;
 -- members who picked them simply have fewer picks until they add more.
+-- (Running, Fitness, Fashion and Writing stay: Lewis, 11 Oct morning.)
 delete from public.profile_interests
  where interest_id in (select id from public.interests
-                        where slug in ('knitting', 'gaming', 'crafts', 'writing', 'fitness', 'running', 'choir', 'music-making', 'fashion'));
+                        where slug in ('knitting', 'gaming', 'crafts', 'choir', 'music-making'));
 delete from public.interests
- where slug in ('knitting', 'gaming', 'crafts', 'writing', 'fitness', 'running', 'choir', 'music-making', 'fashion');
+ where slug in ('knitting', 'gaming', 'crafts', 'choir', 'music-making');
 update public.interests set category_label = 'Active' where category = 'sport';
 update public.interests set category_label = 'Kinds of trip' where category = 'trips';
 update public.interests set category_label = 'Pastimes' where category = 'hobbies';
+
+-- 4 ----------------------------------------------------------------------
+-- Pace and budget: 5 answers each, still in order, so the old answers keep
+-- their place (Relaxed, Steady and Packed; Budget, Mid-range and Comfort).
+alter table public.profiles
+  drop constraint profiles_pace_check,
+  drop constraint profiles_budget_check,
+  add constraint profiles_pace_check check (pace = any (array['easy', 'slow', 'steady', 'busy', 'packed'])),
+  add constraint profiles_budget_check check (budget = any (array['shoestring', 'budget', 'mid', 'comfort', 'luxury']));
+alter table public.preferences
+  drop constraint preferences_paces_check,
+  drop constraint preferences_budgets_check,
+  add constraint preferences_paces_check check (paces <@ '{easy,slow,steady,busy,packed}'::text[]),
+  add constraint preferences_budgets_check check (budgets <@ '{shoestring,budget,mid,comfort,luxury}'::text[]);
+
+-- How close two answers on an ordered scale are: same 1, opposite ends 0,
+-- in between by distance, not answered 0.5. On a 3-step scale this is the
+-- same as before (next door 0.5).
+create or replace function public.scale_match(a text, b text, steps text[])
+returns numeric
+language sql
+immutable
+set search_path = ''
+as $$
+  select case
+    when a is null or b is null then 0.5
+    when a = b then 1
+    when array_position(steps, a) is null or array_position(steps, b) is null then 0
+    else 1 - abs(array_position(steps, a) - array_position(steps, b))::numeric / (cardinality(steps) - 1)
+  end
+$$;
+
+create or replace function public.style_points(a public.profiles, b public.profiles)
+returns numeric
+language sql
+immutable
+set search_path = ''
+as $$
+  select 10 * public.scale_match(a.travel_style, b.travel_style, '{planner,mix,spontaneous}')
+       + 5 * public.scale_match(a.pace, b.pace, '{easy,slow,steady,busy,packed}')
+       + 15 * public.scale_match(a.budget, b.budget, '{shoestring,budget,mid,comfort,luxury}')
+$$;
