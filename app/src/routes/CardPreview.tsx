@@ -5,7 +5,8 @@ import { Layout, Loading } from '../components/Layout'
 import { peek, remember } from '../lib/cache'
 import { cityLabel } from '../lib/cities'
 import { ageFromDate, ageLabel } from '../lib/options'
-import { photoUrl } from '../lib/photo'
+import { usePhotoUrl } from '../lib/photo'
+import { ProfileExtras } from '../components/ProfileExtras'
 import { listInterests, type Interest } from '../lib/profile'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
@@ -15,16 +16,13 @@ export function CardPreview() {
   const { session } = useSession()
   const { data } = useMyProfile(session!.user.id)
   const [interests, setInterests] = useState<Interest[]>(() => peek('interests') ?? [])
-  const [photo, setPhoto] = useState<string | null>(null)
   const heading = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
     remember('interests', listInterests()).then(setInterests, () => undefined)
     heading.current?.focus()
   }, [])
-  useEffect(() => {
-    if (data?.profile.photo_path) photoUrl(data.profile.photo_path).then(setPhoto, () => undefined)
-  }, [data?.profile.photo_path])
+  const photo = usePhotoUrl(data?.profile.photo_path)
 
   if (!data) return <Loading />
   const { profile, interestIds, card } = data
@@ -41,8 +39,8 @@ export function CardPreview() {
         How others see you
       </h1>
       <p className="lede">
-        This is your card in other members’ suggestions. They also see why we suggest you, such as interests you share or a trip at the same time. Your
-        date of birth, email and exact location are never shown.
+        This is your card in other members’ suggestions. They also see why we suggest you, such as interests you share or a trip at the same time. Your date of birth, email and exact location are
+        never shown.
       </p>
       <article className="card person-feed-card preview-card" aria-label="Your card">
         <div className="feed-photo">
@@ -72,6 +70,20 @@ export function CardPreview() {
               ))}
             </ul>
           </div>
+        )}
+        {data.more && (
+          <ProfileExtras
+            name={name}
+            extras={{
+              photo_book: data.more.photo_book,
+              // Others see these with Sodalis+.
+              holiday_prefs: data.more.holiday_prefs,
+              holiday_locked: false,
+              sexuality: data.more.shown_fields.includes('sexuality') ? data.more.sexuality : null,
+              religion: data.more.shown_fields.includes('religion') ? data.more.religion : null,
+              ethnicity: data.more.shown_fields.includes('ethnicity') ? data.more.ethnicity : null,
+            }}
+          />
         )}
         {profile.travelling_with && <p className="feed-detail">Travels with: {profile.travelling_with}</p>}
       </article>

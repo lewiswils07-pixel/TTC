@@ -4,7 +4,7 @@ const STEPS: { icon: string; title: string; text: string }[] = [
   {
     icon: '✦',
     title: 'Meet people one at a time',
-    text: 'Each card is someone we think you’d get on with, with the reasons why. Tap Travel together to say hello, or Skip to see the next person.',
+    text: 'Each card is someone we think you’d get on with, with the reasons why. Tap Connect to say hello, or Skip to see the next person.',
   },
   {
     icon: '↻',

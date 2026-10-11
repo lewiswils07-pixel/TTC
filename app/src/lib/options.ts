@@ -119,6 +119,169 @@ export const DIETS = [
 ] as const satisfies readonly Option<string>[]
 export const MAX_LANGUAGES = rules.profile.languagesMax
 
+// More about you (Lewis, 11 Oct): all optional, and hidden unless the member
+// chooses to show them on their profile.
+export const SEXUALITIES = [
+  { value: 'straight', label: 'Straight' },
+  { value: 'gay', label: 'Gay' },
+  { value: 'lesbian', label: 'Lesbian' },
+  { value: 'bisexual', label: 'Bisexual' },
+  { value: 'pansexual', label: 'Pansexual' },
+  { value: 'asexual', label: 'Asexual' },
+  { value: 'demisexual', label: 'Demisexual' },
+  { value: 'queer', label: 'Queer' },
+  { value: 'questioning', label: 'Questioning' },
+  { value: 'another', label: 'Another sexuality' },
+] as const satisfies readonly Option<string>[]
+
+export const RELIGIONS = [
+  { value: 'agnostic', label: 'Agnostic' },
+  { value: 'atheist', label: 'Atheist' },
+  { value: 'buddhist', label: 'Buddhist' },
+  { value: 'catholic', label: 'Catholic' },
+  { value: 'christian', label: 'Christian' },
+  { value: 'hindu', label: 'Hindu' },
+  { value: 'jewish', label: 'Jewish' },
+  { value: 'muslim', label: 'Muslim' },
+  { value: 'sikh', label: 'Sikh' },
+  { value: 'spiritual', label: 'Spiritual' },
+  { value: 'another', label: 'Another religion' },
+] as const satisfies readonly Option<string>[]
+
+export const ETHNICITIES = [
+  { value: 'black', label: 'Black or African descent' },
+  { value: 'east_asian', label: 'East Asian' },
+  { value: 'hispanic', label: 'Hispanic or Latino' },
+  { value: 'middle_eastern', label: 'Middle Eastern' },
+  { value: 'mixed', label: 'Mixed' },
+  { value: 'pacific_islander', label: 'Pacific Islander' },
+  { value: 'south_asian', label: 'South Asian' },
+  { value: 'southeast_asian', label: 'Southeast Asian' },
+  { value: 'white', label: 'White' },
+  { value: 'another', label: 'Another ethnicity' },
+] as const satisfies readonly Option<string>[]
+
+export type PersonalField = 'sexuality' | 'religion' | 'ethnicity'
+export const PERSONAL_FIELDS: readonly { key: PersonalField; label: string; options: readonly Option<string>[] }[] = [
+  { key: 'sexuality', label: 'Sexuality', options: SEXUALITIES },
+  { key: 'religion', label: 'Religion', options: RELIGIONS },
+  { key: 'ethnicity', label: 'Ethnicity', options: ETHNICITIES },
+]
+
+/** Holiday preferences (Lewis, 11 Oct, like Tinder's lifestyle chips). One
+ *  answer each. They replace the planning question and aren't used for
+ *  matching; seeing other people's is a Sodalis+ feature. */
+export const HOLIDAY_QUESTIONS = [
+  {
+    key: 'planning',
+    label: 'Planning',
+    options: [
+      { value: 'planner', label: 'Plan every detail' },
+      { value: 'mix', label: 'Rough plan' },
+      { value: 'spontaneous', label: 'Go with the flow' },
+    ],
+  },
+  {
+    key: 'stay',
+    label: 'Where I stay',
+    options: [
+      { value: 'hotel', label: 'Hotel' },
+      { value: 'apartment', label: 'Apartment' },
+      { value: 'bnb', label: 'B&B' },
+      { value: 'resort', label: 'All-inclusive' },
+      { value: 'hostel', label: 'Hostel' },
+      { value: 'camping', label: 'Camping' },
+    ],
+  },
+  {
+    key: 'transport',
+    label: 'Getting there',
+    options: [
+      { value: 'fly', label: 'Fly' },
+      { value: 'train', label: 'Train' },
+      { value: 'drive', label: 'Drive' },
+      { value: 'ferry', label: 'Ferry or cruise' },
+      { value: 'coach', label: 'Coach' },
+    ],
+  },
+  {
+    key: 'length',
+    label: 'Trip length',
+    options: [
+      { value: 'weekend', label: 'Long weekend' },
+      { value: 'week', label: 'A week' },
+      { value: 'fortnight', label: 'Two weeks' },
+      { value: 'longer', label: 'Longer' },
+    ],
+  },
+  {
+    key: 'season',
+    label: 'Favourite season',
+    options: [
+      { value: 'spring', label: 'Spring' },
+      { value: 'summer', label: 'Summer' },
+      { value: 'autumn', label: 'Autumn' },
+      { value: 'winter', label: 'Winter' },
+      { value: 'any', label: 'Any time' },
+    ],
+  },
+  {
+    key: 'packing',
+    label: 'Packing',
+    options: [
+      { value: 'light', label: 'Hand luggage only' },
+      { value: 'case', label: 'One big case' },
+      { value: 'everything', label: 'Bring everything' },
+    ],
+  },
+  {
+    key: 'evenings',
+    label: 'Evenings',
+    options: [
+      { value: 'early', label: 'Early night' },
+      { value: 'dinner', label: 'Dinner and a drink' },
+      { value: 'late', label: 'Out late' },
+    ],
+  },
+  {
+    key: 'drinking',
+    label: 'Drinking',
+    options: [
+      { value: 'none', label: 'Don’t drink' },
+      { value: 'sometimes', label: 'Sometimes' },
+      { value: 'socially', label: 'Socially' },
+      { value: 'often', label: 'Most evenings' },
+    ],
+  },
+  {
+    key: 'smoking',
+    label: 'Smoking',
+    options: [
+      { value: 'no', label: 'Non-smoker' },
+      { value: 'social', label: 'Social smoker' },
+      { value: 'yes', label: 'Smoker' },
+    ],
+  },
+  {
+    key: 'photos',
+    label: 'Holiday photos',
+    options: [
+      { value: 'lots', label: 'Snap everything' },
+      { value: 'few', label: 'A few' },
+      { value: 'rarely', label: 'Rarely' },
+    ],
+  },
+] as const satisfies readonly { key: string; label: string; options: readonly Option<string>[] }[]
+export type HolidayPrefs = Partial<Record<(typeof HOLIDAY_QUESTIONS)[number]['key'], string>>
+
+/** "I’m interested in" (Lewis, 11 Oct, like Hinge): Men, Women, Non-binary people, or Everyone. */
+export const INTERESTED_IN = [
+  { value: 'man', label: 'Men' },
+  { value: 'woman', label: 'Women' },
+  { value: 'nonbinary', label: 'Non-binary people' },
+] as const satisfies readonly Option<Gender>[]
+export const PHOTO_BOOK_MAX = rules.profile.photoBookMax
+
 export type Gender = (typeof GENDERS)[number]['value']
 export type TravelStyle = (typeof TRAVEL_STYLES)[number]['value']
 export type Pace = (typeof PACES)[number]['value']

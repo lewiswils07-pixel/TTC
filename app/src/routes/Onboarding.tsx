@@ -1,18 +1,24 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
+import { AgeRange } from '../components/AgeRange'
 import { CityPicker } from '../components/CityPicker'
+import { DistanceSlider } from '../components/DistanceSlider'
+import { InterestedIn } from '../components/InterestedIn'
 import { Field, FieldError, TextField } from '../components/Field'
 import { InterestPicker } from '../components/InterestPicker'
 import { Layout, Loading } from '../components/Layout'
 import { ActionBar, SaveError } from '../components/Form'
 import { QuestionPicker } from '../components/QuestionPicker'
 import { Dropdown } from '../components/Dropdown'
+import { ChipChoice } from '../components/ChipChoice'
 import { Segmented } from '../components/Segmented'
+import { brand } from '../lib/brand'
 import { ANSWER_MAX_CHARS, ANSWER_MAX_WORDS, ANSWERS_TO_PICK, checkAnswer, questionText, saveCard, wordCount, type CardAnswer } from '../lib/card'
 import { cityLabel, type City } from '../lib/cities'
 import { clearDrafts, useDraft } from '../lib/draft'
 import { messageOf } from '../lib/errors'
 import { clearMyLocation, locateMe } from '../lib/location'
+import { saveMeetPreferences } from '../lib/filters'
 import { firstUnfinishedStep, STEP } from '../lib/onboarding'
 import { rules } from '../lib/rules'
 import {
@@ -22,38 +28,33 @@ import {
   GENDERS,
   LANGUAGES,
   MAX_LANGUAGES,
+  MAX_PREF_AGE,
   MIN_AGE,
+  PHOTO_BOOK_MAX,
   INTERESTS_TO_PICK,
   MONTHS,
+  HOLIDAY_QUESTIONS,
   PACES,
+  PERSONAL_FIELDS,
   ROOM_SHARING,
-  TRAVEL_STYLES,
   WALKING,
   type Budget,
   type DayRhythm,
   type Gender,
+  type HolidayPrefs,
   type Pace,
+  type PersonalField,
   type RoomSharing,
-  type TravelStyle,
   type Walking,
 } from '../lib/options'
-import { photoUrl, preparePhoto, uploadPhoto } from '../lib/photo'
-import {
-  finishOnboarding,
-  listInterests,
-  myDiet,
-  saveAboutMe,
-  saveBasics,
-  saveDiet,
-  saveInterests,
-  saveStyleAndPreferences,
-  type Interest,
-  type MyProfile,
-} from '../lib/profile'
+import { addBookPhoto, photoUrl, preparePhoto, removeBookPhoto, uploadPhoto, usePhotoUrl } from '../lib/photo'
+import { forgetExtras } from '../lib/member'
+import { useConfirm } from '../lib/useConfirm'
+import { finishOnboarding, listInterests, myDiet, saveAboutMe, saveBasics, saveDiet, saveInterests, saveMore, saveStyleAndPreferences, type Interest, type More, type MyProfile } from '../lib/profile'
 import { useSession } from '../lib/session-context'
 import { useChecks } from '../lib/useChecks'
 import { useMyProfile } from '../lib/useMyProfile'
-import { birthDate, checkBirthDate, checkChosen, checkInterests, checkName } from '../lib/validation'
+import { birthDate, checkAgeRange, checkBirthDate, checkChosen, checkInterests, checkName } from '../lib/validation'
 
 const STEPS = [
   { title: 'About you', intro: 'Other members see your first name, age and home town. Your date of birth and email always stay private.' },
@@ -61,7 +62,7 @@ const STEPS = [
   { title: 'Your interests', intro: `Pick the ${INTERESTS_TO_PICK} you love most, and meet people who love them too.` },
   {
     title: 'The back of your card',
-    intro: `Pick ${ANSWERS_TO_PICK} questions and answer each in a sentence or two. People see them when they turn your card over.`,
+    intro: `Optional. Pick up to ${ANSWERS_TO_PICK} questions and answer each in a sentence or two. People see them when they turn your card over.`,
   },
   {
     title: 'How you travel',
@@ -136,19 +137,7 @@ export function Onboarding() {
   )
 }
 
-function StepFrame({
-  step,
-  signingUp,
-  signUpSteps,
-  justJoined,
-  children,
-}: {
-  step: number
-  signingUp: boolean
-  signUpSteps: number
-  justJoined: boolean
-  children: ReactNode
-}) {
+function StepFrame({ step, signingUp, signUpSteps, justJoined, children }: { step: number; signingUp: boolean; signUpSteps: number; justJoined: boolean; children: ReactNode }) {
   const heading = useRef<HTMLHeadingElement>(null)
   useEffect(() => heading.current?.focus(), [])
   const { title, intro } = STEPS[step - 1]
@@ -160,9 +149,7 @@ function StepFrame({
           <div className="progress-bar" style={{ width: `${(step / signUpSteps) * 100}%` }} />
         </div>
       )}
-      <p className="eyebrow">
-        {justJoined ? 'Last step, optional' : extra ? 'Add more to your profile' : signingUp ? `Step ${step} of ${signUpSteps}` : 'Edit your profile'}
-      </p>
+      <p className="eyebrow">{justJoined ? 'Last step, optional' : extra ? 'Add more to your profile' : signingUp ? `Step ${step} of ${signUpSteps}` : 'Edit your profile'}</p>
       <h1 ref={heading} tabIndex={-1}>
         {title}
       </h1>
@@ -217,11 +204,19 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
     }
   }
 
+  // Who they'd like to meet, asked at sign-up too (Lewis, 11 Oct, like Hinge).
+  const prefs = data.preferences
+  const [genders, setGenders] = useDraft<Gender[]>('basics.genders', prefs.genders)
+  const [ages, setAges] = useDraft<[number, number]>('basics.ages', [prefs.age_min, Math.min(prefs.age_max, MAX_PREF_AGE)])
+  const [distance, setDistance] = useDraft<number | null>('basics.distance', prefs.max_distance_km)
+
   const errors = {
     name: checkName(name),
     birthDate: checkBirthDate(dobDay, dobMonth, dobYear),
-    gender: checkChosen('how you describe yourself')(gender),
+    gender: checkChosen('your gender')(gender),
     city: city ? null : 'Please choose your home city from the list.',
+    genders: genders.length ? null : 'Choose at least one option.',
+    ages: checkAgeRange(ages),
   }
   const { shown, touch, validateAll } = useChecks(errors)
   // Once the year is in, check the date as soon as a day or month list closes.
@@ -233,6 +228,7 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
     // A town typed in by hand replaces any exact spot saved before.
     if (!located && city!.id !== p.home_city?.id) await clearMyLocation(userId)
     await saveBasics(userId, { display_name: name.trim(), birth_date: birthDate(dobDay, dobMonth, dobYear), gender: gender[0], home_city_id: city!.id })
+    await saveMeetPreferences(userId, { genders, age_min: ages[0], age_max: ages[1], max_distance_km: distance })
     clearDrafts('basics.')
   }, onDone)
 
@@ -300,18 +296,23 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
           </div>
           <FieldError error={shown('birthDate')} />
         </fieldset>
-        <Segmented
-          name="gender"
-          legend="Gender"
-          options={GENDERS}
-          columns={2}
-          selected={gender}
-          onChange={(v) => {
-            setGender(v)
-            touch('gender')
-          }}
-          error={shown('gender')}
-        />
+        <Field name="gender" label="Gender" error={shown('gender')}>
+          {({ id, describedBy, invalid }) => (
+            <Dropdown
+              id={id}
+              placeholder="Choose your gender"
+              value={gender[0] ?? ''}
+              groups={[{ options: GENDERS.map((g) => ({ value: g.value, label: g.label })) }]}
+              describedBy={describedBy}
+              invalid={invalid}
+              onChange={(v) => {
+                setGender([v as Gender])
+                touch('gender')
+              }}
+              onClose={() => touch('gender')}
+            />
+          )}
+        </Field>
         <div data-field="city" className="home-city">
           <CityPicker
             label="Home city"
@@ -340,6 +341,23 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
           <FieldError error={locateError} />
         </div>
       </div>
+      <section className="card form-card" aria-labelledby="meet-heading">
+        <h2 id="meet-heading" className="card-title">
+          Who you’d like to meet
+        </h2>
+        <InterestedIn
+          value={genders}
+          onChange={(v) => {
+            setGenders(v)
+            touch('genders')
+          }}
+          error={shown('genders')}
+        />
+        <AgeRange legend="Age range" min={MIN_AGE} max={MAX_PREF_AGE} value={ages} onChange={setAges} />
+        <FieldError error={shown('ages')} />
+        <DistanceSlider km={distance} onChange={setDistance} />
+        <p className="hint">You can change these any time in Filters.</p>
+      </section>
       <SaveError error={error} />
       <ActionBar busy={busy} />
     </form>
@@ -418,16 +436,89 @@ function PhotoStep({ userId, data, onDone, onBack }: StepProps) {
           <li>No sunglasses, hats or group shots</li>
         </ul>
         <p className="hint">You’ll need a photo to connect with people.</p>
-        <Field name="bio" label="A few words about you (optional)" hint={`Where you’ve been, where you’d love to go, or what makes a good travel companion. ${rules.profile.bioMax - bio.length} characters left.`}>
-          {({ id, describedBy }) => (
-            <textarea id={id} className="textarea" maxLength={rules.profile.bioMax} aria-describedby={describedBy} value={bio} onChange={(e) => setBio(e.target.value)} />
-          )}
+        {data.more && <PhotoBookEditor userId={userId} start={data.more.photo_book} />}
+        <Field
+          name="bio"
+          label="A few words about you (optional)"
+          hint={`Where you’ve been, where you’d love to go, or what makes a good travel companion. ${rules.profile.bioMax - bio.length} characters left.`}
+        >
+          {({ id, describedBy }) => <textarea id={id} className="textarea" maxLength={rules.profile.bioMax} aria-describedby={describedBy} value={bio} onChange={(e) => setBio(e.target.value)} />}
         </Field>
       </div>
       <SaveError error={error} />
       <ActionBar busy={busy || preparing} onBack={onBack} label={photo || p.photo_path ? 'Continue' : 'Skip photo for now'} />
     </form>
   )
+}
+
+/** Up to PHOTO_BOOK_MAX more photos, of you or your trips. Each one saves as soon as it's added. */
+function PhotoBookEditor({ userId, start }: { userId: string; start: string[] }) {
+  const [book, setBook] = useState(start)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const { ask, dialog } = useConfirm()
+
+  async function add(files: FileList | null) {
+    if (!files?.length) return
+    setBusy(true)
+    setError(null)
+    let next = book
+    try {
+      for (const file of [...files].slice(0, PHOTO_BOOK_MAX - book.length)) {
+        next = await addBookPhoto(userId, await preparePhoto(file), next)
+        setBook(next)
+      }
+    } catch (err) {
+      setError(messageOf(err))
+    } finally {
+      setBusy(false)
+      forgetExtras(userId)
+    }
+  }
+
+  async function remove(path: string) {
+    if (!(await ask({ title: 'Remove this photo?', confirmLabel: 'Remove photo' }))) return
+    setError(null)
+    try {
+      setBook(await removeBookPhoto(userId, path, book))
+      forgetExtras(userId)
+    } catch (err) {
+      setError(messageOf(err))
+    }
+  }
+
+  return (
+    <fieldset className="field photo-book" data-field="photo-book">
+      <legend>Photo book (optional)</legend>
+      <p className="hint">Add up to {PHOTO_BOOK_MAX} more photos, of you or your trips.</p>
+      <ul className="photo-book-grid">
+        {book.map((path, i) => (
+          <li key={path}>
+            <BookThumb path={path} />
+            <button type="button" className="photo-book-remove" onClick={() => void remove(path)} aria-label={`Remove photo ${i + 1}`}>
+              ×
+            </button>
+          </li>
+        ))}
+        {book.length < PHOTO_BOOK_MAX && (
+          <li>
+            <label className="photo-book-add">
+              <input type="file" accept="image/*" multiple className="visually-hidden" disabled={busy} onChange={(e) => void add(e.target.files)} />
+              <span aria-hidden="true">+</span>
+              {busy ? 'Adding…' : 'Add photos'}
+            </label>
+          </li>
+        )}
+      </ul>
+      <FieldError error={error} />
+      {dialog}
+    </fieldset>
+  )
+}
+
+function BookThumb({ path }: { path: string }) {
+  const src = usePhotoUrl(path)
+  return src ? <img src={src} alt="" decoding="async" /> : <span className="skeleton" aria-hidden="true" />
 }
 
 function InterestsStep({ data, interests, onDone, onBack, lastStep }: Omit<StepProps, 'userId'> & { interests: Interest[]; lastStep: boolean }) {
@@ -463,15 +554,22 @@ function InterestsStep({ data, interests, onDone, onBack, lastStep }: Omit<StepP
 function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & { onSkip?: () => void }) {
   const p = data.profile
   const prefs = data.preferences
-  const [style, setStyle] = useState<TravelStyle[]>(p.travel_style ? [p.travel_style] : [])
+  const more = data.more
   const [pace, setPace] = useState<Pace[]>(p.pace ? [p.pace] : [])
   const [budget, setBudget] = useState<Budget[]>(p.budget ? [p.budget] : [])
-  const [mobility, setMobility] = useState(p.mobility_note ?? '')
   const [travellingWith, setTravellingWith] = useState(p.travelling_with ?? '')
   const [room, setRoom] = useState<RoomSharing[]>(p.room_sharing ? [p.room_sharing] : [])
   const [rhythm, setRhythm] = useState<DayRhythm[]>(p.day_rhythm ? [p.day_rhythm] : [])
   const [walking, setWalking] = useState<Walking[]>(p.walking ? [p.walking] : [])
   const [languages, setLanguages] = useState<string[]>(p.languages ?? [])
+  // Planning moved into holiday preferences (same answers), so an earlier answer carries over.
+  const [holiday, setHoliday] = useState<HolidayPrefs>(() => ({ ...(p.travel_style ? { planning: p.travel_style } : {}), ...(more?.holiday_prefs ?? {}) }))
+  const [personal, setPersonal] = useState<Pick<More, PersonalField | 'shown_fields'>>(() => ({
+    sexuality: more?.sexuality ?? null,
+    religion: more?.religion ?? null,
+    ethnicity: more?.ethnicity ?? null,
+    shown_fields: more?.shown_fields ?? [],
+  }))
   const [diet, setDiet] = useState<string[] | null>(null)
   useEffect(() => {
     myDiet(userId).then(setDiet, () => setDiet([]))
@@ -481,10 +579,10 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
     await saveStyleAndPreferences(
       userId,
       {
-        travel_style: style[0] ?? null,
+        // Holiday preferences replace the planning question and aren't used for matching (Lewis, 11 Oct).
+        ...(more ? { travel_style: null } : {}),
         pace: pace[0] ?? null,
         budget: budget[0] ?? null,
-        mobility_note: mobility.trim() || null,
         travelling_with: travellingWith.trim() || null,
         room_sharing: room[0] ?? null,
         day_rhythm: rhythm[0] ?? null,
@@ -493,6 +591,7 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
       },
       prefs,
     )
+    if (more) await saveMore(userId, { ...personal, shown_fields: personal.shown_fields.filter((f) => personal[f]), holiday_prefs: holiday })
     if (diet) await saveDiet(userId, diet)
   }, onDone)
 
@@ -504,21 +603,34 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
       }}
       noValidate
     >
+      {more && (
+        <section className="card form-card" aria-labelledby="holiday-heading">
+          <div className="section-head">
+            <h2 id="holiday-heading" className="card-title">
+              Holiday preferences
+            </h2>
+            <span className="tag tag-plus">{brand.plusName}</span>
+          </div>
+          <p className="hint">Members with {brand.plusName} can see these on your card. They don’t change who you’re matched with.</p>
+          {HOLIDAY_QUESTIONS.map((q) => (
+            <ChipChoice
+              key={q.key}
+              name={`holiday-${q.key}`}
+              legend={q.label}
+              options={q.options}
+              selected={holiday[q.key] ? [holiday[q.key]!] : []}
+              onChange={([v]) => setHoliday((h) => ({ ...h, [q.key]: v }))}
+            />
+          ))}
+        </section>
+      )}
+
       <section className="card form-card" aria-labelledby="style-heading">
         <h2 id="style-heading" className="card-title">
           Your travel style
         </h2>
-        <Segmented name="style" legend="Planning" options={TRAVEL_STYLES} selected={style} onChange={setStyle} describeSelection />
         <Segmented name="pace" legend="Pace" options={PACES} selected={pace} onChange={setPace} describeSelection />
         <Segmented name="budget" legend="Budget" options={BUDGETS} selected={budget} onChange={setBudget} describeSelection />
-        <TextField
-          name="mobility"
-          label="Anything about getting around? (optional)"
-          hint="For example, “I avoid lots of stairs”. Only you can see this."
-          maxLength={rules.profile.mobilityNoteMax}
-          value={mobility}
-          onChange={(e) => setMobility(e.target.value)}
-        />
       </section>
 
       <section className="card form-card" aria-labelledby="habits-heading">
@@ -530,7 +642,7 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
         <Segmented name="walking" legend="Walking" options={WALKING} selected={walking} onChange={setWalking} describeSelection />
         <fieldset className="field" data-field="languages">
           <legend>Languages you speak</legend>
-          <div className="chips chips-compact">
+          <div className="chips chips-compact chips-light">
             {LANGUAGES.map((lang) => {
               const checked = languages.includes(lang.value)
               return (
@@ -551,7 +663,7 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
         </fieldset>
         <fieldset className="field" data-field="diet">
           <legend>Food (optional)</legend>
-          <div className="chips chips-compact">
+          <div className="chips chips-compact chips-light">
             {DIETS.map((d) => {
               const checked = !!diet?.includes(d.value)
               return (
@@ -579,9 +691,45 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
         />
       </section>
 
-      <p className="hint section-hint">
-        Choose who you see (gender, age and distance) any time in Filters.
-      </p>
+      {more && (
+        <section className="card form-card" aria-labelledby="personal-heading">
+          <h2 id="personal-heading" className="card-title">
+            About you
+          </h2>
+          <p className="hint">All optional. Each one stays hidden unless you choose to show it on your profile.</p>
+          {PERSONAL_FIELDS.map((f) => (
+            <div className="personal-field" key={f.key}>
+              <Field name={f.key} label={f.label}>
+                {({ id, describedBy }) => (
+                  <Dropdown
+                    id={id}
+                    placeholder="Prefer not to say"
+                    value={personal[f.key] ?? ''}
+                    describedBy={describedBy}
+                    groups={[{ options: [...(personal[f.key] ? [{ value: '', label: 'Prefer not to say' }] : []), ...f.options.map((o) => ({ value: o.value, label: o.label }))] }]}
+                    onChange={(v) => setPersonal((x) => ({ ...x, [f.key]: v || null, shown_fields: v ? x.shown_fields : x.shown_fields.filter((k) => k !== f.key) }))}
+                  />
+                )}
+              </Field>
+              {personal[f.key] && (
+                <label className="switch-row switch-row-end">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    checked={personal.shown_fields.includes(f.key)}
+                    onChange={(e) => setPersonal((x) => ({ ...x, shown_fields: e.target.checked ? [...x.shown_fields, f.key] : x.shown_fields.filter((k) => k !== f.key) }))}
+                  />
+                  <span>
+                    <strong>{personal.shown_fields.includes(f.key) ? 'Shown on your profile' : 'Hidden'}</strong>
+                  </span>
+                </label>
+              )}
+            </div>
+          ))}
+        </section>
+      )}
+
+      <p className="hint section-hint">Choose who you see (gender, age and distance) any time in Filters.</p>
       <SaveError error={error} />
       <ActionBar busy={busy} onBack={onBack} onSkip={onSkip} label={onSkip ? 'Finish' : 'Save'} />
     </form>
@@ -605,8 +753,9 @@ function CardStep({ userId, data, onDone, onBack }: StepProps) {
   const setAnswers = (change: (list: CardAnswer[]) => CardAnswer[]) => saveAnswers(change(answers))
   const errors = Object.fromEntries(
     answers.flatMap((x, i) => [
-      [`q${i}`, x.q ? null : 'Please choose a question.'],
-      [`a${i}`, x.q ? checkAnswer(x) : null],
+      // All optional (Lewis, 11 Oct): only a chosen question needs an answer.
+      [`q${i}`, null],
+      [`a${i}`, x.q ? (x.a.trim() ? checkAnswer(x) : 'Please answer this question, or choose “No question”.') : null],
     ]),
   ) as Record<string, string | null>
   const { shown, touch, validateAll } = useChecks(errors)
@@ -632,7 +781,7 @@ function CardStep({ userId, data, onDone, onBack }: StepProps) {
             <h2 id={`card-q-${i}`} className="card-title">
               Question {i + 1} of {ANSWERS_TO_PICK}
             </h2>
-            <Field name={`q${i}`} label="Choose a question" error={shown(`q${i}`)}>
+            <Field name={`q${i}`} label="Choose a question (optional)" error={shown(`q${i}`)}>
               {({ id, describedBy, invalid }) => (
                 <QuestionPicker
                   id={id}
@@ -641,7 +790,7 @@ function CardStep({ userId, data, onDone, onBack }: StepProps) {
                   invalid={invalid}
                   describedBy={describedBy}
                   onChange={(q) => {
-                    set(i, { q })
+                    set(i, q ? { q } : { q, a: '' })
                     touch(`q${i}`)
                   }}
                 />
@@ -655,9 +804,7 @@ function CardStep({ userId, data, onDone, onBack }: StepProps) {
                   // Only once they're close to a limit (Lewis, 6 Oct).
                   words >= WORDS_WARNING || answer.a.length >= ANSWER_MAX_CHARS - 30 ? (
                     <span className="word-limit" aria-live="polite">
-                      {words >= WORDS_WARNING
-                        ? `Maximum of ${ANSWER_MAX_WORDS} words`
-                        : `${ANSWER_MAX_CHARS - answer.a.length} characters left`}
+                      {words >= WORDS_WARNING ? `Maximum of ${ANSWER_MAX_WORDS} words` : `${ANSWER_MAX_CHARS - answer.a.length} characters left`}
                     </span>
                   ) : undefined
                 }
@@ -685,7 +832,12 @@ function CardStep({ userId, data, onDone, onBack }: StepProps) {
         )
       })}
       <SaveError error={error} />
-      <ActionBar busy={busy} onBack={onBack} label={data.profile.onboarded_at ? 'Save' : 'Finish sign-up'} />
+      <ActionBar
+        busy={busy}
+        onBack={data.profile.onboarded_at ? onBack : undefined}
+        onSkip={data.profile.onboarded_at || answers.some((x) => x.q) ? undefined : () => void onDone()}
+        label={data.profile.onboarded_at ? 'Save' : 'Finish sign-up'}
+      />
     </form>
   )
 }
