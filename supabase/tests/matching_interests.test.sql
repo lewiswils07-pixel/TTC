@@ -34,6 +34,8 @@ where p.id = pg_temp.m(v.n);
 
 -- Clear seed data that could leak into the results.
 delete from public.profile_interests where profile_id not in (select pg_temp.m(n) from generate_series(1, 8) n);
+-- With no minimum of shared interests, seeded demo members would show up too.
+update public.profiles set onboarded_at = null where id not in (select pg_temp.m(n) from generate_series(1, 8) n);
 
 insert into public.profile_interests (profile_id, interest_id)
 select pg_temp.m(v.n), unnest(v.ids) from (values
