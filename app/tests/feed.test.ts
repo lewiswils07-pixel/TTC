@@ -17,6 +17,7 @@ const trip = (id: string, score: number, extra: Partial<TripSuggestion> = {}): T
   overlap_end: '2026-11-18',
   shared_interests: ['Museums'],
   score,
+  rank: score,
   ...extra,
 })
 
@@ -28,18 +29,29 @@ const interest = (id: string, score: number, extra: Partial<InterestSuggestion> 
   shared_interests: ['Museums', 'Wine'],
   shared_places: [],
   score,
+  rank: score,
   ...extra,
 })
 
 describe('the For you feed', () => {
-  it('lists each person once, people going where you are first', () => {
-    const feed = mergeFeed([{ tripId: 7, people: [trip('Ann', 40)] }], [interest('Bob', 90), interest('Ann', 60), interest('Cat', 70)])
-    expect(feed.map((p) => p.profile_id)).toEqual(['Ann', 'Bob', 'Cat'])
-    expect(feed[0]).toMatchObject({ trip_id: 7, score: 60, shared_interests: ['Museums', 'Wine'] })
+  it('lists each person once, best rank first, with a shared trip as a bump rather than a pin', () => {
+    const feed = mergeFeed([{ tripId: 7, people: [trip('Ann', 40, { rank: 52 })] }], [interest('Bob', 90), interest('Ann', 40), interest('Cat', 50)])
+    expect(feed.map((p) => p.profile_id)).toEqual(['Bob', 'Ann', 'Cat'])
+    expect(feed[1]).toMatchObject({ trip_id: 7, score: 40, shared_interests: ['Museums', 'Wine'] })
+  })
+
+  it('pins people there at the same time to the top for Sodalis+', () => {
+    const feed = mergeFeed([{ tripId: 7, people: [trip('Ann', 40)] }], [interest('Bob', 90), interest('Ann', 40)], true)
+    expect(feed.map((p) => p.profile_id)).toEqual(['Ann', 'Bob'])
+  })
+
+  it('shows only the month of a shared trip without Sodalis+', () => {
+    const [ann] = mergeFeed([{ tripId: 7, people: [trip('Ann', 40, { trip_start: '2026-11-01', trip_end: '2026-11-01' })] }], [])
+    expect(callouts(ann, null)[0]).toMatchObject({ kind: 'trip', text: 'Also going to Lisbon in November' })
   })
 
   it('says why, strongest reason first', () => {
-    const [ann] = mergeFeed([{ tripId: 7, people: [trip('Ann', 40)] }], [interest('Ann', 60, { shared_places: ['Rome'], shared_interests: ['Museums', 'Wine', 'Golf'] })])
+    const [ann] = mergeFeed([{ tripId: 7, people: [trip('Ann', 40)] }], [interest('Ann', 60, { shared_places: ['Rome'], shared_interests: ['Museums', 'Wine', 'Golf'] })], true)
     expect(callouts(ann, 'Leeds', '2026-10-07').map((c) => c.text)).toEqual([
       // Date ranges are spaced differently by different Node versions.
       `Lisbon · ${shortDates('2026-11-10', '2026-11-20', '2026-10-07')}`,
@@ -51,7 +63,7 @@ describe('the For you feed', () => {
   })
 
   it('colours a trip on nearby dates differently from one at the same time', () => {
-    const [cat] = mergeFeed([{ tripId: 7, people: [trip('Cat', 40, { overlap_start: null, overlap_end: null })] }], [])
+    const [cat] = mergeFeed([{ tripId: 7, people: [trip('Cat', 40, { overlap_start: null, overlap_end: null })] }], [], true)
     expect(callouts(cat, null)[0]).toMatchObject({ kind: 'trip-close', hint: 'close to your dates' })
   })
 

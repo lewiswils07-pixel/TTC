@@ -33,6 +33,13 @@ export function shortDates(start: string, end: string, today = isoDate(new Date(
   return shortFormat.formatRange(new Date(`${start}T00:00:00Z`), new Date(`${end}T00:00:00Z`))
 }
 
+const monthFormat = new Intl.DateTimeFormat('en-GB', { month: 'long', timeZone: 'UTC' })
+
+/** "May". */
+export function monthName(iso: string): string {
+  return monthFormat.format(new Date(`${iso}T00:00:00Z`))
+}
+
 const longFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
 const dayFormat = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' })
 

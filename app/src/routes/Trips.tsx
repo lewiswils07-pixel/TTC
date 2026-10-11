@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Layout } from '../components/Layout'
 import { HubRow } from '../components/HubRow'
 import { MyTrips, Wishlist } from '../components/MyTrips'
+import { PlanInspiration } from '../components/PlanInspiration'
 import { PopularPlaces } from '../components/PopularPlaces'
 
 /** The Trips tab. Trips are optional: they add "Also going to…" people to the Connect tab. */
@@ -16,12 +17,14 @@ export function Trips() {
       </h1>
       <MyTrips />
       <PopularPlaces />
+      {/* Above "Travel as a group" (Lewis, 11 Oct). */}
+      <Wishlist />
+      <PlanInspiration />
       <ul className="hub-list trips-groups">
         <li>
-          <HubRow to="/groups" title="Travel as a group" text="Plan a trip with up to 6 people you’re connected with" />
+          <HubRow to="/groups" title="Travel as a group" text="Plan a trip with people you’re connected with" />
         </li>
       </ul>
-      <Wishlist />
     </Layout>
   )
 }

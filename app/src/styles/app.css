@@ -924,6 +924,8 @@ legend { padding: 0; }
 .plus-person-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .plus-person-text span { color: var(--ink-soft); font-size: var(--text-sm); }
 .plus-person-trip { font-weight: 700; color: var(--accent) !important; }
+.plus-trip { margin-bottom: var(--space-5); }
+.plus-trip .section-title a { color: inherit; }
 
 /* a suggestion card for someone there at the same time gets the gold tile */
 .person-feed-card.is-same-time {
@@ -1062,6 +1064,7 @@ legend { padding: 0; }
 .feed-online span { width: 8px; height: 8px; border-radius: 50%; background: var(--brand-gold); box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-gold) 35%, transparent); }
 .home-city { display: flex; flex-direction: column; }
 .home-city .field { margin-bottom: 0; }
+.btn-link.locate { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-top: var(--space-1); }
 
 /* Profile hub (Lewis, 6 Oct: laid out like the Hinge profile tab). */
 .hub-actions { display: flex; gap: var(--space-1); margin-left: auto; }
@@ -1350,6 +1353,13 @@ html { scroll-padding-bottom: 7rem; }
 .popular-list { display: flex; gap: var(--space-2); margin: 0 calc(var(--space-4) * -1); padding: 2px var(--space-4) var(--space-2); list-style: none; overflow-x: auto; scroll-snap-type: x proximity; scroll-padding-inline: var(--space-4); scrollbar-width: none; }
 .popular-list::-webkit-scrollbar { display: none; }
 .popular-list li { flex: none; scroll-snap-align: start; }
+/* Sodalis+ sections on Trips and Groups: a heading with the gold tag beside it. */
+.plus-head { display: flex; align-items: center; gap: var(--space-2); }
+.plus-head .section-title { margin: 0; }
+.inspiration, .popular-groups { margin: var(--space-6) 0 var(--space-4); }
+.inspiration-list { display: grid; gap: var(--space-3); margin: var(--space-3) 0 0; padding: 0; list-style: none; }
+.inspiration-card { display: flex; flex-direction: column; gap: 2px; padding: var(--space-3) var(--space-4); }
+.inspiration-card ul { margin: var(--space-2) 0 0; padding-left: 1.1em; }
 .popular-place {
   display: flex; flex-direction: column; gap: 2px; min-width: 132px; min-height: 76px; padding: var(--space-3) var(--space-4); border-radius: 16px;
   background: linear-gradient(160deg, var(--brand-disc), color-mix(in srgb, var(--brand-disc) 70%, #000)); color: #fff; text-decoration: none;
@@ -1409,31 +1419,6 @@ html { scroll-padding-bottom: 7rem; }
 /* The row already names the setting. */
 .filter-row-body legend, .filter-row-body .field > label:first-child { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-/* Home town map under the distance slider. */
-/* Maps: square, with the town in a black label over the dot, like Hinge (Lewis, 11 Oct). */
-.location-map { margin: var(--space-3) 0; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); }
-.location-map-tiles { position: relative; overflow: hidden; background: color-mix(in srgb, var(--ink) 6%, var(--card)); user-select: none; -webkit-user-select: none; }
-.location-map.is-movable .location-map-tiles { touch-action: none; cursor: grab; }
-.location-map.is-movable .location-map-tiles:active { cursor: grabbing; }
-.location-map-tiles img { position: absolute; width: 256px; height: 256px; max-width: none; pointer-events: none; }
-.location-map-circle {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none;
-  background: color-mix(in srgb, var(--accent) 14%, transparent); border: 2px solid var(--accent); transition: width 0.25s var(--ease-out), height 0.25s var(--ease-out);
-}
-.location-map-dot { position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: #111; box-shadow: 0 0 0 3px #fff, 0 2px 6px rgb(0 0 0 / 0.3); pointer-events: none; }
-.location-map-label {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%, calc(-100% - 18px)); max-width: 80%; padding: 8px 14px; border-radius: 10px;
-  background: #111; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none;
-}
-.location-map-label::after { content: ''; position: absolute; left: 50%; bottom: -6px; margin-left: -6px; border: 6px solid transparent; border-bottom: 0; border-top-color: #111; }
-.location-map-btn {
-  display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: #111; color: #fff; font-size: 1.375rem; line-height: 1; cursor: pointer;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 0.25);
-}
-.location-map-btn:disabled { opacity: 0.5; cursor: default; }
-.location-map-find { position: absolute; top: var(--space-3); right: var(--space-3); width: 52px; height: 52px; }
-.location-map-zoom { position: absolute; right: var(--space-3); bottom: var(--space-4); display: grid; gap: var(--space-2); }
-.location-map-credit { position: absolute; left: 6px; bottom: 4px; padding: 0 4px; border-radius: 4px; background: rgb(255 255 255 / 0.75); color: #333; font-size: 0.6875rem; pointer-events: none; }
 .distance-any { margin-top: var(--space-3); border-bottom: 0; }
 
 /* Interests: a count, then categories with Show more. */
@@ -1526,3 +1511,5 @@ html { scroll-padding-bottom: 7rem; }
   .company-charts { grid-template-columns: 1fr 1fr; }
   .company .kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
+.popular-group { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.popular-group .trip-text { display: flex; flex-direction: column; }

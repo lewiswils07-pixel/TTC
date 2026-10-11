@@ -90,3 +90,12 @@ export async function wishlistOf(profileId: string): Promise<string[]> {
   const { data, error } = await supabase.rpc('wishlist_of', { p_profile: profileId })
   return error ? [] : ((data ?? []) as string[])
 }
+
+/** Another member's trip plan, without who made it: the place, the month, how long, and their ideas. */
+export type Inspiration = { trip_id: number; city: string; country_code: string; month: string; nights: number; ideas: string[] }
+
+/** Sodalis+: other members' trip plans for inspiration (Lewis, 11 Oct). Empty without Sodalis+ or on a database without it yet. */
+export async function planInspiration(): Promise<Inspiration[]> {
+  const { data, error } = await supabase.rpc('plan_inspiration')
+  return error ? [] : ((data ?? []) as Inspiration[])
+}

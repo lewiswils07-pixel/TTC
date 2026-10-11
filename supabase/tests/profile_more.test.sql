@@ -1,7 +1,7 @@
 -- pgTAP: holiday preferences, the photo book and the personal details
 -- (sexuality, religion, ethnicity) from Lewis's 11 Oct list.
 begin;
-select plan(14);
+select plan(15);
 
 create function pg_temp.sign_in_as(member uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', member, 'role', 'authenticated')::text, true);
@@ -23,9 +23,9 @@ insert into storage.objects (bucket_id, name, owner_id)
 values ('profile-photos', pg_temp.m(1) || '/book-1.jpg', pg_temp.m(1)), ('profile-photos', pg_temp.m(1) || '/old.jpg', pg_temp.m(1));
 
 select pg_temp.sign_in_as(pg_temp.m(1));
-select lives_ok($$update public.profiles set holiday_prefs = '{"stay": "bnb", "packing": "light"}' where id = auth.uid()$$, 'Ann saves her holiday preferences');
-select throws_ok($$update public.profiles set holiday_prefs = '{"stay": "castle"}' where id = auth.uid()$$, '23514', null, 'only answers from the list');
-select throws_ok($$update public.profiles set holiday_prefs = '{"pets": "dog"}' where id = auth.uid()$$, '23514', null, 'only questions from the list');
+select lives_ok($$update public.profiles set holiday_prefs = '{"stay": ["bnb", "hotel"], "season": ["spring"]}' where id = auth.uid()$$, 'Ann saves her holiday preferences');
+select throws_ok($$update public.profiles set holiday_prefs = '{"stay": ["castle"]}' where id = auth.uid()$$, '23514', null, 'only answers from the list');
+select throws_ok($$update public.profiles set holiday_prefs = '{"pets": ["dog"]}' where id = auth.uid()$$, '23514', null, 'only questions from the list');
 select lives_ok($$update public.profiles set photo_book = array[auth.uid() || '/book-1.jpg'] where id = auth.uid()$$, 'Ann adds a photo book photo');
 select throws_ok(format($$update public.profiles set photo_book = array['%s/x.jpg'] where id = auth.uid()$$, pg_temp.m(2)), '23514', null, 'only photos from her own folder');
 select throws_ok($$update public.profiles set photo_book = (select array_agg(auth.uid() || '/b' || n || '.jpg') from generate_series(1, 7) n) where id = auth.uid()$$,
@@ -41,7 +41,8 @@ select results_eq(format($$select name from storage.objects where name like '%s/
   'he can open her photo book photo, but not her old photos');
 
 select pg_temp.sign_in_as(pg_temp.m(3));
-select is((select holiday_prefs ->> 'stay' from public.member_extras(pg_temp.m(1))), 'bnb', 'Cat, with Sodalis+, sees them');
+select is((select holiday_prefs -> 'stay' ->> 0 from public.member_extras(pg_temp.m(1))), 'bnb', 'Cat, with Sodalis+, sees them');
+select throws_ok($$update public.profiles set holiday_prefs = '{"season": ["any"]}' where id = auth.uid()$$, '23514', null, 'no "any time" season any more');
 select is((select holiday_locked from public.member_extras(pg_temp.m(1))), false, 'with nothing locked');
 
 select * from finish();

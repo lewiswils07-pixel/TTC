@@ -24,12 +24,12 @@ export const SHOWN_GENDERS = [
   { value: 'nonbinary', label: 'Non-binary and other identities' },
 ] as const satisfies readonly Option<Gender>[]
 
-// Travel style, pace and budget are each in order, so close answers count as
-// a partial match in matching (spec §4.2). Pace and budget have 5 (Lewis, 11 Oct).
+// Your travel style (Lewis, 11 Oct): each list is in order, so close answers
+// count as a partial match. Together they're 30 of the 100 matching points.
 export const TRAVEL_STYLES = [
-  { value: 'planner', label: 'Planner', hint: 'I like to know the plan before I go.' },
-  { value: 'mix', label: 'Bit of both', hint: 'A rough plan, with room for surprises.' },
-  { value: 'spontaneous', label: 'Spontaneous', hint: 'I prefer to go with the flow.' },
+  { value: 'planner', label: 'Plan every detail' },
+  { value: 'mix', label: 'Rough plan' },
+  { value: 'spontaneous', label: 'Spontaneous' },
 ] as const satisfies readonly Option<string>[]
 
 export const PACES = [
@@ -41,11 +41,59 @@ export const PACES = [
 ] as const satisfies readonly Option<string>[]
 
 export const BUDGETS = [
-  { value: 'shoestring', label: 'Shoestring', hint: 'As cheap as possible: hostels, picnics, free sights.' },
   { value: 'budget', label: 'Budget', hint: 'Watching the pennies: guesthouses and simple meals.' },
-  { value: 'mid', label: 'Mid-range', hint: 'Comfortable hotels and nice meals out.' },
-  { value: 'comfort', label: 'Comfort', hint: 'Treat ourselves: good hotels and fine dining.' },
+  { value: 'comfort', label: 'Comfort', hint: 'Comfortable hotels and nice meals out.' },
   { value: 'luxury', label: 'Luxury', hint: 'Five stars, first class, the works.' },
+] as const satisfies readonly Option<string>[]
+
+export const MOVING = [
+  { value: 'base', label: 'One base' },
+  { value: 'few', label: 'A few stops' },
+  { value: 'move', label: 'Always on the move' },
+] as const satisfies readonly Option<string>[]
+
+export const TRAVEL_OFTEN = [
+  { value: 'once', label: 'Once a year' },
+  { value: 'twice', label: 'Twice a year' },
+  { value: 'few', label: '2–4 times a year' },
+  { value: 'many', label: '5 or more a year' },
+] as const satisfies readonly Option<string>[]
+
+export const BOOKING = [
+  { value: 'ahead', label: 'Months ahead' },
+  { value: 'weeks', label: 'A few weeks ahead' },
+  { value: 'last', label: 'Last minute' },
+] as const satisfies readonly Option<string>[]
+
+export const GROUP_SIZES = [
+  { value: 'two', label: 'Two is plenty' },
+  { value: 'small', label: 'A small group' },
+  { value: 'more', label: 'The more the merrier' },
+] as const satisfies readonly Option<string>[]
+
+/** Every "Your travel style" question, in the order they're asked. */
+export const STYLE_QUESTIONS = [
+  { key: 'pace', label: 'Pace', options: PACES, filter: 'paces' },
+  { key: 'budget', label: 'Budget', options: BUDGETS, filter: 'budgets' },
+  { key: 'travel_style', label: 'Planning', options: TRAVEL_STYLES, filter: 'styles' },
+  { key: 'moving', label: 'Moving around', options: MOVING, filter: 'movings' },
+  { key: 'travel_often', label: 'How often you travel', options: TRAVEL_OFTEN, filter: 'travel_oftens' },
+  { key: 'booking', label: 'Booking', options: BOOKING, filter: 'bookings' },
+  { key: 'group_size', label: 'Group size', options: GROUP_SIZES, filter: 'group_sizes' },
+] as const
+
+// About you: one answer each (they rarely change from trip to trip).
+export const DRINKING = [
+  { value: 'none', label: 'Don’t drink' },
+  { value: 'sometimes', label: 'Sometimes' },
+  { value: 'socially', label: 'Socially' },
+  { value: 'often', label: 'Most evenings' },
+] as const satisfies readonly Option<string>[]
+
+export const SMOKING = [
+  { value: 'no', label: 'Non-smoker' },
+  { value: 'social', label: 'Social smoker' },
+  { value: 'yes', label: 'Smoker' },
 ] as const satisfies readonly Option<string>[]
 
 // Everyday habits (matching v2). Also in order: a clash lowers a score a
@@ -172,22 +220,13 @@ export const PERSONAL_FIELDS: readonly { key: PersonalField; label: string; opti
   { key: 'ethnicity', label: 'Ethnicity', options: ETHNICITIES },
 ]
 
-/** Holiday preferences (Lewis, 11 Oct, like Tinder's lifestyle chips). One
- *  answer each. They replace the planning question and aren't used for
- *  matching; seeing other people's is a Sodalis+ feature. */
+/** Holiday preferences (Lewis, 11 Oct): pick as many as apply, since trips
+ *  vary. Not used for matching; seeing other people's is a Sodalis+ feature. */
 export const HOLIDAY_QUESTIONS = [
-  {
-    key: 'planning',
-    label: 'Planning',
-    options: [
-      { value: 'planner', label: 'Plan every detail' },
-      { value: 'mix', label: 'Rough plan' },
-      { value: 'spontaneous', label: 'Go with the flow' },
-    ],
-  },
   {
     key: 'stay',
     label: 'Where I stay',
+    filter: 'stays',
     options: [
       { value: 'hotel', label: 'Hotel' },
       { value: 'apartment', label: 'Apartment' },
@@ -198,19 +237,9 @@ export const HOLIDAY_QUESTIONS = [
     ],
   },
   {
-    key: 'transport',
-    label: 'Getting there',
-    options: [
-      { value: 'fly', label: 'Fly' },
-      { value: 'train', label: 'Train' },
-      { value: 'drive', label: 'Drive' },
-      { value: 'ferry', label: 'Ferry or cruise' },
-      { value: 'coach', label: 'Coach' },
-    ],
-  },
-  {
     key: 'length',
     label: 'Trip length',
+    filter: 'lengths',
     options: [
       { value: 'weekend', label: 'Long weekend' },
       { value: 'week', label: 'A week' },
@@ -221,62 +250,16 @@ export const HOLIDAY_QUESTIONS = [
   {
     key: 'season',
     label: 'Favourite season',
+    filter: 'seasons',
     options: [
       { value: 'spring', label: 'Spring' },
       { value: 'summer', label: 'Summer' },
       { value: 'autumn', label: 'Autumn' },
       { value: 'winter', label: 'Winter' },
-      { value: 'any', label: 'Any time' },
     ],
   },
-  {
-    key: 'packing',
-    label: 'Packing',
-    options: [
-      { value: 'light', label: 'Hand luggage only' },
-      { value: 'case', label: 'One big case' },
-      { value: 'everything', label: 'Bring everything' },
-    ],
-  },
-  {
-    key: 'evenings',
-    label: 'Evenings',
-    options: [
-      { value: 'early', label: 'Early night' },
-      { value: 'dinner', label: 'Dinner and a drink' },
-      { value: 'late', label: 'Out late' },
-    ],
-  },
-  {
-    key: 'drinking',
-    label: 'Drinking',
-    options: [
-      { value: 'none', label: 'Don’t drink' },
-      { value: 'sometimes', label: 'Sometimes' },
-      { value: 'socially', label: 'Socially' },
-      { value: 'often', label: 'Most evenings' },
-    ],
-  },
-  {
-    key: 'smoking',
-    label: 'Smoking',
-    options: [
-      { value: 'no', label: 'Non-smoker' },
-      { value: 'social', label: 'Social smoker' },
-      { value: 'yes', label: 'Smoker' },
-    ],
-  },
-  {
-    key: 'photos',
-    label: 'Holiday photos',
-    options: [
-      { value: 'lots', label: 'Snap everything' },
-      { value: 'few', label: 'A few' },
-      { value: 'rarely', label: 'Rarely' },
-    ],
-  },
-] as const satisfies readonly { key: string; label: string; options: readonly Option<string>[] }[]
-export type HolidayPrefs = Partial<Record<(typeof HOLIDAY_QUESTIONS)[number]['key'], string>>
+] as const satisfies readonly { key: string; label: string; filter: string; options: readonly Option<string>[] }[]
+export type HolidayPrefs = Partial<Record<(typeof HOLIDAY_QUESTIONS)[number]['key'], string[]>>
 
 /** "I’m interested in" (Lewis, 11 Oct, like Hinge): Men, Women, Non-binary people, or Everyone. */
 export const INTERESTED_IN = [
@@ -290,11 +273,14 @@ export type Gender = (typeof GENDERS)[number]['value']
 export type TravelStyle = (typeof TRAVEL_STYLES)[number]['value']
 export type Pace = (typeof PACES)[number]['value']
 export type Budget = (typeof BUDGETS)[number]['value']
+export type Moving = (typeof MOVING)[number]['value']
+export type TravelOften = (typeof TRAVEL_OFTEN)[number]['value']
+export type Booking = (typeof BOOKING)[number]['value']
+export type GroupSize = (typeof GROUP_SIZES)[number]['value']
 export type RoomSharing = (typeof ROOM_SHARING)[number]['value']
 export type DayRhythm = (typeof DAY_RHYTHMS)[number]['value']
 export type Walking = (typeof WALKING)[number]['value']
 
-/** Stops on the distance slider, in miles; 0 is "your town only" and the last stop is "any distance". The database keeps km. */
 // The distance slider (Lewis, 11 Oct, like Hinge): a mile at a time up to 50,
 // then 5 at a time up to 100, then 10 at a time up to 150. Further than that
 // is the "Show people further away too" box, saved as no limit.

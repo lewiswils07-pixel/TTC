@@ -21,6 +21,7 @@ const trip = (id: string, extra: Partial<TripSuggestion> = {}): TripSuggestion =
   overlap_end: '2026-11-18',
   shared_interests: [],
   score: 50,
+  rank: 50,
   ...extra,
 })
 

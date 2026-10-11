@@ -8,7 +8,7 @@ import { myConversations } from '../lib/chat'
 import { messageOf } from '../lib/errors'
 import { homeLabel } from '../lib/matching'
 import { loadExtras, loadMemberProfile, type MemberExtras, type MemberProfile as Member } from '../lib/member'
-import { BUDGETS, DAY_RHYTHMS, DIETS, LANGUAGES, PACES, ROOM_SHARING, WALKING, ageLabel, labelFor } from '../lib/options'
+import { DIETS, STYLE_QUESTIONS, ageLabel, labelFor } from '../lib/options'
 import { usePhotoUrl } from '../lib/photo'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
@@ -81,14 +81,16 @@ export function MemberProfile() {
   const home = homeLabel(member)
   const myIds = new Set(mine?.interestIds ?? [])
   const shared = member.interests.filter((i) => myIds.has(i.id)).length
-  const travel = [
-    ['Pace', labelFor(PACES, member.pace)],
-    ['Budget', labelFor(BUDGETS, member.budget)],
-    ['Rooms', labelFor(ROOM_SHARING, member.room_sharing)],
-    ['Mornings', labelFor(DAY_RHYTHMS, member.day_rhythm)],
-    ['Walking', labelFor(WALKING, member.walking)],
-  ].filter(([, v]) => v !== 'Not set')
-  const languages = member.languages.map((code) => LANGUAGES.find((l) => l.value === code)?.label ?? code)
+  const answers: Record<string, string | null | undefined> = {
+    pace: member.pace,
+    budget: member.budget,
+    travel_style: member.travel_style,
+    moving: extras?.moving,
+    travel_often: extras?.travel_often,
+    booking: extras?.booking,
+    group_size: extras?.group_size,
+  }
+  const travel = STYLE_QUESTIONS.map((q) => [q.label, labelFor(q.options, answers[q.key] ?? null)]).filter(([, v]) => v !== 'Not set')
   const diet = member.diet.map((d) => labelFor(DIETS, d))
 
   return (
@@ -125,7 +127,7 @@ export function MemberProfile() {
           )}
         </div>
 
-        {extras && (extras.photo_book.length > 0 || extras.holiday_prefs || extras.holiday_locked || extras.sexuality || extras.religion || extras.ethnicity) && (
+        {extras && (extras.photo_book.length > 0 || extras.holiday_prefs || extras.holiday_locked || extras.sexuality || extras.religion || extras.ethnicity || extras.drinking || extras.smoking) && (
           <section className="card member-extras" aria-label={`More about ${member.display_name}`}>
             <ProfileExtras extras={extras} name={member.display_name} headingLevel={3} />
           </section>
@@ -164,7 +166,7 @@ export function MemberProfile() {
           </section>
         )}
 
-        {(travel.length > 0 || languages.length > 0 || diet.length > 0 || member.travelling_with) && (
+        {(travel.length > 0 || diet.length > 0 || member.travelling_with) && (
           <section className="card" aria-labelledby="member-travel">
             <h2 id="member-travel" className="card-title">
               How {member.display_name} travels
@@ -176,12 +178,6 @@ export function MemberProfile() {
                   <dd>{v}</dd>
                 </div>
               ))}
-              {languages.length > 0 && (
-                <div>
-                  <dt>Speaks</dt>
-                  <dd>{languages.join(', ')}</dd>
-                </div>
-              )}
               {diet.length > 0 && (
                 <div>
                   <dt>Food</dt>

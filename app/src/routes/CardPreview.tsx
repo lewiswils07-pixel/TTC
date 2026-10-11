@@ -82,6 +82,12 @@ export function CardPreview() {
               sexuality: data.more.shown_fields.includes('sexuality') ? data.more.sexuality : null,
               religion: data.more.shown_fields.includes('religion') ? data.more.religion : null,
               ethnicity: data.more.shown_fields.includes('ethnicity') ? data.more.ethnicity : null,
+              moving: profile.moving,
+              travel_often: profile.travel_often,
+              booking: profile.booking,
+              group_size: profile.group_size,
+              drinking: profile.drinking,
+              smoking: profile.smoking,
             }}
           />
         )}

@@ -22,11 +22,17 @@ const emptyProfile: Profile = {
   day_rhythm: null,
   walking: null,
   languages: [],
+  moving: null,
+  travel_often: null,
+  booking: null,
+  group_size: null,
+  drinking: null,
+  smoking: null,
   onboarded_at: null,
   member_number: null,
   home_city: null,
 }
-const prefs = { age_min: 18, age_max: 99, genders: [], max_distance_km: null }
+const prefs = { age_min: 18, age_max: 99, genders: [], max_distance_km: null, age_flexible: false, distance_flexible: false }
 const make = (p: Partial<Profile>, interestIds: number[] = [], card: MyProfile['card'] = null): MyProfile => ({
   profile: { ...emptyProfile, ...p },
   interestIds,

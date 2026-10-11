@@ -2,12 +2,12 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { FieldError } from './Field'
 import { FilterFields } from './FilterFields'
 import { messageOf } from '../lib/errors'
-import { filterErrors, getFilters, saveFilters, type Filters } from '../lib/filters'
+import { NO_PLUS_FILTERS, filterErrors, getFilters, saveFilters, type Filters } from '../lib/filters'
 import { MAX_PREF_AGE, MIN_AGE, SHOWN_GENDERS } from '../lib/options'
 import { hasPlus } from '../lib/plan'
 
 /** One Filters button at the top of Connect. It opens a sheet with every filter; "Show people" saves and refreshes who's shown. */
-export function FilterButton({ userId, homeCityId, onChanged }: { userId: string; homeCityId: number | null; onChanged: () => void }) {
+export function FilterButton({ userId, onChanged }: { userId: string; onChanged: () => void }) {
   const [filters, setFilters] = useState<Filters | null>(null)
   const [plus, setPlus] = useState(false)
   const [open, setOpen] = useState(false)
@@ -41,7 +41,6 @@ export function FilterButton({ userId, homeCityId, onChanged }: { userId: string
           start={filters}
           plus={plus}
           userId={userId}
-          homeCityId={homeCityId}
           onClose={(saved) => {
             setOpen(false)
             if (saved) {
@@ -55,7 +54,7 @@ export function FilterButton({ userId, homeCityId, onChanged }: { userId: string
   )
 }
 
-function FilterSheet({ start, plus, userId, homeCityId, onClose }: { start: Filters; plus: boolean; userId: string; homeCityId: number | null; onClose: (saved: Filters | null) => void }) {
+function FilterSheet({ start, plus, userId, onClose }: { start: Filters; plus: boolean; userId: string; onClose: (saved: Filters | null) => void }) {
   const ref = useRef<HTMLDialogElement>(null)
   const title = useId()
   const [f, setF] = useState(start)
@@ -78,8 +77,8 @@ function FilterSheet({ start, plus, userId, homeCityId, onClose }: { start: Filt
     setBusy(true)
     setError(null)
     try {
-      // ID checks don’t exist yet; planning isn't asked any more (holiday preferences replaced it).
-      await saveFilters(userId, { ...f, verified_only: false, styles: [] })
+      // ID checks don’t exist yet.
+      await saveFilters(userId, { ...f, verified_only: false })
       onClose(f)
     } catch (e) {
       setError(messageOf(e))
@@ -116,13 +115,24 @@ function FilterSheet({ start, plus, userId, homeCityId, onClose }: { start: Filt
           <button
             type="button"
             className="btn-link"
-            onClick={() => setF({ ...f, age_min: MIN_AGE, age_max: MAX_PREF_AGE, max_distance_km: null, genders: SHOWN_GENDERS.map((g) => g.value), styles: [], paces: [], budgets: [] })}
+            onClick={() =>
+              setF({
+                ...f,
+                age_min: MIN_AGE,
+                age_max: MAX_PREF_AGE,
+                max_distance_km: null,
+                genders: SHOWN_GENDERS.map((g) => g.value),
+                age_flexible: false,
+                distance_flexible: false,
+                ...NO_PLUS_FILTERS,
+              })
+            }
           >
             Clear all
           </button>
         </div>
         <div className="sheet-body">
-          <FilterFields value={f} onChange={setF} plus={plus} homeCityId={homeCityId} />
+          <FilterFields value={f} onChange={setF} plus={plus} />
         </div>
         <FieldError error={error} />
         <div className="confirm-actions sheet-actions">

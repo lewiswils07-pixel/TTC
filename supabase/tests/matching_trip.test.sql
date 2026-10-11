@@ -24,8 +24,8 @@ update public.profiles p set photo_path = p.id || '/photo.jpg',
   travel_style = v.style, pace = v.pace, budget = v.budget, onboarded_at = case when v.done then now() end,
   status = v.status
 from (values
-  (1,  'Ann', 'woman', 1960, 2644688, 'planner', 'slow', 'mid', true, 'active'),
-  (2,  'Bob', 'man',   1962, 2267057, 'planner', 'slow', 'mid', true, 'active'),
+  (1,  'Ann', 'woman', 1960, 2644688, 'planner', 'slow', 'comfort', true, 'active'),
+  (2,  'Bob', 'man',   1962, 2267057, 'planner', 'slow', 'comfort', true, 'active'),
   (3,  'Cat', 'woman', 1958, 2644688, 'spontaneous', 'packed', 'comfort', true, 'active'),
   (4,  'Dan', 'man',   1961, 2644688, null, null, null, true, 'active'),
   (5,  'Eve', 'woman', 1963, 2644688, null, null, null, true, 'active'),
@@ -75,10 +75,10 @@ select results_eq(
   $$values ('Bob'::text), ('Cat'), ('Eve')$$,
   'Ann sees Bob, Cat and Eve, best match first');
 
-select is((select score from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Bob'), 81, 'Bob scores 81 (3 of 4 interests, full overlap, same style)');
+select is((select score from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Bob'), 54, 'Bob scores 54 (3 of 8 interests, same style; the shared trip lifts his rank, not his score)');
 -- Pace and budget have 5 steps since 11 Oct, so Cat's are closer to Ann's than before (26 on 3 steps).
-select is((select score from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Cat'), 31, 'Cat scores 31');
-select is((select score from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Eve'), 14, 'Eve scores 14 (nothing in common, neutral style)');
+select is((select score from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Cat'), 33, 'Cat scores 33');
+select is((select score from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Eve'), 25, 'Eve scores 25 (nothing in common, neutral places and style)');
 
 select is((select cardinality(shared_interests) from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Bob'), 3, 'Bob''s card lists 3 shared interests');
 select is((select overlap_start from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Bob'), current_date + 32, 'Bob''s card shows when they overlap');

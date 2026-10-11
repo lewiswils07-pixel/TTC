@@ -1,7 +1,6 @@
 // "Use my location": the phone's position, used only to work out distances.
 // The database keeps it private and sets the nearest town as the home city.
 import type { City } from './cities'
-import type { Point } from './map'
 import { FriendlyError, friendlyError } from './errors'
 import { supabase } from './supabase'
 
@@ -23,17 +22,12 @@ function position(): Promise<GeolocationPosition> {
   })
 }
 
-/** Saves a spot privately and returns the nearest town, which becomes the home city. */
-export async function placeMe(spot: Point): Promise<City> {
-  const { data, error } = await supabase.rpc('set_my_location', { p_lat: spot.lat, p_lng: spot.lng }).single<City>()
+/** Finds the member, saves the spot privately, and returns the nearest town. */
+export async function locateMe(): Promise<City> {
+  const { coords } = await position()
+  const { data, error } = await supabase.rpc('set_my_location', { p_lat: coords.latitude, p_lng: coords.longitude }).single<City>()
   if (error || !data) throw friendlyError(error)
   return data
-}
-
-/** Asks the phone where the member is (it asks for permission the first time). */
-export async function findMe(): Promise<Point> {
-  const { coords } = await position()
-  return { lat: coords.latitude, lng: coords.longitude }
 }
 
 /** Forgets the saved spot, when the member picks a city by hand instead. */

@@ -14,7 +14,7 @@ describe('checkGroupName', () => {
 
 describe('group errors', () => {
   it('explains the size and invite rules', () => {
-    expect(friendlyMessage({ message: 'Groups can have up to 6 people' })).toMatch(/including you/)
+    expect(friendlyMessage({ message: 'Groups can have up to 6 people' })).toMatch(/full/)
     expect(friendlyMessage({ message: "You can only invite people you're connected with" })).toMatch(/connected/)
     expect(friendlyMessage({ message: 'Group limit reached' })).toMatch(/Sodalis\+/)
   })

@@ -16,6 +16,7 @@ const base: TripSuggestion = {
   overlap_end: '2026-11-20',
   shared_interests: ['Museums', 'Theatre', 'Local cuisine', 'Photography'],
   score: 80,
+  rank: 80,
 }
 
 describe('why we suggested someone', () => {
@@ -41,11 +42,12 @@ describe('why we suggested someone with no trip in common', () => {
     home_city: 'York',
     home_country: 'GB',
     photo_path: null,
-  travelling_with: null,
+    travelling_with: null,
     distance_km: 37,
     shared_interests: ['Museums', 'Theatre'],
     shared_places: ['Kyoto'],
     score: 60,
+    rank: 60,
   }
   it('names interests, places and roughly how far away', () => {
     expect(interestReasons(person)).toEqual(['Both into Museums and Theatre', 'You both want to visit Kyoto', 'Lives about 25 miles from you'])
@@ -58,8 +60,9 @@ describe('why we suggested someone with no trip in common', () => {
 describe('words instead of a score', () => {
   it('turns the score into a few words', () => {
     expect(fitWords(81)).toBe('Lots in common')
-    expect(fitWords(70)).toBe('Lots in common')
-    expect(fitWords(56)).toBe('Plenty in common')
-    expect(fitWords(26)).toBe('Worth a look')
+    expect(fitWords(55)).toBe('Lots in common')
+    expect(fitWords(54)).toBe('Plenty in common')
+    expect(fitWords(40)).toBe('Plenty in common')
+    expect(fitWords(39)).toBe('Worth a look')
   })
 })

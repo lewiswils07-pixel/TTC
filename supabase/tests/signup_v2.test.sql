@@ -19,9 +19,9 @@ update public.profiles set display_name = 'S' || right(id::text, 1), gender = 'w
 -- Genders
 select lives_ok($$update public.profiles set gender = 'genderfluid' where id = pg_temp.m(2)$$, 'genderfluid is a choice');
 select throws_ok($$update public.profiles set gender = 'robot' where id = pg_temp.m(2)$$, '23514', null, 'made-up genders are refused');
-select ok(public.fits_preferences(50, 'agender', row(pg_temp.m(1), 18, 99, '{nonbinary}', null, false, '{}', '{}', '{}')::public.preferences),
+select ok(public.fits_preferences(50, 'agender', jsonb_populate_record(null::public.preferences, jsonb_build_object('age_min', 18, 'age_max', 99, 'genders', '{nonbinary}'::text[]))),
   'choosing non-binary also shows agender members');
-select ok(not public.fits_preferences(50, 'another', row(pg_temp.m(1), 18, 99, '{woman}', null, false, '{}', '{}', '{}')::public.preferences),
+select ok(not public.fits_preferences(50, 'another', jsonb_populate_record(null::public.preferences, jsonb_build_object('age_min', 18, 'age_max', 99, 'genders', '{woman}'::text[]))),
   'but not to someone who only chose women');
 
 -- Recently online: 2 was here just now, 3 a week ago, 4 is blocked by 1.
