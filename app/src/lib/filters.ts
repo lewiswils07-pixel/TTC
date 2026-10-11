@@ -2,7 +2,8 @@
 // apply to everyone; the Sodalis+ filters are saved for anyone but only
 // applied by the server while the member has Sodalis+.
 import { friendlyError } from './errors'
-import type { Budget, Gender, Pace, TravelStyle } from './options'
+import { INTERESTED_IN, type Budget, type Gender, type Pace, type TravelStyle } from './options'
+import { checkAgeRange } from './validation'
 import { supabase } from './supabase'
 
 export type Filters = {
@@ -29,3 +30,22 @@ export async function saveFilters(userId: string, filters: Filters): Promise<voi
   if (error) throw friendlyError(error)
 }
 
+/** Who they'd like to meet, from sign-up (Lewis, 11 Oct). */
+export async function saveMeetPreferences(userId: string, prefs: Pick<Filters, 'genders' | 'age_min' | 'age_max' | 'max_distance_km'>): Promise<void> {
+  const { error } = await supabase.from('preferences').update(prefs).eq('profile_id', userId)
+  if (error) throw friendlyError(error)
+}
+
+/** What the "I’m interested in" row says when closed. */
+export function interestedInText(genders: readonly string[]): string {
+  if (INTERESTED_IN.every((o) => genders.includes(o.value))) return 'Everyone'
+  return (
+    INTERESTED_IN.filter((o) => genders.includes(o.value))
+      .map((o) => o.label)
+      .join(', ') || 'Choose who'
+  )
+}
+
+export function filterErrors(f: Filters) {
+  return { genders: f.genders.length ? null : 'Choose at least one option.', ages: checkAgeRange([f.age_min, f.age_max]) }
+}

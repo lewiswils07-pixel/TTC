@@ -19,7 +19,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await choose(a, /^Day/, '14')
     await choose(a, /^Month/, 'November')
     await a.getByLabel('Year').fill('1970')
-    await a.getByRole('radio', { name: 'Man', exact: true }).check({ force: true })
+    await choose(a, 'Gender', 'Man')
     await pickPlace(a, 'Leed', 'Leeds, United Kingdom')
     await a.getByRole('button', { name: /continue/i }).click()
     await expect(a.getByText(/Step 2 of 4/)).toBeVisible()
@@ -57,7 +57,10 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.getByRole('button', { name: 'Add trip' }).click()
     await expect(a.getByRole('heading', { name: /going too/ })).toBeVisible()
     other = await a.locator('.match-card h3').first().innerText()
-    await a.getByRole('button', { name: `Ask to connect with ${other}` }).first().click()
+    await a
+      .getByRole('button', { name: `Ask to connect with ${other}` })
+      .first()
+      .click()
     await a.getByLabel(/Add a note/).fill('Hello! Would you like to see the Musée d’Orsay together?')
     await a.getByRole('button', { name: 'Send request' }).click()
     await expect(a.getByText(/Request sent/)).toBeVisible()
@@ -78,8 +81,14 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await b.getByRole('button', { name: 'Only what’s needed' }).click()
     // Requests wait under Chat, with their number on the Requests tab.
     await b.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: /Chat/ }).click()
-    await b.getByRole('navigation', { name: 'Chat' }).getByRole('link', { name: /Requests/ }).click()
-    await b.getByRole('button', { name: /Accept/ }).first().click()
+    await b
+      .getByRole('navigation', { name: 'Chat' })
+      .getByRole('link', { name: /Requests/ })
+      .click()
+    await b
+      .getByRole('button', { name: /Accept/ })
+      .first()
+      .click()
     // Until they talk, Lewis waits under Other connections on Chats.
     await b.getByRole('navigation', { name: 'Chat' }).getByRole('link', { name: 'Connections' }).click()
     await b.getByRole('link', { name: 'Say hello to Lewis' }).click()
@@ -173,7 +182,10 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     const r = await newPhone(browser)
     await signIn(r, reviewer)
     await expect(r.getByText(/Step 1 of 4/)).toBeVisible()
-    await admin.from('profiles').update({ role: 'admin' }).eq('id', await idOf(reviewer))
+    await admin
+      .from('profiles')
+      .update({ role: 'admin' })
+      .eq('id', await idOf(reviewer))
     await r.goto('/admin')
     await expect(r.getByRole('heading', { name: /To review/ })).toBeVisible()
     await expect(r.locator('.queue-card', { hasText: 'Reported by' })).toContainText('Lewis')

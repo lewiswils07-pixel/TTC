@@ -6,24 +6,13 @@ import { Field } from '../components/Field'
 import { ActionBar, SaveError } from '../components/Form'
 import { useConfirm } from '../lib/useConfirm'
 import { Layout, Loading } from '../components/Layout'
-import { Segmented } from '../components/Segmented'
 import type { City } from '../lib/cities'
 import { addDays, isoDate } from '../lib/dates'
 import { rules } from '../lib/rules'
 import { messageOf } from '../lib/errors'
-import type { Option } from '../lib/options'
 import { deleteTrip, getTrip, saveTrip, type Trip } from '../lib/trips'
 import { useChecks } from '../lib/useChecks'
 import { MAX_NOTE, MAX_TRIP_DAYS, checkNote, checkTripDates } from '../lib/validation'
-
-type Flex = '0' | '1' | '3' | '7'
-const FLEXIBILITY: readonly Option<Flex>[] = [
-  { value: '0', label: 'Exact dates' },
-  { value: '1', label: '1 day either way' },
-  { value: '3', label: '3 days either way' },
-  { value: '7', label: '1 week either way' },
-]
-const toFlex = (days: number): Flex => (FLEXIBILITY.find((f) => Number(f.value) >= days)?.value ?? '7')
 
 /** Add a trip (/trips/new) or change one (/trips/:id/edit). */
 export function TripForm() {
@@ -73,7 +62,6 @@ function TripEditor({ trip }: { trip: Trip | null }) {
   const [city, setCity] = useState<City | null>(trip?.city ?? picked ?? null)
   const [start, setStart] = useState(trip?.start_date ?? '')
   const [end, setEnd] = useState(trip?.end_date ?? '')
-  const [flex, setFlex] = useState<Flex>(toFlex(trip?.flexible_days ?? 0))
   const [note, setNote] = useState(trip?.note ?? '')
   const [visible, setVisible] = useState(trip ? trip.visibility === 'members' : true)
   const [busy, setBusy] = useState(false)
@@ -103,7 +91,8 @@ function TripEditor({ trip }: { trip: Trip | null }) {
           city_id: city!.id,
           start_date: start,
           end_date: end,
-          flexible_days: Number(flex),
+          // "Give or take" dates are gone (Lewis, 11 Oct); close dates still count in matching.
+          flexible_days: trip?.flexible_days ?? 0,
           note: note.trim() || null,
           visibility: visible ? 'members' : 'hidden',
         },
@@ -166,14 +155,6 @@ function TripEditor({ trip }: { trip: Trip | null }) {
               touch('start')
               if (e) touch('end')
             }}
-          />
-          <Segmented
-            name="flex"
-            legend="How flexible are your dates?"
-            hint="We’ll also suggest people whose dates are close to yours."
-            options={FLEXIBILITY}
-            selected={[flex]}
-            onChange={([v]) => setFlex(v)}
           />
           <details className="more-options" open={!!trip?.note || (trip ? trip.visibility === 'hidden' : false)}>
             <summary>Add a note or keep it private</summary>

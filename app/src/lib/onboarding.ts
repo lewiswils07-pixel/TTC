@@ -14,7 +14,7 @@ export const stepLink = (name: StepName) => `/onboarding?step=${STEP[name]}`
 export function firstUnfinishedStep({ profile, interestIds, card }: MyProfile): number {
   if (!profile.display_name || !profile.birth_year || !profile.gender || !profile.home_city_id) return STEP.basics
   if (interestIds.length < INTERESTS_TO_PICK) return profile.photo_path || profile.bio ? STEP.interests : STEP.photo
-  // Then the back of the card (once it's live); "How you travel" is optional, later.
-  if (card && !hasCard(card)) return STEP.card
+  // The back of the card is optional (Lewis, 11 Oct), so a half-finished sign-up goes back to it only if it's empty.
+  if (!profile.onboarded_at && card && !hasCard(card)) return STEP.card
   return STEP.interests
 }

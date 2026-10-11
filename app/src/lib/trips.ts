@@ -77,12 +77,6 @@ export async function removeFromWishlist(cityId: number): Promise<void> {
   if (error) throw friendlyError(error)
 }
 
-export function flexibilityLabel(days: number): string | null {
-  if (!days) return null
-  // Non-breaking spaces keep "3 days" together on narrow screens.
-  return days === 7 ? 'Give or take 1\u00a0week' : `Give or take ${days}\u00a0day${days === 1 ? '' : 's'}`
-}
-
 export type PopularPlace = { city_id: number; city: string; country_code: string; members: number }
 
 /** Cities several members are heading to soon, busiest first. Empty on a database without it yet. */

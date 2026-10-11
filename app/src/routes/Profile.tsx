@@ -6,7 +6,7 @@ import { dismissNotice, iAmAdmin, myNotices, type Notice } from '../lib/admin'
 import { answerMeet, meetPrompts, type MeetPrompt } from '../lib/meet'
 import { Avatar } from '../components/Avatar'
 import { cityLabel } from '../lib/cities'
-import { BUDGETS, GENDERS, MAX_PREF_AGE, MIN_AGE, PACES, TRAVEL_STYLES, ageFromDate, ageLabel, labelFor } from '../lib/options'
+import { BUDGETS, MAX_PREF_AGE, MIN_AGE, PACES, ageFromDate, ageLabel, labelFor } from '../lib/options'
 import type { Card } from '../lib/card'
 import { profileStrength } from '../lib/strength'
 import { answerNps, npsDue } from '../lib/kpis'
@@ -15,7 +15,7 @@ import { messageOf } from '../lib/errors'
 import { stepLink } from '../lib/onboarding'
 import { brand } from '../lib/brand'
 import { count, rules } from '../lib/rules'
-import { photoUrl } from '../lib/photo'
+import { usePhotoUrl } from '../lib/photo'
 import { listInterests, type Interest, type MyProfile, type Profile } from '../lib/profile'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
@@ -23,6 +23,8 @@ import { plusPrice, plusUntil, stopMyPlus } from '../lib/plan'
 import { useConfirm } from '../lib/useConfirm'
 import { HubRow } from '../components/HubRow'
 import { EmergencyNumbers } from '../components/EmergencyNumbers'
+import { interestedInText } from '../lib/filters'
+import { HolidayChips } from '../components/ProfileExtras'
 
 type HubTab = 'me' | 'safety' | 'plus'
 const HUB_TABS: { key: HubTab; label: string }[] = [
@@ -53,11 +55,7 @@ export function Profile() {
   const { data, error, reload } = useMyProfile(session!.user.id)
   const [params, setParams] = useSearchParams()
   const tab: HubTab = HUB_TABS.some((t) => t.key === params.get('tab')) ? (params.get('tab') as HubTab) : 'me'
-  const [photo, setPhoto] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (data?.profile.photo_path) photoUrl(data.profile.photo_path).then(setPhoto)
-  }, [data?.profile.photo_path])
+  const photo = usePhotoUrl(data?.profile.photo_path)
 
   const actions = (
     <div className="hub-actions">
@@ -166,7 +164,7 @@ function MyProfilePanel({ data, hasPhoto }: { data: MyProfile; hasPhoto: boolean
   }, [])
 
   const { profile, interestIds, preferences } = data
-  const travel = [labelFor(TRAVEL_STYLES, profile.travel_style), labelFor(PACES, profile.pace), labelFor(BUDGETS, profile.budget)].filter((l) => l !== 'Not set')
+  const travel = [labelFor(PACES, profile.pace), labelFor(BUDGETS, profile.budget)].filter((l) => l !== 'Not set')
   const myInterests = interests.filter((i) => interestIds.includes(i.id)).map((i) => i.label)
 
   return (
@@ -201,10 +199,18 @@ function MyProfilePanel({ data, hasPhoto }: { data: MyProfile; hasPhoto: boolean
               <dd>{travel.join(' · ')}</dd>
             </div>
           )}
+          {data.more && Object.keys(data.more.holiday_prefs).length > 0 && (
+            <div>
+              <dt>Holiday preferences</dt>
+              <dd>
+                <HolidayChips prefs={data.more.holiday_prefs} />
+              </dd>
+            </div>
+          )}
           <div>
             <dt>Looking for</dt>
             <dd>
-              {preferences.genders.map((g) => labelFor(GENDERS, g)).join(', ')}, aged {preferences.age_min} to {preferences.age_max >= MAX_PREF_AGE ? `${MAX_PREF_AGE}+` : preferences.age_max}
+              {interestedInText(preferences.genders)}, aged {preferences.age_min} to {preferences.age_max >= MAX_PREF_AGE ? `${MAX_PREF_AGE}+` : preferences.age_max}
               {preferences.age_min <= MIN_AGE && preferences.age_max >= MAX_PREF_AGE && (
                 <>
                   {' '}
@@ -319,7 +325,8 @@ function PlusPanel() {
   const has = until !== undefined
   const perks = [
     { icon: ICONS.people, title: 'Connect with as many people as you like' },
-    { icon: ICONS.filters, title: 'Filter by planning style, pace and budget' },
+    { icon: ICONS.tour, title: 'See everyone’s holiday preferences' },
+    { icon: ICONS.filters, title: 'Filter by pace and budget' },
     { icon: ICONS.star, title: `Start up to ${count(rules.groups.maxOwnedPlus, 'group')} at once` },
   ]
   return (

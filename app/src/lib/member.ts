@@ -3,7 +3,7 @@
 import { cleanAnswers, loadCard, type CardAnswer } from './card'
 import { myConnections } from './connections'
 import { friendlyError } from './errors'
-import type { Budget, DayRhythm, Pace, RoomSharing, TravelStyle, Walking } from './options'
+import type { Budget, DayRhythm, HolidayPrefs, Pace, RoomSharing, TravelStyle, Walking } from './options'
 import { supabase } from './supabase'
 
 export type MemberProfile = {
@@ -40,7 +40,10 @@ export async function loadMemberProfile(profileId: string): Promise<MemberProfil
   const row = (data as MemberProfile[] | null)?.[0]
   if (!row) return null
   // Food is a newer extra: a profile still shows if it can't be read.
-  const diet = await Promise.resolve(supabase.rpc('member_diet', { p_profile: profileId })).then((r) => r?.data, () => null)
+  const diet = await Promise.resolve(supabase.rpc('member_diet', { p_profile: profileId })).then(
+    (r) => r?.data,
+    () => null,
+  )
   return {
     ...row,
     languages: row.languages ?? [],
@@ -76,3 +79,42 @@ async function basicProfile(profileId: string): Promise<MemberProfile | null> {
     connected_at: null,
   }
 }
+
+/** The extras on someone's card and profile (Lewis, 11 Oct). Holiday
+ *  preferences come only with Sodalis+; `holiday_locked` says there are some
+ *  to see. Personal details only when the member chose to show them. */
+export type MemberExtras = {
+  photo_book: string[]
+  holiday_prefs: HolidayPrefs | null
+  holiday_locked: boolean
+  sexuality: string | null
+  religion: string | null
+  ethnicity: string | null
+}
+
+const extrasCache = new Map<string, Promise<MemberExtras | null>>()
+
+/** Null before database Part 20 is live, or when they can't be shown. */
+export function loadExtras(profileId: string): Promise<MemberExtras | null> {
+  const hit = extrasCache.get(profileId)
+  if (hit) return hit
+  const load = Promise.resolve(supabase.rpc('member_extras', { p_profile: profileId })).then(
+    ({ data, error }) => {
+      if (error) {
+        extrasCache.delete(profileId)
+        return null
+      }
+      const row = (data as MemberExtras[] | null)?.[0]
+      return row ? { ...row, photo_book: row.photo_book ?? [] } : null
+    },
+    () => {
+      extrasCache.delete(profileId)
+      return null
+    },
+  )
+  extrasCache.set(profileId, load)
+  return load
+}
+
+/** Forget a member's extras, for example after editing your own. */
+export const forgetExtras = (profileId: string) => extrasCache.delete(profileId)

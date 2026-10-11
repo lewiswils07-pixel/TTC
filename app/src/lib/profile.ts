@@ -3,7 +3,7 @@
 import type { Card } from './card'
 import type { City } from './cities'
 import { friendlyError } from './errors'
-import type { Budget, DayRhythm, Gender, Pace, RoomSharing, TravelStyle, Walking } from './options'
+import type { Budget, DayRhythm, Gender, HolidayPrefs, Pace, PersonalField, RoomSharing, TravelStyle, Walking } from './options'
 import { supabase } from './supabase'
 
 export type Interest = { id: number; slug: string; label: string; category_label?: string | null }
@@ -38,8 +38,18 @@ export type Preferences = {
   max_distance_km: number | null
 }
 
-/** `card` is null until the database part with member cards is live. */
-export type MyProfile = { profile: Profile; interestIds: number[]; preferences: Preferences; card: Card | null }
+/** Profile extras from Lewis's 11 Oct list (database Part 20). */
+export type More = {
+  sexuality: string | null
+  religion: string | null
+  ethnicity: string | null
+  shown_fields: PersonalField[]
+  holiday_prefs: HolidayPrefs
+  photo_book: string[]
+}
+
+/** `card` is null until the database part with member cards is live, and `more` until Part 20 is. */
+export type MyProfile = { profile: Profile; interestIds: number[]; preferences: Preferences; card: Card | null; more: More | null }
 
 // The foreign key is named because profiles also reach cities through the
 // wishlist table, which would make a plain cities(...) embed ambiguous.
@@ -47,12 +57,13 @@ const PROFILE_COLUMNS =
   'id, display_name, birth_year, birth_date, gender, home_city_id, bio, photo_path, travel_style, pace, budget, mobility_note, travelling_with, room_sharing, day_rhythm, walking, languages, onboarded_at, member_number, home_city:cities!profiles_home_city_id_fkey(id, name, country_code)'
 
 export async function getMyProfile(userId: string): Promise<MyProfile> {
-  const [profile, interests, preferences, card] = await Promise.all([
+  const [profile, interests, preferences, card, more] = await Promise.all([
     supabase.from('profiles').select(PROFILE_COLUMNS).eq('id', userId).single(),
     supabase.from('profile_interests').select('interest_id').eq('profile_id', userId),
     supabase.from('preferences').select('age_min, age_max, genders, max_distance_km').eq('profile_id', userId).single(),
     // Read on its own so the rest of the profile still loads before the card columns exist.
     supabase.from('profiles').select('card_answers').eq('id', userId).single(),
+    supabase.from('profiles').select('sexuality, religion, ethnicity, shown_fields, holiday_prefs, photo_book').eq('id', userId).single(),
   ])
   const error = profile.error ?? interests.error ?? preferences.error
   if (error) throw friendlyError(error)
@@ -61,15 +72,13 @@ export async function getMyProfile(userId: string): Promise<MyProfile> {
     interestIds: (interests.data ?? []).map((row) => row.interest_id as number),
     preferences: preferences.data as Preferences,
     card: card.error ? null : (card.data as Card),
+    more: more.error ? null : (more.data as More),
   }
 }
 
 export type Basics = Pick<Profile, 'display_name' | 'birth_date' | 'gender' | 'home_city_id'>
 export type AboutMe = Pick<Profile, 'bio'>
-export type Style = Pick<
-  Profile,
-  'travel_style' | 'pace' | 'budget' | 'mobility_note' | 'travelling_with' | 'room_sharing' | 'day_rhythm' | 'walking' | 'languages'
->
+export type Style = Pick<Profile, 'pace' | 'budget' | 'travelling_with' | 'room_sharing' | 'day_rhythm' | 'walking' | 'languages'> & Partial<Pick<Profile, 'travel_style'>>
 
 async function updateProfile(userId: string, fields: Partial<Profile>): Promise<void> {
   const { error } = await supabase.from('profiles').update(fields).eq('id', userId)
@@ -78,6 +87,11 @@ async function updateProfile(userId: string, fields: Partial<Profile>): Promise<
 
 export const saveBasics = (userId: string, basics: Basics) => updateProfile(userId, basics)
 export const saveAboutMe = (userId: string, about: AboutMe) => updateProfile(userId, about)
+
+export async function saveMore(userId: string, more: Partial<More>): Promise<void> {
+  const { error } = await supabase.from('profiles').update(more).eq('id', userId)
+  if (error) throw friendlyError(error)
+}
 
 export async function listInterests(): Promise<Interest[]> {
   // '*' so this works before and after the categories migration.

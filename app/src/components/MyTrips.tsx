@@ -6,7 +6,7 @@ import { cityLabel, type City } from '../lib/cities'
 import { tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { rules } from '../lib/rules'
-import { addToWishlist, flexibilityLabel, listMyTrips, listWishlist, removeFromWishlist, type Trip, type WishlistItem } from '../lib/trips'
+import { addToWishlist, listMyTrips, listWishlist, removeFromWishlist, type Trip, type WishlistItem } from '../lib/trips'
 import { CityPicker } from './CityPicker'
 
 const MAX_WISHLIST = rules.wishlist.max
@@ -57,10 +57,7 @@ export function MyTrips() {
                 </span>
                 <span className="trip-text">
                   <strong>{cityLabel(trip.city)}</strong>
-                  <span className="trip-meta">
-                    {tripDates(trip.start_date, trip.end_date)}
-                    {flexibilityLabel(trip.flexible_days) && ` · ${flexibilityLabel(trip.flexible_days)}`}
-                  </span>
+                  <span className="trip-meta">{tripDates(trip.start_date, trip.end_date)}</span>
                   {trip.visibility === 'hidden' && <span className="tag tag-muted">Hidden</span>}
                 </span>
                 <span className="trip-chevron" aria-hidden="true">

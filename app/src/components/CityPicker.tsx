@@ -23,6 +23,15 @@ export function CityPicker({ label, hint, value, onChange, search = searchCities
   const [active, setActive] = useState(-1)
   const [loadError, setError] = useState<string | null>(null)
   const [searched, setSearched] = useState('')
+  // When the city is set from outside (“Use my location”), show it in the box (Lewis, 11 Oct).
+  const [shownId, setShownId] = useState(value?.id ?? null)
+  if ((value?.id ?? null) !== shownId) {
+    setShownId(value?.id ?? null)
+    if (value) {
+      setText(cityLabel(value))
+      setOpen(false)
+    }
+  }
 
   useEffect(() => {
     if (!open) return
@@ -110,14 +119,7 @@ export function CityPicker({ label, hint, value, onChange, search = searchCities
       />
       <ul ref={list} className="options" id={listId} role="listbox" aria-label={label} hidden={!showList}>
         {results.map((city, i) => (
-          <li
-            key={city.id}
-            id={`${id}-opt-${i}`}
-            role="option"
-            aria-selected={i === active}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => choose(city)}
-          >
+          <li key={city.id} id={`${id}-opt-${i}`} role="option" aria-selected={i === active} onMouseDown={(e) => e.preventDefault()} onClick={() => choose(city)}>
             {cityLabel(city)}
           </li>
         ))}

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { friendlyError } from './errors'
 import { supabase } from './supabase'
 
@@ -22,4 +23,23 @@ export async function searchCities(query: string): Promise<City[]> {
   const { data, error } = await supabase.rpc('search_cities', { q })
   if (error) throw friendlyError(error)
   return (data ?? []) as City[]
+}
+
+export type Spot = { lat: number; lng: number; name: string }
+
+/** A home town's place on the map (cities are public reference data). */
+export function useHomeSpot(cityId: number | null | undefined): Spot | null {
+  const [spot, setSpot] = useState<Spot | null>(null)
+  useEffect(() => {
+    if (!cityId) return
+    let live = true
+    Promise.resolve(supabase.from('cities').select('lat, lng, name').eq('id', cityId).single()).then(
+      ({ data }) => live && data && setSpot(data as Spot),
+      () => undefined,
+    )
+    return () => {
+      live = false
+    }
+  }, [cityId])
+  return cityId ? spot : null
 }

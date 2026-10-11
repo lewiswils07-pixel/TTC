@@ -6,7 +6,7 @@ import { TextField } from '../components/Field'
 import { useConfirm } from '../lib/useConfirm'
 import { Layout, Loading } from '../components/Layout'
 import { PICKS, picksFor } from '../data/picks'
-import { addIdea, checkIdea, checkLink, dayLabel, deleteIdea, editIdea, MAX_IDEA, normalizeLink, planBoard, setDone, toggleVote, type Idea } from '../lib/board'
+import { addIdea, checkIdea, dayLabel, deleteIdea, editIdea, MAX_IDEA, planBoard, setDone, toggleVote, type Idea } from '../lib/board'
 import { IdeaEditor } from '../components/TripPlanner'
 import { myConversations, type Conversation } from '../lib/chat'
 import { daysBetween } from '../lib/dates'
@@ -263,10 +263,9 @@ export function PlanBoard() {
 function AddIdea({ conversationId, days, start, onAdded }: { conversationId: number; days: number; start?: string; onAdded: (title: string) => void }) {
   const [title, setTitle] = useState('')
   const [day, setDay] = useState('')
-  const [url, setUrl] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { shown, touch, validateAll, reset } = useChecks({ idea: checkIdea(title), link: checkLink(normalizeLink(url)) })
+  const { shown, touch, validateAll, reset } = useChecks({ idea: checkIdea(title) })
 
   async function submit(e: FormEvent) {
     e.preventDefault()
@@ -274,11 +273,11 @@ function AddIdea({ conversationId, days, start, onAdded }: { conversationId: num
     setBusy(true)
     setError(null)
     try {
-      await addIdea(conversationId, title, day ? Number(day) : null, normalizeLink(url))
+      // No link box any more (Lewis, 11 Oct): just the idea and a day.
+      await addIdea(conversationId, title, day ? Number(day) : null, '')
       onAdded(title.trim())
       setTitle('')
       setDay('')
-      setUrl('')
       reset()
     } catch (err) {
       setError(messageOf(err))
@@ -315,24 +314,6 @@ function AddIdea({ conversationId, days, start, onAdded }: { conversationId: num
           onChange={setDay}
         />
       </div>
-      <TextField
-        name="link"
-        label="Link (optional)"
-        hint="A web page with details, such as opening times or tickets."
-        type="url"
-        inputMode="url"
-        placeholder="https://"
-        value={url}
-        error={shown('link')}
-        onChange={(e) => {
-          setUrl(e.target.value)
-          if (shown('link')) touch('link')
-        }}
-        onBlur={() => {
-          setUrl(normalizeLink(url))
-          touch('link')
-        }}
-      />
       {error && (
         <p className="notice notice-error" role="alert">
           {error}

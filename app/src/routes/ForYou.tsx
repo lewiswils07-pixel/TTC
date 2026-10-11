@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { Link, Navigate, useSearchParams } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { CardBack } from '../components/CardBack'
+import { ProfileExtras } from '../components/ProfileExtras'
 import { SafetyBox } from '../components/SafetyBox'
 import { SkeletonFeedCard } from '../components/Skeleton'
 import { SameTimeStrip } from '../components/SameTimeStrip'
@@ -18,9 +19,10 @@ import { noteFirstMatch } from '../lib/kpis'
 import { requestsLeftText } from '../lib/plan'
 import { fitWords, homeLabel } from '../lib/matching'
 import { ageLabel, INTERESTS_TO_PICK } from '../lib/options'
-import { photoUrl } from '../lib/photo'
+import { preloadPhotos, usePhotoUrl } from '../lib/photo'
 import { roughly } from '../lib/rules'
 import { useSession } from '../lib/session-context'
+import { loadExtras, type MemberExtras } from '../lib/member'
 import { wishlistOf } from '../lib/trips'
 import { useMyProfile } from '../lib/useMyProfile'
 
@@ -55,6 +57,10 @@ export function ForYou() {
       (e) => setError(messageOf(e)),
     )
   }, [me])
+  // The next few people's photos load while you look at this one (Lewis, 11 Oct: photos lagged).
+  useEffect(() => {
+    if (people) preloadPhotos(people.slice(0, 4).map((p) => p.photo_path))
+  }, [people])
 
   if (profileError) {
     return (
@@ -117,7 +123,7 @@ export function ForYou() {
         <h1 ref={heading} tabIndex={-1}>
           Connect
         </h1>
-        <FilterButton userId={me} onChanged={refresh} />
+        <FilterButton userId={me} homeCityId={data.profile.home_city_id} onChanged={refresh} />
       </div>
       <div role="status">
         {status && (
@@ -205,7 +211,6 @@ function PersonCard({
 }) {
   const [connecting, setConnecting] = useState(false)
   const [drag, setDrag] = useState<{ from: number; x: number } | null>(null)
-  const [photo, setPhoto] = useState<string | null>(null)
   const [flipped, setFlipped] = useState(false)
   const [back, setBack] = useState<CardAnswer[] | 'error' | null>(null)
   const moved = useRef(0)
@@ -228,11 +233,13 @@ function PersonCard({
   const x = drag?.x ?? 0
   const [places, setPlaces] = useState<string[]>([])
 
-  useEffect(() => {
-    if (person.photo_path) photoUrl(person.photo_path).then(setPhoto, () => undefined)
-  }, [person.photo_path])
+  const photo = usePhotoUrl(person.photo_path)
   useEffect(() => {
     wishlistOf(person.profile_id).then(setPlaces)
+  }, [person.profile_id])
+  const [extras, setExtras] = useState<MemberExtras | null>(null)
+  useEffect(() => {
+    loadExtras(person.profile_id).then(setExtras)
   }, [person.profile_id])
 
   function down(e: PointerEvent<HTMLDivElement>) {
@@ -274,13 +281,13 @@ function PersonCard({
               onPointerCancel={() => setDrag(null)}
             >
               {photo ? (
-                <img src={photo} alt="" draggable={false} />
+                <img src={photo} alt="" draggable={false} decoding="async" />
               ) : (
                 <span className="feed-initial" aria-hidden="true">
                   {person.display_name.slice(0, 1).toUpperCase()}
                 </span>
               )}
-              {x > 40 && <span className="swipe-label swipe-yes">Travel together</span>}
+              {x > 40 && <span className="swipe-label swipe-yes">Connect</span>}
               {x < -40 && <span className="swipe-label swipe-no">Skip</span>}
               <div className="feed-who">
                 {person.online && (
@@ -326,6 +333,7 @@ function PersonCard({
                 </ul>
               </div>
             )}
+            <ProfileExtras extras={extras} name={person.display_name} />
             {person.travelling_with && <p className="feed-detail">Travels with: {person.travelling_with}</p>}
           </div>
           <section className="feed-face feed-back" inert={!flipped} aria-label={`The back of ${person.display_name}’s card`}>
@@ -367,9 +375,9 @@ function PersonCard({
               setFlipped(false)
               setConnecting(true)
             }}
-            aria-label={`Travel together with ${person.display_name}`}
+            aria-label={`Connect with ${person.display_name}`}
           >
-            {requests.left > 0 ? 'Travel together' : 'No requests left this week'}
+            {requests.left > 0 ? 'Connect' : 'No requests left this week'}
           </button>
         </div>
       )}
