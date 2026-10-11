@@ -121,8 +121,8 @@ export function callouts(p: FeedPerson, myHomeCity: string | null, today?: strin
   )
   // Kept general on purpose (Lewis, 5 Oct): the card lists the interests themselves.
   if (p.shared_interests.length >= SIMILAR_INTERESTS) lines.push({ kind: 'interests', text: 'Similar interests' })
-  if (myHomeCity && p.home_city === myHomeCity) lines.push({ kind: 'home', text: p.home_city, hint: 'lives in your town' })
-  else if (p.distance_km !== null && p.distance_km < 30) lines.push({ kind: 'home', text: 'Near you' })
+  // Their town is already on the photo (Lewis, 11 Oct), so only say when they're nearby but elsewhere.
+  if (p.distance_km !== null && p.distance_km < 30 && p.home_city !== myHomeCity) lines.push({ kind: 'home', text: 'Near you' })
   if (p.shared_places.length) lines.push({ kind: 'places', text: `Wants to visit ${listLabels(p.shared_places)}` })
   return lines
 }

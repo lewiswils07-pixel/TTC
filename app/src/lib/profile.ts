@@ -86,7 +86,7 @@ export async function getMyProfile(userId: string): Promise<MyProfile> {
 
 export type Basics = Pick<Profile, 'display_name' | 'birth_date' | 'gender' | 'home_city_id'>
 export type AboutMe = Pick<Profile, 'bio'>
-export type Style = Pick<Profile, 'pace' | 'budget' | 'travel_style' | 'moving' | 'travel_often' | 'booking' | 'group_size' | 'travelling_with' | 'drinking' | 'smoking'>
+export type Style = Pick<Profile, 'pace' | 'budget' | 'travel_style' | 'moving' | 'travel_often' | 'booking' | 'group_size' | 'travelling_with'>
 
 async function updateProfile(userId: string, fields: Partial<Profile>): Promise<void> {
   const { error } = await supabase.from('profiles').update(fields).eq('id', userId)

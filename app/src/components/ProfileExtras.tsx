@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { brand } from '../lib/brand'
 import type { MemberExtras } from '../lib/member'
-import { DRINKING, HOLIDAY_QUESTIONS, PERSONAL_FIELDS, SMOKING, labelFor, type HolidayPrefs } from '../lib/options'
+import { HOLIDAY_QUESTIONS, PERSONAL_FIELDS, type HolidayPrefs } from '../lib/options'
 import { usePhotoUrl } from '../lib/photo'
 
 /** Holiday preferences as small labelled chips, like Tinder's lifestyle row. */
@@ -28,8 +28,6 @@ export function ProfileExtras({ extras, name, headingLevel = 4 }: { extras: Memb
   if (!extras) return null
   const H = `h${headingLevel}` as 'h3' | 'h4'
   const personal = [
-    ...(extras.drinking ? [{ key: 'drinking', label: labelFor(DRINKING, extras.drinking) }] : []),
-    ...(extras.smoking ? [{ key: 'smoking', label: labelFor(SMOKING, extras.smoking) }] : []),
     ...PERSONAL_FIELDS.flatMap((f) => {
       const label = f.options.find((o) => o.value === extras[f.key])?.label
       return label ? [{ key: f.key, label }] : []

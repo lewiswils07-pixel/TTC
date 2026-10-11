@@ -56,7 +56,6 @@ describe('the For you feed', () => {
       // Date ranges are spaced differently by different Node versions.
       `Lisbon · ${shortDates('2026-11-10', '2026-11-20', '2026-10-07')}`,
       'Similar interests',
-      'Leeds',
       'Wants to visit Rome',
     ])
     expect(callouts(ann, 'Leeds')[0]).toMatchObject({ kind: 'trip', hint: 'same dates as you' })
