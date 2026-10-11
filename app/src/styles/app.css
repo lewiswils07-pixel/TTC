@@ -1427,7 +1427,14 @@ html { scroll-padding-bottom: 7rem; }
 .interest-count strong { color: var(--accent); }
 .interest-count.is-full strong { color: var(--accent); }
 .interest-more { margin-top: var(--space-3); }
-.interest-pool .interest-type { padding: 0; margin-bottom: var(--space-3); font-weight: 800; }
+.interest-pool { padding: var(--space-3); }
+/* The heading sits inside its box, not on the border (Lewis, 11 Oct). */
+.interest-pool .interest-type { float: left; width: 100%; padding: 0; margin: 0 0 var(--space-3); font-size: 1rem; font-weight: 800; color: var(--ink); }
+.interest-pool .interest-type + .chips { clear: both; }
+/* Tighter bubbles, so three fit on a row more often. */
+.interests .chips { gap: 6px; }
+.interests .chips-compact .chip span { min-height: 36px; padding: 0 10px 0 6px; gap: 4px; font-size: 0.875rem; }
+.interests .chip-plus i { width: 18px; height: 18px; font-size: 0.75rem; }
 
 /* Holiday preferences and personal details on cards and profiles. */
 .holiday-chips .tag-pref { gap: 6px; background: var(--card); border: 1px solid var(--line); font-weight: 600; }
