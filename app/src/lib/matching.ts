@@ -20,6 +20,8 @@ export type TripSuggestion = {
   overlap_end: string | null
   shared_interests: string[]
   score: number
+  /** Ordering only (filters, activity and the same-trip bump). */
+  rank: number
 }
 
 /** Members going to the same place at the same time, best match first. */
@@ -53,10 +55,10 @@ export async function tripCompanions(tripId: number): Promise<TripCompanion[]> {
 }
 
 /** Words instead of a number on each card (Lewis, 5 Oct). Thresholds suit
- *  the 0 to 100 score from the database. */
+ *  the 0 to 100 score from the database (lowered 11 Oct after the simulation). */
 export function fitWords(score: number): string {
-  if (score >= 70) return 'Lots in common'
-  if (score >= 50) return 'Plenty in common'
+  if (score >= 55) return 'Lots in common'
+  if (score >= 40) return 'Plenty in common'
   return 'Worth a look'
 }
 
@@ -72,11 +74,7 @@ export function reasons(s: TripSuggestion, myCityName: string): string[] {
   const lines: string[] = []
   if (s.shared_interests.length) lines.push(`Both into ${listLabels(s.shared_interests)}`)
   const where = s.trip_city === myCityName ? '' : ` in ${s.trip_city}`
-  lines.push(
-    s.overlap_start && s.overlap_end
-      ? `There at the same time${where}: ${tripDates(s.overlap_start, s.overlap_end)}`
-      : `Dates close to yours${where}: ${tripDates(s.trip_start, s.trip_end)}`,
-  )
+  lines.push(s.overlap_start && s.overlap_end ? `There at the same time${where}: ${tripDates(s.overlap_start, s.overlap_end)}` : `Dates close to yours${where}: ${tripDates(s.trip_start, s.trip_end)}`)
   return lines
 }
 
@@ -96,9 +94,10 @@ export type InterestSuggestion = {
   shared_interests: string[]
   shared_places: string[]
   score: number
+  rank: number
 }
 
-/** Up to 20 members who share at least 2 interests, for planning something new. */
+/** Members ranked on interests, places and travel style, for planning something new. */
 export async function suggestByInterests(): Promise<InterestSuggestion[]> {
   const { data, error } = await supabase.rpc('suggest_by_interests')
   if (error) throw friendlyError(error)

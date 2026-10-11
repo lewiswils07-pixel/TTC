@@ -3,12 +3,10 @@ import { AgeRange } from './AgeRange'
 import { ChipChoice } from './ChipChoice'
 import { DistanceSlider } from './DistanceSlider'
 import { FieldError } from './Field'
-import { HomeMap } from './HomeMap'
-import { useHomeSpot } from '../lib/cities'
 import { InterestedIn } from './InterestedIn'
 import { brand } from '../lib/brand'
-import { filterErrors, interestedInText, type Filters } from '../lib/filters'
-import { BUDGETS, DISTANCE_MILES, MAX_PREF_AGE, MIN_AGE, PACES, distanceLabel, distanceStop } from '../lib/options'
+import { filterErrors, interestedInText, type Filters, type PlusFilter } from '../lib/filters'
+import { HOLIDAY_QUESTIONS, MAX_PREF_AGE, MIN_AGE, STYLE_QUESTIONS, distanceLabel } from '../lib/options'
 
 const ageText = (min: number, max: number) => `${min} to ${max >= MAX_PREF_AGE ? `${MAX_PREF_AGE}+` : max}`
 const listText = (chosen: readonly string[], options: readonly { value: string; label: string }[]) =>
@@ -21,16 +19,17 @@ const listText = (chosen: readonly string[], options: readonly { value: string; 
 
 /** Every filter as a list of rows, like Hinge (Lewis, 11 Oct: the boxes were
  *  clunky). Each row shows its setting and opens to change it. */
-export function FilterFields({ value: f, onChange, plus, homeCityId }: { value: Filters; onChange: (next: Filters) => void; plus: boolean; homeCityId: number | null }) {
+export function FilterFields({ value: f, onChange, plus }: { value: Filters; onChange: (next: Filters) => void; plus: boolean }) {
   const [open, setOpen] = useState<string | null>(null)
   const set = (change: Partial<Filters>) => onChange({ ...f, ...change })
   const errors = filterErrors(f)
-  const spot = useHomeSpot(homeCityId)
   const row = (key: string, label: string, summary: string, body: ReactNode, error?: string | null) => (
     <FilterRow key={key} label={label} summary={summary} open={open === key || !!error} onToggle={() => setOpen(open === key ? null : key)}>
       {body}
     </FilterRow>
   )
+  const plusRow = (key: PlusFilter, label: string, options: readonly { value: string; label: string }[]) =>
+    row(key, label, listText(f[key], options), <ChipChoice name={key} legend={label} options={options} selected={f[key]} onChange={(chosen) => set({ [key]: chosen })} multiple />)
   return (
     <div className="filter-rows">
       <h3 className="filter-group">Member preferences</h3>
@@ -48,16 +47,17 @@ export function FilterFields({ value: f, onChange, plus, homeCityId }: { value: 
         <>
           <AgeRange legend="Age range" min={MIN_AGE} max={MAX_PREF_AGE} value={[f.age_min, f.age_max]} onChange={([age_min, age_max]) => set({ age_min, age_max })} />
           <FieldError error={errors.ages} />
+          <Flexible label="Show people a little outside this range" checked={f.age_flexible} onChange={(age_flexible) => set({ age_flexible })} />
         </>,
         errors.ages,
       )}
       {row(
         'distance',
         'Maximum distance',
-        distanceLabel(DISTANCE_MILES[distanceStop(f.max_distance_km)]),
+        distanceLabel(f.max_distance_km),
         <>
           <DistanceSlider km={f.max_distance_km} onChange={(max_distance_km) => set({ max_distance_km })} />
-          {spot && <HomeMap spot={spot} km={f.max_distance_km} />}
+          {f.max_distance_km !== null && <Flexible label="Show people a bit further away too" checked={f.distance_flexible} onChange={(distance_flexible) => set({ distance_flexible })} />}
         </>,
       )}
       <div className="filter-group filter-group-plus">
@@ -69,8 +69,9 @@ export function FilterFields({ value: f, onChange, plus, homeCityId }: { value: 
           These come with {brand.plusName}. You can set them now, and they’ll start working when you have {brand.plusName}.
         </p>
       )}
-      {row('paces', 'Pace', listText(f.paces, PACES), <ChipChoice name="paces" legend="Pace" options={PACES} selected={f.paces} onChange={(paces) => set({ paces })} multiple />)}
-      {row('budgets', 'Budget', listText(f.budgets, BUDGETS), <ChipChoice name="budgets" legend="Budget" options={BUDGETS} selected={f.budgets} onChange={(budgets) => set({ budgets })} multiple />)}
+      {STYLE_QUESTIONS.map((q) => plusRow(q.filter, q.label, q.options))}
+      <h3 className="filter-group">Holiday preferences</h3>
+      {HOLIDAY_QUESTIONS.map((q) => plusRow(q.filter, q.label, q.options))}
     </div>
   )
 }
@@ -92,5 +93,15 @@ function FilterRow({ label, summary, open, onToggle, children }: { label: string
         </div>
       )}
     </div>
+  )
+}
+
+/** Hinge's "dealbreaker" switch, the other way round: ticked shows people just outside, lower down. */
+function Flexible({ label, checked, onChange }: { label: string; checked: boolean; onChange: (checked: boolean) => void }) {
+  return (
+    <label className="check-row distance-any">
+      {label}
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+    </label>
   )
 }

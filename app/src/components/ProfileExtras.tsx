@@ -2,14 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { brand } from '../lib/brand'
 import type { MemberExtras } from '../lib/member'
-import { HOLIDAY_QUESTIONS, PERSONAL_FIELDS, type HolidayPrefs } from '../lib/options'
+import { DRINKING, HOLIDAY_QUESTIONS, PERSONAL_FIELDS, SMOKING, labelFor, type HolidayPrefs } from '../lib/options'
 import { usePhotoUrl } from '../lib/photo'
 
 /** Holiday preferences as small labelled chips, like Tinder's lifestyle row. */
 export function HolidayChips({ prefs }: { prefs: HolidayPrefs }) {
   const answered = HOLIDAY_QUESTIONS.flatMap((q) => {
-    const answer = q.options.find((o) => o.value === prefs[q.key])
-    return answer ? [{ key: q.key, label: q.label, answer: answer.label }] : []
+    const answers = q.options.filter((o) => prefs[q.key]?.includes(o.value)).map((o) => o.label)
+    return answers.length ? [{ key: q.key, label: q.label, answer: answers.join(', ') }] : []
   })
   if (!answered.length) return null
   return (
@@ -27,10 +27,14 @@ export function HolidayChips({ prefs }: { prefs: HolidayPrefs }) {
 export function ProfileExtras({ extras, name, headingLevel = 4 }: { extras: MemberExtras | null; name: string; headingLevel?: 3 | 4 }) {
   if (!extras) return null
   const H = `h${headingLevel}` as 'h3' | 'h4'
-  const personal = PERSONAL_FIELDS.flatMap((f) => {
-    const label = f.options.find((o) => o.value === extras[f.key])?.label
-    return label ? [{ key: f.key, label }] : []
-  })
+  const personal = [
+    ...(extras.drinking ? [{ key: 'drinking', label: labelFor(DRINKING, extras.drinking) }] : []),
+    ...(extras.smoking ? [{ key: 'smoking', label: labelFor(SMOKING, extras.smoking) }] : []),
+    ...PERSONAL_FIELDS.flatMap((f) => {
+      const label = f.options.find((o) => o.value === extras[f.key])?.label
+      return label ? [{ key: f.key, label }] : []
+    }),
+  ]
   return (
     <>
       {extras.photo_book.length > 0 && (

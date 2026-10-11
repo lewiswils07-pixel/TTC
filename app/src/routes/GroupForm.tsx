@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { CityPicker } from '../components/CityPicker'
 import { DateRangePicker } from '../components/DateRangePicker'
@@ -64,14 +64,16 @@ function GroupEditor({ people }: { people: Connection[] }) {
   const navigate = useNavigate()
   const [today] = useState(() => isoDate(new Date()))
   const heading = useRef<HTMLHeadingElement>(null)
-  const [name, setName] = useState('')
-  const [city, setCity] = useState<City | null>(null)
+  // From "Popular right now" on Groups: a trip group going there.
+  const popular = (useLocation().state as { city?: City } | null)?.city ?? null
+  const [name, setName] = useState(popular ? `${popular.name} trip`.slice(0, MAX_GROUP_NAME) : '')
+  const [city, setCity] = useState<City | null>(popular)
   const [start, setStart] = useState('')
   const [end, setEnd] = useState('')
   const [invite, setInvite] = useState<string[]>([])
   const [trips, setTrips] = useState<Trip[]>([])
   const fromTrip = Number(useSearchParams()[0].get('trip')) || null
-  const [kind, setKind] = useState<'chat' | 'trip'>(fromTrip ? 'trip' : 'chat')
+  const [kind, setKind] = useState<'chat' | 'trip'>(fromTrip || popular ? 'trip' : 'chat')
   const forTrip = kind === 'trip'
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -135,7 +137,7 @@ function GroupEditor({ people }: { people: Connection[] }) {
         <h1 ref={heading} tabIndex={-1}>
           Start a group
         </h1>
-        <p className="lede">Up to {MAX_GROUP} people, including you. Everyone you invite chooses whether to join.</p>
+        <p className="lede">Invite as many people you’re connected with as you like. Everyone you invite chooses whether to join.</p>
 
         <div className="card form-card">
           <Segmented
@@ -208,7 +210,7 @@ function GroupEditor({ people }: { people: Connection[] }) {
           <fieldset className="field" data-field="invite" aria-describedby={shown('invite') ? 'invite-error' : 'invite-hint'}>
             <legend>Who to invite</legend>
             <p className="hint" id="invite-hint">
-              {people.length ? `Choose up to ${MAX_GROUP - 1}. ${invite.length} chosen.` : 'Only people you’re connected with can be invited.'}
+              {people.length ? `${invite.length} chosen.` : 'Only people you’re connected with can be invited.'}
             </p>
             {people.length === 0 ? (
               <Link to="/connections">Find people to travel with</Link>

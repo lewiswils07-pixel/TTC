@@ -7,14 +7,16 @@ import { supabase } from './supabase'
 function position(): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) return reject(new FriendlyError('This device can’t share its location. Please type your city instead.'))
-    navigator.geolocation.getCurrentPosition(resolve, (err) =>
-      reject(
-        new FriendlyError(
-          err.code === err.PERMISSION_DENIED
-            ? 'Location is turned off for this app. You can turn it on in your settings, or type your city instead.'
-            : 'We couldn’t find where you are. Please try again, or type your city instead.',
+    navigator.geolocation.getCurrentPosition(
+      resolve,
+      (err) =>
+        reject(
+          new FriendlyError(
+            err.code === err.PERMISSION_DENIED
+              ? 'Location is turned off for this app. You can turn it on in your settings, or type your city instead.'
+              : 'We couldn’t find where you are. Please try again, or type your city instead.',
+          ),
         ),
-      ),
       { enableHighAccuracy: false, timeout: 15_000, maximumAge: 60_000 },
     )
   })

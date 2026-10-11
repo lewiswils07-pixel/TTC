@@ -11,7 +11,6 @@ import { ActionBar, SaveError } from '../components/Form'
 import { QuestionPicker } from '../components/QuestionPicker'
 import { Dropdown } from '../components/Dropdown'
 import { ChipChoice } from '../components/ChipChoice'
-import { Segmented } from '../components/Segmented'
 import { brand } from '../lib/brand'
 import { ANSWER_MAX_CHARS, ANSWER_MAX_WORDS, ANSWERS_TO_PICK, checkAnswer, questionText, saveCard, wordCount, type CardAnswer } from '../lib/card'
 import { cityLabel, type City } from '../lib/cities'
@@ -22,30 +21,21 @@ import { saveMeetPreferences } from '../lib/filters'
 import { firstUnfinishedStep, STEP } from '../lib/onboarding'
 import { rules } from '../lib/rules'
 import {
-  BUDGETS,
-  DAY_RHYTHMS,
   DIETS,
+  DRINKING,
   GENDERS,
-  LANGUAGES,
-  MAX_LANGUAGES,
   MAX_PREF_AGE,
   MIN_AGE,
   PHOTO_BOOK_MAX,
   INTERESTS_TO_PICK,
   MONTHS,
   HOLIDAY_QUESTIONS,
-  PACES,
   PERSONAL_FIELDS,
-  ROOM_SHARING,
-  WALKING,
-  type Budget,
-  type DayRhythm,
+  SMOKING,
+  STYLE_QUESTIONS,
   type Gender,
   type HolidayPrefs,
-  type Pace,
   type PersonalField,
-  type RoomSharing,
-  type Walking,
 } from '../lib/options'
 import { addBookPhoto, photoUrl, preparePhoto, removeBookPhoto, uploadPhoto, usePhotoUrl } from '../lib/photo'
 import { forgetExtras } from '../lib/member'
@@ -551,19 +541,18 @@ function InterestsStep({ data, interests, onDone, onBack, lastStep }: Omit<StepP
   )
 }
 
+type StyleAnswers = Record<(typeof STYLE_QUESTIONS)[number]['key'], string[]>
+
 function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & { onSkip?: () => void }) {
   const p = data.profile
   const prefs = data.preferences
   const more = data.more
-  const [pace, setPace] = useState<Pace[]>(p.pace ? [p.pace] : [])
-  const [budget, setBudget] = useState<Budget[]>(p.budget ? [p.budget] : [])
+  // Your travel style (Lewis, 11 Oct): one answer to each, all optional.
+  const [style, setStyle] = useState<StyleAnswers>(() => Object.fromEntries(STYLE_QUESTIONS.map((q) => [q.key, p[q.key] ? [p[q.key]!] : []])) as StyleAnswers)
   const [travellingWith, setTravellingWith] = useState(p.travelling_with ?? '')
-  const [room, setRoom] = useState<RoomSharing[]>(p.room_sharing ? [p.room_sharing] : [])
-  const [rhythm, setRhythm] = useState<DayRhythm[]>(p.day_rhythm ? [p.day_rhythm] : [])
-  const [walking, setWalking] = useState<Walking[]>(p.walking ? [p.walking] : [])
-  const [languages, setLanguages] = useState<string[]>(p.languages ?? [])
-  // Planning moved into holiday preferences (same answers), so an earlier answer carries over.
-  const [holiday, setHoliday] = useState<HolidayPrefs>(() => ({ ...(p.travel_style ? { planning: p.travel_style } : {}), ...(more?.holiday_prefs ?? {}) }))
+  const [drinking, setDrinking] = useState<string[]>(p.drinking ? [p.drinking] : [])
+  const [smoking, setSmoking] = useState<string[]>(p.smoking ? [p.smoking] : [])
+  const [holiday, setHoliday] = useState<HolidayPrefs>(() => more?.holiday_prefs ?? {})
   const [personal, setPersonal] = useState<Pick<More, PersonalField | 'shown_fields'>>(() => ({
     sexuality: more?.sexuality ?? null,
     religion: more?.religion ?? null,
@@ -576,18 +565,20 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
   }, [userId])
 
   const { busy, error, submit } = useStepSubmit(async () => {
+    const one = (key: keyof StyleAnswers) => (style[key][0] ?? null) as never
     await saveStyleAndPreferences(
       userId,
       {
-        // Holiday preferences replace the planning question and aren't used for matching (Lewis, 11 Oct).
-        ...(more ? { travel_style: null } : {}),
-        pace: pace[0] ?? null,
-        budget: budget[0] ?? null,
+        pace: one('pace'),
+        budget: one('budget'),
+        travel_style: one('travel_style'),
+        moving: one('moving'),
+        travel_often: one('travel_often'),
+        booking: one('booking'),
+        group_size: one('group_size'),
         travelling_with: travellingWith.trim() || null,
-        room_sharing: room[0] ?? null,
-        day_rhythm: rhythm[0] ?? null,
-        walking: walking[0] ?? null,
-        languages,
+        drinking: drinking[0] ?? null,
+        smoking: smoking[0] ?? null,
       },
       prefs,
     )
@@ -603,6 +594,16 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
       }}
       noValidate
     >
+      <section className="card form-card" aria-labelledby="style-heading">
+        <h2 id="style-heading" className="card-title">
+          Your travel style
+        </h2>
+        <p className="hint">These help us find people who travel the way you do.</p>
+        {STYLE_QUESTIONS.map((q) => (
+          <ChipChoice<string> key={q.key} name={q.key} legend={q.label} options={q.options} selected={style[q.key]} onChange={(v) => setStyle((x) => ({ ...x, [q.key]: v }))} />
+        ))}
+      </section>
+
       {more && (
         <section className="card form-card" aria-labelledby="holiday-heading">
           <div className="section-head">
@@ -611,56 +612,27 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
             </h2>
             <span className="tag tag-plus">{brand.plusName}</span>
           </div>
-          <p className="hint">Members with {brand.plusName} can see these on your card. They don’t change who you’re matched with.</p>
+          <p className="hint">Pick as many as apply. Members with {brand.plusName} can see these on your card.</p>
           {HOLIDAY_QUESTIONS.map((q) => (
-            <ChipChoice
+            <ChipChoice<string>
               key={q.key}
               name={`holiday-${q.key}`}
               legend={q.label}
               options={q.options}
-              selected={holiday[q.key] ? [holiday[q.key]!] : []}
-              onChange={([v]) => setHoliday((h) => ({ ...h, [q.key]: v }))}
+              selected={holiday[q.key] ?? []}
+              onChange={(v) => setHoliday((h) => ({ ...h, [q.key]: v.length ? v : undefined }))}
+              multiple
             />
           ))}
         </section>
       )}
 
-      <section className="card form-card" aria-labelledby="style-heading">
-        <h2 id="style-heading" className="card-title">
-          Your travel style
+      <section className="card form-card" aria-labelledby="personal-heading">
+        <h2 id="personal-heading" className="card-title">
+          About you
         </h2>
-        <ChipChoice name="pace" legend="Pace" options={PACES} selected={pace} onChange={setPace} />
-        <ChipChoice name="budget" legend="Budget" options={BUDGETS} selected={budget} onChange={setBudget} />
-      </section>
-
-      <section className="card form-card" aria-labelledby="habits-heading">
-        <h2 id="habits-heading" className="card-title">
-          On the road
-        </h2>
-        <Segmented name="room" legend="Sharing a room" options={ROOM_SHARING} selected={room} onChange={setRoom} describeSelection />
-        <Segmented name="rhythm" legend="Mornings" options={DAY_RHYTHMS} selected={rhythm} onChange={setRhythm} />
-        <Segmented name="walking" legend="Walking" options={WALKING} selected={walking} onChange={setWalking} describeSelection />
-        <fieldset className="field" data-field="languages">
-          <legend>Languages you speak</legend>
-          <div className="chips chips-compact chips-light">
-            {LANGUAGES.map((lang) => {
-              const checked = languages.includes(lang.value)
-              return (
-                <label className="chip" key={lang.value}>
-                  <input
-                    type="checkbox"
-                    name="languages"
-                    value={lang.value}
-                    checked={checked}
-                    disabled={!checked && languages.length >= MAX_LANGUAGES}
-                    onChange={() => setLanguages(checked ? languages.filter((l) => l !== lang.value) : [...languages, lang.value])}
-                  />
-                  <span>{lang.label}</span>
-                </label>
-              )
-            })}
-          </div>
-        </fieldset>
+        <ChipChoice<string> name="drinking" legend="Drinking" options={DRINKING} selected={drinking} onChange={setDrinking} />
+        <ChipChoice<string> name="smoking" legend="Smoking" options={SMOKING} selected={smoking} onChange={setSmoking} />
         <fieldset className="field" data-field="diet">
           <legend>Food (optional)</legend>
           <div className="chips chips-compact chips-light">
@@ -689,45 +661,41 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
           value={travellingWith}
           onChange={(e) => setTravellingWith(e.target.value)}
         />
-      </section>
-
-      {more && (
-        <section className="card form-card" aria-labelledby="personal-heading">
-          <h2 id="personal-heading" className="card-title">
-            About you
-          </h2>
-          <p className="hint">All optional. Each one stays hidden unless you choose to show it on your profile.</p>
-          {PERSONAL_FIELDS.map((f) => (
-            <div className="personal-field" key={f.key}>
-              <Field name={f.key} label={f.label}>
-                {({ id, describedBy }) => (
-                  <Dropdown
-                    id={id}
-                    placeholder="Prefer not to say"
-                    value={personal[f.key] ?? ''}
-                    describedBy={describedBy}
-                    groups={[{ options: [...(personal[f.key] ? [{ value: '', label: 'Prefer not to say' }] : []), ...f.options.map((o) => ({ value: o.value, label: o.label }))] }]}
-                    onChange={(v) => setPersonal((x) => ({ ...x, [f.key]: v || null, shown_fields: v ? x.shown_fields : x.shown_fields.filter((k) => k !== f.key) }))}
-                  />
+        {more && (
+          <>
+            <p className="hint">These three stay hidden unless you choose to show them on your profile.</p>
+            {PERSONAL_FIELDS.map((f) => (
+              <div className="personal-field" key={f.key}>
+                <Field name={f.key} label={f.label}>
+                  {({ id, describedBy }) => (
+                    <Dropdown
+                      id={id}
+                      placeholder="Prefer not to say"
+                      value={personal[f.key] ?? ''}
+                      describedBy={describedBy}
+                      groups={[{ options: [...(personal[f.key] ? [{ value: '', label: 'Prefer not to say' }] : []), ...f.options.map((o) => ({ value: o.value, label: o.label }))] }]}
+                      onChange={(v) => setPersonal((x) => ({ ...x, [f.key]: v || null, shown_fields: v ? x.shown_fields : x.shown_fields.filter((k) => k !== f.key) }))}
+                    />
+                  )}
+                </Field>
+                {personal[f.key] && (
+                  <label className="switch-row switch-row-end">
+                    <input
+                      type="checkbox"
+                      role="switch"
+                      checked={personal.shown_fields.includes(f.key)}
+                      onChange={(e) => setPersonal((x) => ({ ...x, shown_fields: e.target.checked ? [...x.shown_fields, f.key] : x.shown_fields.filter((k) => k !== f.key) }))}
+                    />
+                    <span>
+                      <strong>{personal.shown_fields.includes(f.key) ? 'Shown on your profile' : 'Hidden'}</strong>
+                    </span>
+                  </label>
                 )}
-              </Field>
-              {personal[f.key] && (
-                <label className="switch-row switch-row-end">
-                  <input
-                    type="checkbox"
-                    role="switch"
-                    checked={personal.shown_fields.includes(f.key)}
-                    onChange={(e) => setPersonal((x) => ({ ...x, shown_fields: e.target.checked ? [...x.shown_fields, f.key] : x.shown_fields.filter((k) => k !== f.key) }))}
-                  />
-                  <span>
-                    <strong>{personal.shown_fields.includes(f.key) ? 'Shown on your profile' : 'Hidden'}</strong>
-                  </span>
-                </label>
-              )}
-            </div>
-          ))}
-        </section>
-      )}
+              </div>
+            ))}
+          </>
+        )}
+      </section>
 
       <p className="hint section-hint">Choose who you see (gender, age and distance) any time in Filters.</p>
       <SaveError error={error} />

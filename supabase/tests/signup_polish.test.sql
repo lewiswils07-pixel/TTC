@@ -33,9 +33,9 @@ select is((select extract(year from current_date)::int - public.age_year(p) from
 
 -- ------------------------------------------------------------ gender
 update public.profiles set gender = 'unsaid' where id = pg_temp.m(1);
-select ok(public.fits_preferences(39, 'unsaid', row(null, 18, 99, '{woman,man,nonbinary}', null, false, '{}', '{}', '{}')::public.preferences),
+select ok(public.fits_preferences(39, 'unsaid', jsonb_populate_record(null::public.preferences, jsonb_build_object('age_min', 18, 'age_max', 99, 'genders', '{woman,man,nonbinary}'::text[]))),
   '"Prefer not to say" is shown to members who show everyone');
-select ok(not public.fits_preferences(39, 'unsaid', row(null, 18, 99, '{woman}', null, false, '{}', '{}', '{}')::public.preferences),
+select ok(not public.fits_preferences(39, 'unsaid', jsonb_populate_record(null::public.preferences, jsonb_build_object('age_min', 18, 'age_max', 99, 'genders', '{woman}'::text[]))),
   'but not to members who chose particular genders');
 
 -- ------------------------------------------------------- founding members

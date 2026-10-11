@@ -8,7 +8,6 @@ import { filterErrors, getFilters, saveFilters, type Filters as FilterValues } f
 import { MAX_PREF_AGE } from '../lib/options'
 import { hasPlus } from '../lib/plan'
 import { useSession } from '../lib/session-context'
-import { useMyProfile } from '../lib/useMyProfile'
 
 /** Who to show in suggestions. The Sodalis+ filters are shown to everyone but only unlock with the plan. */
 export function Filters() {
@@ -20,7 +19,6 @@ export function Filters() {
   const [busy, setBusy] = useState(false)
   const heading = useRef<HTMLHeadingElement>(null)
   const navigate = useNavigate()
-  const home = useMyProfile(userId).data?.profile.home_city_id ?? null
 
   useEffect(() => {
     Promise.all([getFilters(userId), hasPlus()]).then(
@@ -59,8 +57,8 @@ export function Filters() {
     setBusy(true)
     setError(null)
     try {
-      // ID checks don’t exist yet; planning isn't asked any more (holiday preferences replaced it).
-      await saveFilters(userId, { ...values, verified_only: false, styles: [] })
+      // ID checks don’t exist yet.
+      await saveFilters(userId, { ...values, verified_only: false })
       navigate('/connections')
     } catch (e) {
       setError(messageOf(e))
@@ -84,7 +82,7 @@ export function Filters() {
         noValidate
       >
         <div className="card form-card">
-          <FilterFields value={values} onChange={setValues} plus={plus} homeCityId={home} />
+          <FilterFields value={values} onChange={setValues} plus={plus} />
         </div>
 
         <SaveError error={error} />

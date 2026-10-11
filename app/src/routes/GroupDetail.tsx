@@ -164,9 +164,7 @@ export function GroupDetail() {
         </div>
       )}
 
-      <h2 className="section-title">
-        Who’s in it ({people.filter((p) => p.status === 'joined').length} of {MAX_GROUP})
-      </h2>
+      <h2 className="section-title">Who’s in it ({people.filter((p) => p.status === 'joined').length})</h2>
       <ul className="person-list">
         {people.map((p) => (
           <li key={p.profile_id} className="card person-card">

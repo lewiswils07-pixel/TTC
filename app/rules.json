@@ -3,7 +3,7 @@
   "signIn": { "codeLength": 6, "passwordMin": 8, "passwordMax": 72 },
   "interests": { "pick": 8 },
   "requests": { "perWeekFree": 5, "plusSafetyCap": 50, "plusShowLeftBelow": 5 },
-  "groups": { "maxOwnedFree": 1, "maxOwnedPlus": 3, "maxPeople": 12, "nameMax": 60 },
+  "groups": { "maxOwnedFree": 1, "maxOwnedPlus": 3, "maxPeople": 200, "nameMax": 60 },
   "trips": { "maxNights": 90, "maxDaysAhead": 730, "maxUpcoming": 20, "maxFlexDays": 7, "noteMax": 280, "popularMinMembers": 2, "popularShown": 8 },
   "wishlist": { "max": 10 },
   "age": { "min": 18, "maxPreferred": 99 },
@@ -17,14 +17,20 @@
   "reviews": { "textMax": 500 },
   "survey": { "commentMax": 500, "heardFromAfterMinutes": 30 },
   "founding": { "plusMonths": 3 },
-  "matching": { "maxSuggestions": 100 },
+  "matching": { "maxSuggestions": 100, "sameTripBonus": 12, "flexiblePenalty": 10, "flexibleAgeYears": 5 },
   "plus": { "pricePencePerMonth": 599 },
   "choices": {
     "gender": ["woman", "man", "nonbinary", "genderfluid", "agender", "another", "unsaid"],
     "genderShown": ["woman", "man", "nonbinary"],
     "travelStyle": ["planner", "mix", "spontaneous"],
     "pace": ["easy", "slow", "steady", "busy", "packed"],
-    "budget": ["shoestring", "budget", "mid", "comfort", "luxury"],
+    "budget": ["budget", "comfort", "luxury"],
+    "moving": ["base", "few", "move"],
+    "travelOften": ["once", "twice", "few", "many"],
+    "booking": ["ahead", "weeks", "last"],
+    "groupSize": ["two", "small", "more"],
+    "drinking": ["none", "sometimes", "socially", "often"],
+    "smoking": ["no", "social", "yes"],
     "roomSharing": ["share", "unsure", "separate"],
     "dayRhythm": ["early", "either", "late"],
     "walking": ["gentle", "moderate", "lots"],
@@ -33,16 +39,9 @@
     "religion": ["agnostic", "atheist", "buddhist", "catholic", "christian", "hindu", "jewish", "muslim", "sikh", "spiritual", "another"],
     "ethnicity": ["black", "east_asian", "hispanic", "middle_eastern", "mixed", "pacific_islander", "south_asian", "southeast_asian", "white", "another"],
     "holiday": {
-      "planning": ["planner", "mix", "spontaneous"],
       "stay": ["hotel", "apartment", "bnb", "resort", "hostel", "camping"],
-      "transport": ["fly", "train", "drive", "ferry", "coach"],
       "length": ["weekend", "week", "fortnight", "longer"],
-      "season": ["spring", "summer", "autumn", "winter", "any"],
-      "packing": ["light", "case", "everything"],
-      "evenings": ["early", "dinner", "late"],
-      "drinking": ["none", "sometimes", "socially", "often"],
-      "smoking": ["no", "social", "yes"],
-      "photos": ["lots", "few", "rarely"]
+      "season": ["spring", "summer", "autumn", "winter"]
     }
   }
 }

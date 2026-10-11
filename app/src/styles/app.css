@@ -924,6 +924,8 @@ legend { padding: 0; }
 .plus-person-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .plus-person-text span { color: var(--ink-soft); font-size: var(--text-sm); }
 .plus-person-trip { font-weight: 700; color: var(--accent) !important; }
+.plus-trip { margin-bottom: var(--space-5); }
+.plus-trip .section-title a { color: inherit; }
 
 /* a suggestion card for someone there at the same time gets the gold tile */
 .person-feed-card.is-same-time {
@@ -1351,6 +1353,13 @@ html { scroll-padding-bottom: 7rem; }
 .popular-list { display: flex; gap: var(--space-2); margin: 0 calc(var(--space-4) * -1); padding: 2px var(--space-4) var(--space-2); list-style: none; overflow-x: auto; scroll-snap-type: x proximity; scroll-padding-inline: var(--space-4); scrollbar-width: none; }
 .popular-list::-webkit-scrollbar { display: none; }
 .popular-list li { flex: none; scroll-snap-align: start; }
+/* Sodalis+ sections on Trips and Groups: a heading with the gold tag beside it. */
+.plus-head { display: flex; align-items: center; gap: var(--space-2); }
+.plus-head .section-title { margin: 0; }
+.inspiration, .popular-groups { margin: var(--space-6) 0 var(--space-4); }
+.inspiration-list { display: grid; gap: var(--space-3); margin: var(--space-3) 0 0; padding: 0; list-style: none; }
+.inspiration-card { display: flex; flex-direction: column; gap: 2px; padding: var(--space-3) var(--space-4); }
+.inspiration-card ul { margin: var(--space-2) 0 0; padding-left: 1.1em; }
 .popular-place {
   display: flex; flex-direction: column; gap: 2px; min-width: 132px; min-height: 76px; padding: var(--space-3) var(--space-4); border-radius: 16px;
   background: linear-gradient(160deg, var(--brand-disc), color-mix(in srgb, var(--brand-disc) 70%, #000)); color: #fff; text-decoration: none;
@@ -1410,24 +1419,21 @@ html { scroll-padding-bottom: 7rem; }
 /* The row already names the setting. */
 .filter-row-body legend, .filter-row-body .field > label:first-child { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-/* Home town map under the distance slider. */
-.home-map { margin: var(--space-3) 0 0; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); background: var(--card); }
-.home-map-tiles { position: relative; height: 200px; overflow: hidden; background: color-mix(in srgb, var(--ink) 6%, var(--card)); }
-.home-map-tiles img { position: absolute; width: 256px; height: 256px; max-width: none; }
-.home-map-circle {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); border-radius: 50%;
-  background: color-mix(in srgb, var(--accent) 16%, transparent); border: 2px solid var(--accent); transition: width 0.25s var(--ease-out), height 0.25s var(--ease-out);
-}
-.home-map-pin { position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--card); }
-.home-map figcaption { display: flex; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) var(--space-3); font-weight: 600; font-size: var(--text-sm); }
-.home-map figcaption small { color: var(--muted); font-weight: 500; }
+.distance-any { margin-top: var(--space-3); border-bottom: 0; }
 
 /* Interests: a count, then categories with Show more. */
 .interest-count { margin: 0; color: var(--ink-soft); }
 .interest-count strong { color: var(--accent); }
 .interest-count.is-full strong { color: var(--accent); }
 .interest-more { margin-top: var(--space-3); }
-.interest-pool .interest-type { padding: 0; margin-bottom: var(--space-3); font-weight: 800; }
+.interest-pool { padding: var(--space-3); }
+/* The heading sits inside its box, not on the border (Lewis, 11 Oct). */
+.interest-pool .interest-type { float: left; width: 100%; padding: 0; margin: 0 0 var(--space-3); font-size: 1rem; font-weight: 800; color: var(--ink); }
+.interest-pool .interest-type + .chips { clear: both; }
+/* Tighter bubbles, so three fit on a row more often. */
+.interests .chips { gap: 6px; }
+.interests .chips-compact .chip span { min-height: 36px; padding: 0 10px 0 6px; gap: 4px; font-size: 0.875rem; }
+.interests .chip-plus i { width: 18px; height: 18px; font-size: 0.75rem; }
 
 /* Holiday preferences and personal details on cards and profiles. */
 .holiday-chips .tag-pref { gap: 6px; background: var(--card); border: 1px solid var(--line); font-weight: 600; }
@@ -1505,3 +1511,5 @@ html { scroll-padding-bottom: 7rem; }
   .company-charts { grid-template-columns: 1fr 1fr; }
   .company .kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
+.popular-group { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.popular-group .trip-text { display: flex; flex-direction: column; }

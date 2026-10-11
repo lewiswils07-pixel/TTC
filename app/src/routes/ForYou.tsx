@@ -123,7 +123,7 @@ export function ForYou() {
         <h1 ref={heading} tabIndex={-1}>
           Connect
         </h1>
-        <FilterButton userId={me} homeCityId={data.profile.home_city_id} onChanged={refresh} />
+        <FilterButton userId={me} onChanged={refresh} />
       </div>
       <div role="status">
         {status && (

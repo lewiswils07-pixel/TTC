@@ -22,11 +22,17 @@ const emptyProfile: Profile = {
   day_rhythm: null,
   walking: null,
   languages: [],
+  moving: null,
+  travel_often: null,
+  booking: null,
+  group_size: null,
+  drinking: null,
+  smoking: null,
   onboarded_at: null,
   member_number: null,
   home_city: null,
 }
-const prefs = { age_min: 18, age_max: 99, genders: [], max_distance_km: null }
+const prefs = { age_min: 18, age_max: 99, genders: [], max_distance_km: null, age_flexible: false, distance_flexible: false }
 const make = (p: Partial<Profile>, interestIds: number[] = [], card: MyProfile['card'] = null): MyProfile => ({
   profile: { ...emptyProfile, ...p },
   interestIds,
@@ -66,16 +72,20 @@ describe('profile helpers', () => {
 })
 
 describe('distance slider', () => {
-  it('starts at 0, meaning your town only', () => {
-    expect(DISTANCE_MILES[0]).toBe(0)
-    expect(distanceLabel(0)).toBe('Your town only')
-    // The database's smallest distance; people in your town always count.
-    expect(milesToKm(0)).toBe(1)
-    expect(distanceStop(1)).toBe(0)
+  it('goes up by 1 to 50, by 5 to 100, then by 10 to 150 miles', () => {
+    expect(DISTANCE_MILES[0]).toBe(1)
+    expect(DISTANCE_MILES.slice(48, 52)).toEqual([49, 50, 55, 60])
+    expect(DISTANCE_MILES.slice(-7)).toEqual([95, 100, 110, 120, 130, 140, 150])
+    expect(DISTANCE_MILES.at(-1)).toBe(150)
   })
-  it('ends at any distance', () => {
+  it('shows a saved distance at its nearest stop', () => {
+    expect(distanceLabel(milesToKm(1))).toBe('Up to 1 mile')
+    expect(distanceLabel(milesToKm(37))).toBe('Up to 37 miles')
+    // Old saved distances past 150 miles show at the end.
+    expect(distanceLabel(milesToKm(300))).toBe('Up to 150 miles')
+  })
+  it('saves no limit as any distance', () => {
     expect(distanceLabel(null)).toBe('Any distance')
     expect(distanceStop(null)).toBe(DISTANCE_MILES.length - 1)
-    expect(distanceStop(milesToKm(50))).toBe(DISTANCE_MILES.indexOf(50))
   })
 })

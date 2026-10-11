@@ -1,5 +1,6 @@
--- pgTAP: suggest_by_interests (spec §4.1, §4.3). At least 2 shared
--- interests, the hard filters, and the ranking order on fixed fixtures.
+-- pgTAP: suggest_by_interests (spec §4.1, §4.3). The hard filters and the
+-- ranking order on fixed fixtures. Since 11 Oct there is no minimum number of
+-- shared interests: interests 50 (shared out of 8), places 20, travel style 30.
 -- Run with: npx supabase test db
 begin;
 select plan(10);
@@ -20,8 +21,8 @@ update public.profiles p set photo_path = p.id || '/photo.jpg',
   display_name = v.name, gender = v.gender, birth_year = v.born, home_city_id = v.home,
   travel_style = v.style, pace = v.pace, budget = v.budget, onboarded_at = now()
 from (values
-  (1, 'Ann', 'woman', 1960, 2644688, 'planner', 'slow', 'mid'),
-  (2, 'Bob', 'man',   1962, 2633352, 'planner', 'slow', 'mid'),
+  (1, 'Ann', 'woman', 1960, 2644688, 'planner', 'slow', 'comfort'),
+  (2, 'Bob', 'man',   1962, 2633352, 'planner', 'slow', 'comfort'),
   (3, 'Cat', 'woman', 1958, 2644688, 'spontaneous', 'packed', 'comfort'),
   (4, 'Dan', 'man',   1961, 2644688, null, null, null),
   (5, 'Eve', 'woman', 1963, 2988507, null, null, null),
@@ -33,6 +34,8 @@ where p.id = pg_temp.m(v.n);
 
 -- Clear seed data that could leak into the results.
 delete from public.profile_interests where profile_id not in (select pg_temp.m(n) from generate_series(1, 8) n);
+-- With no minimum of shared interests, seeded demo members would show up too.
+update public.profiles set onboarded_at = null where id not in (select pg_temp.m(n) from generate_series(1, 8) n);
 
 insert into public.profile_interests (profile_id, interest_id)
 select pg_temp.m(v.n), unnest(v.ids) from (values
@@ -52,24 +55,24 @@ insert into public.wishlist (profile_id, city_id) values
 insert into public.blocks (blocker_id, blocked_id) values (pg_temp.m(1), pg_temp.m(8));
 
 select pg_temp.sign_in_as(pg_temp.m(1));
-select results_eq('select display_name from public.suggest_by_interests()', $$values ('Bob'::text), ('Eve'), ('Dan'), ('Cat')$$,
-  'Ann sees Bob, Eve, Dan and Cat, best match first');
-select is((select score from public.suggest_by_interests() where display_name = 'Bob'), 62, 'Bob scores 62 (3 of 4 interests, same style)');
-select is((select score from public.suggest_by_interests() where display_name = 'Dan'), 51, 'Dan scores 51 (2 of 5 interests, a shared place)');
+select results_eq('select display_name from public.suggest_by_interests()', $$values ('Bob'::text), ('Eve'), ('Dan'), ('Cat'), ('Gus')$$,
+  'Ann sees Bob, Eve, Dan, Cat and Gus, best match first');
+select is((select score from public.suggest_by_interests() where display_name = 'Bob'), 54, 'Bob scores 54 (3 of 8 interests, no places, same style on the 3 he answered)');
+select is((select score from public.suggest_by_interests() where display_name = 'Dan'), 48, 'Dan scores 48 (2 of 8 interests, a shared place, style blank)');
 select is((select shared_places from public.suggest_by_interests() where display_name = 'Dan'), array['Paris'], 'Dan''s card says you both want to visit Paris');
 select is((select distance_km from public.suggest_by_interests() where display_name = 'Bob') between 30 and 40, true, 'cards show how far away they live');
-select is_empty($$select 1 from public.suggest_by_interests() where display_name in ('Fay', 'Gus', 'Hal')$$,
-  'out-of-range, 1-interest and blocked members are left out');
+select is_empty($$select 1 from public.suggest_by_interests() where display_name in ('Fay', 'Hal')$$,
+  'out-of-range and blocked members are left out');
 
 reset role;
 update public.preferences set max_distance_km = 50 where profile_id = pg_temp.m(1);
 select pg_temp.sign_in_as(pg_temp.m(1));
-select results_eq('select display_name from public.suggest_by_interests()', $$values ('Bob'::text), ('Dan'), ('Cat')$$,
+select results_eq('select display_name from public.suggest_by_interests()', $$values ('Bob'::text), ('Dan'), ('Cat'), ('Gus')$$,
   'the distance filter leaves out Eve in Paris');
 reset role;
 update public.preferences set max_distance_km = 1 where profile_id = pg_temp.m(1);
 select pg_temp.sign_in_as(pg_temp.m(1));
-select results_eq('select display_name from public.suggest_by_interests()', $$values ('Dan'::text), ('Cat')$$,
+select results_eq('select display_name from public.suggest_by_interests()', $$values ('Dan'::text), ('Cat'), ('Gus')$$,
   '"your town only" keeps everyone in Leeds and leaves out Bob in York');
 reset role;
 
@@ -78,7 +81,7 @@ select throws_ok('select * from public.suggest_by_interests()', '42501', null, '
 reset role;
 
 select pg_temp.sign_in_as(pg_temp.m(7));
-select is_empty($$select 1 from public.suggest_by_interests() where display_name = 'Ann'$$, 'Gus, sharing 1 interest, doesn''t see Ann');
+select isnt_empty($$select 1 from public.suggest_by_interests() where display_name = 'Ann'$$, 'Gus, sharing 1 interest, still sees Ann (no minimum)');
 
 select * from finish();
 rollback;

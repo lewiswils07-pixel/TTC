@@ -49,7 +49,7 @@ update public.profiles p
        bio          = 'Demo member for local testing.',
        travel_style = (array['planner', 'mix', 'spontaneous'])[1 + floor(random() * 3)::int],
        pace         = (array['slow', 'steady', 'packed'])[1 + floor(random() * 3)::int],
-       budget       = (array['budget', 'mid', 'comfort'])[1 + floor(random() * 3)::int],
+       budget       = (array['budget', 'comfort', 'luxury'])[1 + floor(random() * 3)::int],
        phone_verified_at = now(),
        onboarded_at = now(),
        last_active_at = now() - make_interval(days => floor(random() * 30)::int)

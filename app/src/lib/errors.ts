@@ -30,7 +30,7 @@ const RULES: Array<[RegExp, string]> = [
   [/finish your profile/i, 'Please finish your profile before sending requests.'],
   [/requests are paused/i, 'Your requests are paused while we look into something about your account. We’ll be in touch by email.'],
   [/message not found/i, 'We couldn’t find that message.'],
-  [/groups can have up to/i, `Groups can have up to ${rules.groups.maxPeople} people, including you.`],
+  [/groups can have up to/i, 'This group is full.'],
   [/only invite people you're connected with|only invite people you’re connected with/i, 'You can only invite people you’re connected with.'],
   [/group limit reached/i, `You’ve reached your limit of groups for now. You can start another when your current group’s trip is over, or with ${brand.plusName}.`],
   [/group isn't available|group isn’t available/i, 'This group isn’t available any more.'],

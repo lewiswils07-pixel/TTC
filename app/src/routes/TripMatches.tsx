@@ -4,13 +4,11 @@ import { Layout, Loading } from '../components/Layout'
 import { CityReviews } from '../components/CityReviews'
 import { DateOverlap } from '../components/DateOverlap'
 import { TripPlanner } from '../components/TripPlanner'
-import { RequestsHint, SuggestionCard, useRequests } from '../components/Suggestions'
 import { picksFor } from '../data/picks'
 import { cityLabel } from '../lib/cities'
 import { isoDate, tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
-import { noteFirstMatch } from '../lib/kpis'
-import { homeLabel, reasons, suggestForTrip, tripCompanions, type TripCompanion, type TripSuggestion } from '../lib/matching'
+import { homeLabel, tripCompanions, type TripCompanion } from '../lib/matching'
 import { ageLabel } from '../lib/options'
 import { Avatar } from '../components/Avatar'
 import { getTrip, type Trip } from '../lib/trips'
@@ -22,26 +20,24 @@ const TABS: { key: Tab; label: string }[] = [
   { key: 'reviews', label: 'Reviews' },
 ]
 
-/** One of your trips: the members going too, your own plan, and reviews of the place. */
+/** One of your trips: people you know going too, your own plan, and reviews of the place. */
 export function TripMatches() {
   const tripId = Number(useParams().id)
   const [params, setParams] = useSearchParams()
   const tab: Tab = TABS.some((t) => t.key === params.get('tab')) ? (params.get('tab') as Tab) : 'people'
   const [trip, setTrip] = useState<Trip | null | undefined>(undefined)
-  const [people, setPeople] = useState<TripSuggestion[] | null>(null)
-  const [companions, setCompanions] = useState<TripCompanion[]>([])
-  const requests = useRequests()
+  const [companions, setCompanions] = useState<TripCompanion[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const heading = useRef<HTMLHeadingElement>(null)
   const [today] = useState(() => isoDate(new Date()))
 
   useEffect(() => {
-    Promise.all([getTrip(tripId), suggestForTrip(tripId), tripCompanions(tripId).catch(() => [])]).then(
-      ([t, p, c]) => {
+    // Only people you're connected or in touch with (Lewis, 11 Oct): everyone
+    // else going at the same time is found on Connect.
+    Promise.all([getTrip(tripId), tripCompanions(tripId).catch(() => [])]).then(
+      ([t, c]) => {
         setTrip(t)
-        setPeople(p)
         setCompanions(c)
-        if (p.length) noteFirstMatch()
       },
       (e) => setError(messageOf(e)),
     )
@@ -62,7 +58,7 @@ export function TripMatches() {
       </Layout>
     )
   }
-  if (!trip || !people || !requests) return <Loading />
+  if (!trip || !companions) return <Loading />
 
   const picks = picksFor(trip.city_id)
   return (
@@ -97,7 +93,7 @@ export function TripMatches() {
             onClick={() => setParams(t.key === 'people' ? {} : { tab: t.key }, { replace: true })}
           >
             {t.label}
-            {t.key === 'people' && people.length + companions.length > 0 && <span className="tab-count"> {people.length + companions.length}</span>}
+            {t.key === 'people' && companions.length > 0 && <span className="tab-count"> {companions.length}</span>}
           </button>
         ))}
       </div>
@@ -107,11 +103,11 @@ export function TripMatches() {
         {tab === 'reviews' && <CityReviews cityId={trip.city_id} city={trip.city.name} opensOn={trip.start_date > today ? trip.start_date : undefined} />}
         {tab === 'people' && (
           <>
-            {people.length + companions.length > 0 && (
+            {companions.length > 0 && (
               <DateOverlap
                 city={trip.city.name}
                 mine={{ start: trip.start_date, end: trip.end_date }}
-                others={[...companions, ...[...people].sort((a, b) => Number(!!b.overlap_start) - Number(!!a.overlap_start))].map((p) => ({
+                others={companions.map((p) => ({
                   name: p.display_name,
                   start: p.trip_start,
                   end: p.trip_end,
@@ -122,7 +118,7 @@ export function TripMatches() {
             {companions.length > 0 && (
               <section aria-labelledby="in-touch">
                 <h2 id="in-touch" className="section-title">
-                  Already in touch
+                  People you know going too
                 </h2>
                 <ul className="person-list">
                   {companions.map((c) => (
@@ -137,34 +133,14 @@ export function TripMatches() {
               </section>
             )}
 
-            <section aria-labelledby="going-too">
-              <h2 id="going-too" className="section-title">
-                {people.length
-                  ? `${people.length} ${companions.length ? 'more ' : ''}${people.length === 1 ? 'person' : 'people'} going too`
-                  : companions.length
-                    ? 'More people going too'
-                    : 'People going too'}
-              </h2>
-              {people.length > 0 && <RequestsHint requests={requests} />}
-              {people.length === 0 ? (
-                <div className="card empty">
-                  {companions.length ? (
-                    <p>No one else yet. As more members add trips to {trip.city.name} around your dates, they’ll appear here.</p>
-                  ) : (
-                    <>
-                      <p>No one yet. As members add trips to {trip.city.name} around your dates, they’ll appear here, best match first.</p>
-                      <p className="hint">Changing your dates can help. Tap Edit trip to change them.</p>
-                    </>
-                  )}
-                </div>
-              ) : (
-                <ul className="match-list">
-                  {people.map((person) => (
-                    <SuggestionCard key={person.profile_id} person={person} reasons={reasons(person, trip.city.name)} tripId={trip.id} requests={requests} />
-                  ))}
-                </ul>
-              )}
-            </section>
+            {companions.length === 0 && (
+              <div className="card empty">
+                <p>When you connect with someone going to {trip.city.name} at the same time as you, they’ll appear here.</p>
+                <Link className="btn btn-secondary" to="/connections">
+                  Find people on Connect
+                </Link>
+              </div>
+            )}
           </>
         )}
       </div>

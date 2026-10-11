@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Profile } from '../src/lib/profile'
 import { profileStrength } from '../src/lib/strength'
 
-const empty = { photo_path: null, bio: null, travel_style: null, pace: null, budget: null, room_sharing: null, day_rhythm: null, walking: null, languages: [] } as unknown as Profile
+const empty = { photo_path: null, bio: null, travel_style: null, pace: null, budget: null, moving: null, travel_often: null, booking: null, group_size: null } as unknown as Profile
 
 describe('profile strength', () => {
   it('starts low and lists what to add first', () => {
@@ -11,7 +11,18 @@ describe('profile strength', () => {
     expect(parts[0]).toMatchObject({ label: 'Add a photo', done: false })
   })
   it('reaches 100% with everything filled in', () => {
-    const full = { ...empty, photo_path: 'x/1.jpg', bio: 'Hi', travel_style: 'mix', pace: 'slow', budget: 'mid', room_sharing: 'share', day_rhythm: 'early', walking: 'lots', languages: ['en'] } as Profile
+    const full = {
+      ...empty,
+      photo_path: 'x/1.jpg',
+      bio: 'Hi',
+      travel_style: 'mix',
+      pace: 'slow',
+      budget: 'comfort',
+      moving: 'few',
+      travel_often: 'twice',
+      booking: 'weeks',
+      group_size: 'small',
+    } as Profile
     expect(profileStrength(full, 8, true).percent).toBe(100)
     expect(profileStrength(full, 8, false).percent).toBe(83)
   })

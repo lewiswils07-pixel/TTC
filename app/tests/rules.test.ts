@@ -3,7 +3,27 @@
 // answer lists in options.ts.
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { BUDGETS, DAY_RHYTHMS, DIETS, ETHNICITIES, GENDERS, HOLIDAY_QUESTIONS, PACES, RELIGIONS, ROOM_SHARING, SEXUALITIES, SHOWN_GENDERS, TRAVEL_STYLES, WALKING } from '../src/lib/options'
+import {
+  BOOKING,
+  BUDGETS,
+  DAY_RHYTHMS,
+  DIETS,
+  DRINKING,
+  ETHNICITIES,
+  GENDERS,
+  GROUP_SIZES,
+  HOLIDAY_QUESTIONS,
+  MOVING,
+  PACES,
+  RELIGIONS,
+  ROOM_SHARING,
+  SEXUALITIES,
+  SHOWN_GENDERS,
+  SMOKING,
+  TRAVEL_OFTEN,
+  TRAVEL_STYLES,
+  WALKING,
+} from '../src/lib/options'
 import { count, roughly, rules } from '../src/lib/rules'
 // @ts-expect-error a plain JavaScript script, with no types
 import { rulesSql, rulesTest } from '../scripts/rules-sql.mjs'
@@ -29,6 +49,12 @@ describe('rules', () => {
     expect(values(SEXUALITIES)).toEqual(rules.choices.sexuality)
     expect(values(RELIGIONS)).toEqual(rules.choices.religion)
     expect(values(ETHNICITIES)).toEqual(rules.choices.ethnicity)
+    expect(values(MOVING)).toEqual(rules.choices.moving)
+    expect(values(TRAVEL_OFTEN)).toEqual(rules.choices.travelOften)
+    expect(values(BOOKING)).toEqual(rules.choices.booking)
+    expect(values(GROUP_SIZES)).toEqual(rules.choices.groupSize)
+    expect(values(DRINKING)).toEqual(rules.choices.drinking)
+    expect(values(SMOKING)).toEqual(rules.choices.smoking)
     expect(Object.fromEntries(HOLIDAY_QUESTIONS.map((q) => [q.key, values(q.options)]))).toEqual(rules.choices.holiday)
   })
   it('words numbers the way members say them', () => {
