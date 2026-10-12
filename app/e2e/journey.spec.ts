@@ -56,19 +56,16 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.getByRole('radio', { name: '1 week either way' }).evaluate((el: HTMLElement) => el.click())
     await a.getByRole('button', { name: 'Add trip' }).click()
     await expect(a.getByRole('heading', { name: /going too/ })).toBeVisible()
-    // Who's going now lists people going to Paris too, under the trip, with what you share.
+    // Who's going now shows the Paris trip; tapping it shows people going one at a time, with what you share.
     await a.goto('/connections')
-    const row = a
-      .locator('.going-trip')
-      .filter({ has: a.getByRole('heading', { level: 2, name: 'Paris' }) })
-      .locator('.going-person')
-      .first()
+    await a.locator('.going-trip-row').filter({ hasText: 'Paris' }).click()
+    const row = a.locator('.going-person').first()
     await expect(row.locator('.going-share')).toContainText('Paris')
     other = (await row.locator('.going-name strong').innerText()).split(',')[0]
-    await row.getByRole('button', { name: `Say hello to ${other}` }).click()
-    await a.getByLabel(/Your hello to/).fill('Hello! Would you like to see the Musée d’Orsay together?')
-    await a.getByRole('button', { name: 'Send hello' }).click()
-    await expect(a.getByText(/Your hello is on its way/)).toBeVisible()
+    await row.getByRole('button', { name: `Connect with ${other}` }).click()
+    await a.getByLabel(/Your note to/).fill('Hello! Would you like to see the Musée d’Orsay together?')
+    await a.getByRole('button', { name: 'Send request' }).click()
+    await expect(a.getByText(/Request sent/)).toBeVisible()
   })
 
   const lewis = await idOf(lewisEmail)

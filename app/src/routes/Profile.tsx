@@ -324,7 +324,7 @@ function PlusPanel() {
   if (until === 'loading') return <div className="skeleton-block" aria-hidden="true" />
   const has = until !== undefined
   const perks = [
-    { icon: ICONS.people, title: 'Say hello to as many people as you like' },
+    { icon: ICONS.people, title: 'Connect with as many people as you like' },
     { icon: ICONS.tour, title: 'See everyone’s holiday preferences' },
     { icon: ICONS.filters, title: 'Filter by pace and budget' },
     { icon: ICONS.star, title: `Start up to ${count(rules.groups.maxOwnedPlus, 'group')} at once` },

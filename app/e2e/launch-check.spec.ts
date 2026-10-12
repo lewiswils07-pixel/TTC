@@ -144,6 +144,9 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await page.locator('.going-who').first().click()
   await expect(page.locator('.going-details').first()).toBeVisible()
   issues.push(...(await problems(page, '/connections (read more)')))
+  // The back of the card: their answers.
+  await page.locator('.going-person .flip-corner').first().click()
+  await expect(page.locator('.going-flip.is-flipped')).toBeVisible()
   await visit(page, '/requests', 'Chat', issues)
   await visit(page, '/messages', 'Chat', issues)
   // A connection's full profile, from Other connections on Chats.
@@ -161,7 +164,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
     .insert({ owner_id: me, city_id: 2267057, start_date: isoIn(30), end_date: isoIn(34) })
     .select('id')
     .single()
-  await admin.from('city_reviews').insert({ profile_id: demo(2), city_id: 2267057, rating: 5, body: 'Take the tram early, before the crowds.' })
+  await admin.from('city_tips').insert({ profile_id: demo(2), city_id: 2267057, category: 'getting_around', place: 'Tram 28', rating: 5, body: 'Take the tram early, before the crowds.' })
   await visit(page, `/trips/${trip!.id}`, /Lisbon/, issues)
   // Your own plan: add one of our picks and an idea of your own.
   await page.getByRole('tab', { name: 'My plan' }).click()
@@ -178,25 +181,26 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await page.getByRole('checkbox', { name: 'Sunset at a miradouro' }).check()
   await expect(page.getByText('1 of 2 done')).toBeVisible()
   issues.push(...(await problems(page, '/trips/:id?tab=plan')))
-  // Reviews: someone else's, then her own.
-  await page.getByRole('tab', { name: 'Reviews' }).click()
+  // Nice to know: someone else's tip, then her own.
+  await page.getByRole('tab', { name: 'Nice to know' }).click()
   await expect(page.getByText('Take the tram early, before the crowds.')).toBeVisible()
-  await expect(page.getByText(/You can add your own review once your trip starts/)).toBeVisible()
+  await expect(page.getByText(/You can share your own tips once your trip starts/)).toBeVisible()
   // Once the trip has started, she can add her own.
   await admin
     .from('trips')
     .update({ start_date: isoIn(0) })
     .eq('id', trip!.id)
   await page.reload()
-  await page.getByRole('tab', { name: 'Reviews' }).click()
-  await page.getByRole('button', { name: 'Post review' }).click()
-  await expect(page.getByText('Please choose how many stars.')).toBeVisible()
-  await page.getByRole('radio', { name: '4 stars' }).check({ force: true })
-  await page.getByLabel('A few words (optional)').fill('Lovely light and kind people.')
-  await page.getByRole('button', { name: 'Post review' }).click()
-  await expect(page.getByText('Your review', { exact: true })).toBeVisible()
-  await expect(page.locator('.review-average')).toHaveText('4.5')
-  issues.push(...(await problems(page, '/trips/:id?tab=reviews')))
+  await page.getByRole('tab', { name: 'Nice to know' }).click()
+  await page.getByRole('button', { name: 'Share a tip' }).click()
+  await page.getByRole('button', { name: 'Share tip' }).click()
+  await expect(page.getByText('Please choose what kind of tip this is.')).toBeVisible()
+  await page.getByRole('checkbox', { name: 'Food' }).check({ force: true })
+  await page.getByLabel('The place').fill('Time Out Market')
+  await page.getByLabel('Why it’s worth knowing (optional)').fill('Lovely light and kind people.')
+  await page.getByRole('button', { name: 'Share tip' }).click()
+  await expect(page.getByText('Your tip', { exact: true })).toBeVisible()
+  issues.push(...(await problems(page, '/trips/:id?tab=tips')))
   // Someone going to Lisbon at the same time shows in the "Trips in common" tile.
   await admin
     .from('profiles')

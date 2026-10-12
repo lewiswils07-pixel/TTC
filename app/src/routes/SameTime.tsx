@@ -97,7 +97,7 @@ export function SameTime() {
                   </section>
                 ))}
                 <Link className="btn btn-secondary btn-block" to="/connections">
-                  Say hello on Who’s going
+                  Connect on Who’s going
                 </Link>
               </>
             )}

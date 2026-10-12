@@ -8,11 +8,11 @@ import { CityPicks } from './CityPicks'
 import { Dropdown } from './Dropdown'
 import { FieldError } from './Field'
 
-type Props = { tripId: number; city: string; start: string; end: string; picks?: Picks }
+type Props = { tripId: number; start: string; end: string; picks?: Picks }
 
 /** Your own day-by-day plan for a trip, with our picks to add from
  *  (Lewis, 7 Oct: a trip planner on your own trips). */
-export function TripPlanner({ tripId, city, start, end, picks }: Props) {
+export function TripPlanner({ tripId, start, end, picks }: Props) {
   const days = Math.min(daysBetween(start, end) + 1, 91)
   const [items, setItems] = useState<PlanItem[] | null>(null)
   const [title, setTitle] = useState('')
@@ -192,14 +192,12 @@ export function TripPlanner({ tripId, city, start, end, picks }: Props) {
         </>
       )}
 
-      {picks ? (
+      {picks && (
         <CityPicks
           picks={picks}
           added={items.map((i) => i.title)}
           onAdd={(t, url) => run(() => addTripIdea(tripId, t, null, url), `${t} added to your plan.`)}
         />
-      ) : (
-        <p className="hint section-hint">We haven’t written our picks for {city} yet, so add your own ideas above.</p>
       )}
     </div>
   )

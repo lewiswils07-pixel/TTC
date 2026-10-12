@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
-import { CityReviews } from '../components/CityReviews'
+import { CityTips } from '../components/CityTips'
 import { DateOverlap } from '../components/DateOverlap'
 import { TripPlanner } from '../components/TripPlanner'
 import { picksFor } from '../data/picks'
@@ -13,14 +13,14 @@ import { ageLabel } from '../lib/options'
 import { Avatar } from '../components/Avatar'
 import { getTrip, type Trip } from '../lib/trips'
 
-type Tab = 'people' | 'plan' | 'reviews'
+type Tab = 'people' | 'plan' | 'tips'
 const TABS: { key: Tab; label: string }[] = [
   { key: 'people', label: 'People' },
   { key: 'plan', label: 'My plan' },
-  { key: 'reviews', label: 'Reviews' },
+  { key: 'tips', label: 'Nice to know' },
 ]
 
-/** One of your trips: people you know going too, your own plan, and reviews of the place. */
+/** One of your trips: people you know going too, your own plan, and members' tips about the place. */
 export function TripMatches() {
   const tripId = Number(useParams().id)
   const [params, setParams] = useSearchParams()
@@ -99,8 +99,8 @@ export function TripMatches() {
       </div>
 
       <div id="trip-panel" role="tabpanel" aria-labelledby={`trip-tab-${tab}`}>
-        {tab === 'plan' && <TripPlanner tripId={trip.id} city={trip.city.name} start={trip.start_date} end={trip.end_date} picks={picks} />}
-        {tab === 'reviews' && <CityReviews cityId={trip.city_id} city={trip.city.name} opensOn={trip.start_date > today ? trip.start_date : undefined} />}
+        {tab === 'plan' && <TripPlanner tripId={trip.id} start={trip.start_date} end={trip.end_date} picks={picks} />}
+        {tab === 'tips' && <CityTips cityId={trip.city_id} city={trip.city.name} opensOn={trip.start_date > today ? trip.start_date : undefined} />}
         {tab === 'people' && (
           <>
             {companions.length > 0 && (

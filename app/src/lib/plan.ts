@@ -27,10 +27,10 @@ export async function loadRequests(): Promise<{ left: number; limit: number; plu
   return { left, limit: weeklyRequests(plus), plus }
 }
 
-/** "You have 3 of 5 hellos left this week." Sodalis+ members only see it near the spam guard. */
+/** "You have 3 of 5 requests left this week." Sodalis+ members only see it near the spam guard. */
 export function requestsLeftText({ left, limit, plus }: { left: number; limit: number; plus: boolean }): string {
   if (plus && left > PLUS_SHOW_LEFT_BELOW) return ''
-  return `You have ${left} of ${limit} hellos left this week${left === 0 ? '; you get more on Monday' : ''}.`
+  return `You have ${left} of ${limit} requests left this week${left === 0 ? '; you get more on Monday' : ''}.`
 }
 
 /** When the member's Sodalis+ ends: a date, null if it doesn't, undefined if they don't have it. */
