@@ -235,9 +235,8 @@ export function ForYou() {
 
           <section className="going-groups" aria-labelledby="small-groups">
             <h2 className="section-title" id="small-groups">
-              Small groups
+              Trip groups
             </h2>
-            <p className="hint section-hint">Travel with 3 or 4 people going your way. Start one for a trip and invite your connections.</p>
             <div className="action-row going-groups-actions">
               <Link className="btn btn-secondary" to="/groups">
                 Your groups

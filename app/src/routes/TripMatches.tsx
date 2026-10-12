@@ -99,7 +99,7 @@ export function TripMatches() {
       </div>
 
       <div id="trip-panel" role="tabpanel" aria-labelledby={`trip-tab-${tab}`}>
-        {tab === 'plan' && <TripPlanner tripId={trip.id} city={trip.city.name} start={trip.start_date} end={trip.end_date} picks={picks} />}
+        {tab === 'plan' && <TripPlanner tripId={trip.id} start={trip.start_date} end={trip.end_date} picks={picks} />}
         {tab === 'reviews' && <CityReviews cityId={trip.city_id} city={trip.city.name} opensOn={trip.start_date > today ? trip.start_date : undefined} />}
         {tab === 'people' && (
           <>
