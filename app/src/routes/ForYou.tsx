@@ -1,32 +1,52 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useSearchParams } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
+import { Avatar } from '../components/Avatar'
 import { CardBack } from '../components/CardBack'
 import { ProfileExtras } from '../components/ProfileExtras'
 import { SafetyBox } from '../components/SafetyBox'
-import { SkeletonFeedCard } from '../components/Skeleton'
-import { SameTimeStrip } from '../components/SameTimeStrip'
+import { SkeletonRows } from '../components/Skeleton'
 import { Tour } from '../components/Tour'
 import { FilterButton } from '../components/FilterBar'
+import { PopularGroups } from '../components/PopularGroups'
 import { ConnectBox, SharedInterests, useRequests, type Requests } from '../components/Suggestions'
+import { brand } from '../lib/brand'
 import { loadCard, type CardAnswer } from '../lib/card'
-import { shortDates } from '../lib/dates'
+import { monthName, shortDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { stepLink } from '../lib/onboarding'
 import { peek, remember } from '../lib/cache'
-import { callouts, clearNotNow, nearYou, NOT_NOW_DAYS, sameTime, forgetNotNow, loadFeed, notNowIds, saveNotNow, skipMember, skippedCount, unskipAll, unskipMember, type FeedPerson } from '../lib/feed'
+import {
+  clearNotNow,
+  forgetNotNow,
+  groupByTrip,
+  loadFeed,
+  nearYou,
+  NOT_NOW_DAYS,
+  notNowIds,
+  saveNotNow,
+  skipMember,
+  skippedCount,
+  tripTo,
+  unskipAll,
+  unskipMember,
+  whatYouShare,
+  type FeedPerson,
+} from '../lib/feed'
+import { groupsICanStart } from '../lib/groups'
 import { noteFirstMatch } from '../lib/kpis'
 import { requestsLeftText } from '../lib/plan'
-import { LOTS_IN_COMMON, fitWords, homeLabel } from '../lib/matching'
+import { homeLabel } from '../lib/matching'
 import { ageLabel, INTERESTS_TO_PICK } from '../lib/options'
-import { preloadPhotos, usePhotoUrl } from '../lib/photo'
+import { preloadPhotos } from '../lib/photo'
 import { roughly } from '../lib/rules'
 import { useSession } from '../lib/session-context'
 import { loadExtras, type MemberExtras } from '../lib/member'
-import { wishlistOf } from '../lib/trips'
+import { listMyTrips, wishlistOf, type Trip } from '../lib/trips'
 import { useMyProfile } from '../lib/useMyProfile'
 
-/** The Connect tab: suggested people one at a time, with why they're suggested. */
+/** The Who's going tab: members going where you're going, grouped by trip, then small groups,
+ *  then people who travel like you. A calm list to browse, not one face at a time (Lewis, 12 Oct). */
 export function ForYou() {
   const { session } = useSession()
   const me = session!.user.id
@@ -38,6 +58,8 @@ export function ForYou() {
     const hidden = notNowIds(me)
     return last.filter((p) => !hidden.has(p.profile_id))
   })
+  const [myTrips, setMyTrips] = useState<Trip[]>([])
+  const [canStart, setCanStart] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [skipped, setSkipped] = useState(0)
   const [status, setStatus] = useState<{ text: string; undo?: FeedPerson } | null>(null)
@@ -56,10 +78,14 @@ export function ForYou() {
       },
       (e) => setError(messageOf(e)),
     )
+    listMyTrips().then(
+      (t) => setMyTrips(t ?? []),
+      () => {},
+    )
+    groupsICanStart().then(setCanStart, () => {})
   }, [me])
-  // The next few people's photos load while you look at this one (Lewis, 11 Oct: photos lagged).
   useEffect(() => {
-    if (people) preloadPhotos(people.slice(0, 4).map((p) => p.photo_path))
+    if (people) preloadPhotos(people.slice(0, 8).map((p) => p.photo_path))
   }, [people])
 
   if (profileError) {
@@ -74,10 +100,8 @@ export function ForYou() {
   if (!data) return <Loading />
   if (!data.profile.onboarded_at) return <Navigate to="/onboarding" replace />
 
-  const person = people?.[0]
-
-  function next(text: string, undo?: FeedPerson) {
-    setPeople((list) => list && list.slice(1))
+  function gone(p: FeedPerson, text: string, undo?: FeedPerson) {
+    setPeople((list) => list && list.filter((x) => x.profile_id !== p.profile_id))
     setStatus({ text, undo })
   }
 
@@ -85,14 +109,17 @@ export function ForYou() {
     saveNotNow(me, p.profile_id)
     void skipMember(p.profile_id)
     setSkipped((n) => n + 1)
-    next(`We won’t show ${p.display_name} again for ${roughly(NOT_NOW_DAYS)}.`, p)
+    gone(p, `We won’t show ${p.display_name} again for ${roughly(NOT_NOW_DAYS)}.`, p)
   }
 
   function undo(p: FeedPerson) {
     forgetNotNow(me, p.profile_id)
     void unskipMember(p.profile_id)
     setSkipped((n) => Math.max(0, n - 1))
-    setPeople((list) => [p, ...(list ?? [])])
+    remember('feed', loadFeed()).then((list) => {
+      const hidden = notNowIds(me)
+      setPeople(list.filter((x) => !hidden.has(x.profile_id)))
+    })
     setStatus(null)
   }
 
@@ -116,15 +143,39 @@ export function ForYou() {
       .then(setPeople, (e) => setError(messageOf(e)))
   }
 
+  const { trips, others } = groupByTrip(people ?? [])
+  const myHome = data.profile.home_city?.name ?? null
+  const row = (p: FeedPerson, city?: string) =>
+    requests && (
+      <PersonRow
+        key={p.profile_id}
+        person={p}
+        city={city}
+        myHome={myHome}
+        requests={requests}
+        onNotNow={() => notNow(p)}
+        onSent={(connected) =>
+          gone(
+            p,
+            connected
+              ? `${p.display_name} had already said hello to you, so you’re now connected. Carry on in Chat.`
+              : `Your hello is on its way to ${p.display_name}. We’ll let you know when they reply.`,
+          )
+        }
+        onBlocked={(message) => gone(p, message)}
+      />
+    )
+
   return (
     <Layout tab="connections">
       {touring && <Tour onClose={() => setParams({}, { replace: true })} />}
       <div className="connections-top">
         <h1 ref={heading} tabIndex={-1}>
-          Connect
+          Who’s going
         </h1>
         <FilterButton userId={me} onChanged={refresh} />
       </div>
+      <p className="hint going-intro">Members going where you’re going, and people who travel like you. {requests && requestsLeftText(requests)}</p>
       <div role="status">
         {status && (
           <p className="feed-toast">
@@ -142,60 +193,105 @@ export function ForYou() {
           {error}
         </p>
       )}
-      {people && <SameTimeStrip people={people} />}
-      {!error && (!people || !requests) && <SkeletonFeedCard label="Finding people for you…" />}
-      {people && requests && person && (
+      {!error && (!people || !requests) && <SkeletonRows rows={3} label="Finding who’s going…" />}
+
+      {people && requests && (
         <>
-          <PersonCard
-            key={person.profile_id}
-            person={person}
-            myHome={data.profile.home_city?.name ?? null}
-            requests={requests}
-            onNotNow={() => notNow(person)}
-            onSent={(connected) =>
-              next(
-                connected
-                  ? `${person.display_name} had already asked to connect with you, so you’re now connected. Say hello in Chat.`
-                  : `Request sent to ${person.display_name}. We’ll let you know when they reply.`,
-              )
-            }
-            onBlocked={(message) => next(message)}
-          />
-          <p className="hint feed-count">
-            {people.length > 1 ? `${people.length - 1} more after this.` : 'Last one for now.'} {requestsLeftText(requests)}
-          </p>
-        </>
-      )}
-      {people && people.length === 0 && (
-        <div className="card empty feed-empty">
-          <h2>You’ve seen everyone for now</h2>
-          <p>New members join every week. To see more people:</p>
-          <ul className="feed-tips">
-            <li>
-              <Link to="/trips/new">Add a trip</Link> to meet people going to the same place
-            </li>
-            <li>
-              <Link to={stepLink('interests')}>{data.interestIds.length >= INTERESTS_TO_PICK ? 'Swap some of your interests' : 'Add more interests'}</Link>
-            </li>
-            <li>
-              <Link to="/filters">Widen your filters</Link>
-            </li>
-          </ul>
-          {skipped > 0 && (
-            <button type="button" className="btn btn-secondary btn-block" onClick={showSkipped}>
-              Show the {skipped} {skipped === 1 ? 'person' : 'people'} you skipped
-            </button>
+          {trips.map((g) => {
+            const mine = myTrips.find((t) => t.city.name === g.city)
+            return (
+              <section key={g.city} className="going-trip" aria-labelledby={`trip-${g.city}`}>
+                <div className="going-trip-head">
+                  <h2 className="section-title" id={`trip-${g.city}`}>
+                    {g.city}
+                  </h2>
+                  <span className="hint">{mine ? `Your trip · ${shortDates(mine.start_date, mine.end_date)}` : monthName(tripTo(g.people[0], g.city)!.start)}</span>
+                </div>
+                <p className="hint going-trip-count">
+                  {g.people.length === 1 ? '1 member going around then' : `${g.people.length} members going around then`}
+                  {!requests.plus && (
+                    <>
+                      {' · '}
+                      <Link className="going-plus-link" to="/connections/same-time">
+                        See exact days with {brand.plusName}
+                      </Link>
+                    </>
+                  )}
+                </p>
+                <ul className="person-list going-list">{g.people.map((p) => row(p, g.city))}</ul>
+              </section>
+            )
+          })}
+
+          {myTrips.length === 0 && (
+            <div className="card going-add-trip">
+              <h2 className="card-title">Where are you off to next?</h2>
+              <p className="hint">Add a trip and you’ll see members going to the same place at the same time.</p>
+              <Link className="btn btn-primary" to="/trips/new">
+                Add a trip
+              </Link>
+            </div>
           )}
-        </div>
+
+          <section className="going-groups" aria-labelledby="small-groups">
+            <h2 className="section-title" id="small-groups">
+              Small groups
+            </h2>
+            <p className="hint section-hint">Travel with 3 or 4 people going your way. Start one for a trip and invite your connections.</p>
+            <div className="action-row going-groups-actions">
+              <Link className="btn btn-secondary" to="/groups">
+                Your groups
+              </Link>
+              {canStart > 0 && (
+                <Link className="btn btn-primary" to="/groups/new">
+                  Start a group
+                </Link>
+              )}
+            </div>
+            <PopularGroups canStart={canStart > 0} />
+          </section>
+
+          {others.length > 0 && (
+            <section aria-labelledby="travel-like-you">
+              <h2 className="section-title" id="travel-like-you">
+                People who travel like you
+              </h2>
+              <ul className="person-list going-list">{others.map((p) => row(p))}</ul>
+            </section>
+          )}
+
+          {people.length === 0 && (
+            <div className="card empty feed-empty">
+              <h2>You’ve seen everyone for now</h2>
+              <p>New members join every week. To see more people:</p>
+              <ul className="feed-tips">
+                <li>
+                  <Link to="/trips/new">Add a trip</Link> to meet people going to the same place
+                </li>
+                <li>
+                  <Link to={stepLink('interests')}>{data.interestIds.length >= INTERESTS_TO_PICK ? 'Swap some of your interests' : 'Add more interests'}</Link>
+                </li>
+                <li>
+                  <Link to="/filters">Widen your filters</Link>
+                </li>
+              </ul>
+              {skipped > 0 && (
+                <button type="button" className="btn btn-secondary btn-block" onClick={showSkipped}>
+                  Show the {skipped} {skipped === 1 ? 'person' : 'people'} you passed on
+                </button>
+              )}
+            </div>
+          )}
+        </>
       )}
     </Layout>
   )
 }
 
-const SWIPE = 110
-
-function PersonCard({
+/** One member in the list: who they are and what you share. Tap their name to read more; Say hello is tied to the trip. */
+function PersonRow({
   person,
+  city,
   myHome,
   requests,
   onNotNow,
@@ -203,212 +299,115 @@ function PersonCard({
   onBlocked,
 }: {
   person: FeedPerson
+  /** The trip you're both going on, when they're listed under one. */
+  city?: string
   myHome: string | null
   requests: Requests
   onNotNow: () => void
   onSent: (connected: boolean) => void
   onBlocked: (message: string) => void
 }) {
-  const [connecting, setConnecting] = useState(false)
-  const [drag, setDrag] = useState<{ from: number; x: number } | null>(null)
-  const [flipped, setFlipped] = useState(false)
-  const [back, setBack] = useState<CardAnswer[] | 'error' | null>(null)
-  const moved = useRef(0)
+  const [open, setOpen] = useState(false)
+  const [hello, setHello] = useState(false)
+  const trip = city ? tripTo(person, city) : undefined
+  const share = whatYouShare(person, trip)
   const home = homeLabel(person)
-
-  function flip() {
-    if (connecting) return
-    setFlipped((f) => !f)
-    if (back === null || back === 'error') {
-      loadCard(person.profile_id).then(
-        (c) => setBack(c.card_answers),
-        () => setBack('error'),
-      )
-    }
-  }
-  // The card leads with where they're going: a trip at the same time as yours if there is one.
-  const lead = sameTime(person) ?? person.trips[0]
-  const leadText = lead ? `${lead.city} · ${shortDates(lead.start, lead.end)}` : null
-  const lines = callouts(person).filter((c) => c.text !== leadText)
-  const x = drag?.x ?? 0
-  const [places, setPlaces] = useState<string[]>([])
-
-  const photo = usePhotoUrl(person.photo_path)
-  useEffect(() => {
-    wishlistOf(person.profile_id).then(setPlaces)
-  }, [person.profile_id])
-  const [extras, setExtras] = useState<MemberExtras | null>(null)
-  useEffect(() => {
-    loadExtras(person.profile_id).then(setExtras)
-  }, [person.profile_id])
-
-  function down(e: PointerEvent<HTMLDivElement>) {
-    moved.current = 0
-    if (connecting || e.pointerType === 'mouse') return
-    setDrag({ from: e.clientX, x: 0 })
-  }
-  function move(e: PointerEvent<HTMLDivElement>) {
-    if (!drag) return
-    moved.current = Math.max(moved.current, Math.abs(e.clientX - drag.from))
-    setDrag({ ...drag, x: e.clientX - drag.from })
-  }
-  function up() {
-    if (!drag) return
-    setDrag(null)
-    if (drag.x < -SWIPE) onNotNow()
-    else if (drag.x > SWIPE && requests.left > 0) setConnecting(true)
-  }
+  const id = `person-${person.profile_id}`
+  const suggested = trip
+    ? `Hi ${person.display_name}, I’m going to ${trip.city} in ${monthName(trip.start)} too. Would you like to meet up while we’re there?`
+    : `Hi ${person.display_name}, it looks like we enjoy the same kind of travel. Where are you off to next?`
 
   return (
-    <article className={`card person-feed-card${connecting ? ' is-connecting' : ''}${sameTime(person) ? ' is-same-time' : ''}`} aria-labelledby={`name-${person.profile_id}`}>
-      <div className={flipped ? 'feed-flip is-flipped' : 'feed-flip'}>
-        <div
-          className="feed-flip-inner"
-          onPointerDown={() => (moved.current = 0)}
-          // A tap anywhere on the card turns it over; a swipe or a tap on a link doesn't.
-          onClick={(e) => {
-            if (moved.current >= 8 || (e.target as HTMLElement).closest('a, button')) return
-            flip()
-          }}
-        >
-          <div className="feed-face feed-front" inert={flipped}>
-            <div
-              className={drag ? 'feed-photo is-dragging' : 'feed-photo'}
-              style={{ transform: x ? `translateX(${x}px) rotate(${x / 25}deg)` : undefined }}
-              onPointerDown={down}
-              onPointerMove={move}
-              onPointerUp={up}
-              onPointerCancel={() => setDrag(null)}
-            >
-              {photo ? (
-                <img src={photo} alt="" draggable={false} decoding="async" />
-              ) : (
-                <span className="feed-initial" aria-hidden="true">
-                  {person.display_name.slice(0, 1).toUpperCase()}
-                </span>
-              )}
-              {x > 40 && <span className="swipe-label swipe-yes">Connect</span>}
-              {x < -40 && <span className="swipe-label swipe-no">Skip</span>}
-              <div className="feed-who">
-                {person.online && (
-                  <p className="feed-online">
-                    <span aria-hidden="true" /> Active today
-                  </p>
-                )}
-                {lead && (
-                  <p className={lead.overlap ? 'feed-trip is-same-time' : 'feed-trip'}>
-                    <PlaneIcon />
-                    {leadText}
-                    <span className="visually-hidden">{lead.overlap ? ', same dates as you' : ', close to your dates'}</span>
-                  </p>
-                )}
-                <h2 id={`name-${person.profile_id}`} className={lead ? 'feed-name-small' : undefined}>
-                  {person.display_name}
-                  {person.birth_year ? <span className="feed-age">, {ageLabel(person.birth_year)}</span> : null}
-                </h2>
-                {home && <p>{home}</p>}
-              </div>
-              {/* Top left: only the strongest signals (Lewis, 11 Oct). */}
-              {(person.score >= LOTS_IN_COMMON || nearYou(person, myHome)) && (
-                <div className="feed-badges">
-                  {person.score >= LOTS_IN_COMMON && <span className="feed-fit">{fitWords(person.score)}</span>}
-                  {nearYou(person, myHome) && <span className="feed-fit">Near you</span>}
-                </div>
-              )}
-            </div>
-            {lines.length > 0 && (
-              <ul className="callouts" aria-label="Why we suggest them">
-                {lines.map((c) => (
-                  <li key={c.text} className={`callout callout-${c.kind}`}>
-                    {c.text}
-                    {c.hint && <span className="visually-hidden">, {c.hint}</span>}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {person.shared_interests.length > 0 && <SharedInterests labels={person.shared_interests} />}
-            {places.length > 0 && (
-              <div className="shared-interests">
-                <h4>Places I’d love to go</h4>
-                <ul className="chip-list">
-                  {places.map((place) => (
-                    <li key={place} className="tag tag-place">
-                      {place}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <ProfileExtras extras={extras} name={person.display_name} />
-            {person.travelling_with && <p className="feed-detail">Travels with: {person.travelling_with}</p>}
-          </div>
-          <section className="feed-face feed-back" inert={!flipped} aria-label={`The back of ${person.display_name}’s card`}>
-            <p className="feed-back-name">
-              {person.display_name}
-              <span>In their own words</span>
-            </p>
-            {back === null ? (
-              <div className="card-back-empty" role="status">
-                <span className="visually-hidden">Loading their answers</span>
-                <span className="skeleton skeleton-line" aria-hidden="true" />
-                <span className="skeleton skeleton-line skeleton-line-short" aria-hidden="true" />
-              </div>
-            ) : back === 'error' ? (
-              <p className="card-back-empty">We couldn’t load this. Turn the card over to try again.</p>
-            ) : (
-              <CardBack name={person.display_name} answers={back} />
-            )}
-          </section>
+    <li className="card going-person" aria-labelledby={id}>
+      <button type="button" className="going-who" aria-expanded={open} aria-controls={`${id}-more`} onClick={() => setOpen((o) => !o)}>
+        <Avatar name={person.display_name} path={person.photo_path} size="md" />
+        <span className="going-name">
+          <strong id={id}>
+            {person.display_name}
+            {person.birth_year ? `, ${ageLabel(person.birth_year)}` : ''}
+          </strong>
+          <span className="hint">{[home, nearYou(person, myHome) ? 'Near you' : null, person.online ? 'Active today' : null].filter(Boolean).join(' · ')}</span>
+          <span className="going-more">{open ? 'Show less' : 'Read more'}</span>
+        </span>
+      </button>
+      {share.length > 0 && (
+        <div className="going-share">
+          <h3>What you share</h3>
+          <p>{share.join(' · ')}</p>
         </div>
-        {!connecting && (
-          <button type="button" className="flip-corner" onClick={flip} aria-label={flipped ? `Turn ${person.display_name}’s card back to the front` : `Turn ${person.display_name}’s card over`}>
-            <FlipIcon />
-          </button>
-        )}
-      </div>
-      {connecting ? (
-        <ConnectBox person={person} tripId={person.trip_id ?? undefined} requests={requests} startOpen onSent={onSent} onCancel={() => setConnecting(false)} />
+      )}
+      {open && <PersonMore person={person} id={`${id}-more`} />}
+      {hello ? (
+        <ConnectBox person={person} tripId={person.trip_id ?? undefined} requests={requests} startOpen suggested={suggested} onSent={onSent} onCancel={() => setHello(false)} />
       ) : (
-        <div className="feed-actions">
-          <button type="button" className="btn btn-secondary feed-no" onClick={onNotNow} aria-label={`Skip ${person.display_name}`}>
-            Skip
+        <div className="action-row going-actions">
+          <button type="button" className="btn btn-secondary" onClick={onNotNow} aria-label={`${city ? 'Not for this trip' : 'Not now'}: ${person.display_name}`}>
+            {city ? 'Not for this trip' : 'Not now'}
           </button>
-          <button
-            type="button"
-            className="btn btn-primary feed-yes"
-            disabled={requests.left <= 0}
-            onClick={() => {
-              setFlipped(false)
-              setConnecting(true)
-            }}
-            aria-label={`Connect with ${person.display_name}`}
-          >
-            {requests.left > 0 ? 'Connect' : 'No requests left this week'}
+          <button type="button" className="btn btn-primary" disabled={requests.left <= 0} onClick={() => setHello(true)} aria-label={`Say hello to ${person.display_name}`}>
+            {requests.left > 0 ? 'Say hello' : 'No hellos left this week'}
           </button>
         </div>
       )}
       <SafetyBox profileId={person.profile_id} name={person.display_name} onBlocked={onBlocked} />
-    </article>
+    </li>
   )
 }
 
-/** A small plane, before the trip on a card. */
-function PlaneIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
-      <path d="M21.5 15.5v-2l-8-5V3a1.5 1.5 0 0 0-3 0v5.5l-8 5v2l8-2.5V18.5l-2 1.5v1.5l3.5-1 3.5 1v-1.5l-2-1.5V13l8 2.5Z" fill="currentColor" />
-    </svg>
-  )
-}
+/** More about someone: their trips and travel first, then what they love, then their own words. Loaded when opened. */
+function PersonMore({ person, id }: { person: FeedPerson; id: string }) {
+  const [places, setPlaces] = useState<string[]>([])
+  const [extras, setExtras] = useState<MemberExtras | null>(null)
+  const [back, setBack] = useState<CardAnswer[] | 'error' | null>(null)
+  useEffect(() => {
+    wishlistOf(person.profile_id).then(setPlaces)
+    loadExtras(person.profile_id).then(setExtras)
+    loadCard(person.profile_id).then(
+      (c) => setBack(c.card_answers),
+      () => setBack('error'),
+    )
+  }, [person.profile_id])
 
-/** Two curved arrows chasing each other: “turn this over”. */
-function FlipIcon() {
   return (
-    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 10a8 8 0 0 1 14.3-4.3" />
-      <path d="M19 3v3.5h-3.5" />
-      <path d="M20 14a8 8 0 0 1-14.3 4.3" />
-      <path d="M5 21v-3.5h3.5" />
-    </svg>
+    <div className="going-details" id={id}>
+      {person.trips.length > 0 && (
+        <div className="shared-interests">
+          <h4>Trips you have in common</h4>
+          <ul className="going-trips">
+            {person.trips.map((t) => (
+              <li key={t.city + t.start}>
+                <span>{t.city}</span>
+                <span className="hint">{t.exact ? shortDates(t.start, t.end) : monthName(t.start)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <ProfileExtras extras={extras} name={person.display_name} />
+      {person.travelling_with && <p className="feed-detail">Travels with: {person.travelling_with}</p>}
+      {person.shared_interests.length > 0 && <SharedInterests labels={person.shared_interests} />}
+      {places.length > 0 && (
+        <div className="shared-interests">
+          <h4>Places they’d love to go</h4>
+          <ul className="chip-list">
+            {places.map((place) => (
+              <li key={place} className="tag tag-place">
+                {place}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <div className="shared-interests">
+        <h4>In their own words</h4>
+        {back === null ? (
+          <SkeletonRows rows={1} label="Loading their answers" />
+        ) : back === 'error' ? (
+          <p className="hint">We couldn’t load this just now.</p>
+        ) : (
+          <CardBack name={person.display_name} answers={back} />
+        )}
+      </div>
+    </div>
   )
 }

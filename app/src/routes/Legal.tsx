@@ -128,6 +128,9 @@ export function CommunityRules() {
       </p>
       <ol className="rules">
         <li>
+          <strong>Friendship, not dating.</strong> {brand.name} is for finding people to travel with. Don’t use it to look for romance.
+        </li>
+        <li>
           <strong>Be yourself.</strong> Use your real first name, age and a recent photo of you.
         </li>
         <li>

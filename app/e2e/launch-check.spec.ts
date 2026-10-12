@@ -125,7 +125,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   const { data: chat } = await admin.from('conversations').select('id').eq('connection_id', made!.id).single()
   await admin.from('profiles').update({ role: 'admin' }).eq('id', me)
 
-  await visit(page, '/connections', 'Connect', issues)
+  await visit(page, '/connections', 'Who’s going', issues)
   // The privacy box shows once, after sign-up; she chooses for herself.
   await expect(page.getByRole('heading', { name: 'We value your privacy' })).toBeVisible()
   issues.push(...(await problems(page, '/connections (privacy box)')))
@@ -136,16 +136,14 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await page.getByRole('button', { name: 'Save choices' }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Settings' })).toBeVisible()
   issues.push(...(await problems(page, '/settings')))
-  // The tour, then the back of a card.
+  // The tour, then more about someone.
   await page.goto('/connections?tour=1')
-  await expect(page.getByRole('heading', { name: 'Meet people one at a time' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'See who’s going' })).toBeVisible()
   issues.push(...(await problems(page, '/connections (tour)')))
   await page.getByRole('button', { name: 'Skip', exact: true }).click()
-  await page.getByRole('button', { name: /card over$/ }).click()
-  await expect(page.locator('.feed-back')).toBeVisible()
-  await page.waitForTimeout(700)
-  issues.push(...(await problems(page, '/connections (card flipped)')))
-  await page.getByRole('button', { name: /back to the front$/ }).click()
+  await page.locator('.going-who').first().click()
+  await expect(page.locator('.going-details').first()).toBeVisible()
+  issues.push(...(await problems(page, '/connections (read more)')))
   await visit(page, '/requests', 'Chat', issues)
   await visit(page, '/messages', 'Chat', issues)
   // A connection's full profile, from Other connections on Chats.
@@ -205,8 +203,8 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
     .update({ photo_path: `${demo(3)}/demo.jpg`, last_active_at: new Date().toISOString() })
     .eq('id', demo(3))
   await admin.from('trips').insert({ owner_id: demo(3), city_id: 2267057, start_date: isoIn(31), end_date: isoIn(33) })
-  await visit(page, '/connections', 'Connect', issues)
-  await page.getByRole('link', { name: /Trips in common/ }).click()
+  await visit(page, '/connections', 'Who’s going', issues)
+  await page.goto('/connections/same-time')
   await expect(page.getByRole('heading', { level: 1, name: 'Trips in common' })).toBeVisible()
   await expect(page.locator('.plus-person').filter({ hasText: 'Lisbon' }).first()).toBeVisible()
   issues.push(...(await problems(page, '/connections/same-time')))

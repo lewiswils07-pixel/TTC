@@ -5,6 +5,7 @@ import { TextField } from '../components/Field'
 import { PasswordField } from '../components/PasswordField'
 import { CODE_LENGTH, hasPassword, MIN_PASSWORD, needsPasswordChoice, ReauthNeeded, sendCode, setPassword, signInWithPassword, skipPassword, verifyCode } from '../lib/auth'
 import { messageOf } from '../lib/errors'
+import { brand } from '../lib/brand'
 import { useSession } from '../lib/session-context'
 import { useChecks } from '../lib/useChecks'
 import { checkCode, checkEmail, checkNewPassword, checkPassword } from '../lib/validation'
@@ -251,6 +252,11 @@ export function SignIn() {
                   </button>
                 </div>
               </>
+            )}
+            {mode === 'join' && (
+              <p className="friend-promise">
+                <strong>{brand.name} is for travel friendships.</strong> No romantic approaches, ever. Joining means you agree to keep it that way.
+              </p>
             )}
             <p className="hint center legal-line">
               By continuing you agree to our <Link to="/terms">terms</Link>, <Link to="/privacy">privacy notice</Link> and{' '}

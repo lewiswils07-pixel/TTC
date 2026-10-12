@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { bestDays } from '../src/lib/overlap'
-import { callouts, clearNotNow, forgetNotNow, mergeFeed, nearYou, notNowIds, saveNotNow } from '../src/lib/feed'
+import { callouts, clearNotNow, forgetNotNow, groupByTrip, mergeFeed, nearYou, notNowIds, saveNotNow, tripTo, whatYouShare } from '../src/lib/feed'
 import { shortDates } from '../src/lib/dates'
 import type { InterestSuggestion, TripSuggestion } from '../src/lib/matching'
 
@@ -103,5 +103,24 @@ describe('best days to meet', () => {
   })
   it('is empty when no one overlaps', () => {
     expect(bestDays({ start: '2027-05-12', end: '2027-05-18' }, [{ start: '2027-06-01', end: '2027-06-03' }])).toBeNull()
+  })
+})
+
+describe('Who’s going', () => {
+  it('groups people under the trip you share, and keeps the rest apart', () => {
+    const feed = mergeFeed([{ tripId: 1, people: [trip('ann', 60), trip('bob', 40, { trip_city: 'Rome' })] }], [interest('cat', 50)])
+    const { trips, others } = groupByTrip(feed)
+    expect(trips.map((g) => [g.city, g.people.map((p) => p.profile_id)])).toEqual([
+      ['Lisbon', ['ann']],
+      ['Rome', ['bob']],
+    ])
+    expect(others.map((p) => p.profile_id)).toEqual(['cat'])
+  })
+
+  it('says what you share in plain words: the month without Sodalis+, the days with it', () => {
+    const [free] = mergeFeed([{ tripId: 1, people: [trip('ann', 60)] }], [])
+    expect(whatYouShare(free, tripTo(free, 'Lisbon'))).toEqual(['Both in Lisbon in November', 'Museums'])
+    const [plus] = mergeFeed([{ tripId: 1, people: [trip('ann', 60)] }], [], true)
+    expect(whatYouShare(plus, tripTo(plus, 'Lisbon'), '2026-10-12')[0]).toBe(`Both in Lisbon ${shortDates('2026-11-12', '2026-11-18', '2026-10-12')}`)
   })
 })
