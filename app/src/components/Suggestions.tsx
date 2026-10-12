@@ -56,7 +56,7 @@ export function useRequests(): Requests | null {
   }
 }
 
-/** "Say hello": a connection request with a note. On Who's going it opens straight away and hands back to the row when sent or cancelled. */
+/** "Connect": a connection request with a note. On Who's going it opens straight away and hands back to the row when sent or cancelled. */
 export function ConnectBox({
   person,
   tripId,
@@ -92,10 +92,10 @@ export function ConnectBox({
       <p className="notice notice-success" role="status">
         {sent === 'connected' ? (
           <>
-            {person.display_name} had already said hello to you, so you’re now connected. <Link to="/messages">Carry on in Chat</Link>
+            {person.display_name} had already asked to connect with you, so you’re now connected. <Link to="/messages">Say hello in Chat</Link>
           </>
         ) : (
-          `Your hello is on its way. We’ll let you know when ${person.display_name} replies.`
+          `Request sent. We’ll let you know when ${person.display_name} replies.`
         )}
       </p>
     )
@@ -103,7 +103,7 @@ export function ConnectBox({
   if (!open) {
     return (
       <button type="button" className="btn btn-primary btn-block" disabled={left <= 0} onClick={() => setOpen(true)}>
-        {left > 0 ? `Say hello to ${person.display_name}` : 'No hellos left this week'}
+        {left > 0 ? `Connect with ${person.display_name}` : 'No requests left this week'}
       </button>
     )
   }
@@ -126,7 +126,7 @@ export function ConnectBox({
     <div className="connect-box">
       <Field
         name="note"
-        label={`Your hello to ${person.display_name}`}
+        label={`Your note to ${person.display_name}`}
         hint={`Change it as you like. ${MAX_NOTE - note.length} characters left.`}
       >
         {({ id, describedBy }) => (
@@ -142,8 +142,8 @@ export function ConnectBox({
         )}
       </Field>
       <p className="hint">
-        {requests.plus && left > PLUS_SHOW_LEFT_BELOW ? '' : `This uses 1 of your ${left} hello${left === 1 ? '' : 's'} left this week. `}
-        You can chat once they say hello back.
+        {requests.plus && left > PLUS_SHOW_LEFT_BELOW ? '' : `This uses 1 of your ${left} request${left === 1 ? '' : 's'} left this week. `}
+        You can chat once they accept.
       </p>
       {error && (
         <p className="notice notice-error" role="alert">
@@ -161,7 +161,7 @@ export function ConnectBox({
           Cancel
         </button>
         <button type="button" className="btn btn-primary" onClick={send} disabled={busy}>
-          {busy ? 'Sending…' : 'Send hello'}
+          {busy ? 'Sending…' : 'Send request'}
         </button>
       </div>
     </div>

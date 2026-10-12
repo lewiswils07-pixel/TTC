@@ -1219,9 +1219,10 @@ a.hub-row:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 .plan-item-tick input { width: 22px; height: 22px; accent-color: var(--accent); flex: none; }
 .plan-item.is-done .plan-item-tick span { text-decoration: line-through; color: var(--muted); font-weight: 400; }
 .plan-remove { border: 0; background: none; font: inherit; font-size: var(--text-xl); color: var(--muted); cursor: pointer; width: 44px; height: 44px; }
-.city-reviews { display: grid; gap: var(--space-4); }
-.review-summary { display: flex; align-items: center; gap: var(--space-2); margin: 0; }
-.review-average { font-size: var(--text-2xl); line-height: 1; }
+.city-tips { display: grid; gap: var(--space-4); }
+.tip-filters { display: grid; gap: var(--space-3); }
+.tip-plus { margin: 0; padding: var(--space-3) var(--space-4); }
+.tip-add { justify-self: start; }
 .stars { color: var(--gold); letter-spacing: 1px; font-size: var(--text-lg); }
 .stars-off { color: var(--line); }
 .review { display: grid; gap: var(--space-2); padding: var(--space-4); }
@@ -1517,13 +1518,40 @@ html { scroll-padding-bottom: 7rem; }
 
 /* ------------------------------------------------ Who's going: trips first, a calm list (Lewis, 12 Oct) */
 .going-intro { margin: calc(-1 * var(--space-2)) 0 var(--space-4); }
-.going-trip { margin-bottom: var(--space-5); }
-.going-trip-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
-.going-trip-head .section-title { margin: 0; font-size: var(--text-xl); }
-.going-trip-count { margin: var(--space-1) 0 var(--space-3); }
 .going-plus-link { color: var(--gold-ink); font-weight: 700; }
-.going-list { margin-bottom: 0; }
-.going-person { display: flex; flex-direction: column; gap: var(--space-3); }
+.going-person { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--space-3); }
+.going-trip-list { list-style: none; margin: 0 0 var(--space-2); padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.going-trip-row {
+  display: flex; align-items: center; gap: var(--space-3); width: 100%; padding: var(--space-3) var(--space-4);
+  font: inherit; color: inherit; text-align: left; cursor: pointer;
+}
+.going-trip-row.is-current { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.going-trip-row:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.going-trip-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.going-trip-text strong { font-size: var(--text-lg); }
+.going-faces { display: flex; }
+.going-faces .avatar { width: 32px; height: 32px; margin-left: -8px; border: 2px solid var(--card); font-size: 0.8rem; }
+.going-faces .avatar:first-child { margin-left: 0; }
+.going-trip-count { font-weight: 700; font-size: var(--text-sm); white-space: nowrap; }
+.going-plus-line { margin-bottom: var(--space-5); }
+.going-deck { margin-bottom: var(--space-5); }
+.going-deck-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.going-deck-head .section-title { margin-bottom: var(--space-2); }
+.going-show-all { margin-bottom: var(--space-3); }
+/* The next card peeks out under this one, so it reads as one of several. */
+.going-stack { position: relative; }
+.going-stack.has-next { padding-bottom: 12px; }
+.going-stack.has-next::after {
+  content: ''; position: absolute; left: var(--space-4); right: var(--space-4); bottom: 0; height: 24px;
+  border: 1px solid var(--line); border-top: 0; border-radius: 0 0 var(--radius) var(--radius); background: var(--paper-tint);
+}
+.going-person.is-open .avatar-lg { width: 96px; height: 96px; }
+/* The person card turns over with the corner button, like the old card did. */
+.going-flip .feed-flip-inner { cursor: auto; }
+.going-front { display: flex; flex-direction: column; gap: var(--space-3); }
+.going-front .going-who { padding-right: 52px; }
+.going-flip .flip-corner { top: 0; right: 0; }
+.going-flip .feed-back { min-height: 260px; }
 .going-who {
   display: flex; align-items: center; gap: var(--space-3); width: 100%; padding: 0; border: 0; background: none;
   color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-sm);

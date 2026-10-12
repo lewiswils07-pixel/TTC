@@ -4,22 +4,22 @@ const STEPS: { icon: string; title: string; text: string }[] = [
   {
     icon: '✦',
     title: 'See who’s going',
-    text: 'Members going where you’re going are listed under each of your trips, with what you share. Tap Say hello, or Not for this trip to pass.',
+    text: 'Your trips are at the top, with who’s going. Below, people show one at a time with what you share. Tap Connect, or Not now to see the next person.',
   },
   {
     icon: '↻',
     title: 'Read more about someone',
-    text: 'Tap a name to see their trips, how they travel and three questions they chose to answer. Once you’re connected, you can see their full profile.',
+    text: 'Tap Read more to open someone’s card: their trips, how they holiday and three questions they chose to answer. Once you’re connected, you can see their full profile.',
   },
   {
     icon: '✈',
-    title: 'Small groups',
-    text: 'Travel with 3 or 4 people going your way. Start a group for a trip from Who’s going and invite your connections.',
+    title: 'Travel groups',
+    text: 'Start a travel group for a trip from Who’s going and invite your connections.',
   },
   {
     icon: '✓',
     title: 'Plan together',
-    text: 'Once someone accepts your request, you can chat. Trip groups have a plan board for ideas, with our own picks for popular cities.',
+    text: 'Once someone accepts your request, you can chat. Travel groups have a plan board for ideas, with our own picks for popular cities.',
   },
   {
     icon: '♡',
