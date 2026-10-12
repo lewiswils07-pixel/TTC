@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
+import { Avatar } from '../components/Avatar'
 import { CardBack } from '../components/CardBack'
 import { Layout, Loading } from '../components/Layout'
 import { SafetyBox } from '../components/SafetyBox'
@@ -9,11 +10,10 @@ import { messageOf } from '../lib/errors'
 import { homeLabel } from '../lib/matching'
 import { loadExtras, loadMemberProfile, type MemberExtras, type MemberProfile as Member } from '../lib/member'
 import { DIETS, STYLE_QUESTIONS, ageLabel, labelFor } from '../lib/options'
-import { usePhotoUrl } from '../lib/photo'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
 
-/** A connection's full profile: photo, interests, how they travel and the back of their card. */
+/** A connection's full profile: how they travel and what they love first, a small photo, then their own words (Lewis, 12 Oct). */
 export function MemberProfile() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
@@ -23,7 +23,6 @@ export function MemberProfile() {
   const [chatId, setChatId] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const heading = useRef<HTMLHeadingElement>(null)
-  const photo = usePhotoUrl(member?.photo_path)
   const [extras, setExtras] = useState<MemberExtras | null>(null)
   useEffect(() => {
     loadExtras(id).then(setExtras)
@@ -97,20 +96,14 @@ export function MemberProfile() {
     <Layout tab="connections">
       {back}
       <article className="member-page" aria-labelledby="member-name">
-        <div className="member-hero">
-          {photo ? (
-            <img src={photo} alt="" />
-          ) : (
-            <span className="feed-initial" aria-hidden="true">
-              {member.display_name.slice(0, 1).toUpperCase()}
-            </span>
-          )}
-          <div className="feed-who">
+        <div className="member-head">
+          <Avatar name={member.display_name} path={member.photo_path} size="lg" />
+          <div className="member-head-text">
             <h1 id="member-name" ref={heading} tabIndex={-1}>
               {member.display_name}
               {member.birth_year ? <span className="feed-age">, {ageLabel(member.birth_year)}</span> : null}
             </h1>
-            {home && <p>{home}</p>}
+            {home && <p className="hint">{home}</p>}
           </div>
         </div>
 
@@ -126,45 +119,6 @@ export function MemberProfile() {
             </Link>
           )}
         </div>
-
-        {extras && (extras.photo_book.length > 0 || extras.holiday_prefs || extras.holiday_locked || extras.sexuality || extras.religion || extras.ethnicity) && (
-          <section className="card member-extras" aria-label={`More about ${member.display_name}`}>
-            <ProfileExtras extras={extras} name={member.display_name} headingLevel={3} />
-          </section>
-        )}
-
-        {member.bio && (
-          <section className="card" aria-labelledby="member-about">
-            <h2 id="member-about" className="card-title">
-              About {member.display_name}
-            </h2>
-            <p className="profile-bio">{member.bio}</p>
-          </section>
-        )}
-
-        <section className="card member-card-back" aria-labelledby="member-card">
-          <h2 id="member-card" className="card-title">
-            In their own words
-          </h2>
-          <CardBack name={member.display_name} answers={member.card_answers} />
-        </section>
-
-        {member.interests.length > 0 && (
-          <section className="card" aria-labelledby="member-interests">
-            <h2 id="member-interests" className="card-title">
-              Interests
-            </h2>
-            {shared > 0 && <p className="hint section-hint">{shared === 1 ? 'You share 1 of these.' : `You share ${shared} of these.`}</p>}
-            <ul className="chip-list">
-              {member.interests.map((i) => (
-                <li key={i.id} className={myIds.has(i.id) ? 'tag tag-shared' : 'tag'}>
-                  {i.label}
-                  {myIds.has(i.id) && <span className="visually-hidden"> (you share this)</span>}
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
 
         {(travel.length > 0 || diet.length > 0 || member.travelling_with) && (
           <section className="card" aria-labelledby="member-travel">
@@ -193,6 +147,45 @@ export function MemberProfile() {
             </dl>
           </section>
         )}
+
+        {member.interests.length > 0 && (
+          <section className="card" aria-labelledby="member-interests">
+            <h2 id="member-interests" className="card-title">
+              Interests
+            </h2>
+            {shared > 0 && <p className="hint section-hint">{shared === 1 ? 'You share 1 of these.' : `You share ${shared} of these.`}</p>}
+            <ul className="chip-list">
+              {member.interests.map((i) => (
+                <li key={i.id} className={myIds.has(i.id) ? 'tag tag-shared' : 'tag'}>
+                  {i.label}
+                  {myIds.has(i.id) && <span className="visually-hidden"> (you share this)</span>}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {extras && (extras.photo_book.length > 0 || extras.holiday_prefs || extras.holiday_locked || extras.sexuality || extras.religion || extras.ethnicity) && (
+          <section className="card member-extras" aria-label={`More about ${member.display_name}`}>
+            <ProfileExtras extras={extras} name={member.display_name} headingLevel={3} />
+          </section>
+        )}
+
+        {member.bio && (
+          <section className="card" aria-labelledby="member-about">
+            <h2 id="member-about" className="card-title">
+              About {member.display_name}
+            </h2>
+            <p className="profile-bio">{member.bio}</p>
+          </section>
+        )}
+
+        <section className="card member-card-back" aria-labelledby="member-card">
+          <h2 id="member-card" className="card-title">
+            In their own words
+          </h2>
+          <CardBack name={member.display_name} answers={member.card_answers} />
+        </section>
 
         {member.connected_at && <p className="hint member-since">Connected since {new Date(member.connected_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>}
         <SafetyBox profileId={member.profile_id} name={member.display_name} onBlocked={(message) => navigate('/messages', { state: { message } })} />

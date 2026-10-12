@@ -5,7 +5,7 @@ import type { Option } from './options'
 import { supabase } from './supabase'
 import { rules } from './rules'
 
-export type ReportReason = 'fake_profile' | 'asking_for_money' | 'harassment' | 'inappropriate' | 'feels_unsafe' | 'other'
+export type ReportReason = 'fake_profile' | 'asking_for_money' | 'harassment' | 'inappropriate' | 'feels_unsafe' | 'romantic_approach' | 'other'
 
 export const REPORT_REASONS: readonly Option<ReportReason>[] = [
   { value: 'fake_profile', label: 'Fake profile' },
@@ -13,6 +13,7 @@ export const REPORT_REASONS: readonly Option<ReportReason>[] = [
   { value: 'harassment', label: 'Harassment' },
   { value: 'inappropriate', label: 'Inappropriate' },
   { value: 'feels_unsafe', label: 'Feels unsafe' },
+  { value: 'romantic_approach', label: 'Unwanted romantic approach' },
   { value: 'other', label: 'Something else' },
 ]
 

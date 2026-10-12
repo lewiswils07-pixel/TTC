@@ -37,14 +37,14 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await expect(a.getByRole('heading', { name: /is on us for/ })).toBeVisible()
     await a.getByRole('link', { name: 'Start meeting people' }).click()
     // The tour opens first; look at the first step, then skip it.
-    await expect(a.getByRole('heading', { name: 'Meet people one at a time' })).toBeVisible()
+    await expect(a.getByRole('heading', { name: 'See who’s going' })).toBeVisible()
     await a.getByRole('button', { name: 'Skip', exact: true }).click()
     // Then, once, the privacy choices.
     await expect(a.getByRole('heading', { name: 'We value your privacy' })).toBeVisible()
     await a.getByRole('button', { name: 'Accept all' }).click()
     await expect(a.getByRole('heading', { name: 'We value your privacy' })).toBeHidden()
-    await expect(a.getByRole('heading', { level: 1, name: 'Connect' })).toBeVisible()
-    await expect(a.locator('.person-feed-card')).toBeVisible()
+    await expect(a.getByRole('heading', { level: 1, name: 'Who’s going' })).toBeVisible()
+    await expect(a.locator('.going-person').first()).toBeVisible()
   })
 
   let other = ''
@@ -56,17 +56,19 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.getByRole('radio', { name: '1 week either way' }).evaluate((el: HTMLElement) => el.click())
     await a.getByRole('button', { name: 'Add trip' }).click()
     await expect(a.getByRole('heading', { name: /going too/ })).toBeVisible()
-    other = await a.locator('.match-card h3').first().innerText()
-    await a
-      .getByRole('button', { name: `Ask to connect with ${other}` })
-      .first()
-      .click()
-    await a.getByLabel(/Add a note/).fill('Hello! Would you like to see the Musée d’Orsay together?')
-    await a.getByRole('button', { name: 'Send request' }).click()
-    await expect(a.getByText(/Request sent/)).toBeVisible()
-    // The Connect tab now leads with people going to Paris too, their trip first on the card.
+    // Who's going now lists people going to Paris too, under the trip, with what you share.
     await a.goto('/connections')
-    await expect(a.locator('.person-feed-card .feed-trip').first()).toContainText('Paris ·')
+    const row = a
+      .locator('.going-trip')
+      .filter({ has: a.getByRole('heading', { level: 2, name: 'Paris' }) })
+      .locator('.going-person')
+      .first()
+    await expect(row.locator('.going-share')).toContainText('Paris')
+    other = (await row.locator('.going-name strong').innerText()).split(',')[0]
+    await row.getByRole('button', { name: `Say hello to ${other}` }).click()
+    await a.getByLabel(/Your hello to/).fill('Hello! Would you like to see the Musée d’Orsay together?')
+    await a.getByRole('button', { name: 'Send hello' }).click()
+    await expect(a.getByText(/Your hello is on its way/)).toBeVisible()
   })
 
   const lewis = await idOf(lewisEmail)

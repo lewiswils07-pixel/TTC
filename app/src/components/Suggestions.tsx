@@ -4,13 +4,9 @@ import { keep, peek, remember } from '../lib/cache'
 import { sendRequest } from '../lib/connections'
 import { messageOf } from '../lib/errors'
 import { stepLink } from '../lib/onboarding'
-import { fitWords, homeLabel } from '../lib/matching'
-import { ageLabel } from '../lib/options'
-import { loadRequests, PLUS_SHOW_LEFT_BELOW, requestsLeftText, weeklyRequests } from '../lib/plan'
+import { loadRequests, PLUS_SHOW_LEFT_BELOW, weeklyRequests } from '../lib/plan'
 import { MAX_NOTE } from '../lib/validation'
-import { Avatar } from './Avatar'
 import { Field } from './Field'
-import { SafetyBox } from './SafetyBox'
 
 /** Every interest two members share, as tags (Lewis, 5 Oct: show them all). */
 export function SharedInterests({ labels }: { labels: string[] }) {
@@ -60,59 +56,13 @@ export function useRequests(): Requests | null {
   }
 }
 
-export function RequestsHint({ requests }: { requests: Requests }) {
-  return <p className="hint section-hint">Best matches first. {requestsLeftText(requests)}</p>
-}
-
-/** One suggested member: who they are, why we think you'd get on, and Ask to connect. */
-export function SuggestionCard({ person, reasons, tripId, requests }: { person: Person; reasons: string[]; tripId?: number; requests: Requests }) {
-  const [gone, setGone] = useState<string | null>(null)
-  const home = homeLabel(person)
-  if (gone) {
-    return (
-      <li className="card">
-        <p className="notice notice-success" role="status">
-          {gone}
-        </p>
-      </li>
-    )
-  }
-  return (
-    <li className="card match-card">
-      <div className="match-head">
-        <Avatar name={person.display_name} path={person.photo_path} />
-        <div className="match-who">
-          <div className="match-name">
-            <h3>{person.display_name}</h3>
-            <span className="match-score" title="How well your interests, dates and travel style line up">
-              {fitWords(person.score)}
-            </span>
-          </div>
-          <p className="profile-meta">
-            {person.birth_year ? `Age ${ageLabel(person.birth_year)}` : null}
-            {home && ` · ${home}`}
-          </p>
-          {person.travelling_with && <p className="profile-meta">Travels with: {person.travelling_with}</p>}
-        </div>
-      </div>
-      <ul className="match-reasons">
-        {reasons.filter((line) => !line.startsWith('Both into')).map((line) => (
-          <li key={line}>{line}</li>
-        ))}
-      </ul>
-      {!!person.shared_interests?.length && <SharedInterests labels={person.shared_interests} />}
-      <ConnectBox person={person} tripId={tripId} requests={requests} />
-      <SafetyBox profileId={person.profile_id} name={person.display_name} onBlocked={setGone} />
-    </li>
-  )
-}
-
-/** "Ask to connect" with an optional note. In the For you feed it opens straight away and hands back to the card when sent or cancelled. */
+/** "Say hello": a connection request with a note. On Who's going it opens straight away and hands back to the row when sent or cancelled. */
 export function ConnectBox({
   person,
   tripId,
   requests,
   startOpen = false,
+  suggested = '',
   onSent,
   onCancel,
 }: {
@@ -120,11 +70,13 @@ export function ConnectBox({
   tripId?: number
   requests: Requests
   startOpen?: boolean
+  /** A first line tied to the trip, which they can change. */
+  suggested?: string
   onSent?: (connected: boolean) => void
   onCancel?: () => void
 }) {
   const [open, setOpen] = useState(startOpen)
-  const [note, setNote] = useState('')
+  const [note, setNote] = useState(suggested.slice(0, MAX_NOTE))
   const [busy, setBusy] = useState(false)
   const [sent, setSent] = useState<'sent' | 'connected' | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -140,10 +92,10 @@ export function ConnectBox({
       <p className="notice notice-success" role="status">
         {sent === 'connected' ? (
           <>
-            {person.display_name} had already asked to connect with you, so you’re now connected. <Link to="/messages">Say hello in Chat</Link>
+            {person.display_name} had already said hello to you, so you’re now connected. <Link to="/messages">Carry on in Chat</Link>
           </>
         ) : (
-          `Request sent. We’ll let you know when ${person.display_name} replies.`
+          `Your hello is on its way. We’ll let you know when ${person.display_name} replies.`
         )}
       </p>
     )
@@ -151,7 +103,7 @@ export function ConnectBox({
   if (!open) {
     return (
       <button type="button" className="btn btn-primary btn-block" disabled={left <= 0} onClick={() => setOpen(true)}>
-        {left > 0 ? `Ask to connect with ${person.display_name}` : 'No requests left this week'}
+        {left > 0 ? `Say hello to ${person.display_name}` : 'No hellos left this week'}
       </button>
     )
   }
@@ -174,8 +126,8 @@ export function ConnectBox({
     <div className="connect-box">
       <Field
         name="note"
-        label={`Add a note for ${person.display_name} (optional)`}
-        hint={`Say hello and what you’d like to do together. ${MAX_NOTE - note.length} characters left.`}
+        label={`Your hello to ${person.display_name}`}
+        hint={`Change it as you like. ${MAX_NOTE - note.length} characters left.`}
       >
         {({ id, describedBy }) => (
           <textarea
@@ -190,8 +142,8 @@ export function ConnectBox({
         )}
       </Field>
       <p className="hint">
-        {requests.plus && left > PLUS_SHOW_LEFT_BELOW ? '' : `This uses 1 of your ${left} request${left === 1 ? '' : 's'} left this week. `}
-        Nothing else is shared until they accept.
+        {requests.plus && left > PLUS_SHOW_LEFT_BELOW ? '' : `This uses 1 of your ${left} hello${left === 1 ? '' : 's'} left this week. `}
+        You can chat once they say hello back.
       </p>
       {error && (
         <p className="notice notice-error" role="alert">
@@ -209,7 +161,7 @@ export function ConnectBox({
           Cancel
         </button>
         <button type="button" className="btn btn-primary" onClick={send} disabled={busy}>
-          {busy ? 'Sending…' : 'Send request'}
+          {busy ? 'Sending…' : 'Send hello'}
         </button>
       </div>
     </div>

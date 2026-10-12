@@ -124,6 +124,47 @@ export function callouts(p: FeedPerson, today?: string): Callout[] {
   return lines
 }
 
+/** "What you share" with someone, in plain words, strongest first: reasons, not a rating (Lewis, 12 Oct).
+ *  `trip` is the trip you're both on; exact days are Sodalis+, others see the month. */
+export function whatYouShare(p: FeedPerson, trip?: FeedPerson['trips'][number], today?: string): string[] {
+  const lines: string[] = []
+  if (trip) {
+    lines.push(
+      trip.days
+        ? `Both in ${trip.city} ${shortDates(trip.days.start, trip.days.end, today)}`
+        : trip.overlap
+          ? `Both in ${trip.city} in ${monthName(trip.start)}`
+          : `${trip.city} in ${monthName(trip.start)}, near your dates`,
+    )
+  }
+  lines.push(...p.shared_interests.slice(0, 3))
+  if (p.shared_places.length) lines.push(`Both want to see ${listLabels(p.shared_places)}`)
+  return lines
+}
+
+export type TripGroup = { city: string; people: FeedPerson[] }
+
+/** Who's going: one group per place you're going, each person under their best trip with you
+ *  (there at the same time first), in feed order. Everyone else shares your interests. */
+export function groupByTrip(people: FeedPerson[]): { trips: TripGroup[]; others: FeedPerson[] } {
+  const trips = new Map<string, TripGroup>()
+  const others: FeedPerson[] = []
+  for (const p of people) {
+    const t = sameTime(p) ?? p.trips[0]
+    if (!t) {
+      others.push(p)
+      continue
+    }
+    const group = trips.get(t.city) ?? { city: t.city, people: [] }
+    group.people.push(p)
+    trips.set(t.city, group)
+  }
+  return { trips: [...trips.values()], others }
+}
+
+/** This person's trip to a place you're going. */
+export const tripTo = (p: FeedPerson, city: string) => p.trips.find((t) => t.city === city)
+
 /** Lives within 30 km but not in your town (their town is already on the photo). Shown as a badge on the photo (Lewis, 11 Oct). */
 export const nearYou = (p: FeedPerson, myHomeCity: string | null) => p.distance_km !== null && p.distance_km < 30 && p.home_city !== myHomeCity
 

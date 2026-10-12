@@ -33,7 +33,7 @@ export function TripMatches() {
 
   useEffect(() => {
     // Only people you're connected or in touch with (Lewis, 11 Oct): everyone
-    // else going at the same time is found on Connect.
+    // else going at the same time is found on Who’s going.
     Promise.all([getTrip(tripId), tripCompanions(tripId).catch(() => [])]).then(
       ([t, c]) => {
         setTrip(t)
@@ -137,7 +137,7 @@ export function TripMatches() {
               <div className="card empty">
                 <p>When you connect with someone going to {trip.city.name} at the same time as you, they’ll appear here.</p>
                 <Link className="btn btn-secondary" to="/connections">
-                  Find people on Connect
+                  Find people on Who’s going
                 </Link>
               </div>
             )}

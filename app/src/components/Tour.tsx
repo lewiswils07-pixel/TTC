@@ -3,18 +3,18 @@ import { useEffect, useRef, useState } from 'react'
 const STEPS: { icon: string; title: string; text: string }[] = [
   {
     icon: '✦',
-    title: 'Meet people one at a time',
-    text: 'Each card is someone we think you’d get on with, with the reasons why. Tap Connect to say hello, or Skip to see the next person.',
+    title: 'See who’s going',
+    text: 'Members going where you’re going are listed under each of your trips, with what you share. Tap Say hello, or Not for this trip to pass.',
   },
   {
     icon: '↻',
-    title: 'Flip the card',
-    text: 'Tap a card, or the small turn-over mark in its top corner, to see the back: three questions they chose to answer. Once you’re connected, tap their name to see their full profile.',
+    title: 'Read more about someone',
+    text: 'Tap a name to see their trips, how they travel and three questions they chose to answer. Once you’re connected, you can see their full profile.',
   },
   {
     icon: '✈',
-    title: 'Trips in common',
-    text: 'Add a trip and anyone going to the same place at the same time appears in the burgundy strip at the top of Connect.',
+    title: 'Small groups',
+    text: 'Travel with 3 or 4 people going your way. Start a group for a trip from Who’s going and invite your connections.',
   },
   {
     icon: '✓',

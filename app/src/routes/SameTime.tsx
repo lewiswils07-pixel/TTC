@@ -46,7 +46,7 @@ export function SameTime() {
     <Layout tab="connections">
       <div className="plus-page">
         <Link className="back-link" to="/connections">
-          ‹ Connect
+          ‹ Who’s going
         </Link>
         <span className="tag tag-plus">{brand.plusName}</span>
         <h1 ref={heading} tabIndex={-1}>
@@ -97,7 +97,7 @@ export function SameTime() {
                   </section>
                 ))}
                 <Link className="btn btn-secondary btn-block" to="/connections">
-                  Ask to connect on Connect
+                  Say hello on Who’s going
                 </Link>
               </>
             )}

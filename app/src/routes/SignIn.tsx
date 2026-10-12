@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { brand } from '../lib/brand'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { TextField } from '../components/Field'
@@ -251,6 +252,11 @@ export function SignIn() {
                   </button>
                 </div>
               </>
+            )}
+            {mode === 'join' && (
+              <p className="friend-promise">
+                <strong>{brand.name} is for travel friendships.</strong> No romantic approaches, ever. Joining means you agree to keep it that way.
+              </p>
             )}
             <p className="hint center legal-line">
               By continuing you agree to our <Link to="/terms">terms</Link>, <Link to="/privacy">privacy notice</Link> and{' '}
