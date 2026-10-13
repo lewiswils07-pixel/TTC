@@ -599,6 +599,8 @@ legend { padding: 0; }
 
 /* ------------------------------------------------------------ tab bar */
 .has-tabs .main { padding-bottom: calc(var(--safe-bottom) + 96px); }
+/* Anything scrolled into view (a focused box, the people after tapping a trip) stops clear of the top bar and the tab bar. */
+html:has(.has-tabs) { scroll-padding: calc(var(--safe-top) + 76px) 0 calc(var(--safe-bottom) + 104px); }
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
   padding: 0 var(--safe-right) var(--safe-bottom) var(--safe-left);
@@ -1513,7 +1515,8 @@ html { scroll-padding-bottom: 7rem; }
   .company-charts { grid-template-columns: 1fr 1fr; }
   .company .kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
-.popular-group { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.popular-group { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4); }
+.popular-groups .person-list { margin-bottom: var(--space-3); }
 .popular-group .trip-text { display: flex; flex-direction: column; }
 
 /* ------------------------------------------------ Who's going: trips first, a calm list (Lewis, 12 Oct) */
@@ -1534,6 +1537,8 @@ html { scroll-padding-bottom: 7rem; }
 .going-faces .avatar:first-child { margin-left: 0; }
 .going-trip-count { font-weight: 700; font-size: var(--text-sm); white-space: nowrap; }
 .going-plus-line { margin-bottom: var(--space-5); }
+.going-showing { margin: 0 0 var(--space-3); }
+.connect-photo p { margin: 0 0 var(--space-3); }
 .going-deck { margin-bottom: var(--space-5); }
 .going-deck-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
 .going-deck-head .section-title { margin-bottom: var(--space-2); }
@@ -1549,9 +1554,12 @@ html { scroll-padding-bottom: 7rem; }
 /* The person card turns over with the corner button, like the old card did. */
 .going-flip .feed-flip-inner { cursor: auto; }
 .going-front { display: flex; flex-direction: column; gap: var(--space-3); }
-.going-front .going-who { padding-right: 52px; }
-.going-flip .flip-corner { top: 0; right: 0; }
-.going-flip .feed-back { min-height: 260px; }
+.going-flip .flip-corner { position: static; margin-top: var(--space-3); }
+/* With words, not just the icon (testers, 13 Oct). */
+.going-flip-btn { display: inline-flex; gap: 6px; width: auto; height: 40px; padding: 0 14px 0 10px; border-radius: 999px; font: inherit; font-size: 0.875rem; font-weight: 600; }
+.going-flip-btn svg { width: 18px; height: 18px; flex: none; }
+.going-flip-btn:hover { transform: none; border-color: var(--brand-gold); }
+.going-flip .feed-back { min-height: 0; }
 .going-who {
   display: flex; align-items: center; gap: var(--space-3); width: 100%; padding: 0; border: 0; background: none;
   color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-sm);

@@ -5,10 +5,13 @@ import { peek, remember } from '../lib/cache'
 import { hasPlus } from '../lib/plan'
 import { popularDestinations, type PopularPlace } from '../lib/trips'
 
+const SHOWN = 3
+
 /** Sodalis+ on Groups: places members are heading right now, each a tap away from starting a trip group there (Lewis, 11 Oct). */
 export function PopularGroups({ canStart }: { canStart: boolean }) {
   const [plus, setPlus] = useState<boolean | null>(null)
   const [places, setPlaces] = useState<PopularPlace[] | undefined>(() => peek('popular'))
+  const [all, setAll] = useState(false)
 
   useEffect(() => {
     hasPlus().then(setPlus, () => setPlus(false))
@@ -18,19 +21,17 @@ export function PopularGroups({ canStart }: { canStart: boolean }) {
   if (plus === null || !places?.length) return null
   return (
     <section className="popular-groups" aria-labelledby="popular-groups-title">
-      <div className="plus-head">
-        <h2 className="section-title" id="popular-groups-title">
-          Popular right now
-        </h2>
-        <span className="tag tag-plus">{brand.plusName}</span>
-      </div>
-      {!plus ? (
-        <p className="hint">
-          See where members are heading now and start a group for it. <Link to="/profile?tab=plus">Comes with {brand.plusName}</Link>
-        </p>
-      ) : (
+      <h2 className="section-title" id="popular-groups-title">
+        Popular right now
+      </h2>
+      {/* The badge always says what it's for (testers, 13 Oct). */}
+      <p className="hint">
+        <span className="tag tag-plus">{brand.plusName}</span> Where members are heading now, so you can start a group for one.{' '}
+        {!plus && <Link to="/profile?tab=plus">Comes with {brand.plusName}</Link>}
+      </p>
+      {plus && (
         <ul className="person-list">
-          {places.map((p) => (
+          {(all ? places : places.slice(0, SHOWN)).map((p) => (
             <li key={p.city_id} className="card group-card popular-group">
               <span className="trip-text">
                 <strong>{p.city}</strong>
@@ -44,6 +45,11 @@ export function PopularGroups({ canStart }: { canStart: boolean }) {
             </li>
           ))}
         </ul>
+      )}
+      {plus && places.length > SHOWN && (
+        <button type="button" className="btn-link" onClick={() => setAll((a) => !a)}>
+          {all ? 'Show fewer' : `Show all ${places.length}`}
+        </button>
       )}
     </section>
   )

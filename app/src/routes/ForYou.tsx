@@ -63,6 +63,7 @@ export function ForYou() {
   const [canStart, setCanStart] = useState(0)
   /** A trip tapped at the top: the cards then show only people going there. */
   const [only, setOnly] = useState<string | null>(null)
+  const deckRef = useRef<HTMLElement>(null)
   const [error, setError] = useState<string | null>(null)
   const [skipped, setSkipped] = useState(0)
   const [status, setStatus] = useState<{ text: string; undo?: FeedPerson } | null>(null)
@@ -148,6 +149,11 @@ export function ForYou() {
 
   const { trips } = groupByTrip(people ?? [])
   const myHome = data.profile.home_city?.name ?? null
+  // Show the people straight away when a trip is tapped (testers, 13 Oct: the card was off screen).
+  function pickTrip(city: string | null) {
+    setOnly(city)
+    if (city) requestAnimationFrame(() => deckRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
   const deck = (only ? trips.find((g) => g.city === only)?.people : people) ?? []
   const person = deck[0]
   const cityOf = (p: FeedPerson) => only ?? (sameTime(p) ?? p.trips[0])?.city
@@ -197,7 +203,7 @@ export function ForYou() {
                         type="button"
                         className={only === g.city ? 'card going-trip-row is-current' : 'card going-trip-row'}
                         aria-pressed={only === g.city}
-                        onClick={() => setOnly(only === g.city ? null : g.city)}
+                        onClick={() => pickTrip(only === g.city ? null : g.city)}
                       >
                         <span className="going-trip-text">
                           <strong>{g.city}</strong>
@@ -234,30 +240,18 @@ export function ForYou() {
             </div>
           )}
 
-          <section className="going-groups" aria-labelledby="travel-groups">
-            <h2 className="section-title" id="travel-groups">
-              Travel groups
-            </h2>
-            <div className="action-row going-groups-actions">
-              <Link className="btn btn-secondary" to="/groups">
-                Your groups
-              </Link>
-              {canStart > 0 && (
-                <Link className="btn btn-primary" to="/groups/new">
-                  Start a group
-                </Link>
-              )}
-            </div>
-            <PopularGroups canStart={canStart > 0} />
-          </section>
-
-          <section className="going-deck" aria-labelledby="people-title">
+          <section className="going-deck" aria-labelledby="people-title" ref={deckRef}>
             <div className="going-deck-head">
               <h2 className="section-title" id="people-title">
                 {only ? `Going to ${only}` : 'People like you'}
               </h2>
               {deck.length > 0 && <span className="hint">1 of {deck.length}</span>}
             </div>
+            {only && deck.length > 0 && (
+              <p className="hint going-showing">
+                Showing {deck.length === 1 ? '1 person' : `${deck.length} people`} going to {only}
+              </p>
+            )}
             {only && (
               <button type="button" className="btn-link going-show-all" onClick={() => setOnly(null)}>
                 Show everyone
@@ -270,6 +264,7 @@ export function ForYou() {
                   person={person}
                   city={cityOf(person)}
                   myHome={myHome}
+                  hasPhoto={!!data.profile.photo_path}
                   requests={requests}
                   onNotNow={() => notNow(person)}
                   onSent={(connected) =>
@@ -309,6 +304,23 @@ export function ForYou() {
               )}
             </div>
           )}
+
+          <section className="going-groups" aria-labelledby="travel-groups">
+            <h2 className="section-title" id="travel-groups">
+              Travel groups
+            </h2>
+            <div className="action-row going-groups-actions">
+              <Link className="btn btn-secondary" to="/groups">
+                Your groups
+              </Link>
+              {canStart > 0 && (
+                <Link className="btn btn-primary" to="/groups/new">
+                  Start a group
+                </Link>
+              )}
+            </div>
+            <PopularGroups canStart={canStart > 0} />
+          </section>
         </>
       )}
     </Layout>
@@ -324,8 +336,10 @@ function PersonCard({
   onNotNow,
   onSent,
   onBlocked,
+  hasPhoto,
 }: {
   person: FeedPerson
+  hasPhoto: boolean
   /** The trip you're both going on, if any. */
   city?: string
   myHome: string | null
@@ -343,7 +357,7 @@ function PersonCard({
   const home = homeLabel(person)
   const id = `person-${person.profile_id}`
   const suggested = trip
-    ? `Hi ${person.display_name}, I’m going to ${trip.city} in ${monthName(trip.start)} too. Would you like to meet up while we’re there?`
+    ? `Hi ${person.display_name}, I’m going to ${trip.city} in ${monthName(trip.days?.start ?? trip.start)} too. Would you like to meet up while we’re there?`
     : `Hi ${person.display_name}, it looks like we enjoy the same kind of travel. Where are you off to next?`
 
   // The back of the card: the three questions they chose to answer (Lewis, 12 Oct: keep the flip).
@@ -399,12 +413,27 @@ function PersonCard({
             )}
           </section>
         </div>
-        <button type="button" className="flip-corner" onClick={flip} aria-label={flipped ? `Turn ${person.display_name}’s card back to the front` : `Turn ${person.display_name}’s card over`}>
+        <button
+          type="button"
+          className="flip-corner going-flip-btn"
+          onClick={flip}
+          aria-label={flipped ? `Turn ${person.display_name}’s card back to the front` : `Turn ${person.display_name}’s card over`}
+        >
           <FlipIcon />
+          <span aria-hidden="true">{flipped ? 'Front' : 'Their answers'}</span>
         </button>
       </div>
       {connecting ? (
-        <ConnectBox person={person} tripId={person.trip_id ?? undefined} requests={requests} startOpen suggested={suggested} onSent={onSent} onCancel={() => setConnecting(false)} />
+        <ConnectBox
+          person={person}
+          tripId={person.trip_id ?? undefined}
+          requests={requests}
+          startOpen
+          needsPhoto={!hasPhoto}
+          suggested={suggested}
+          onSent={onSent}
+          onCancel={() => setConnecting(false)}
+        />
       ) : (
         <div className="action-row going-actions">
           <button type="button" className="btn btn-secondary" onClick={onNotNow} aria-label={`Not now: ${person.display_name}`}>

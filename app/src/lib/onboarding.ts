@@ -8,7 +8,8 @@ export const STEP = { basics: 1, photo: 2, interests: 3, card: 4, travel: 5 } as
 export type StepName = keyof typeof STEP
 
 /** The link that opens one profile step. */
-export const stepLink = (name: StepName) => `/onboarding?step=${STEP[name]}`
+/** A sign-up step to open from elsewhere; `returnTo` brings them back there once it's saved. */
+export const stepLink = (name: StepName, returnTo?: string) => `/onboarding?step=${STEP[name]}${returnTo ? `&return=${encodeURIComponent(returnTo)}` : ''}`
 
 /** Where to send a member who comes back to a half-finished profile. */
 export function firstUnfinishedStep({ profile, interestIds, card }: MyProfile): number {
