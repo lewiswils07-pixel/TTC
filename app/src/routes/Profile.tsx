@@ -6,7 +6,7 @@ import { dismissNotice, iAmAdmin, myNotices, type Notice } from '../lib/admin'
 import { answerMeet, meetPrompts, type MeetPrompt } from '../lib/meet'
 import { Avatar } from '../components/Avatar'
 import { cityLabel } from '../lib/cities'
-import { BUDGETS, MAX_PREF_AGE, MIN_AGE, PACES, ageFromDate, ageLabel, labelFor } from '../lib/options'
+import { BUDGETS, MAX_PREF_AGE, PACES, ageFromDate, ageLabel, labelFor } from '../lib/options'
 import type { Card } from '../lib/card'
 import { profileStrength } from '../lib/strength'
 import { answerNps, npsDue } from '../lib/kpis'
@@ -25,6 +25,7 @@ import { HubRow } from '../components/HubRow'
 import { EmergencyNumbers } from '../components/EmergencyNumbers'
 import { interestedInText } from '../lib/filters'
 import { HolidayChips } from '../components/ProfileExtras'
+import { NextIcon } from '../components/Icons'
 
 type HubTab = 'me' | 'safety' | 'plus'
 const HUB_TABS: { key: HubTab; label: string }[] = [
@@ -59,7 +60,7 @@ export function Profile() {
 
   const actions = (
     <div className="hub-actions">
-      <Link className="icon-btn" to="/filters" aria-label="Who I’d like to meet">
+      <Link className="icon-btn" to="/filters" aria-label="Filters">
         <Icon d={ICONS.filters} />
       </Link>
       <Link className="icon-btn" to="/settings" aria-label="Settings">
@@ -208,15 +209,10 @@ function MyProfilePanel({ data, hasPhoto }: { data: MyProfile; hasPhoto: boolean
             </div>
           )}
           <div>
-            <dt>Looking for</dt>
+            <dt>Travel companions</dt>
             <dd>
-              {interestedInText(preferences.genders)}, aged {preferences.age_min} to {preferences.age_max >= MAX_PREF_AGE ? `${MAX_PREF_AGE}+` : preferences.age_max}
-              {preferences.age_min <= MIN_AGE && preferences.age_max >= MAX_PREF_AGE && (
-                <>
-                  {' '}
-                  <Link to="/filters">Narrow this down</Link>
-                </>
-              )}
+              {interestedInText(preferences.genders) === 'Everyone' ? 'Anyone' : interestedInText(preferences.genders)}, aged {preferences.age_min} to{' '}
+              {preferences.age_max >= MAX_PREF_AGE ? `${MAX_PREF_AGE}+` : preferences.age_max}
             </dd>
           </div>
         </dl>
@@ -472,7 +468,7 @@ function AdminLink() {
         <span className="trip-meta">Reports, flagged messages and KPIs (team only)</span>
       </span>
       <span className="trip-chevron" aria-hidden="true">
-        ›
+        <NextIcon />
       </span>
     </Link>
   )

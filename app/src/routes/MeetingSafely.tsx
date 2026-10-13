@@ -4,6 +4,7 @@ import { Avatar } from '../components/Avatar'
 import { Layout } from '../components/Layout'
 import { EmergencyNumbers } from '../components/EmergencyNumbers'
 import { myConversations, type Conversation } from '../lib/chat'
+import { BackIcon, NextIcon } from '../components/Icons'
 
 const TIPS: { title: string; text: string }[] = [
   { title: 'Get to know each other here first', text: 'Chat in the app, and have a video call before you meet. Someone who won’t talk on camera is a reason to be careful.' },
@@ -42,7 +43,7 @@ function TellSomeone() {
                 <Avatar name={c.display_name} path={c.photo_path} size="sm" />
                 <span>Meeting {c.display_name}</span>
                 <span className="trip-chevron" aria-hidden="true">
-                  ›
+                  <NextIcon />
                 </span>
               </Link>
             </li>
@@ -64,11 +65,13 @@ export function MeetingSafely() {
     <Layout>
       {canGoBack ? (
         <button type="button" className="back-link btn-plain" onClick={() => navigate(-1)}>
-          ‹ Back
+          <BackIcon />
+          Back
         </button>
       ) : (
         <Link className="back-link" to="/profile">
-          ‹ My profile
+          <BackIcon />
+          Profile
         </Link>
       )}
       <h1 ref={heading} tabIndex={-1}>

@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import { NextIcon } from './Icons'
 
 /** A tappable row with an optional icon, title, one line of text and a chevron. */
 export function HubRow({ to, title, text, icon }: { to: string; title: string; text?: string; icon?: string }) {
@@ -16,7 +17,7 @@ export function HubRow({ to, title, text, icon }: { to: string; title: string; t
         {text && <span>{text}</span>}
       </span>
       <span className="trip-chevron" aria-hidden="true">
-        ›
+        <NextIcon />
       </span>
     </Link>
   )

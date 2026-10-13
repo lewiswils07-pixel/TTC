@@ -8,6 +8,8 @@ import { messageOf } from '../lib/errors'
 import { rules } from '../lib/rules'
 import { addToWishlist, listMyTrips, listWishlist, removeFromWishlist, type Trip, type WishlistItem } from '../lib/trips'
 import { CityPicker } from './CityPicker'
+import { CityPhoto } from './CityPhoto'
+import { CloseIcon, NextIcon } from './Icons'
 
 const MAX_WISHLIST = rules.wishlist.max
 
@@ -50,18 +52,14 @@ export function MyTrips() {
           {trips.map((trip) => (
             <li key={trip.id}>
               <Link className="trip-row" to={`/trips/${trip.id}`} aria-label={`${cityLabel(trip.city)}, ${tripDates(trip.start_date, trip.end_date)}. See who’s going`}>
-                <span className="trip-pin" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" width="20" height="20">
-                    <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z" fill="currentColor" />
-                  </svg>
-                </span>
+                <CityPhoto city={trip.city.name} width={120} className="trip-thumb" />
                 <span className="trip-text">
                   <strong>{cityLabel(trip.city)}</strong>
                   <span className="trip-meta">{tripDates(trip.start_date, trip.end_date)}</span>
                   {trip.visibility === 'hidden' && <span className="tag tag-muted">Hidden</span>}
                 </span>
                 <span className="trip-chevron" aria-hidden="true">
-                  ›
+                  <NextIcon />
                 </span>
               </Link>
             </li>
@@ -119,7 +117,7 @@ export function Wishlist() {
           {items.map((item) => (
             <li key={item.city_id}>
               <button type="button" className="chip-remove" aria-label={`Remove ${cityLabel(item.city)}`} disabled={busy} onClick={() => run(() => removeFromWishlist(item.city_id))}>
-                {cityLabel(item.city)} <span aria-hidden="true">×</span>
+                {cityLabel(item.city)} <CloseIcon />
               </button>
             </li>
           ))}

@@ -18,9 +18,12 @@ export function useChecks<K extends string>(errors: Record<K, string | null>) {
     const first = (Object.keys(errors) as K[]).find((k) => errors[k])
     if (!first) return true
     requestAnimationFrame(() => {
-      const el = document.querySelector<HTMLElement>(`[data-field="${first}"] input, [data-field="${first}"] textarea, [data-field="${first}"] select, [data-field="${first}"] .range-day:not(:disabled)`)
-      el?.focus()
-      el?.closest('[data-field]')?.scrollIntoView?.({ block: 'center', behavior: 'smooth' })
+      const el = document.querySelector<HTMLElement>(
+        `[data-field="${first}"] input, [data-field="${first}"] textarea, [data-field="${first}"] select, [data-field="${first}"] .range-day:not(:disabled)`,
+      )
+      el?.focus({ preventScroll: true })
+      // Scroll to the field itself, even when it has nothing to focus (testers, 13 Oct: an error sat out of sight).
+      document.querySelector(`[data-field="${first}"]`)?.scrollIntoView?.({ block: 'center', behavior: 'smooth' })
     })
     return false
   }

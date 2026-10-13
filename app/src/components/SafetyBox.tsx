@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { messageOf } from '../lib/errors'
 import { blockMember, MAX_REPORT_DETAILS, REPORT_REASONS, reportMember, reportMessage, type ReportReason } from '../lib/safety'
 import { Field, FieldError } from './Field'
+import { MoreIcon } from './Icons'
 
 type Mode = 'closed' | 'menu' | 'block' | 'report' | 'reported'
 
@@ -16,14 +17,17 @@ export function SafetyBox({
   onBlocked,
   messageId,
   onCancel,
+  startOpen,
 }: {
   profileId: string
   name: string
   onBlocked: (message: string) => void
   messageId?: number
   onCancel?: () => void
+  /** Opened from a ⋯ menu: starts on the Report / Block choice. */
+  startOpen?: boolean
 }) {
-  const [mode, setMode] = useState<Mode>(messageId ? 'report' : 'closed')
+  const [mode, setMode] = useState<Mode>(messageId ? 'report' : startOpen ? 'menu' : 'closed')
   const [reason, setReason] = useState<ReportReason | null>(messageId ? 'asking_for_money' : null)
   const [details, setDetails] = useState('')
   const [tried, setTried] = useState(false)
@@ -56,7 +60,11 @@ export function SafetyBox({
     }
   }
 
-  const block = () => run(() => blockMember(profileId), () => onBlocked(`You blocked ${name}. You won’t see each other again.`))
+  const block = () =>
+    run(
+      () => blockMember(profileId),
+      () => onBlocked(`You blocked ${name}. You won’t see each other again.`),
+    )
 
   // Two plain buttons rather than a switch, so it's always clear whether they'll be blocked too.
   function report(alsoBlock: boolean) {
@@ -114,8 +122,7 @@ export function SafetyBox({
       {mode === 'block' && (
         <>
           <p>
-            <strong>Block {name}?</strong> You won’t see each other anywhere, and any request or connection between you ends. {name} isn’t
-            told.
+            <strong>Block {name}?</strong> You won’t see each other anywhere, and any request or connection between you ends. {name} isn’t told.
           </p>
           {errorRow}
           <div className="action-row">
@@ -145,14 +152,7 @@ export function SafetyBox({
           </fieldset>
           <Field name="details" label="Anything else we should know? (optional)" hint={`Only our team sees this. ${MAX_REPORT_DETAILS - details.length} characters left.`}>
             {({ id: fieldId, describedBy }) => (
-              <textarea
-                id={fieldId}
-                className="textarea textarea-short"
-                maxLength={MAX_REPORT_DETAILS}
-                aria-describedby={describedBy}
-                value={details}
-                onChange={(e) => setDetails(e.target.value)}
-              />
+              <textarea id={fieldId} className="textarea textarea-short" maxLength={MAX_REPORT_DETAILS} aria-describedby={describedBy} value={details} onChange={(e) => setDetails(e.target.value)} />
             )}
           </Field>
           <p className="hint">Blocking too means you won’t see each other again. {name} isn’t told who reported them.</p>
@@ -171,5 +171,18 @@ export function SafetyBox({
         </>
       )}
     </div>
+  )
+}
+
+/** A ⋯ button (placed by the card's CSS) that opens Block or report in the card's flow (testers, 13 Oct: the link on every card was loud). */
+export function SafetyMenu({ profileId, name, onBlocked }: { profileId: string; name: string; onBlocked: (message: string) => void }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <button type="button" className="icon-btn safety-more" aria-expanded={open} aria-label={`More: block or report ${name}`} onClick={() => setOpen((o) => !o)}>
+        <MoreIcon />
+      </button>
+      {open && <SafetyBox profileId={profileId} name={name} onBlocked={onBlocked} startOpen onCancel={() => setOpen(false)} />}
+    </>
   )
 }

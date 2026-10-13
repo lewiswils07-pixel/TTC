@@ -12,6 +12,7 @@ import { loadExtras, loadMemberProfile, type MemberExtras, type MemberProfile as
 import { DIETS, STYLE_QUESTIONS, ageLabel, labelFor } from '../lib/options'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
+import { BackIcon } from '../components/Icons'
 
 /** A connection's full profile: how they travel and what they love first, a small photo, then their own words (Lewis, 12 Oct). */
 export function MemberProfile() {
@@ -45,11 +46,13 @@ export function MemberProfile() {
 
   const back = canGoBack ? (
     <button type="button" className="back-link btn-plain" onClick={() => navigate(-1)}>
-      ‹ Back
+      <BackIcon />
+      Back
     </button>
   ) : (
     <Link className="back-link" to="/messages">
-      ‹ Chats
+      <BackIcon />
+      Chats
     </Link>
   )
 

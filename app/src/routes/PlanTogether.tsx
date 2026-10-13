@@ -14,6 +14,7 @@ import { planTripTogether } from '../lib/together'
 import { listMyTrips, type Trip } from '../lib/trips'
 import { useChecks } from '../lib/useChecks'
 import { MAX_TRIP_DAYS, checkTripDates } from '../lib/validation'
+import { BackIcon } from '../components/Icons'
 
 /** Invite a connection to plan a trip together: one of your trips, or somewhere new. */
 export function PlanTogether() {
@@ -81,7 +82,8 @@ export function PlanTogether() {
     <Layout tab="chat">
       {who && (
         <Link className="back-link" to={`/messages/${who.chat}`}>
-          ‹ {who.name}
+          <BackIcon />
+          {who.name}
         </Link>
       )}
       <form onSubmit={submit} noValidate>
@@ -89,8 +91,8 @@ export function PlanTogether() {
           {who ? `Plan a trip with ${who.name}` : 'Plan a trip together'}
         </h1>
         <p className="lede">
-          {who ? `${who.name} gets an invite in your chat.` : 'They get an invite in your chat.'} If they say yes, the trip goes in both your Trips, with
-          a shared plan board for ideas. You can invite more people later.
+          {who ? `${who.name} gets an invite in your chat.` : 'They get an invite in your chat.'} If they say yes, the trip goes in both your Trips, with a shared plan board for ideas. You can invite
+          more people later.
         </p>
         {error && !trips && (
           <p className="notice notice-error" role="alert">

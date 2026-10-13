@@ -80,7 +80,8 @@ function GroupEditor({ people }: { people: Connection[] }) {
   const [kind, setKind] = useState<'chat' | 'trip'>(fromTrip || popular ? 'trip' : 'chat')
   const forTrip = kind === 'trip'
   // Who can join (Lewis, 13 Oct): open groups, women-only groups and an age range.
-  const [open, setOpen] = useState(false)
+  // With no connections yet, a trip group is open so it isn't a dead end (Josh, 13 Oct).
+  const [open, setOpen] = useState(people.length === 0)
   const [womenOnly, setWomenOnly] = useState(false)
   const [ages, setAges] = useState<[number, number]>([MIN_AGE, MAX_PREF_AGE])
   const { session } = useSession()
@@ -156,7 +157,7 @@ function GroupEditor({ people }: { people: Connection[] }) {
         <h1 ref={heading} tabIndex={-1}>
           Start a group
         </h1>
-        <p className="lede">A group can have up to {rules.groups.maxPeople} people, you included. Invite people you’re connected with, and each of them chooses whether to join.</p>
+        <p className="lede">Plan a trip or just chat, with up to {rules.groups.maxPeople} people.</p>
 
         <div className="card form-card">
           <Segmented

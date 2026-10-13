@@ -4,7 +4,7 @@ import { Layout } from '../components/Layout'
 import { ChatNav } from '../components/SubNav'
 import { Avatar } from '../components/Avatar'
 import { useConfirm } from '../lib/useConfirm'
-import { SafetyBox } from '../components/SafetyBox'
+import { SafetyMenu } from '../components/SafetyBox'
 import { SkeletonRows } from '../components/Skeleton'
 import { loadTabCounts, refreshTabCounts } from '../lib/tabCounts'
 import type { Conversation } from '../lib/chat'
@@ -14,6 +14,7 @@ import { peek, remember } from '../lib/cache'
 import { myConnections, respondToRequest, withdrawRequest, type Connection } from '../lib/connections'
 import { ageLabel } from '../lib/options'
 import { myBlocks, unblockMember, type BlockedMember } from '../lib/safety'
+import { NextIcon } from '../components/Icons'
 
 /**
  * Connections on the Chat tab. "other" sits under Chats: people you're connected
@@ -233,7 +234,11 @@ function PersonCard({
           {item.birth_year ? `Age ${ageLabel(item.birth_year)}` : null}
           {home && ` · ${home}`}
         </p>
-        {profileLink && <span className="match-view">View profile ›</span>}
+        {profileLink && (
+          <span className="match-view">
+            View profile <NextIcon />
+          </span>
+        )}
       </div>
     </>
   )
@@ -248,7 +253,7 @@ function PersonCard({
       )}
       {item.note && <blockquote className="person-note">{item.note}</blockquote>}
       {children}
-      <SafetyBox profileId={item.profile_id} name={item.display_name} onBlocked={onBlocked} />
+      <SafetyMenu profileId={item.profile_id} name={item.display_name} onBlocked={onBlocked} />
     </li>
   )
 }

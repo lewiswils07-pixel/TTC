@@ -20,7 +20,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await choose(a, /^Month/, 'November')
     await a.getByLabel('Year').fill('1970')
     await choose(a, 'Gender', 'Man')
-    await pickPlace(a, 'Leed', 'Leeds, United Kingdom')
+    await pickPlace(a, 'Leed', 'Leeds, West Yorkshire')
     await a.getByRole('button', { name: /continue/i }).click()
     await expect(a.getByText(/Step 2 of 3/)).toBeVisible()
     // A photo is needed to ask to connect (a 1×1 PNG is enough here).

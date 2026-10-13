@@ -4,6 +4,7 @@ import { EmergencyNumbers } from '../components/EmergencyNumbers'
 import { Layout } from '../components/Layout'
 import { brand } from '../lib/brand'
 import { count, rules } from '../lib/rules'
+import { BackIcon } from '../components/Icons'
 
 const QUESTIONS: { q: string; a: string; link?: { to: string; label: string } }[] = [
   {
@@ -50,11 +51,13 @@ export function Help() {
     <Layout>
       {canGoBack ? (
         <button type="button" className="back-link btn-plain" onClick={() => navigate(-1)}>
-          ‹ Back
+          <BackIcon />
+          Back
         </button>
       ) : (
         <Link className="back-link" to="/settings">
-          ‹ Settings
+          <BackIcon />
+          Settings
         </Link>
       )}
       <h1 ref={heading} tabIndex={-1}>

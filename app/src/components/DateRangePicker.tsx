@@ -1,6 +1,7 @@
 import { useId, useState } from 'react'
 import { addDays, dateReadback, daysBetween, isoDate } from '../lib/dates'
 import { FieldError } from './Field'
+import { BackIcon, NextIcon } from './Icons'
 
 const fullDay = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
 const monthTitle = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
@@ -48,13 +49,13 @@ export function DateRangePicker({ start, end, min, max, maxDays, onChange, error
       </p>
       <div className="range-picker-head">
         <button type="button" className="icon-btn" aria-label="Previous month" disabled={first <= min.slice(0, 7) + '-01'} onClick={() => setMonth(prevMonth)}>
-          ‹
+          <BackIcon />
         </button>
         <h3 id={titleId} aria-live="polite">
           {monthTitle.format(new Date(`${first}T00:00:00Z`))}
         </h3>
         <button type="button" className="icon-btn" aria-label="Next month" disabled={nextMonth > max} onClick={() => setMonth(nextMonth)}>
-          ›
+          <NextIcon />
         </button>
       </div>
       <div className="range-grid" role="group" aria-labelledby={titleId} aria-describedby={error ? errorId : undefined}>

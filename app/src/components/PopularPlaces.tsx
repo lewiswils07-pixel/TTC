@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { peek, remember } from '../lib/cache'
+import { CityPhoto } from './CityPhoto'
 import { popularDestinations, type PopularPlace } from '../lib/trips'
 
 /** "Where members are heading": popular cities for upcoming trips. Tapping one starts a trip there. Hidden until there are some. */
@@ -18,7 +19,13 @@ export function PopularPlaces() {
       <ul className="popular-list">
         {places.map((p) => (
           <li key={p.city_id}>
-            <Link className="popular-place" to="/trips/new" state={{ city: { id: p.city_id, name: p.city, country_code: p.country_code } }} aria-label={`${p.city}, ${p.members} members going. Plan a trip there`}>
+            <Link
+              className="popular-place"
+              to="/trips/new"
+              state={{ city: { id: p.city_id, name: p.city, country_code: p.country_code } }}
+              aria-label={`${p.city}, ${p.members} members going. Plan a trip there`}
+            >
+              <CityPhoto city={p.city} width={300} className="popular-photo" />
               <strong>{p.city}</strong>
               <span>{p.members} going</span>
             </Link>

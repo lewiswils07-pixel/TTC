@@ -1,3 +1,4 @@
+import { BackIcon, SendIcon } from '../components/Icons'
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { Avatar } from '../components/Avatar'
@@ -155,7 +156,7 @@ export function Chat() {
       <div className="chat">
         <div className="chat-head">
           <Link className="back-link" to={group ? '/groups' : '/messages'} aria-label={group ? 'Back to groups' : 'Back to messages'}>
-            ‹
+            <BackIcon />
           </Link>
           <Link
             className="chat-who"
@@ -379,8 +380,8 @@ function Composer({ conversationId, name, onSent }: { conversationId: number; na
             }
           }}
         />
-        <button type="submit" className="btn btn-primary composer-send" disabled={busy || !text.trim()}>
-          Send
+        <button type="submit" className="btn btn-primary composer-send" disabled={busy || !text.trim()} aria-label="Send">
+          <SendIcon />
         </button>
       </div>
     </form>
@@ -392,7 +393,7 @@ function GuideCard() {
   const [show, setShow] = useState(() => !guideSeen())
   if (!show) return null
   return (
-    <aside className="card guide-card" aria-labelledby="guide-title">
+    <aside className="card meet-guide" aria-labelledby="guide-title">
       <h2 id="guide-title">Before you meet</h2>
       <ul>
         <li>Have a video call first.</li>

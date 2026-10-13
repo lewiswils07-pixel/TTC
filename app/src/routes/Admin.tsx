@@ -1,21 +1,10 @@
+import { BackIcon } from '../components/Icons'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { SubNav } from '../components/SubNav'
 import { ADMIN_NAV } from '../lib/nav'
-import {
-  ACTION_LABELS,
-  adminAct,
-  adminLog,
-  adminQueue,
-  iAmAdmin,
-  pausedMembers,
-  reasonLabel,
-  type AdminAction,
-  type LogEntry,
-  type PausedMember,
-  type QueueItem,
-} from '../lib/admin'
+import { ACTION_LABELS, adminAct, adminLog, adminQueue, iAmAdmin, pausedMembers, reasonLabel, type AdminAction, type LogEntry, type PausedMember, type QueueItem } from '../lib/admin'
 import { messageTime } from '../lib/chat'
 import { messageOf } from '../lib/errors'
 import { brand } from '../lib/brand'
@@ -73,7 +62,8 @@ export function Admin() {
   return (
     <Layout>
       <Link className="back-link" to="/profile">
-        ‹ My profile
+        <BackIcon />
+        Profile
       </Link>
       <h1 ref={heading} tabIndex={-1}>
         Review
@@ -174,12 +164,7 @@ function QueueCard({ item, onDone }: { item: QueueItem; onDone: (message: string
       </ul>
       {item.message_body && <blockquote className="person-note">“{item.message_body}”</blockquote>}
       {item.details && <p className="queue-details">{item.details}</p>}
-      <ActionBox
-        name={name}
-        actions={item.subject_id ? ACTIONS : ACTIONS.filter((a) => a.action === 'dismiss')}
-        run={(action, note) => adminAct(item.kind, item.id, action, note)}
-        onDone={onDone}
-      />
+      <ActionBox name={name} actions={item.subject_id ? ACTIONS : ACTIONS.filter((a) => a.action === 'dismiss')} run={(action, note) => adminAct(item.kind, item.id, action, note)} onDone={onDone} />
     </li>
   )
 }
