@@ -80,7 +80,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await choose(page, /^Month/, 'May')
   await page.getByLabel('Year').fill('1962')
   await choose(page, 'Gender', 'Woman')
-  await pickPlace(page, 'Leed', 'Leeds, United Kingdom')
+  await pickPlace(page, 'Leed', 'Leeds, West Yorkshire')
   await page.getByRole('button', { name: /continue/i }).click()
   await expect(page.getByText(/Step 2 of 3/)).toBeVisible()
   issues.push(...(await problems(page, '/onboarding step 2')))
