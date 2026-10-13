@@ -20,7 +20,8 @@ export function OpenGroups({ cityId, title = 'Groups you can join' }: { cityId?:
     setError(null)
     try {
       await joinOpenGroup(g.id)
-      navigate(`/groups/${g.id}`, { state: { message: `You’ve joined ${g.name}. Say hello in the group chat.` } })
+      // Joining adds the group's dates to your trips unless you already have one there then (Kai, 13 Oct: say so).
+      navigate(`/groups/${g.id}`, { state: { message: `You’ve joined ${g.name}. ${g.city} ${shortDates(g.start_date, g.end_date)} is now in your trips.` } })
     } catch (e) {
       setError(messageOf(e))
       setBusy(null)

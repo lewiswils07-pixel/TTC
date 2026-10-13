@@ -1664,7 +1664,7 @@ html { scroll-padding-bottom: 7rem; }
 .going-flip .feed-back { min-height: 0; }
 /* Photo first, like "How others see you". */
 .going-photo {
-  position: relative; aspect-ratio: 16 / 11; max-height: 34dvh; min-height: 200px; width: 100%; border-radius: calc(var(--radius-lg) - 6px); overflow: hidden;
+  position: relative; aspect-ratio: 16 / 11; max-height: 30dvh; min-height: 190px; width: 100%; border-radius: calc(var(--radius-lg) - 6px); overflow: hidden;
   background: linear-gradient(160deg, var(--brand-disc), color-mix(in srgb, var(--brand-disc) 60%, #000));
 }
 .going-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -1724,3 +1724,26 @@ html { scroll-padding-bottom: 7rem; }
 .tip .review-head { padding-right: 44px; }
 .subnav-item { min-width: 0; padding: 0 8px; }
 @media (max-width: 360px) { .subnav-item { padding: 0 4px; gap: 4px; font-size: 0.875rem; } }
+
+/* ------------------------------------- button system pass (round 5, 13 Oct) */
+/* Icon buttons are quiet: no browser ring, a soft tint on hover. */
+.icon-btn { border: 0; background: none; padding: 0; font: inherit; cursor: pointer; }
+.safety-more, .first-day-hide { color: var(--ink-soft); }
+.safety-more:hover, .first-day-hide:hover { background: color-mix(in srgb, var(--ink) 7%, transparent); }
+.safety-sheet .safety-box { border-top: 0; padding-top: 0; }
+.safety-sheet .confirm-title { margin-bottom: var(--space-4); }
+/* A text button beside real buttons matches their height and drops the underline. */
+.action-row .btn-link, .safety-send .btn-link, .tip-actions .btn-link { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 var(--space-3); text-decoration: none; font-weight: 700; }
+/* Connect / Not now stay above the tab bar when a card is opened up (Ellie and Kai, 13 Oct). */
+.going-person.is-open .going-actions { position: sticky; bottom: calc(var(--safe-bottom) + 92px); z-index: 2; margin: 0 calc(-1 * var(--space-2)) calc(-1 * var(--space-4)); padding: var(--space-3) var(--space-4) var(--space-4); background: var(--card); border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.feed-toast { gap: var(--space-3); }
+.feed-toast .btn-link { flex: none; white-space: nowrap; }
+/* Lists, not a stack of cards: one rounded panel with dividers (Ellie and Kai, 13 Oct). */
+.hub-list, .person-list, .review-list { gap: 0; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+.hub-list > li + li, .person-list > li + li, .review-list > li + li { border-top: 1px solid var(--line); }
+.hub-list .hub-row { border: 0; border-radius: 0; background: transparent; }
+.person-list > .card, .review-list > .card { border: 0; border-radius: 0; box-shadow: none; background: transparent; padding: var(--space-4); }
+.hub-row:hover { background: color-mix(in srgb, var(--ink) 3%, transparent); }
+.going-photo.is-empty { background: radial-gradient(120% 90% at 30% 20%, hsl(var(--hue) 45% 78%), hsl(calc(var(--hue) + 30) 40% 52%)); }
+.going-initial { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); display: grid; place-items: center; width: 96px; height: 96px; border-radius: 50%; background: rgb(255 255 255 / 28%); color: #fff; font-size: 2.75rem; font-weight: 800; box-shadow: inset 0 0 0 2px rgb(255 255 255 / 45%); }
+.safety-sheet .safety-link { align-self: stretch; min-height: 48px; text-decoration: none; font-weight: 700; color: var(--ink-soft); }

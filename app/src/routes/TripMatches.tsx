@@ -66,7 +66,7 @@ export function TripMatches() {
 
   const picks = picksFor(trip.city_id)
   return (
-    <Layout>
+    <Layout tab="trips">
       <Link className="back-link" to="/trips">
         <BackIcon />
         My trips

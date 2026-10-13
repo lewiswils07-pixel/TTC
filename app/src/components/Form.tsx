@@ -7,6 +7,7 @@ export function ActionBar({
   onSkip,
   label = 'Continue',
   note,
+  quiet = false,
 }: {
   busy: boolean
   onBack?: () => void
@@ -14,6 +15,8 @@ export function ActionBar({
   onSkip?: () => void
   label?: string
   note?: ReactNode
+  /** The main action is on the page (like "Choose a photo"), so this one steps back to secondary. */
+  quiet?: boolean
 }) {
   return (
     <div className="action-bar">
@@ -29,7 +32,7 @@ export function ActionBar({
             Skip for now
           </button>
         )}
-        <button type="submit" className="btn btn-primary" disabled={busy}>
+        <button type="submit" className={quiet ? 'btn btn-secondary' : 'btn btn-primary'} disabled={busy}>
           {busy ? 'Saving…' : label}
         </button>
       </div>
