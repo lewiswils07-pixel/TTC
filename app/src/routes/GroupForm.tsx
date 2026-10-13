@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { CityPicker } from '../components/CityPicker'
+import { AgeRange } from '../components/AgeRange'
 import { DateRangePicker } from '../components/DateRangePicker'
 import { FieldError, TextField } from '../components/Field'
 import { ActionBar, SaveError } from '../components/Form'
@@ -14,7 +15,10 @@ import { messageOf } from '../lib/errors'
 import { brand } from '../lib/brand'
 import { rules } from '../lib/rules'
 import { checkGroupName, createGroup, groupsICanStart, MAX_GROUP, MAX_GROUP_NAME } from '../lib/groups'
+import { MAX_PREF_AGE, MIN_AGE } from '../lib/options'
+import { useSession } from '../lib/session-context'
 import { listMyTrips, type Trip } from '../lib/trips'
+import { useMyProfile } from '../lib/useMyProfile'
 import { useChecks } from '../lib/useChecks'
 import { MAX_TRIP_DAYS, checkTripDates } from '../lib/validation'
 
@@ -75,6 +79,12 @@ function GroupEditor({ people }: { people: Connection[] }) {
   const fromTrip = Number(useSearchParams()[0].get('trip')) || null
   const [kind, setKind] = useState<'chat' | 'trip'>(fromTrip || popular ? 'trip' : 'chat')
   const forTrip = kind === 'trip'
+  // Who can join (Lewis, 13 Oct): open groups, women-only groups and an age range.
+  const [open, setOpen] = useState(false)
+  const [womenOnly, setWomenOnly] = useState(false)
+  const [ages, setAges] = useState<[number, number]>([MIN_AGE, MAX_PREF_AGE])
+  const { session } = useSession()
+  const isWoman = useMyProfile(session!.user.id).data?.profile.gender === 'woman'
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -84,7 +94,7 @@ function GroupEditor({ people }: { people: Connection[] }) {
     city: !forTrip || city ? null : 'Please choose where the group is going.',
     start: forTrip ? dates.start : null,
     end: forTrip ? dates.end : null,
-    invite: invite.length ? null : 'Please choose at least one person to invite.',
+    invite: invite.length || (forTrip && open) ? null : 'Please choose at least one person to invite.',
   }
   const { shown, touch, validateAll } = useChecks(errors)
 
@@ -122,8 +132,17 @@ function GroupEditor({ people }: { people: Connection[] }) {
     setBusy(true)
     setError(null)
     try {
-      const id = await createGroup({ name, trip: forTrip ? { cityId: city!.id, start, end } : null, invite })
-      navigate(`/groups/${id}`, { replace: true, state: { message: 'Your group is ready. We’ve sent your invites.' } })
+      const settings = {
+        open: forTrip && open,
+        women_only: isWoman && womenOnly,
+        age_min: ages[0] > MIN_AGE ? ages[0] : null,
+        age_max: ages[1] < MAX_PREF_AGE ? ages[1] : null,
+      }
+      const id = await createGroup({ name, trip: forTrip ? { cityId: city!.id, start, end } : null, invite, settings })
+      navigate(`/groups/${id}`, {
+        replace: true,
+        state: { message: invite.length ? 'Your group is ready. We’ve sent your invites.' : 'Your group is ready. Members going there can now find it and join.' },
+      })
     } catch (err) {
       setError(messageOf(err))
       setBusy(false)
@@ -207,8 +226,31 @@ function GroupEditor({ people }: { people: Connection[] }) {
               />
             </>
           )}
+          {forTrip && (
+            <Segmented
+              name="who-joins"
+              legend="Who can join?"
+              options={[
+                { value: 'invite', label: 'People I invite' },
+                { value: 'open', label: 'Anyone who fits' },
+              ]}
+              selected={[open ? 'open' : 'invite']}
+              onChange={([v]) => setOpen(v === 'open')}
+              hint={open ? `Members going to ${city?.name ?? 'the same place'} can find your group and join. You can still invite people.` : 'Only people you invite can join.'}
+            />
+          )}
+          {isWoman && (
+            <label className="switch-row">
+              <input type="checkbox" role="switch" checked={womenOnly} onChange={(e) => setWomenOnly(e.target.checked)} />
+              <span>
+                <strong>Women only</strong>
+                <span className="hint">Only women can be invited or join.</span>
+              </span>
+            </label>
+          )}
+          <AgeRange legend="Ages who can join (optional)" min={MIN_AGE} max={MAX_PREF_AGE} value={ages} onChange={setAges} />
           <fieldset className="field" data-field="invite" aria-describedby={shown('invite') ? 'invite-error' : 'invite-hint'}>
-            <legend>Who to invite</legend>
+            <legend>{forTrip && open ? 'Who to invite (optional)' : 'Who to invite'}</legend>
             <p className="hint" id="invite-hint">
               {people.length ? `${invite.length} chosen, up to ${rules.groups.maxPeople - 1}.` : 'Only people you’re connected with can be invited.'}
             </p>

@@ -12,7 +12,21 @@ import type { City } from '../lib/cities'
 import { rules } from '../lib/rules'
 import { MAX_TRIP_DAYS, checkTripDates } from '../lib/validation'
 import { messageOf } from '../lib/errors'
-import { groupPeople, inviteToGroup, isTripGroup, leaveGroup, MAX_GROUP, myGroups, respondToInvite, setGroupTrip, type Group, type GroupPerson } from '../lib/groups'
+import {
+  groupPeople,
+  groupSettings,
+  inviteToGroup,
+  isTripGroup,
+  leaveGroup,
+  MAX_GROUP,
+  myGroups,
+  respondToInvite,
+  setGroupTrip,
+  settingsLabel,
+  type Group,
+  type GroupPerson,
+  type GroupSettings,
+} from '../lib/groups'
 import { ageLabel } from '../lib/options'
 import { useSession } from '../lib/session-context'
 import { SkeletonRows } from '../components/Skeleton'
@@ -26,6 +40,7 @@ export function GroupDetail() {
   const navigate = useNavigate()
   const [group, setGroup] = useState<Group | null | undefined>(undefined)
   const [people, setPeople] = useState<GroupPerson[]>([])
+  const [settings, setSettings] = useState<GroupSettings | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState<string | null>((useLocation().state as { message?: string } | null)?.message ?? null)
   const [busy, setBusy] = useState(false)
@@ -35,10 +50,11 @@ export function GroupDetail() {
 
   const load = useCallback(
     () =>
-      Promise.all([myGroups(), groupPeople(groupId)]).then(
-        ([all, p]) => {
+      Promise.all([myGroups(), groupPeople(groupId), groupSettings(groupId)]).then(
+        ([all, p, s]) => {
           setGroup(all?.find((g) => g.id === groupId) ?? null)
           setPeople(p)
+          setSettings(s)
         },
         (e) => setError(messageOf(e)),
       ),
@@ -105,6 +121,7 @@ export function GroupDetail() {
           {trip.city} · {tripDates(trip.start_date, trip.end_date)}
         </p>
       )}
+      {settings && settingsLabel(settings) && <p className="hint group-settings">{settingsLabel(settings)}</p>}
       {error && (
         <p className="notice notice-error" role="alert">
           {error}

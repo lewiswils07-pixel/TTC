@@ -30,6 +30,7 @@ import {
   MONTHS,
   HOLIDAY_QUESTIONS,
   PERSONAL_FIELDS,
+  ROOM_SHARING,
   STYLE_QUESTIONS,
   type Gender,
   type HolidayPrefs,
@@ -547,6 +548,7 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
   // Your travel style (Lewis, 11 Oct): one answer to each, all optional.
   const [style, setStyle] = useState<StyleAnswers>(() => Object.fromEntries(STYLE_QUESTIONS.map((q) => [q.key, p[q.key] ? [p[q.key]!] : []])) as StyleAnswers)
   const [travellingWith, setTravellingWith] = useState(p.travelling_with ?? '')
+  const [room, setRoom] = useState<string[]>(p.room_sharing ? [p.room_sharing] : [])
   const [holiday, setHoliday] = useState<HolidayPrefs>(() => more?.holiday_prefs ?? {})
   const [personal, setPersonal] = useState<Pick<More, PersonalField | 'shown_fields'>>(() => ({
     sexuality: more?.sexuality ?? null,
@@ -574,6 +576,7 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
         booking: one('booking'),
         group_size: one('group_size'),
         travelling_with: travellingWith.trim() || null,
+        room_sharing: (room[0] ?? null) as never,
       },
       prefs,
     )
@@ -597,6 +600,8 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
         {STYLE_QUESTIONS.map((q) => (
           <ChipChoice<string> key={q.key} name={q.key} legend={q.label} options={q.options} selected={style[q.key]} onChange={(v) => setStyle((x) => ({ ...x, [q.key]: v }))} />
         ))}
+        {/* Survey: sharing a twin room saves the single supplement. Shown on your card. */}
+        <ChipChoice<string> name="room_sharing" legend="Sharing a twin room" options={ROOM_SHARING} selected={room} onChange={setRoom} />
       </section>
 
       {more && (

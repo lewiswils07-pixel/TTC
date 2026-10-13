@@ -91,12 +91,13 @@ select is((select count(*)::int from public.suggest_for_trip((select id from ann
 
 select throws_ok('select * from public.suggest_for_trip((select id from bob_trip))', 'P0002', 'Trip not found', 'Ann cannot get suggestions for Bob''s trip');
 
--- Ann only wants people within 50 km of home: Bob lives in Lisbon.
+-- Ann only wants people within 50 km of home, but Bob lives in Lisbon: on
+-- a trip, where people live doesn't matter (testers, 13 Oct), so he still shows.
 reset role;
 update public.preferences set max_distance_km = 50 where profile_id = pg_temp.m(1);
 select pg_temp.sign_in_as(pg_temp.m(1));
-select results_eq('select display_name from public.suggest_for_trip((select id from ann_trip))', $$values ('Cat'::text), ('Eve')$$,
-  'the distance filter uses home towns');
+select is((select count(*)::int from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Bob'), 1,
+  'the distance limit doesn''t hide people going on the same trip');
 reset role;
 
 -- Mutual: if Bob only wants to see people under 60, Ann (66) doesn't see him either.

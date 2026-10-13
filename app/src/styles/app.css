@@ -592,6 +592,24 @@ legend { padding: 0; }
 .first-day-hint { display: block; font-size: var(--text-sm); font-weight: 500; color: var(--muted); }
 .is-done > .check-mark::before { content: '✓'; color: #fff; font-size: 0.8125rem; font-weight: 800; line-height: 1; }
 
+/* Open groups: details on the left, Join on the right. */
+.open-group { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: var(--space-3); text-align: left; }
+.open-group .trip-text { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.open-group .tag { justify-self: start; margin-top: var(--space-1); }
+.open-groups { margin-top: var(--space-6); }
+
+/* Tell someone you trust, started from Meeting up safely. */
+.tell-someone { margin-bottom: var(--space-4); }
+.tell-someone h2 { margin: 0 0 var(--space-2); }
+.tell-someone .hint + .hint { margin-top: var(--space-2); }
+.tell-list { list-style: none; margin: var(--space-3) 0 0; padding: 0; display: grid; gap: var(--space-1); }
+.tell-row { display: flex; align-items: center; gap: var(--space-3); min-height: var(--tap); padding: var(--space-1) 0; font-weight: 600; color: inherit; text-decoration: none; border-top: 1px solid var(--line); }
+.tell-row > span:nth-child(2) { flex: 1; }
+
+/* Twin-room sharing on a card. */
+.room-share { display: inline-flex; align-items: center; gap: var(--space-1); margin: 0 0 var(--space-3); font-weight: 600; color: var(--gold-ink); }
+.room-share::before { content: '⌂'; font-size: 1.1em; }
+
 /* --------------------------------------------------------------- photo tips */
 .photo-tips { margin: 0; padding-left: 1.2em; display: grid; gap: var(--space-1); color: var(--ink-soft); }
 .photo-tips li::marker { color: var(--gold); }

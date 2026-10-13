@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { CityTips } from '../components/CityTips'
 import { DateOverlap } from '../components/DateOverlap'
+import { OpenGroups } from '../components/OpenGroups'
 import { ShareTrip } from '../components/ShareTrip'
 import { TripPlanner } from '../components/TripPlanner'
 import { picksFor } from '../data/picks'
@@ -145,6 +146,7 @@ export function TripMatches() {
                 </Link>
               </div>
             )}
+            <OpenGroups cityId={trip.city_id} title={`Groups going to ${trip.city.name}`} />
           </>
         )}
       </div>

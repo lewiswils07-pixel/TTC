@@ -94,6 +94,8 @@ export type MemberExtras = {
   travel_often: string | null
   booking: string | null
   group_size: string | null
+  /** From database Part 24. */
+  room_sharing?: RoomSharing | null
 }
 
 const extrasCache = new Map<string, Promise<MemberExtras | null>>()
