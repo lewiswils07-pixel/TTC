@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { AgeRange } from '../components/AgeRange'
 import { CityPicker } from '../components/CityPicker'
@@ -107,6 +107,9 @@ export function Onboarding() {
     }
     if (justJoined) return welcome()
     await reload()
+    // Opened from elsewhere (like Connect asking for a photo): go back there.
+    const returnTo = params.get('return')
+    if (returnTo?.startsWith('/') && !returnTo.startsWith('//')) return navigate(returnTo, { replace: true })
     if (step < TOTAL) goTo(step + 1 === CARD_STEP && !data.card ? step + 2 : step + 1)
     else navigate('/profile', { replace: true })
   }
@@ -560,9 +563,7 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
     myDiet(userId).then(setDiet, () => setDiet([]))
   }, [userId])
 
-  // The holiday questions must be answered (Lewis, 11 Oct).
-  const [tried, setTried] = useState(false)
-  const missingHoliday = more ? HOLIDAY_QUESTIONS.filter((q) => !holiday[q.key]?.length).map((q) => q.key) : []
+  // All optional, holiday questions too (Lewis, 13 Oct: testers were stopped by "Please choose at least one").
 
   const { busy, error, submit } = useStepSubmit(async () => {
     const one = (key: keyof StyleAnswers) => (style[key][0] ?? null) as never
@@ -588,11 +589,6 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
     <form
       onSubmit={(e) => {
         e.preventDefault()
-        if (missingHoliday.length) {
-          setTried(true)
-          document.querySelector<HTMLInputElement>(`[data-field="holiday-${missingHoliday[0]}"] input`)?.focus()
-          return
-        }
         void submit()
       }}
       noValidate
@@ -617,17 +613,15 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
           </div>
           <p className="hint">More information about your travel interests helps us improve the quality of your matches. Pick as many as apply in each.</p>
           {HOLIDAY_QUESTIONS.map((q) => (
-            <Fragment key={q.key}>
-              <ChipChoice<string>
-                name={`holiday-${q.key}`}
-                legend={q.label}
-                options={q.options}
-                selected={holiday[q.key] ?? []}
-                onChange={(v) => setHoliday((h) => ({ ...h, [q.key]: v.length ? v : undefined }))}
-                multiple
-              />
-              {tried && missingHoliday.includes(q.key) && <FieldError error="Please choose at least one." />}
-            </Fragment>
+            <ChipChoice<string>
+              key={q.key}
+              name={`holiday-${q.key}`}
+              legend={q.label}
+              options={q.options}
+              selected={holiday[q.key] ?? []}
+              onChange={(v) => setHoliday((h) => ({ ...h, [q.key]: v.length ? v : undefined }))}
+              multiple
+            />
           ))}
         </section>
       )}

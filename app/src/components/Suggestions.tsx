@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { keep, peek, remember } from '../lib/cache'
 import { sendRequest } from '../lib/connections'
 import { messageOf } from '../lib/errors'
@@ -62,6 +62,7 @@ export function ConnectBox({
   tripId,
   requests,
   startOpen = false,
+  needsPhoto = false,
   suggested = '',
   onSent,
   onCancel,
@@ -70,6 +71,8 @@ export function ConnectBox({
   tripId?: number
   requests: Requests
   startOpen?: boolean
+  /** You have no photo yet, so ask for one before they write a note (testers, 13 Oct). */
+  needsPhoto?: boolean
   /** A first line tied to the trip, which they can change. */
   suggested?: string
   onSent?: (connected: boolean) => void
@@ -81,10 +84,15 @@ export function ConnectBox({
   const [sent, setSent] = useState<'sent' | 'connected' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const noteBox = useRef<HTMLTextAreaElement>(null)
+  const box = useRef<HTMLDivElement>(null)
+  const here = useLocation()
   const { left } = requests
 
   useEffect(() => {
-    if (open) noteBox.current?.focus()
+    if (!open) return
+    // Bring the whole box into view, buttons included, so nothing sits under the tab bar.
+    noteBox.current?.focus({ preventScroll: true })
+    box.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
   }, [open])
 
   if (sent) {
@@ -108,6 +116,24 @@ export function ConnectBox({
     )
   }
 
+  if (needsPhoto) {
+    return (
+      <div className="connect-box connect-photo" ref={box}>
+        <p>
+          <strong>Add a photo first.</strong> Members only accept requests from people they can see. It takes a minute, and we’ll bring you back here.
+        </p>
+        <div className="action-row">
+          <button type="button" className="btn btn-secondary" onClick={() => (onCancel ? onCancel() : setOpen(false))}>
+            Not yet
+          </button>
+          <Link className="btn btn-primary" to={stepLink('photo', here.pathname + here.search)}>
+            Add a photo
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   async function send() {
     setBusy(true)
     setError(null)
@@ -123,22 +149,10 @@ export function ConnectBox({
   }
 
   return (
-    <div className="connect-box">
-      <Field
-        name="note"
-        label={`Your note to ${person.display_name}`}
-        hint={`Change it as you like. ${MAX_NOTE - note.length} characters left.`}
-      >
+    <div className="connect-box" ref={box}>
+      <Field name="note" label={`Your note to ${person.display_name}`} hint={`Change it as you like. ${MAX_NOTE - note.length} characters left.`}>
         {({ id, describedBy }) => (
-          <textarea
-            ref={noteBox}
-            id={id}
-            className="textarea textarea-short"
-            maxLength={MAX_NOTE}
-            aria-describedby={describedBy}
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-          />
+          <textarea ref={noteBox} id={id} className="textarea textarea-short" maxLength={MAX_NOTE} aria-describedby={describedBy} value={note} onChange={(e) => setNote(e.target.value)} />
         )}
       </Field>
       <p className="hint">
