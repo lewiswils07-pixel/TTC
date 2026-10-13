@@ -66,7 +66,7 @@ export function Groups() {
           Chat
         </h1>
         {canStart > 0 && (
-          <Link className="btn btn-primary btn-small" to="/groups/new">
+          <Link className="btn btn-secondary btn-small" to="/groups/new">
             Start a group
           </Link>
         )}

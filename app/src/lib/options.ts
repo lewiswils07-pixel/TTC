@@ -183,7 +183,7 @@ export const SEXUALITIES = [
   { value: 'demisexual', label: 'Demisexual' },
   { value: 'queer', label: 'Queer' },
   { value: 'questioning', label: 'Questioning' },
-  { value: 'another', label: 'Another sexuality' },
+  { value: 'another', label: 'Another orientation' },
 ] as const satisfies readonly Option<string>[]
 
 export const RELIGIONS = [
@@ -215,7 +215,7 @@ export const ETHNICITIES = [
 
 export type PersonalField = 'sexuality' | 'religion' | 'ethnicity'
 export const PERSONAL_FIELDS: readonly { key: PersonalField; label: string; options: readonly Option<string>[] }[] = [
-  { key: 'sexuality', label: 'Sexuality', options: SEXUALITIES },
+  { key: 'sexuality', label: 'Sexual orientation', options: SEXUALITIES },
   { key: 'religion', label: 'Religion', options: RELIGIONS },
   { key: 'ethnicity', label: 'Ethnicity', options: ETHNICITIES },
 ]
@@ -261,7 +261,7 @@ export const HOLIDAY_QUESTIONS = [
 ] as const satisfies readonly { key: string; label: string; filter: string; options: readonly Option<string>[] }[]
 export type HolidayPrefs = Partial<Record<(typeof HOLIDAY_QUESTIONS)[number]['key'], string[]>>
 
-/** "I’m interested in" (Lewis, 11 Oct, like Hinge): Men, Women, Non-binary people, or Everyone. */
+/** "I’d like to travel with" (was "I’m interested in", Lewis, 11 Oct): Men, Women, Non-binary people, or Everyone. */
 export const INTERESTED_IN = [
   { value: 'man', label: 'Men' },
   { value: 'woman', label: 'Women' },
