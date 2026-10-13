@@ -3,7 +3,7 @@
 // (with a scam warning), start a group, plan together, and report and block,
 // ending with the report on the review page.
 import { expect, test } from '@playwright/test'
-import { admin, closeGuide, emailOf, idOf, isoIn, newPhone, pickPlace, signIn, fillCard, choose, pickDates } from './helpers'
+import { admin, closeGuide, emailOf, idOf, isoIn, newPhone, pickPlace, signIn, finishSignUp, choose, pickDates } from './helpers'
 
 const TINY_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
 
@@ -14,7 +14,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
 
   await test.step('join and build a profile', async () => {
     await signIn(a, lewisEmail, password)
-    await expect(a.getByText(/Step 1 of 4/)).toBeVisible()
+    await expect(a.getByText(/Step 1 of 3/)).toBeVisible()
     await a.getByLabel('First name').fill('Lewis')
     await choose(a, /^Day/, '14')
     await choose(a, /^Month/, 'November')
@@ -22,28 +22,26 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await choose(a, 'Gender', 'Man')
     await pickPlace(a, 'Leed', 'Leeds, United Kingdom')
     await a.getByRole('button', { name: /continue/i }).click()
-    await expect(a.getByText(/Step 2 of 4/)).toBeVisible()
+    await expect(a.getByText(/Step 2 of 3/)).toBeVisible()
     // A photo is needed to ask to connect (a 1×1 PNG is enough here).
     await a.locator('#photo').setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: Buffer.from(TINY_PNG, 'base64') })
     await expect(a.getByRole('img', { name: 'Your profile photo' })).toBeVisible()
     await a.getByRole('button', { name: /continue|skip/i }).click()
-    await expect(a.getByText(/Step 3 of 4/)).toBeVisible()
+    await expect(a.getByText(/Step 3 of 3/)).toBeVisible()
     for (const name of ['Museums', 'Wine', 'Walking', 'Photography', 'Theatre', 'Local cuisine', 'Gardens', 'Architecture']) {
       await a.getByRole('checkbox', { name, exact: true }).evaluate((el: HTMLElement) => el.click())
     }
-    await a.getByRole('button', { name: 'Continue' }).click()
-    await fillCard(a)
+    await finishSignUp(a)
     await expect(a.getByRole('heading', { name: 'Welcome to the Collective' })).toBeVisible()
     await expect(a.getByRole('heading', { name: /is on us for/ })).toBeVisible()
     await a.getByRole('link', { name: 'Start meeting people' }).click()
-    // The tour opens first; look at the first step, then skip it.
-    await expect(a.getByRole('heading', { name: 'See who’s going' })).toBeVisible()
-    await a.getByRole('button', { name: 'Skip', exact: true }).click()
-    // Then, once, the privacy choices.
+    // Once, the privacy choices.
     await expect(a.getByRole('heading', { name: 'We value your privacy' })).toBeVisible()
     await a.getByRole('button', { name: 'Accept all' }).click()
     await expect(a.getByRole('heading', { name: 'We value your privacy' })).toBeHidden()
     await expect(a.getByRole('heading', { level: 1, name: 'Who’s going' })).toBeVisible()
+    // The first-day guide: three things to try, none done yet.
+    await expect(a.getByRole('heading', { name: 'Your first day' })).toBeVisible()
     await expect(a.locator('.going-person').first()).toBeVisible()
   })
 
@@ -180,7 +178,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     const reviewer = `reviewer${Date.now()}@example.com`
     const r = await newPhone(browser)
     await signIn(r, reviewer)
-    await expect(r.getByText(/Step 1 of 4/)).toBeVisible()
+    await expect(r.getByText(/Step 1 of 3/)).toBeVisible()
     await admin
       .from('profiles')
       .update({ role: 'admin' })

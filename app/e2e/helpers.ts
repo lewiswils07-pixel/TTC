@@ -91,30 +91,20 @@ export async function pickPlace(page: Page, typed: string, option: string | RegE
   await choice.click()
 }
 
-/** Sign-up step 4: picks 3 questions for the back of the card and answers them, then finishes sign-up. */
-export async function fillCard(page: Page): Promise<void> {
-  await expect(page.getByText(/Step 4 of 4/)).toBeVisible()
-  const picks = [
-    ['Describe your perfect holiday', 'A slow week in Lisbon with long lunches, old trams and sunsets over the river.'],
-    ['How often do you get away?', 'Four or five times a year, more if I can.'],
-    ['I never travel without…', 'A good book and comfortable shoes.'],
-  ]
-  for (const [i, [question, answer]] of picks.entries()) {
-    const slot = page.locator('.card-question').nth(i)
-    await slot.getByRole('button', { name: 'Choose a question' }).click()
-    await slot.getByRole('button', { name: question, exact: true }).click()
-    await slot.getByRole('textbox').fill(answer)
-  }
+/** Sign-up step 3: finishes sign-up once the interests are picked. The back of the card and "How you travel" come later, from Profile. */
+export async function finishSignUp(page: Page): Promise<void> {
+  await expect(page.getByText(/Step 3 of 3/)).toBeVisible()
   await page.getByRole('button', { name: 'Finish sign-up' }).click()
-  // "How you travel" is offered last; it's optional.
-  await expect(page.getByText('Last step, optional')).toBeVisible()
-  await page.getByRole('button', { name: 'Skip for now' }).click()
 }
 
 /** Opens one of our dropdowns and picks an option from its list. */
 export async function choose(page: Page, field: string | RegExp, option: string | RegExp): Promise<void> {
   await page.getByRole('button', { name: field }).first().click()
-  await page.locator('.dropdown-panel').getByRole('button', { name: option, exact: typeof option === 'string' }).first().click()
+  await page
+    .locator('.dropdown-panel')
+    .getByRole('button', { name: option, exact: typeof option === 'string' })
+    .first()
+    .click()
   await expect(page.locator('.dropdown-panel')).toHaveCount(0)
 }
 

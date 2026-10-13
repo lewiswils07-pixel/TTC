@@ -361,6 +361,9 @@ legend { padding: 0; }
 .back-link:hover { color: var(--ink); }
 .trip-summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-6); }
 .trip-summary .lede { margin: 0; }
+.trip-actions { gap: var(--space-2); flex-wrap: wrap; }
+.share-trip { display: contents; }
+.share-trip .hint { order: 3; flex-basis: 100%; margin: 0; }
 .section-title { font-size: var(--text-lg); margin-bottom: var(--space-2); }
 .section-hint { margin-bottom: var(--space-4); }
 .section-card > .section-hint { margin: calc(-1 * var(--space-2)) 0 0; }
@@ -575,7 +578,19 @@ legend { padding: 0; }
 .strength-bar { height: 8px; border-radius: 4px; background: var(--paper-tint); overflow: hidden; margin: var(--space-3) 0; }
 .strength-bar > div { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--gold)); }
 .strength .hint { margin: 0 0 var(--space-2); }
-.strength-next { margin: 0; padding-left: 1.2em; display: grid; gap: var(--space-1); font-weight: 600; }
+
+/* A to-do list that ticks itself off: Finish your profile, Your first day. */
+.check-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.check-list li { display: flex; align-items: center; gap: var(--space-2); min-height: 32px; font-weight: 600; }
+.check-list li.is-done { color: var(--ink-soft); font-weight: 500; text-decoration: line-through; text-decoration-color: var(--gold); }
+.check-mark { flex: none; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--gold); display: grid; place-items: center; }
+.is-done > .check-mark { background: var(--gold); }
+.first-day { margin-bottom: var(--space-4); border-color: var(--gold); }
+.first-day-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-2); }
+.first-day-head h2 { font-size: 1.0625rem; margin: 0; }
+.first-day .hint { margin: var(--space-1) 0 var(--space-3); }
+.first-day-hint { display: block; font-size: var(--text-sm); font-weight: 500; color: var(--muted); }
+.is-done > .check-mark::before { content: '✓'; color: #fff; font-size: 0.8125rem; font-weight: 800; line-height: 1; }
 
 /* --------------------------------------------------------------- photo tips */
 .photo-tips { margin: 0; padding-left: 1.2em; display: grid; gap: var(--space-1); color: var(--ink-soft); }

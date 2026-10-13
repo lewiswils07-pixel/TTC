@@ -1,4 +1,3 @@
-import { hasCard } from './card'
 import { INTERESTS_TO_PICK } from './options'
 import type { MyProfile } from './profile'
 
@@ -12,10 +11,8 @@ export type StepName = keyof typeof STEP
 export const stepLink = (name: StepName, returnTo?: string) => `/onboarding?step=${STEP[name]}${returnTo ? `&return=${encodeURIComponent(returnTo)}` : ''}`
 
 /** Where to send a member who comes back to a half-finished profile. */
-export function firstUnfinishedStep({ profile, interestIds, card }: MyProfile): number {
+export function firstUnfinishedStep({ profile, interestIds }: MyProfile): number {
   if (!profile.display_name || !profile.birth_year || !profile.gender || !profile.home_city_id) return STEP.basics
   if (interestIds.length < INTERESTS_TO_PICK) return profile.photo_path || profile.bio ? STEP.interests : STEP.photo
-  // The back of the card is optional (Lewis, 11 Oct), so a half-finished sign-up goes back to it only if it's empty.
-  if (!profile.onboarded_at && card && !hasCard(card)) return STEP.card
   return STEP.interests
 }

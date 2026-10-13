@@ -57,9 +57,10 @@ const STEPS = [
     intro: 'All optional, and there are no wrong answers. Add as much as you like to meet people who travel the way you do.',
   },
 ] as const satisfies readonly { title: string; intro: string | null }[]
-/** Sign-up is the first 4 steps (Lewis, 5 Oct: keep it quick; 6 Oct: add
- *  the back of the card). "How you travel" comes after, from the profile
- *  page. Until the card is live in the database, sign-up is 3 steps. */
+/** Sign-up is the first 3 steps: about you, photo and interests (testers,
+ *  13 Oct: keep it short). The back of the card and "How you travel" come
+ *  after, from the "Finish your profile" list on Profile. */
+const SIGN_UP_STEPS = STEP.interests
 const CARD_STEP = STEP.card
 const TOTAL = STEPS.length
 
@@ -89,23 +90,18 @@ export function Onboarding() {
   }
   if (!data || !interests) return <Loading />
 
-  const signUpSteps = data.card ? CARD_STEP : CARD_STEP - 1
+  const signUpSteps = SIGN_UP_STEPS
   const requested = Number(params.get('step'))
   let step = requested >= 1 && requested <= TOTAL ? requested : firstUnfinishedStep(data)
   if (step === CARD_STEP && !data.card) step = CARD_STEP + 1
   const goTo = (n: number) => setParams({ step: String(n) })
   const firstTime = !data.profile.onboarded_at
-  // Straight after sign-up: "How you travel" as an optional last step (testers: sign-up never asked).
-  const justJoined = params.get('new') === '1' && step === STEP.travel
-  const welcome = () => navigate('/welcome', { replace: true })
   const next = async () => {
     if (firstTime && step >= signUpSteps) {
       await finishOnboarding()
       await reload()
-      setParams({ step: String(STEP.travel), new: '1' }, { replace: true })
-      return
+      return navigate('/welcome', { replace: true })
     }
-    if (justJoined) return welcome()
     await reload()
     // Opened from elsewhere (like Connect asking for a photo): go back there.
     const returnTo = params.get('return')
@@ -117,18 +113,18 @@ export function Onboarding() {
 
   return (
     <Layout>
-      <StepFrame step={step} key={step} signingUp={firstTime} signUpSteps={signUpSteps} justJoined={justJoined}>
+      <StepFrame step={step} key={step} signingUp={firstTime} signUpSteps={signUpSteps}>
         {step === STEP.basics && <BasicsStep userId={userId} data={data} onDone={next} />}
         {step === STEP.photo && <PhotoStep userId={userId} data={data} onDone={next} onBack={back} />}
-        {step === STEP.interests && <InterestsStep data={data} interests={interests} onDone={next} onBack={back} lastStep={signUpSteps === 3} />}
+        {step === STEP.interests && <InterestsStep data={data} interests={interests} onDone={next} onBack={back} />}
         {step === STEP.card && <CardStep userId={userId} data={data} onDone={next} onBack={back} />}
-        {step === STEP.travel && <PreferencesStep userId={userId} data={data} onDone={next} onBack={justJoined ? undefined : back} onSkip={justJoined ? welcome : undefined} />}
+        {step === STEP.travel && <PreferencesStep userId={userId} data={data} onDone={next} onBack={back} />}
       </StepFrame>
     </Layout>
   )
 }
 
-function StepFrame({ step, signingUp, signUpSteps, justJoined, children }: { step: number; signingUp: boolean; signUpSteps: number; justJoined: boolean; children: ReactNode }) {
+function StepFrame({ step, signingUp, signUpSteps, children }: { step: number; signingUp: boolean; signUpSteps: number; children: ReactNode }) {
   const heading = useRef<HTMLHeadingElement>(null)
   useEffect(() => heading.current?.focus(), [])
   const { title, intro } = STEPS[step - 1]
@@ -140,7 +136,7 @@ function StepFrame({ step, signingUp, signUpSteps, justJoined, children }: { ste
           <div className="progress-bar" style={{ width: `${(step / signUpSteps) * 100}%` }} />
         </div>
       )}
-      <p className="eyebrow">{justJoined ? 'Last step, optional' : extra ? 'Add more to your profile' : signingUp ? `Step ${step} of ${signUpSteps}` : 'Edit your profile'}</p>
+      <p className="eyebrow">{extra ? 'Add more to your profile' : signingUp ? `Step ${step} of ${signUpSteps}` : 'Edit your profile'}</p>
       <h1 ref={heading} tabIndex={-1}>
         {title}
       </h1>
@@ -512,7 +508,7 @@ function BookThumb({ path }: { path: string }) {
   return src ? <img src={src} alt="" decoding="async" /> : <span className="skeleton" aria-hidden="true" />
 }
 
-function InterestsStep({ data, interests, onDone, onBack, lastStep }: Omit<StepProps, 'userId'> & { interests: Interest[]; lastStep: boolean }) {
+function InterestsStep({ data, interests, onDone, onBack }: Omit<StepProps, 'userId'> & { interests: Interest[] }) {
   const [selected, setSelected] = useState<number[]>(data.interestIds)
   const errors = { interests: checkInterests(selected) }
   const { shown, validateAll } = useChecks(errors)
@@ -531,7 +527,7 @@ function InterestsStep({ data, interests, onDone, onBack, lastStep }: Omit<StepP
       <ActionBar
         busy={busy}
         onBack={onBack}
-        label={data.profile.onboarded_at || !lastStep ? undefined : 'Finish sign-up'}
+        label={data.profile.onboarded_at ? undefined : 'Finish sign-up'}
         note={
           <span aria-live="polite">
             <strong>{selected.length}</strong> of {INTERESTS_TO_PICK} picked
@@ -544,7 +540,7 @@ function InterestsStep({ data, interests, onDone, onBack, lastStep }: Omit<StepP
 
 type StyleAnswers = Record<(typeof STYLE_QUESTIONS)[number]['key'], string[]>
 
-function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & { onSkip?: () => void }) {
+function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
   const p = data.profile
   const prefs = data.preferences
   const more = data.more
@@ -696,7 +692,7 @@ function PreferencesStep({ userId, data, onDone, onBack, onSkip }: StepProps & {
 
       <p className="hint section-hint">Choose who you see (gender, age and distance) any time in Filters.</p>
       <SaveError error={error} />
-      <ActionBar busy={busy} onBack={onBack} onSkip={onSkip} label={onSkip ? 'Finish' : 'Save'} />
+      <ActionBar busy={busy} onBack={onBack} label="Save" />
     </form>
   )
 }

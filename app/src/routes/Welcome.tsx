@@ -32,11 +32,9 @@ export function WelcomeScreen() {
           <h2>
             {brand.plusName} is on us for {count(rules.founding.plusMonths, 'month')}
           </h2>
-          <p>
-            Connect with as many people as you like{welcome?.plus_until ? `, until ${longDate(welcome.plus_until.slice(0, 10))}` : ''}. No card needed.
-          </p>
+          <p>Connect with as many people as you like{welcome?.plus_until ? `, until ${longDate(welcome.plus_until.slice(0, 10))}` : ''}. No card needed.</p>
         </div>
-        <Link className="btn btn-primary btn-block btn-lg" to="/connections?tour=1">
+        <Link className="btn btn-primary btn-block btn-lg" to="/connections">
           Start meeting people
         </Link>
         <Link className="btn btn-secondary btn-block" to="/trips/new">
