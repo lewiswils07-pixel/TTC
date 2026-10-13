@@ -23,7 +23,10 @@ export function HolidayChips({ prefs }: { prefs: HolidayPrefs }) {
   )
 }
 
-/** Holiday preferences, photo book and anything personal they chose to show. */
+/** Twin-room sharing, on cards (survey: to avoid paying the single supplement). "Own room" isn't shown. */
+const ROOM_LINE: Record<string, string> = { share: 'Happy to share a twin room', unsure: 'Might share a twin room' }
+
+/** Twin-room sharing, holiday preferences, photo book and anything personal they chose to show. */
 export function ProfileExtras({ extras, name, headingLevel = 4 }: { extras: MemberExtras | null; name: string; headingLevel?: 3 | 4 }) {
   if (!extras) return null
   const H = `h${headingLevel}` as 'h3' | 'h4'
@@ -33,8 +36,10 @@ export function ProfileExtras({ extras, name, headingLevel = 4 }: { extras: Memb
       return label ? [{ key: f.key, label }] : []
     }),
   ]
+  const room = ROOM_LINE[extras.room_sharing ?? '']
   return (
     <>
+      {room && <p className="room-share">{room}</p>}
       {extras.photo_book.length > 0 && (
         <div className="shared-interests">
           <H>Photo book</H>

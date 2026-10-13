@@ -35,7 +35,28 @@ export type GroupPerson = {
   status: 'invited' | 'joined'
 }
 
-export type NewGroup = { name: string; trip: { cityId: number; start: string; end: string } | null; invite: string[] }
+/** Who can join: open groups can be found and joined by anyone who fits. */
+export type GroupSettings = { open: boolean; women_only: boolean; age_min: number | null; age_max: number | null }
+
+export type NewGroup = { name: string; trip: { cityId: number; start: string; end: string } | null; invite: string[]; settings?: GroupSettings }
+
+/** An open trip group someone could join. */
+export type OpenGroup = {
+  id: number
+  name: string
+  city: string
+  country_code: string
+  city_id: number
+  start_date: string
+  end_date: string
+  members: number
+  max_people: number
+  owner_name: string
+  women_only: boolean
+  age_min: number | null
+  age_max: number | null
+  going_when_you_are: boolean
+}
 
 export type GroupDates = { profile_id: string; display_name: string; start_date: string; end_date: string }
 
@@ -71,9 +92,40 @@ export async function createGroup(g: NewGroup): Promise<number> {
     p_start: g.trip?.start ?? null,
     p_end: g.trip?.end ?? null,
     p_invite: g.invite,
+    // Sent only when set, so this works before database Part 24 too.
+    ...(g.settings && (g.settings.open || g.settings.women_only || g.settings.age_min || g.settings.age_max)
+      ? { p_open: g.settings.open, p_women_only: g.settings.women_only, p_age_min: g.settings.age_min, p_age_max: g.settings.age_max }
+      : {}),
   })
   if (error) throw friendlyError(error)
   return data as number
+}
+
+/** Open trip groups I could join, optionally near one place. Empty before database Part 24. */
+export async function openGroups(cityId?: number): Promise<OpenGroup[]> {
+  const { data, error } = await supabase.rpc('open_groups', cityId ? { p_city_id: cityId } : {})
+  if (missing(error?.code)) return []
+  if (error) throw friendlyError(error)
+  return (data ?? []) as OpenGroup[]
+}
+
+export async function joinOpenGroup(groupId: number): Promise<void> {
+  const { error } = await supabase.rpc('join_open_group', { p_group: groupId })
+  if (error) throw friendlyError(error)
+}
+
+/** A group's settings, for the people in it. Null before database Part 24. */
+export async function groupSettings(groupId: number): Promise<GroupSettings | null> {
+  const { data, error } = await supabase.rpc('group_settings', { p_group: groupId })
+  if (error) return null
+  return ((data ?? []) as GroupSettings[])[0] ?? null
+}
+
+/** "Open to anyone · Women only · Ages 45 to 75", or null for a plain invite-only group. */
+export function settingsLabel(s: Pick<GroupSettings, 'women_only' | 'age_min' | 'age_max'> & { open?: boolean }): string | null {
+  const ages = s.age_min && s.age_max ? `Ages ${s.age_min} to ${s.age_max}` : s.age_min ? `Ages ${s.age_min} and over` : s.age_max ? `Ages up to ${s.age_max}` : null
+  const parts = [s.open ? 'Open to anyone who fits' : null, s.women_only ? 'Women only' : null, ages].filter(Boolean)
+  return parts.length ? parts.join(' · ') : null
 }
 
 /** Turn a general group into a trip group, or change its trip. */

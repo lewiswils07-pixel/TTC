@@ -7,6 +7,7 @@ import { messageOf } from '../lib/errors'
 import { brand } from '../lib/brand'
 import { rules } from '../lib/rules'
 import { peek, remember } from '../lib/cache'
+import { OpenGroups } from '../components/OpenGroups'
 import { PopularGroups } from '../components/PopularGroups'
 import { groupsICanStart, isTripGroup, myGroups, respondToInvite, type Group } from '../lib/groups'
 
@@ -131,6 +132,7 @@ export function Groups() {
           ))}
         </ul>
       )}
+      <OpenGroups />
       <PopularGroups canStart={canStart > 0} />
       {canStart === 0 && joined.some((g) => g.i_own) && (
         <p className="hint section-hint">
