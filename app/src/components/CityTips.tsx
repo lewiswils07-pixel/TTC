@@ -9,7 +9,7 @@ import { addTip, checkTip, cityTips, deleteTip, TIP_CATEGORIES, tipLabel, type N
 import { useConfirm } from '../lib/useConfirm'
 import { ChipChoice } from './ChipChoice'
 import { FieldError } from './Field'
-import { SafetyBox } from './SafetyBox'
+import { SafetyMenu } from './SafetyBox'
 
 /** "★★★★☆" for a rating, read out as "4 out of 5 stars". */
 function Stars({ rating }: { rating: number }) {
@@ -141,7 +141,7 @@ export function CityTips({ cityId, city, opensOn }: { cityId: number; city: stri
                   </button>
                 </div>
               ) : (
-                <SafetyBox profileId={t.author_id} name={t.author} onBlocked={(m) => reload().then(() => setStatus(m))} />
+                <SafetyMenu profileId={t.author_id} name={t.author} onBlocked={(m) => reload().then(() => setStatus(m))} />
               )}
             </li>
           ))}

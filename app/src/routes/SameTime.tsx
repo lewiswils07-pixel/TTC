@@ -10,6 +10,7 @@ import { messageOf } from '../lib/errors'
 import { loadFeed, sameTime, type FeedPerson } from '../lib/feed'
 import { ageLabel } from '../lib/options'
 import { hasPlus, plusPrice } from '../lib/plan'
+import { BackIcon } from '../components/Icons'
 
 /** Everyone here grouped under the member's trip they share, with the days you're both there. */
 function byTrip(people: FeedPerson[]) {
@@ -46,7 +47,8 @@ export function SameTime() {
     <Layout tab="connections">
       <div className="plus-page">
         <Link className="back-link" to="/connections">
-          ‹ Who’s going
+          <BackIcon />
+          Who’s going
         </Link>
         <span className="tag tag-plus">{brand.plusName}</span>
         <h1 ref={heading} tabIndex={-1}>

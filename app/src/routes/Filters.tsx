@@ -8,6 +8,7 @@ import { filterErrors, getFilters, saveFilters, type Filters as FilterValues } f
 import { MAX_PREF_AGE } from '../lib/options'
 import { hasPlus } from '../lib/plan'
 import { useSession } from '../lib/session-context'
+import { BackIcon } from '../components/Icons'
 
 /** Who to show in suggestions. The Sodalis+ filters are shown to everyone but only unlock with the plan. */
 export function Filters() {
@@ -69,7 +70,8 @@ export function Filters() {
   return (
     <Layout>
       <Link className="back-link" to="/connections">
-        ‹ Connect
+        <BackIcon />
+        Who’s going
       </Link>
       <h1 ref={heading} tabIndex={-1}>
         Filters

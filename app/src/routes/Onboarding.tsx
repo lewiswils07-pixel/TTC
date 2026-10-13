@@ -1,3 +1,4 @@
+import { CloseIcon } from '../components/Icons'
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { AgeRange } from '../components/AgeRange'
@@ -484,7 +485,7 @@ function PhotoBookEditor({ userId, start }: { userId: string; start: string[] })
           <li key={path}>
             <BookThumb path={path} />
             <button type="button" className="photo-book-remove" onClick={() => void remove(path)} aria-label={`Remove photo ${i + 1}`}>
-              ×
+              <CloseIcon />
             </button>
           </li>
         ))}

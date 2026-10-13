@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router'
 import { Layout } from '../components/Layout'
 import { brand } from '../lib/brand'
 import { count, rules } from '../lib/rules'
+import { BackIcon } from '../components/Icons'
 
 const UPDATED = '5 October 2026'
 
@@ -18,11 +19,13 @@ function LegalPage({ title, children }: { title: string; children: ReactNode }) 
     <Layout>
       {canGoBack ? (
         <button type="button" className="back-link btn-plain" onClick={() => navigate(-1)}>
-          ‹ Back
+          <BackIcon />
+          Back
         </button>
       ) : (
         <Link className="back-link" to="/">
-          ‹ Home
+          <BackIcon />
+          Home
         </Link>
       )}
       <article className="legal">
@@ -44,8 +47,8 @@ export function Terms() {
   return (
     <LegalPage title="Terms">
       <p>
-        {brand.name} helps adults find people to travel with. By joining, you agree to these terms, our{' '}
-        <Link to="/privacy">privacy notice</Link> and our <Link to="/community-rules">community rules</Link>.
+        {brand.name} helps adults find people to travel with. By joining, you agree to these terms, our <Link to="/privacy">privacy notice</Link> and our{' '}
+        <Link to="/community-rules">community rules</Link>.
       </p>
       <h2>Joining</h2>
       <ul>
@@ -61,18 +64,14 @@ export function Terms() {
       </ul>
       <h2>{brand.plusName}</h2>
       <p>
-        Founding members get {count(rules.founding.plusMonths, 'month')} of {brand.plusName} free. It ends on its own: you won’t be charged, and we’ll ask before
-        offering any paid plan.
+        Founding members get {count(rules.founding.plusMonths, 'month')} of {brand.plusName} free. It ends on its own: you won’t be charged, and we’ll ask before offering any paid plan.
       </p>
       <h2>When we can step in</h2>
-      <p>
-        We may warn, pause or remove a member who breaks the community rules, and remove anything they’ve posted. You can leave at any
-        time.
-      </p>
+      <p>We may warn, pause or remove a member who breaks the community rules, and remove anything they’ve posted. You can leave at any time.</p>
       <h2>Our responsibility</h2>
       <p>
-        We work hard to keep the app safe and running, but we can’t promise it will always be available or that every member will behave
-        well. Nothing in these terms limits your rights under UK consumer law.
+        We work hard to keep the app safe and running, but we can’t promise it will always be available or that every member will behave well. Nothing in these terms limits your rights under UK
+        consumer law.
       </p>
     </LegalPage>
   )
@@ -85,17 +84,14 @@ export function Privacy() {
       <h2>What we collect</h2>
       <ul>
         <li>Your email address, to send sign-in codes.</li>
-        <li>
-          Your profile: first name, date of birth, gender, home town, photo, bio, interests, travel style and the optional questions about
-          how you travel.
-        </li>
+        <li>Your profile: first name, date of birth, gender, home town, photo, bio, interests, travel style and the optional questions about how you travel.</li>
         <li>Your trips, places you’d like to visit, connections, messages, groups and plan ideas.</li>
         <li>Reports you make or that are made about you, and when you last opened the app.</li>
       </ul>
       <h2>Why</h2>
       <p>
-        To run the service you’ve signed up for: suggesting people, letting you connect and chat, and keeping members safe. We check
-        messages automatically for common scams (such as requests for money) so we can warn the reader.
+        To run the service you’ve signed up for: suggesting people, letting you connect and chat, and keeping members safe. We check messages automatically for common scams (such as requests for
+        money) so we can warn the reader.
       </p>
       <h2>Who can see what</h2>
       <ul>
@@ -104,16 +100,13 @@ export function Privacy() {
         <li>We never sell your details or show you adverts.</li>
       </ul>
       <h2>Where it’s kept</h2>
-      <p>
-        With the companies that run the app for us: Supabase (database and sign-in), Netlify (the website) and Google (sending sign-in
-        emails). They only use your details to provide that service.
-      </p>
+      <p>With the companies that run the app for us: Supabase (database and sign-in), Netlify (the website) and Google (sending sign-in emails). They only use your details to provide that service.</p>
       <h2>How long</h2>
       <p>For as long as you’re a member. If you leave, we delete your profile, except what we must keep about safety reports.</p>
       <h2>Your rights</h2>
       <p>
-        You can ask for a copy of your details, have them corrected or deleted, or object to how we use them. Reply to any sign-in email to
-        contact us. If you’re unhappy with our answer, you can complain to the Information Commissioner’s Office (ico.org.uk).
+        You can ask for a copy of your details, have them corrected or deleted, or object to how we use them. Reply to any sign-in email to contact us. If you’re unhappy with our answer, you can
+        complain to the Information Commissioner’s Office (ico.org.uk).
       </p>
     </LegalPage>
   )
@@ -123,8 +116,8 @@ export function CommunityRules() {
   return (
     <LegalPage title="Community rules">
       <p>
-        {brand.name} works because members trust each other. Breaking these rules can lead to a warning, a pause or removal. Use{' '}
-        <strong>Block or report</strong> on any profile or message, and a real person will review it.
+        {brand.name} works because members trust each other. Breaking these rules can lead to a warning, a pause or removal. Use <strong>Block or report</strong> on any profile or message, and a real
+        person will review it.
       </p>
       <ol className="rules">
         <li>

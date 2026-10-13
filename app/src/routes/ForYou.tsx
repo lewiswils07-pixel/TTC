@@ -4,12 +4,14 @@ import { Layout, Loading } from '../components/Layout'
 import { Avatar } from '../components/Avatar'
 import { CardBack } from '../components/CardBack'
 import { ProfileExtras } from '../components/ProfileExtras'
-import { SafetyBox } from '../components/SafetyBox'
+import { SafetyMenu } from '../components/SafetyBox'
+import { HubRow } from '../components/HubRow'
+import { NextIcon } from '../components/Icons'
+import { ChevronDown, Repeat2 } from 'lucide-react'
 import { SkeletonRows } from '../components/Skeleton'
 import { Tour } from '../components/Tour'
 import { FirstDayGuide } from '../components/FirstDayGuide'
 import { FilterButton } from '../components/FilterBar'
-import { PopularGroups } from '../components/PopularGroups'
 import { ConnectBox, SharedInterests, useRequests, type Requests } from '../components/Suggestions'
 import { brand } from '../lib/brand'
 import { loadCard, type CardAnswer } from '../lib/card'
@@ -41,7 +43,7 @@ import { noteFirstMatch } from '../lib/kpis'
 import { requestsLeftText } from '../lib/plan'
 import { homeLabel } from '../lib/matching'
 import { ageLabel, INTERESTS_TO_PICK } from '../lib/options'
-import { preloadPhotos } from '../lib/photo'
+import { preloadPhotos, usePhotoUrl } from '../lib/photo'
 import { roughly } from '../lib/rules'
 import { useSession } from '../lib/session-context'
 import { loadExtras, type MemberExtras } from '../lib/member'
@@ -64,7 +66,7 @@ export function ForYou() {
   const [myTrips, setMyTrips] = useState<Trip[]>([])
   const [canStart, setCanStart] = useState(0)
   /** A trip tapped at the top: the cards then show only people going there. */
-  const [only, setOnly] = useState<string | null>(null)
+  const [only, setOnly] = useState<string | null>(() => new URLSearchParams(window.location.search).get('trip'))
   const deckRef = useRef<HTMLElement>(null)
   const [error, setError] = useState<string | null>(null)
   const [skipped, setSkipped] = useState(0)
@@ -163,6 +165,11 @@ export function ForYou() {
   const deck = (only ? trips.find((g) => g.city === only)?.people : people) ?? []
   const person = deck[0]
   const cityOf = (p: FeedPerson) => only ?? (sameTime(p) ?? p.trips[0])?.city
+  /** Your own trip's place for the trip they're shown under. */
+  const myCityFor = (p: FeedPerson) => {
+    const t = tripTo(p, cityOf(p) ?? '')
+    return myTrips.find((m) => m.id === t?.mine)?.city.name
+  }
 
   return (
     <Layout tab="connections">
@@ -173,7 +180,6 @@ export function ForYou() {
         </h1>
         <FilterButton userId={me} onChanged={refresh} />
       </div>
-      <p className="hint going-intro">Members going where you’re going, and people who travel like you. {requests && requestsLeftText(requests)}</p>
       <div role="status">
         {status && (
           <p className="feed-toast">
@@ -191,62 +197,64 @@ export function ForYou() {
           {error}
         </p>
       )}
-      {showGuide && people && requests && (
-        <FirstDayGuide hasTrip={myTrips.length > 0} read={!!firstDay.read} sent={!!firstDay.sent || requests.left < requests.limit} onHide={() => tick({ hidden: true })} />
-      )}
       {!error && (!people || !requests) && <SkeletonRows rows={3} label="Finding who’s going…" />}
 
       {people && requests && (
         <>
           {trips.length > 0 && (
-            <section aria-labelledby="your-trips">
-              <h2 className="section-title" id="your-trips">
+            <section aria-labelledby="your-trips" className="going-trips-bar">
+              <h2 className="visually-hidden" id="your-trips">
                 Going when you are
               </h2>
+              {/* One slim scrolling row, so the first person is on screen straight away (testers, 13 Oct). */}
               <ul className="going-trip-list">
+                <li>
+                  <button type="button" className={only ? 'going-trip-row' : 'going-trip-row is-current'} aria-pressed={!only} onClick={() => pickTrip(null)}>
+                    <span className="going-trip-text">
+                      <strong>Everyone</strong>
+                      <span>{people.length} people</span>
+                    </span>
+                  </button>
+                </li>
                 {trips.map((g) => {
                   const mine = myTrips.find((t) => t.city.name === g.city)
                   return (
                     <li key={g.city}>
                       <button
                         type="button"
-                        className={only === g.city ? 'card going-trip-row is-current' : 'card going-trip-row'}
+                        className={only === g.city ? 'going-trip-row is-current' : 'going-trip-row'}
                         aria-pressed={only === g.city}
                         onClick={() => pickTrip(only === g.city ? null : g.city)}
                       >
-                        <span className="going-trip-text">
-                          <strong>{g.city}</strong>
-                          <span className="hint">{mine ? `Your trip · ${shortDates(mine.start_date, mine.end_date)}` : monthName(tripTo(g.people[0], g.city)!.start)}</span>
-                        </span>
                         <span className="going-faces" aria-hidden="true">
-                          {g.people.slice(0, 3).map((p) => (
+                          {g.people.slice(0, 2).map((p) => (
                             <Avatar key={p.profile_id} name={p.display_name} path={p.photo_path} size="sm" />
                           ))}
                         </span>
-                        <span className="going-trip-count">{g.people.length} going</span>
+                        <span className="going-trip-text">
+                          <strong>{g.city}</strong>
+                          <span>
+                            {g.people.length} going · {mine ? shortDates(mine.start_date, mine.end_date) : monthName(tripTo(g.people[0], g.city)!.start)}
+                          </span>
+                        </span>
                       </button>
                     </li>
                   )
                 })}
               </ul>
-              {!requests.plus && (
-                <p className="hint going-plus-line">
-                  <Link className="going-plus-link" to="/connections/same-time">
-                    See the exact days you overlap with {brand.plusName}
-                  </Link>
-                </p>
-              )}
             </section>
           )}
 
-          {myTrips.length === 0 && (
-            <div className="card going-add-trip">
-              <h2 className="card-title">Where are you off to next?</h2>
-              <p className="hint">Add a trip and you’ll see members going to the same place at the same time.</p>
-              <Link className="btn btn-primary" to="/trips/new">
-                Add a trip
-              </Link>
-            </div>
+          {showGuide && <FirstDayGuide hasTrip={myTrips.length > 0} read={!!firstDay.read} sent={!!firstDay.sent || requests.left < requests.limit} onHide={() => tick({ hidden: true })} />}
+
+          {myTrips.length === 0 && !showGuide && (
+            <Link className="going-add-trip" to="/trips/new">
+              <span>
+                <strong>Where are you off to next?</strong>
+                <span>Add a trip to see who’s going when you are.</span>
+              </span>
+              <NextIcon />
+            </Link>
           )}
 
           <section className="going-deck" aria-labelledby="people-title" ref={deckRef}>
@@ -254,24 +262,15 @@ export function ForYou() {
               <h2 className="section-title" id="people-title">
                 {only ? `Going to ${only}` : 'People like you'}
               </h2>
-              {deck.length > 0 && <span className="hint">1 of {deck.length}</span>}
+              {deck.length > 0 && <span className="going-count">1 of {deck.length}</span>}
             </div>
-            {only && deck.length > 0 && (
-              <p className="hint going-showing">
-                Showing {deck.length === 1 ? '1 person' : `${deck.length} people`} going to {only}
-              </p>
-            )}
-            {only && (
-              <button type="button" className="btn-link going-show-all" onClick={() => setOnly(null)}>
-                Show everyone
-              </button>
-            )}
             {person && (
               <div className={deck.length > 1 ? 'going-stack has-next' : 'going-stack'}>
                 <PersonCard
                   key={person.profile_id}
                   person={person}
                   city={cityOf(person)}
+                  myCity={myCityFor(person)}
                   myHome={myHome}
                   hasPhoto={!!data.profile.photo_path}
                   requests={requests}
@@ -290,9 +289,24 @@ export function ForYou() {
                 />
               </div>
             )}
+            {requests.left <= 3 && <p className="hint going-left">{requestsLeftText(requests)}</p>}
+            {!requests.plus && trips.length > 0 && (
+              <p className="hint going-plus-line">
+                <Link className="going-plus-link" to="/connections/same-time">
+                  See the exact days you overlap with {brand.plusName}
+                </Link>
+              </p>
+            )}
           </section>
 
-          {deck.length === 0 && only && <p className="hint">You’ve seen everyone going to {only} for now.</p>}
+          {deck.length === 0 && only && (
+            <div className="empty-inline">
+              <p>You’ve seen everyone going to {only} for now.</p>
+              <button type="button" className="btn btn-secondary" onClick={() => setOnly(null)}>
+                Show everyone
+              </button>
+            </div>
+          )}
           {people.length === 0 && (
             <div className="card empty feed-empty">
               <h2>You’ve seen everyone for now</h2>
@@ -316,32 +330,21 @@ export function ForYou() {
             </div>
           )}
 
-          <section className="going-groups" aria-labelledby="travel-groups">
-            <h2 className="section-title" id="travel-groups">
-              Travel groups
-            </h2>
-            <div className="action-row going-groups-actions">
-              <Link className="btn btn-secondary" to="/groups">
-                Your groups
-              </Link>
-              {canStart > 0 && (
-                <Link className="btn btn-primary" to="/groups/new">
-                  Start a group
-                </Link>
-              )}
-            </div>
-            <PopularGroups canStart={canStart > 0} />
+          {/* Groups live on their own page now; one row here (testers, 13 Oct: "Start a group" was on this screen 4 times). */}
+          <section className="going-groups" aria-label="Travel groups">
+            <HubRow to="/groups" title="Travel groups" text={canStart > 0 ? 'Plan a trip with a few members, or join an open group' : 'Your groups and open groups to join'} />
           </section>
         </>
       )}
     </Layout>
   )
 }
-
-/** One member at a time: who they are and what you share. Read more opens the card in place; Connect is tied to the trip. */
+/** One member at a time, photo first like the preview of your own card: who they are, what you share, then Connect or Not now.
+ *  Read more opens the rest in place; the flip shows their card answers; ⋯ holds block and report (testers, 13 Oct). */
 function PersonCard({
   person,
   city,
+  myCity,
   myHome,
   requests,
   onNotNow,
@@ -354,6 +357,8 @@ function PersonCard({
   hasPhoto: boolean
   /** The trip you're both going on, if any. */
   city?: string
+  /** Your own trip's place, when theirs is somewhere near it. */
+  myCity?: string
   myHome: string | null
   requests: Requests
   onNotNow: () => void
@@ -366,13 +371,17 @@ function PersonCard({
   const [connecting, setConnecting] = useState(false)
   const [flipped, setFlipped] = useState(false)
   const [back, setBack] = useState<CardAnswer[] | 'error' | null>(null)
+  const photo = usePhotoUrl(person.photo_path)
   const trip = city ? tripTo(person, city) : undefined
-  const share = whatYouShare(person, trip)
+  const share = whatYouShare(person, trip, undefined, myCity)
   const home = homeLabel(person)
   const id = `person-${person.profile_id}`
-  const suggested = trip
-    ? `Hi ${person.display_name}, I’m going to ${trip.city} in ${monthName(trip.days?.start ?? trip.start)} too. Would you like to meet up while we’re there?`
-    : `Hi ${person.display_name}, it looks like we enjoy the same kind of travel. Where are you off to next?`
+  const month = trip && monthName(trip.days?.start ?? trip.start)
+  const suggested = !trip
+    ? `Hi ${person.display_name}, it looks like we enjoy the same kind of travel. Where are you off to next?`
+    : myCity && myCity !== trip.city
+      ? `Hi ${person.display_name}, I’m going to ${myCity} in ${month} and saw you’ll be in ${trip.city}. Would you like to meet up?`
+      : `Hi ${person.display_name}, I’m going to ${trip.city} in ${month} too. Would you like to meet up while we’re there?`
 
   // The back of the card: the three questions they chose to answer (Lewis, 12 Oct: keep the flip).
   function flip() {
@@ -391,30 +400,41 @@ function PersonCard({
       <div className={flipped ? 'feed-flip going-flip is-flipped' : 'feed-flip going-flip'}>
         <div className="feed-flip-inner">
           <div className="feed-face going-front" inert={flipped}>
-            <button
-              type="button"
-              className="going-who"
-              aria-expanded={open}
-              aria-controls={`${id}-more`}
-              onClick={() => {
-                setOpen((o) => !o)
-                onRead()
-              }}
-            >
-              <Avatar name={person.display_name} path={person.photo_path} size={open ? 'lg' : 'md'} />
-              <span className="going-name">
-                <strong id={id}>
+            <div className="going-photo">
+              {photo ? (
+                <img src={photo} alt="" />
+              ) : (
+                <span className="feed-initial" aria-hidden="true">
+                  {person.display_name.slice(0, 1).toUpperCase()}
+                </span>
+              )}
+              <div className="going-badges">
+                {person.online && (
+                  <span className="going-badge">
+                    <span className="going-dot" aria-hidden="true" />
+                    Active today
+                  </span>
+                )}
+                {nearYou(person, myHome) && <span className="going-badge">Near you</span>}
+              </div>
+              <div className="going-who">
+                <h3 id={id}>
                   {person.display_name}
-                  {person.birth_year ? `, ${ageLabel(person.birth_year)}` : ''}
-                </strong>
-                <span className="hint">{[home, nearYou(person, myHome) ? 'Near you' : null, person.online ? 'Active today' : null].filter(Boolean).join(' · ')}</span>
-                <span className="going-more">{open ? 'Show less' : 'Read more'}</span>
-              </span>
-            </button>
+                  {person.birth_year ? <span className="feed-age">, {ageLabel(person.birth_year)}</span> : null}
+                </h3>
+                {home && <p>{home}</p>}
+              </div>
+            </div>
             {share.length > 0 && (
               <div className="going-share">
-                <h3>What you share</h3>
-                <p>{share.join(' · ')}</p>
+                <h4>What you share</h4>
+                <ul className="chip-list">
+                  {share.map((s, i) => (
+                    <li key={s} className={i === 0 && trip ? 'tag tag-shared' : 'tag'}>
+                      {s}
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
             {open && <PersonMore person={person} id={`${id}-more`} />}
@@ -437,20 +457,33 @@ function PersonCard({
             )}
           </section>
         </div>
-        <button
-          type="button"
-          className="flip-corner going-flip-btn"
-          onClick={flip}
-          aria-label={flipped ? `Turn ${person.display_name}’s card back to the front` : `Turn ${person.display_name}’s card over`}
-        >
-          <FlipIcon />
-          <span aria-hidden="true">{flipped ? 'Front' : 'Their answers'}</span>
+      </div>
+      <div className="going-tools">
+        {!flipped && (
+          <button
+            type="button"
+            className="going-tool"
+            aria-expanded={open}
+            aria-controls={`${id}-more`}
+            onClick={() => {
+              setOpen((o) => !o)
+              onRead()
+            }}
+          >
+            {open ? 'Show less' : 'Read more'}
+            <ChevronDown className={open ? 'icon is-up' : 'icon'} size={18} aria-hidden="true" />
+          </button>
+        )}
+        <button type="button" className="going-tool" onClick={flip} aria-label={flipped ? `Back to ${person.display_name}’s profile` : `See ${person.display_name}’s answers`}>
+          <Repeat2 className="icon" size={18} aria-hidden="true" />
+          <span aria-hidden="true">{flipped ? 'Back to profile' : 'Their answers'}</span>
         </button>
+        <SafetyMenu profileId={person.profile_id} name={person.display_name} onBlocked={onBlocked} />
       </div>
       {connecting ? (
         <ConnectBox
           person={person}
-          tripId={person.trip_id ?? undefined}
+          tripId={trip?.mine ?? person.trip_id ?? undefined}
           requests={requests}
           startOpen
           needsPhoto={!hasPhoto}
@@ -468,11 +501,9 @@ function PersonCard({
           </button>
         </div>
       )}
-      <SafetyBox profileId={person.profile_id} name={person.display_name} onBlocked={onBlocked} />
     </article>
   )
 }
-
 /** More about someone: their trips and how they holiday first, then what they love. Loaded when opened. */
 function PersonMore({ person, id }: { person: FeedPerson; id: string }) {
   const [places, setPlaces] = useState<string[]>([])
@@ -513,17 +544,5 @@ function PersonMore({ person, id }: { person: FeedPerson; id: string }) {
         </div>
       )}
     </div>
-  )
-}
-
-/** Two curved arrows chasing each other: “turn this over”. */
-function FlipIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 10a8 8 0 0 1 14.3-4.3" />
-      <path d="M19 3v3.5h-3.5" />
-      <path d="M20 14a8 8 0 0 1-14.3 4.3" />
-      <path d="M5 21v-3.5h3.5" />
-    </svg>
   )
 }

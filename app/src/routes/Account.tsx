@@ -9,6 +9,7 @@ import { messageOf } from '../lib/errors'
 import { useSession } from '../lib/session-context'
 import { useChecks } from '../lib/useChecks'
 import { checkCode, checkNewPassword } from '../lib/validation'
+import { BackIcon } from '../components/Icons'
 
 const CONFIRM_WORD = 'DELETE'
 
@@ -54,7 +55,8 @@ export function Account() {
   return (
     <Layout tab="profile">
       <Link className="back-link" to="/profile">
-        ‹ My profile
+        <BackIcon />
+        Profile
       </Link>
       <h1 ref={heading} tabIndex={-1}>
         Your account and data
@@ -84,8 +86,8 @@ export function Account() {
       <section className="card section-card account-card account-danger" aria-labelledby="delete-title">
         <h2 id="delete-title">Delete my account</h2>
         <p>
-          This removes your profile, photos, trips, connections and messages for good. People you’ve chatted with will no longer see your messages. If you
-          started a group, another member takes it over. It can’t be undone.
+          This removes your profile, photos, trips, connections and messages for good. People you’ve chatted with will no longer see your messages. If you started a group, another member takes it
+          over. It can’t be undone.
         </p>
         {!deleting ? (
           <button type="button" className="btn btn-danger btn-block" onClick={() => setDeleting(true)}>
@@ -96,14 +98,7 @@ export function Account() {
             <label htmlFor={confirmId}>
               Type <strong>{CONFIRM_WORD}</strong> to confirm
             </label>
-            <input
-              id={confirmId}
-              className="input"
-              autoComplete="off"
-              autoCapitalize="characters"
-              value={typed}
-              onChange={(e) => setTyped(e.target.value)}
-            />
+            <input id={confirmId} className="input" autoComplete="off" autoCapitalize="characters" value={typed} onChange={(e) => setTyped(e.target.value)} />
             <div className="action-row">
               <button
                 type="button"

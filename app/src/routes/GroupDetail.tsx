@@ -1,9 +1,10 @@
+import { BackIcon, NextIcon } from '../components/Icons'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { useConfirm } from '../lib/useConfirm'
 import { Layout, Loading } from '../components/Layout'
-import { SafetyBox } from '../components/SafetyBox'
+import { SafetyMenu } from '../components/SafetyBox'
 import { myConnections, type Connection } from '../lib/connections'
 import { addDays, isoDate, tripDates } from '../lib/dates'
 import { CityPicker } from '../components/CityPicker'
@@ -110,7 +111,8 @@ export function GroupDetail() {
     <Layout>
       {confirmDialog}
       <Link className="back-link" to={chat ?? '/groups'}>
-        {chat ? '‹ Back to the chat' : '‹ Groups'}
+        <BackIcon />
+        {chat ? 'Chat' : 'Groups'}
       </Link>
       <p className="eyebrow">{trip ? 'Trip group' : 'Group'}</p>
       <h1 ref={heading} tabIndex={-1}>
@@ -196,7 +198,7 @@ export function GroupDetail() {
                 </p>
                 {p.profile_id !== me && p.status === 'joined' && group.my_status === 'joined' && (
                   <Link className="match-view" to={`/connections/people/${p.profile_id}`} aria-label={`View ${p.display_name}’s profile`}>
-                    View profile ›
+                    View profile <NextIcon />
                   </Link>
                 )}
               </div>
@@ -219,7 +221,7 @@ export function GroupDetail() {
                     {p.status === 'invited' ? 'Withdraw invite' : 'Remove from group'}
                   </button>
                 )}
-                <SafetyBox profileId={p.profile_id} name={p.display_name} onBlocked={(message) => act(async () => undefined, message)} />
+                <SafetyMenu profileId={p.profile_id} name={p.display_name} onBlocked={(message) => act(async () => undefined, message)} />
               </div>
             )}
           </li>

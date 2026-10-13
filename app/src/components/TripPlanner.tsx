@@ -7,6 +7,7 @@ import { addTripIdea, deleteTripIdea, editTripIdea, tripPlan, updateTripIdea, ty
 import { CityPicks } from './CityPicks'
 import { Dropdown } from './Dropdown'
 import { FieldError } from './Field'
+import { CloseIcon } from './Icons'
 
 type Props = { tripId: number; start: string; end: string; picks?: Picks }
 
@@ -181,7 +182,7 @@ export function TripPlanner({ tripId, start, end, picks }: Props) {
                           void run(() => deleteTripIdea(item.id), `${item.title} removed. You can undo this.`)
                         }}
                       >
-                        ×
+                        <CloseIcon />
                       </button>
                     </li>
                   ),
@@ -192,13 +193,7 @@ export function TripPlanner({ tripId, start, end, picks }: Props) {
         </>
       )}
 
-      {picks && (
-        <CityPicks
-          picks={picks}
-          added={items.map((i) => i.title)}
-          onAdd={(t, url) => run(() => addTripIdea(tripId, t, null, url), `${t} added to your plan.`)}
-        />
-      )}
+      {picks && <CityPicks picks={picks} added={items.map((i) => i.title)} onAdd={(t, url) => run(() => addTripIdea(tripId, t, null, url), `${t} added to your plan.`)} />}
     </div>
   )
 }

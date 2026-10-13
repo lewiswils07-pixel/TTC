@@ -4,6 +4,7 @@ import { Layout, Loading } from '../components/Layout'
 import { CityTips } from '../components/CityTips'
 import { DateOverlap } from '../components/DateOverlap'
 import { OpenGroups } from '../components/OpenGroups'
+import { CityPhoto } from '../components/CityPhoto'
 import { ShareTrip } from '../components/ShareTrip'
 import { TripPlanner } from '../components/TripPlanner'
 import { picksFor } from '../data/picks'
@@ -14,6 +15,7 @@ import { homeLabel, tripCompanions, type TripCompanion } from '../lib/matching'
 import { ageLabel } from '../lib/options'
 import { Avatar } from '../components/Avatar'
 import { getTrip, type Trip } from '../lib/trips'
+import { BackIcon } from '../components/Icons'
 
 type Tab = 'people' | 'plan' | 'tips'
 const TABS: { key: Tab; label: string }[] = [
@@ -66,12 +68,18 @@ export function TripMatches() {
   return (
     <Layout>
       <Link className="back-link" to="/trips">
-        ‹ My trips
+        <BackIcon />
+        My trips
       </Link>
-      <p className="eyebrow">Your trip</p>
-      <h1 ref={heading} tabIndex={-1}>
-        {cityLabel(trip.city)}
-      </h1>
+      <div className="trip-hero">
+        <CityPhoto city={trip.city.name} width={720} credit className="trip-hero-photo" />
+        <div className="trip-hero-text">
+          <p className="eyebrow">Your trip</p>
+          <h1 ref={heading} tabIndex={-1}>
+            {cityLabel(trip.city)}
+          </h1>
+        </div>
+      </div>
       <div className="trip-summary">
         <p className="lede">
           {tripDates(trip.start_date, trip.end_date)}
@@ -140,9 +148,9 @@ export function TripMatches() {
 
             {companions.length === 0 && (
               <div className="card empty">
-                <p>When you connect with someone going to {trip.city.name} at the same time as you, they’ll appear here.</p>
-                <Link className="btn btn-secondary" to="/connections">
-                  Find people on Who’s going
+                <p>Meet members going to {trip.city.name} one at a time on Who’s going. Once you connect, they’ll appear here too.</p>
+                <Link className="btn btn-primary" to={`/connections?trip=${encodeURIComponent(trip.city.name)}`}>
+                  See who’s going to {trip.city.name}
                 </Link>
               </div>
             )}

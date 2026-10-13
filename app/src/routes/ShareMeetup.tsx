@@ -9,6 +9,7 @@ import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
 import { checkIn, createShare, emailHref, localInputValue, MAX_NOTE, MAX_PLACE, meetTime, myShares, sendLink, stopSharing, textHref, type MeetupShare } from '../lib/share'
 import { useChecks } from '../lib/useChecks'
+import { BackIcon } from '../components/Icons'
 
 function checkPlace(place: string): string | null {
   return place.trim().length < 2 ? 'Please say where you’re meeting, such as the name of a café and the town.' : null
@@ -108,14 +109,13 @@ export function ShareMeetup() {
   return (
     <Layout tab="chat">
       <Link className="back-link" to={`/messages/${conversationId}`}>
-        ‹ {chat.display_name}
+        <BackIcon />
+        {chat.display_name}
       </Link>
       <h1 ref={heading} tabIndex={-1}>
         Tell someone you trust
       </h1>
-      <p className="lede">
-        Make a private link for a friend or relative. It shows who you’re meeting, where and when, and you can let them know when you’re back safe.
-      </p>
+      <p className="lede">Make a private link for a friend or relative. It shows who you’re meeting, where and when, and you can let them know when you’re back safe.</p>
       <p className={status ? 'notice notice-success' : 'visually-hidden'} role="status">
         {status}
       </p>
@@ -136,9 +136,7 @@ export function ShareMeetup() {
                 <p className="share-when">{meetTime(s.meet_at)}</p>
                 <p className="share-place">{s.place}</p>
                 <p className="hint">With {s.meeting_with.map((p) => p.name).join(', ') || 'your chat'}</p>
-                {s.checked_in_at ? (
-                  <p className="notice notice-success">You’ve said you’re back safe. Anyone with the link can see this.</p>
-                ) : null}
+                {s.checked_in_at ? <p className="notice notice-success">You’ve said you’re back safe. Anyone with the link can see this.</p> : null}
                 <FriendSend share={s} member={me} />
                 <div className="action-row">
                   <button type="button" className="btn btn-secondary" disabled={busy !== null} onClick={() => send(s)}>
@@ -184,8 +182,8 @@ export function ShareMeetup() {
       <form className="card section-card" onSubmit={create} noValidate aria-labelledby="new-title">
         <h2 id="new-title">{shares.length ? 'Share another meet-up' : 'Your meet-up'}</h2>
         <p className="hint section-hint">
-          You’re meeting {chat.kind === 'group' ? `your group, ${chat.display_name}` : chat.display_name}. Their first name, age, home town and member number go on the
-          link, never their photo or contact details.
+          You’re meeting {chat.kind === 'group' ? `your group, ${chat.display_name}` : chat.display_name}. Their first name, age, home town and member number go on the link, never their photo or
+          contact details.
         </p>
         <TextField
           name="place"
@@ -215,14 +213,7 @@ export function ShareMeetup() {
         />
         <div className="field" data-field="note">
           <label htmlFor="share-note">Anything else? (optional)</label>
-          <textarea
-            id="share-note"
-            className="textarea textarea-short"
-            maxLength={MAX_NOTE}
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            aria-describedby="share-note-hint"
-          />
+          <textarea id="share-note" className="textarea textarea-short" maxLength={MAX_NOTE} value={note} onChange={(e) => setNote(e.target.value)} aria-describedby="share-note-hint" />
           <p className="hint" id="share-note-hint">
             For example, “I’ll text you by 6pm”.
           </p>

@@ -32,34 +32,6 @@ export function FilterFields({ value: f, onChange, plus }: { value: Filters; onC
     row(key, label, listText(f[key], options), <ChipChoice name={key} legend={label} options={options} selected={f[key]} onChange={(chosen) => set({ [key]: chosen })} multiple />)
   return (
     <div className="filter-rows">
-      <h3 className="filter-group">Member preferences</h3>
-      {row(
-        'genders',
-        'I’d like to travel with',
-        interestedInText(f.genders),
-        <InterestedIn legend="I’d like to travel with" value={f.genders} onChange={(genders) => set({ genders })} error={errors.genders} />,
-        errors.genders,
-      )}
-      {row(
-        'ages',
-        'Age range',
-        ageText(f.age_min, f.age_max),
-        <>
-          <AgeRange legend="Age range" min={MIN_AGE} max={MAX_PREF_AGE} value={[f.age_min, f.age_max]} onChange={([age_min, age_max]) => set({ age_min, age_max })} />
-          <FieldError error={errors.ages} />
-          <Flexible label="Show people a little outside this range" checked={f.age_flexible} onChange={(age_flexible) => set({ age_flexible })} />
-        </>,
-        errors.ages,
-      )}
-      {row(
-        'distance',
-        'Maximum distance',
-        distanceLabel(f.max_distance_km),
-        <>
-          <DistanceSlider km={f.max_distance_km} onChange={(max_distance_km) => set({ max_distance_km })} />
-          {f.max_distance_km !== null && <Flexible label="Show people a bit further away too" checked={f.distance_flexible} onChange={(distance_flexible) => set({ distance_flexible })} />}
-        </>,
-      )}
       <div className="filter-group filter-group-plus">
         <h3>How they travel</h3>
         <span className="tag tag-plus">{brand.plusName}</span>
@@ -72,6 +44,34 @@ export function FilterFields({ value: f, onChange, plus }: { value: Filters; onC
       {STYLE_QUESTIONS.map((q) => plusRow(q.filter, q.label, q.options))}
       <h3 className="filter-group">Holiday preferences</h3>
       {HOLIDAY_QUESTIONS.map((q) => plusRow(q.filter, q.label, q.options))}
+      <h3 className="filter-group">The basics</h3>
+      {row(
+        'genders',
+        'I’d like to travel with',
+        interestedInText(f.genders),
+        <InterestedIn legend="I’d like to travel with" value={f.genders} onChange={(genders) => set({ genders })} error={errors.genders} />,
+        errors.genders,
+      )}
+      {row(
+        'ages',
+        'Ages',
+        ageText(f.age_min, f.age_max),
+        <>
+          <AgeRange legend="Ages" min={MIN_AGE} max={MAX_PREF_AGE} value={[f.age_min, f.age_max]} onChange={([age_min, age_max]) => set({ age_min, age_max })} />
+          <FieldError error={errors.ages} />
+          <Flexible label="Show people a little outside this range" checked={f.age_flexible} onChange={(age_flexible) => set({ age_flexible })} />
+        </>,
+        errors.ages,
+      )}
+      {row(
+        'distance',
+        'Lives within',
+        distanceLabel(f.max_distance_km),
+        <>
+          <DistanceSlider km={f.max_distance_km} onChange={(max_distance_km) => set({ max_distance_km })} />
+          {f.max_distance_km !== null && <Flexible label="Show people a bit further away too" checked={f.distance_flexible} onChange={(distance_flexible) => set({ distance_flexible })} />}
+        </>,
+      )}
     </div>
   )
 }

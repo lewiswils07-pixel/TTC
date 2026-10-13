@@ -23,7 +23,8 @@ export type FeedPerson = {
   trip_id: number | null
   /** Their trip's dates. `overlap` is true when they're there at the same time as you, not just on nearby dates.
    *  Without Sodalis+ the server sends only the month (`exact` is false), and `days` (the days you're both there) is null. */
-  trips: { city: string; start: string; end: string; overlap: boolean; exact: boolean; days: { start: string; end: string } | null }[]
+  /** Their trips near yours; `mine` is the id of your trip it matched. */
+  trips: { city: string; start: string; end: string; overlap: boolean; exact: boolean; days: { start: string; end: string } | null; mine?: number }[]
   shared_interests: string[]
   shared_places: string[]
   distance_km: number | null
@@ -67,7 +68,7 @@ export function mergeFeed(byTrip: { tripId: number; people: TripSuggestion[] }[]
       p.score = Math.max(p.score, s.score)
       p.rank = Math.max(p.rank, s.rank)
       const overlap = !!(s.overlap_start && s.overlap_end)
-      p.trips.push({ city: s.trip_city, start: s.trip_start, end: s.trip_end, overlap, exact: plus, days: plus && overlap ? { start: s.overlap_start!, end: s.overlap_end! } : null })
+      p.trips.push({ city: s.trip_city, start: s.trip_start, end: s.trip_end, overlap, exact: plus, days: plus && overlap ? { start: s.overlap_start!, end: s.overlap_end! } : null, mine: tripId })
       p.shared_interests = union(p.shared_interests, s.shared_interests)
       people.set(s.profile_id, p)
     }
@@ -126,9 +127,12 @@ export function callouts(p: FeedPerson, today?: string): Callout[] {
 
 /** "What you share" with someone, in plain words, strongest first: reasons, not a rating (Lewis, 12 Oct).
  *  `trip` is the trip you're both on; exact days are Sodalis+, others see the month. */
-export function whatYouShare(p: FeedPerson, trip?: FeedPerson['trips'][number], today?: string): string[] {
+export function whatYouShare(p: FeedPerson, trip?: FeedPerson['trips'][number], today?: string, myCity?: string): string[] {
   const lines: string[] = []
-  if (trip) {
+  // Their trip is to a place near yours (Maya, 13 Oct: "Both in Cascais" when she was going to Lisbon).
+  if (trip && myCity && myCity !== trip.city) {
+    lines.push(`${trip.city} in ${monthName(trip.start)}, near your ${myCity} trip`)
+  } else if (trip) {
     lines.push(
       trip.days
         ? `Both in ${trip.city} ${shortDates(trip.days.start, trip.days.end, today)}`

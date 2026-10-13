@@ -7,9 +7,10 @@ import { messageOf } from '../lib/errors'
 import { myPrivacyChoices, PRIVACY_TOOLS, savePrivacyChoices, type PrivacyChoices } from '../lib/privacy'
 import { useSession } from '../lib/session-context'
 import { HubRow } from '../components/HubRow'
+import { BackIcon } from '../components/Icons'
 
 const LINKS: { to: string; title: string; text: string }[] = [
-  { to: '/filters', title: 'Who I’d like to meet', text: 'Age, distance and more' },
+  { to: '/filters', title: 'Filters', text: 'How people travel, age and distance' },
   { to: '/settings/privacy', title: 'Privacy choices', text: 'Choose which optional tools we use' },
   { to: '/account', title: 'Account and data', text: 'Password, download your data, delete your account' },
   { to: '/connections?tour=1', title: 'Take the tour again', text: 'A quick look at what you can do' },
@@ -28,7 +29,8 @@ export function Settings() {
   return (
     <Layout tab="profile">
       <Link className="back-link" to="/profile">
-        ‹ Profile
+        <BackIcon />
+        Profile
       </Link>
       <h1 ref={heading} tabIndex={-1}>
         Settings
@@ -94,7 +96,8 @@ export function PrivacyChoicesPage() {
   return (
     <Layout tab="profile">
       <Link className="back-link" to="/settings">
-        ‹ Settings
+        <BackIcon />
+        Settings
       </Link>
       <h1 ref={heading} tabIndex={-1}>
         Privacy choices

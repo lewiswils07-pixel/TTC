@@ -14,6 +14,7 @@ import { messageOf } from '../lib/errors'
 import { groupPeople, isTripGroup, myGroups, type GroupPerson } from '../lib/groups'
 import { Avatar } from '../components/Avatar'
 import { useChecks } from '../lib/useChecks'
+import { BackIcon, NextIcon } from '../components/Icons'
 
 type Trip = { start: string; days: number } | null
 
@@ -190,7 +191,8 @@ export function PlanBoard() {
     <Layout>
       {confirmDialog}
       <Link className="back-link" to={`/messages/${conversationId}`}>
-        ‹ Back to the chat
+        <BackIcon />
+        Chat
       </Link>
       <p className="eyebrow">{who}</p>
       <h1 ref={heading} tabIndex={-1}>
@@ -209,7 +211,7 @@ export function PlanBoard() {
             <span>{members.map((p) => p.display_name).join(', ')}</span>
           </span>
           <span className="trip-chevron" aria-hidden="true">
-            ›
+            <NextIcon />
           </span>
         </Link>
       )}

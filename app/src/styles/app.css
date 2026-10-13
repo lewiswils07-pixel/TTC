@@ -482,9 +482,9 @@ legend { padding: 0; }
 .guide-list { list-style: none; margin: var(--space-4) 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
 .guide-list h2 { margin: 0 0 var(--space-1); font-size: var(--text-lg); }
 .guide-list p { margin: 0; color: var(--ink-soft); }
-.guide-card { margin-bottom: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); }
-.guide-card h2 { margin: 0; font-size: var(--text-lg); }
-.guide-card ul { margin: 0; padding-left: 1.25em; display: flex; flex-direction: column; gap: 2px; }
+.meet-guide { margin-bottom: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); }
+.meet-guide h2 { margin: 0; font-size: var(--text-lg); }
+.meet-guide ul { margin: 0; padding-left: 1.25em; display: flex; flex-direction: column; gap: 2px; }
 .chat-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 0 var(--space-5, 20px); }
 .chat-tools > .safety-link { align-self: center; padding-inline: 0; }
 .chat-tools .safety-box { flex-basis: 100%; }
@@ -585,11 +585,6 @@ legend { padding: 0; }
 .check-list li.is-done { color: var(--ink-soft); font-weight: 500; text-decoration: line-through; text-decoration-color: var(--gold); }
 .check-mark { flex: none; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--gold); display: grid; place-items: center; }
 .is-done > .check-mark { background: var(--gold); }
-.first-day { margin-bottom: var(--space-4); border-color: var(--gold); }
-.first-day-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-2); }
-.first-day-head h2 { font-size: 1.0625rem; margin: 0; }
-.first-day .hint { margin: var(--space-1) 0 var(--space-3); }
-.first-day-hint { display: block; font-size: var(--text-sm); font-weight: 500; color: var(--muted); }
 .is-done > .check-mark::before { content: '✓'; color: #fff; font-size: 0.8125rem; font-weight: 800; line-height: 1; }
 
 /* Open groups: details on the left, Join on the right. */
@@ -1553,7 +1548,7 @@ html { scroll-padding-bottom: 7rem; }
 .company .card, .company .kpi-wide { background: #fff; border: 1px solid #e4e0db; border-radius: 16px; box-shadow: none; }
 .company .kpi-section:first-of-type { margin-top: 0; }
 .company .section-title { font-size: var(--text-lg); }
-.company-foot { margin-top: var(--space-6); color: #8a827b; font-size: 0.8125rem; }
+.company-foot { margin-top: var(--space-6); color: var(--ink-soft); font-size: 0.8125rem; }
 @media (min-width: 760px) {
   .company-body { grid-template-columns: 220px 1fr; min-height: calc(100dvh - 64px); }
   .company-nav { flex-direction: column; gap: var(--space-1); padding: var(--space-5) var(--space-3); border-bottom: 0; border-right: 1px solid #e4e0db; overflow: visible; }
@@ -1568,64 +1563,6 @@ html { scroll-padding-bottom: 7rem; }
 .popular-group .trip-text { display: flex; flex-direction: column; }
 
 /* ------------------------------------------------ Who's going: trips first, a calm list (Lewis, 12 Oct) */
-.going-intro { margin: calc(-1 * var(--space-2)) 0 var(--space-4); }
-.going-plus-link { color: var(--gold-ink); font-weight: 700; }
-.going-person { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--space-3); }
-.going-trip-list { list-style: none; margin: 0 0 var(--space-2); padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
-.going-trip-row {
-  display: flex; align-items: center; gap: var(--space-3); width: 100%; padding: var(--space-3) var(--space-4);
-  font: inherit; color: inherit; text-align: left; cursor: pointer;
-}
-.going-trip-row.is-current { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.going-trip-row:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.going-trip-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
-.going-trip-text strong { font-size: var(--text-lg); }
-.going-faces { display: flex; }
-.going-faces .avatar { width: 32px; height: 32px; margin-left: -8px; border: 2px solid var(--card); font-size: 0.8rem; }
-.going-faces .avatar:first-child { margin-left: 0; }
-.going-trip-count { font-weight: 700; font-size: var(--text-sm); white-space: nowrap; }
-.going-plus-line { margin-bottom: var(--space-5); }
-.going-showing { margin: 0 0 var(--space-3); }
-.connect-photo p { margin: 0 0 var(--space-3); }
-.going-deck { margin-bottom: var(--space-5); }
-.going-deck-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
-.going-deck-head .section-title { margin-bottom: var(--space-2); }
-.going-show-all { margin-bottom: var(--space-3); }
-/* The next card peeks out under this one, so it reads as one of several. */
-.going-stack { position: relative; }
-.going-stack.has-next { padding-bottom: 12px; }
-.going-stack.has-next::after {
-  content: ''; position: absolute; left: var(--space-4); right: var(--space-4); bottom: 0; height: 24px;
-  border: 1px solid var(--line); border-top: 0; border-radius: 0 0 var(--radius) var(--radius); background: var(--paper-tint);
-}
-.going-person.is-open .avatar-lg { width: 96px; height: 96px; }
-/* The person card turns over with the corner button, like the old card did. */
-.going-flip .feed-flip-inner { cursor: auto; }
-.going-front { display: flex; flex-direction: column; gap: var(--space-3); }
-.going-flip .flip-corner { position: static; margin-top: var(--space-3); }
-/* With words, not just the icon (testers, 13 Oct). */
-.going-flip-btn { display: inline-flex; gap: 6px; width: auto; height: 40px; padding: 0 14px 0 10px; border-radius: 999px; font: inherit; font-size: 0.875rem; font-weight: 600; }
-.going-flip-btn svg { width: 18px; height: 18px; flex: none; }
-.going-flip-btn:hover { transform: none; border-color: var(--brand-gold); }
-.going-flip .feed-back { min-height: 0; }
-.going-who {
-  display: flex; align-items: center; gap: var(--space-3); width: 100%; padding: 0; border: 0; background: none;
-  color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-sm);
-}
-.going-who:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
-.going-name { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
-.going-name strong { font-size: var(--text-lg); line-height: 1.25; }
-.going-more { color: var(--accent); font-size: var(--text-sm); font-weight: 700; }
-.going-share { padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: color-mix(in srgb, var(--brand-gold) 16%, var(--card)); }
-.going-share h3 { margin: 0 0 2px; font-size: 0.8125rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--gold-ink); }
-.going-share p { margin: 0; font-size: var(--text-sm); }
-.going-actions .btn { flex: 1; }
-.going-details { display: flex; flex-direction: column; gap: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--line); }
-.going-trips { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-1); }
-.going-trips li { display: flex; justify-content: space-between; gap: var(--space-3); font-weight: 600; }
-.going-add-trip { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); margin-bottom: var(--space-5); }
-.going-groups { margin-bottom: var(--space-5); }
-.going-groups-actions { margin-bottom: var(--space-3); }
 
 /* A connection's page: small photo beside the name, travel first. */
 .member-head { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-4); }
@@ -1639,3 +1576,151 @@ html { scroll-padding-bottom: 7rem; }
   background: color-mix(in srgb, var(--brand-gold) 16%, var(--card)); border: 1px solid color-mix(in srgb, var(--brand-gold) 45%, transparent);
 }
 .going-details .shared-interests { padding: 0; }
+
+/* ------------------------------------------- design pass (testers, 13 Oct) */
+/* One icon set: icons sit on the text line and never shrink. */
+.icon { flex: none; display: inline-block; vertical-align: middle; }
+.back-link { gap: 2px; margin-left: -6px; }
+.trip-chevron { display: flex; align-items: center; }
+.match-view { display: inline-flex; align-items: center; gap: 2px; }
+.range-picker-head .icon-btn { display: grid; place-items: center; }
+
+/* One tab style everywhere: a soft track with the chosen item raised. */
+.hub-tabs, .segmented {
+  display: grid; gap: 4px; margin: 0 0 var(--space-5); padding: 4px; border: 0; border-radius: var(--radius);
+  background: color-mix(in srgb, var(--ink) 6%, var(--card)); overflow: visible;
+}
+.hub-tabs { grid-template-columns: repeat(3, 1fr); }
+.segmented { margin: 0; }
+.hub-tab { border: 0 !important; border-radius: calc(var(--radius) - 4px); min-height: 40px; }
+.hub-tab.is-current { background: var(--card); color: var(--accent); box-shadow: var(--shadow-sm); }
+.subnav { border-radius: var(--radius); }
+.subnav-item { border-radius: calc(var(--radius) - 4px); }
+.segment + .segment, .segmented[data-cols='2'] .segment:nth-child(n + 3) { border: 0; }
+.segment span { min-height: 40px; border-radius: calc(var(--radius) - 4px); color: var(--ink-soft); }
+.segment input:checked + span { background: var(--card); color: var(--accent); box-shadow: var(--shadow-sm); }
+.segmented[data-invalid='true'] { box-shadow: inset 0 0 0 1.5px var(--danger); }
+
+/* Fewer boxes: a card inside a card loses its own frame. */
+.card .card { border: 0; box-shadow: none; padding: 0; background: transparent; }
+
+/* ⋯ for block and report. */
+.safety-more { width: 40px; height: 40px; margin-left: auto; color: var(--ink-soft); border-radius: 999px; }
+
+/* The first-day guide as one slim bar. */
+.first-day { display: flex; align-items: center; gap: var(--space-3); margin: 0 0 var(--space-4); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3); border-radius: var(--radius); background: color-mix(in srgb, var(--brand-gold) 14%, var(--card)); border: 1px solid color-mix(in srgb, var(--brand-gold) 40%, transparent); }
+.first-day-count {
+  flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; font-size: 0.8125rem; font-weight: 800; color: var(--gold-ink);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--brand-gold) 14%, var(--card)) 76%, transparent 78%), conic-gradient(var(--gold) calc(var(--done) * 360deg), color-mix(in srgb, var(--gold) 25%, transparent) 0);
+}
+.first-day-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--space-2); color: inherit; text-decoration: none; }
+.first-day-text { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.3; }
+.first-day-text span { font-size: var(--text-sm); color: var(--ink-soft); }
+.first-day-hide { width: 36px; height: 36px; color: var(--ink-soft); }
+
+/* Who's going: trips as one scrolling row, then the person. */
+.going-plus-link { color: var(--gold-ink); font-weight: 700; }
+.going-trips-bar { margin: 0 calc(-1 * var(--space-4)) var(--space-4); }
+.going-trip-list { list-style: none; margin: 0; padding: 2px var(--space-4); display: flex; gap: var(--space-2); overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; scroll-padding-inline: var(--space-4); }
+.going-trip-list::-webkit-scrollbar { display: none; }
+.going-trip-list li { flex: none; scroll-snap-align: start; }
+.going-trip-row {
+  display: flex; align-items: center; gap: var(--space-2); min-height: 52px; padding: 6px 14px 6px 8px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink); font: inherit; text-align: left; cursor: pointer; box-shadow: var(--shadow-sm);
+}
+.going-trip-row:first-child:not(:has(.going-faces)) { padding-left: 14px; }
+.going-trip-row.is-current { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.going-trip-row.is-current .going-trip-text span { color: color-mix(in srgb, var(--on-accent) 80%, transparent); }
+.going-trip-row:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.going-trip-text { display: flex; flex-direction: column; line-height: 1.2; white-space: nowrap; }
+.going-trip-text strong { font-size: 0.9375rem; }
+.going-trip-text span { font-size: 0.8125rem; color: var(--ink-soft); }
+.going-faces { display: flex; }
+.going-faces .avatar { width: 32px; height: 32px; margin-left: -10px; border: 2px solid var(--card); font-size: 0.8rem; }
+.going-faces .avatar:first-child { margin-left: 0; }
+.going-add-trip {
+  display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); padding: var(--space-3) var(--space-4); border-radius: var(--radius);
+  border: 1px dashed color-mix(in srgb, var(--accent) 45%, var(--line)); color: inherit; text-decoration: none;
+}
+.going-add-trip > span { flex: 1; display: flex; flex-direction: column; line-height: 1.35; }
+.going-add-trip > span span { font-size: var(--text-sm); color: var(--ink-soft); }
+.going-deck { margin-bottom: var(--space-5); }
+.going-deck-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.going-deck-head .section-title { margin-bottom: var(--space-2); }
+.going-count { font-size: 0.8125rem; font-weight: 700; color: var(--ink-soft); }
+.going-left { margin: var(--space-3) 0 0; text-align: center; }
+.going-plus-line { margin: var(--space-3) 0 0; text-align: center; }
+.going-stack { position: relative; }
+.going-stack.has-next { padding-bottom: 10px; }
+.going-stack.has-next::after {
+  content: ''; position: absolute; left: var(--space-4); right: var(--space-4); bottom: 0; height: 24px;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: color-mix(in srgb, var(--ink) 7%, var(--paper));
+}
+.going-person { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-2) var(--space-2) var(--space-4); border: 0; box-shadow: 0 1px 2px rgb(33 32 30 / 6%), 0 10px 30px rgb(33 32 30 / 10%); }
+.going-person > :not(.going-flip) { margin-inline: var(--space-2); }
+.going-flip .feed-flip-inner { cursor: auto; }
+.going-front { display: flex; flex-direction: column; gap: var(--space-3); }
+.going-front > :not(.going-photo) { margin-inline: var(--space-2); }
+.going-flip .feed-back { min-height: 0; }
+/* Photo first, like "How others see you". */
+.going-photo {
+  position: relative; aspect-ratio: 16 / 11; max-height: 34dvh; min-height: 200px; width: 100%; border-radius: calc(var(--radius-lg) - 6px); overflow: hidden;
+  background: linear-gradient(160deg, var(--brand-disc), color-mix(in srgb, var(--brand-disc) 60%, #000));
+}
+.going-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.going-badges { position: absolute; top: var(--space-3); left: var(--space-3); display: flex; flex-wrap: wrap; gap: 6px; }
+.going-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: rgb(0 0 0 / 45%); color: #fff; font-size: 0.8125rem; font-weight: 700; backdrop-filter: blur(6px); }
+.going-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; }
+.going-who { position: absolute; left: 0; right: 0; bottom: 0; padding: 64px var(--space-4) var(--space-3); background: linear-gradient(transparent, rgb(0 0 0 / 70%)); color: #fff; }
+.going-who h3 { margin: 0; font-size: 1.625rem; font-weight: 800; line-height: 1.15; color: #fff; }
+.going-who p { margin: 2px 0 0; color: rgb(255 255 255 / 88%); font-size: var(--text-sm); font-weight: 600; }
+.going-share h4 { margin: 0 0 var(--space-2); font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); }
+.going-share .chip-list { gap: 6px; }
+.going-tools { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.going-tool {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--card); color: var(--ink); font: inherit; font-size: 0.875rem; font-weight: 700; cursor: pointer;
+}
+.going-tool:hover { border-color: var(--ink-soft); }
+.going-tool .icon { color: var(--accent); transition: transform 0.2s var(--ease-out); }
+.going-tool .icon.is-up { transform: rotate(180deg); }
+.going-tools .safety-box { flex-basis: 100%; }
+.going-actions .btn { flex: 1; }
+.going-details { display: flex; flex-direction: column; gap: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--line); }
+.going-details .shared-interests { padding: 0; }
+.going-trips { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+.going-trips li { display: flex; justify-content: space-between; gap: var(--space-3); font-weight: 600; }
+.going-groups { margin-bottom: var(--space-5); }
+.going-groups .hub-row { border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow-sm); }
+.empty-inline { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); margin-bottom: var(--space-5); text-align: center; color: var(--ink-soft); }
+.empty-inline p { margin: 0; }
+.person-card, .tip { position: relative; }
+.person-card > .safety-more, .tip > .safety-more { position: absolute; top: var(--space-2); right: var(--space-2); }
+.person-card > .safety-box, .tip > .safety-box { margin-top: var(--space-2); }
+.person-card .match-head, .tip > :first-child { padding-right: 36px; }
+
+/* City photos (Unsplash) over the branded art. */
+.city-photo { position: relative; display: block; overflow: hidden; background: linear-gradient(160deg, var(--brand-disc), color-mix(in srgb, var(--brand-disc) 60%, #000)); }
+.city-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.4s ease; }
+.city-photo img.is-loaded { opacity: 1; }
+.city-photo-credit { position: absolute; right: 8px; bottom: 6px; z-index: 1; font-size: 0.6875rem; color: rgb(255 255 255 / 85%); }
+.city-photo-credit a { color: inherit; }
+.trip-thumb { flex: none; width: 56px; height: 56px; border-radius: 12px; }
+.popular-place { position: relative; overflow: hidden; justify-content: flex-end; min-width: 150px; min-height: 110px; isolation: isolate; }
+.popular-place .popular-photo { position: absolute; inset: 0; z-index: -1; }
+.popular-place .popular-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 30%, rgb(0 0 0 / 65%)); }
+.popular-place span:not(.city-photo) { color: #fff; }
+.trip-hero { position: relative; margin: 0 0 var(--space-4); border-radius: var(--radius-lg); overflow: hidden; color: #fff; }
+.trip-hero-photo { aspect-ratio: 16 / 9; width: 100%; }
+.trip-hero-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 35%, rgb(0 0 0 / 70%)); pointer-events: none; }
+.trip-hero-text { position: absolute; left: var(--space-4); right: var(--space-4); bottom: var(--space-5); pointer-events: none; }
+.trip-hero-text .eyebrow { margin: 0 0 2px; color: var(--brand-gold); }
+.trip-hero-text h1 { margin: 0; color: #fff; }
+.meet-guide ul { list-style: none; padding: 0; gap: var(--space-1); }
+.meet-guide li { position: relative; padding-left: 28px; }
+.meet-guide li::before { content: ''; position: absolute; left: 4px; top: 0.45em; width: 12px; height: 7px; border-left: 2.5px solid var(--accent); border-bottom: 2.5px solid var(--accent); transform: rotate(-45deg); }
+.composer-send { width: 48px; min-width: 48px; height: 48px; padding: 0; border-radius: 50%; display: grid; place-items: center; }
+.hub-tab { white-space: nowrap; font-size: 0.9375rem; padding-inline: 6px; }
+.tip .review-head { padding-right: 44px; }
+.subnav-item { min-width: 0; padding: 0 8px; }
+@media (max-width: 360px) { .subnav-item { padding: 0 4px; gap: 4px; font-size: 0.875rem; } }

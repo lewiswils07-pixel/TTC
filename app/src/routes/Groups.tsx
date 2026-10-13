@@ -10,6 +10,7 @@ import { peek, remember } from '../lib/cache'
 import { OpenGroups } from '../components/OpenGroups'
 import { PopularGroups } from '../components/PopularGroups'
 import { groupsICanStart, isTripGroup, myGroups, respondToInvite, type Group } from '../lib/groups'
+import { NextIcon } from '../components/Icons'
 
 /** My groups and their chats, invites waiting for an answer, and a way to start one. */
 export function Groups() {
@@ -125,7 +126,7 @@ export function Groups() {
                   <GroupSummary group={g} />
                 </span>
                 <span className="trip-chevron" aria-hidden="true">
-                  ›
+                  <NextIcon />
                 </span>
               </Link>
             </li>

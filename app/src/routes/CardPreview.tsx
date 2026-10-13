@@ -10,6 +10,7 @@ import { ProfileExtras } from '../components/ProfileExtras'
 import { listInterests, type Interest } from '../lib/profile'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
+import { BackIcon } from '../components/Icons'
 
 /** "See my card as others do": your suggestion card, front and back, as another member sees it. */
 export function CardPreview() {
@@ -33,7 +34,8 @@ export function CardPreview() {
   return (
     <Layout tab="profile">
       <Link className="back-link" to="/profile">
-        ‹ Profile
+        <BackIcon />
+        Profile
       </Link>
       <h1 ref={heading} tabIndex={-1}>
         How others see you

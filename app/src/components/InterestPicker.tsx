@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useState } from 'react'
 import type { Interest } from '../lib/profile'
 import { FieldError } from './Field'
+import { CloseIcon } from './Icons'
 
 type Props = {
   interests: Interest[]
@@ -109,7 +110,7 @@ export function InterestPicker({ interests, selected, onChange, max, error }: Pr
             {chosen.map((i) => (
               <li key={i.id}>
                 <button type="button" className="chip-remove" onClick={() => toggle(i.id)} aria-label={`Remove ${i.label}`}>
-                  {i.label} <span aria-hidden="true">×</span>
+                  {i.label} <CloseIcon />
                 </button>
               </li>
             ))}
