@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { messageOf } from '../lib/errors'
 import { blockMember, MAX_REPORT_DETAILS, REPORT_REASONS, reportMember, reportMessage, type ReportReason } from '../lib/safety'
 import { Field, FieldError } from './Field'
@@ -174,15 +174,64 @@ export function SafetyBox({
   )
 }
 
-/** A ⋯ button (placed by the card's CSS) that opens Block or report in the card's flow (testers, 13 Oct: the link on every card was loud). */
+/** A quiet ⋯ button (placed by the card's CSS) that opens Block or report in a sheet from the bottom, so the card never jumps (testers, 13 Oct). */
 export function SafetyMenu({ profileId, name, onBlocked }: { profileId: string; name: string; onBlocked: (message: string) => void }) {
   const [open, setOpen] = useState(false)
   return (
     <>
-      <button type="button" className="icon-btn safety-more" aria-expanded={open} aria-label={`More: block or report ${name}`} onClick={() => setOpen((o) => !o)}>
+      <button type="button" className="icon-btn safety-more" aria-haspopup="dialog" aria-label={`More: block or report ${name}`} onClick={() => setOpen(true)}>
         <MoreIcon />
       </button>
-      {open && <SafetyBox profileId={profileId} name={name} onBlocked={onBlocked} startOpen onCancel={() => setOpen(false)} />}
+      {open && (
+        <SafetySheet
+          name={name}
+          onClose={() => setOpen(false)}
+          body={
+            <SafetyBox
+              profileId={profileId}
+              name={name}
+              startOpen
+              onCancel={() => setOpen(false)}
+              onBlocked={(message) => {
+                setOpen(false)
+                onBlocked(message)
+              }}
+            />
+          }
+        />
+      )}
     </>
+  )
+}
+
+function SafetySheet({ name, body, onClose }: { name: string; body: ReactNode; onClose: () => void }) {
+  const ref = useRef<HTMLDialogElement>(null)
+  const title = useId()
+  useEffect(() => {
+    const d = ref.current
+    const before = document.activeElement as HTMLElement | null
+    if (d && typeof d.showModal === 'function') d.showModal()
+    else d?.setAttribute('open', '')
+    return () => before?.focus?.()
+  }, [])
+  return (
+    <dialog
+      ref={ref}
+      className="confirm sheet safety-sheet"
+      aria-labelledby={title}
+      onCancel={(e) => {
+        e.preventDefault()
+        onClose()
+      }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="confirm-box sheet-box">
+        <span className="sheet-handle" aria-hidden="true" />
+        <h2 id={title} className="confirm-title">
+          {name}
+        </h2>
+        {body}
+      </div>
+    </dialog>
   )
 }

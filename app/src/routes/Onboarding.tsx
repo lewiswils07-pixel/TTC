@@ -409,7 +409,7 @@ function PhotoStep({ userId, data, onDone, onBack }: StepProps) {
             </div>
           )}
           <div className="photo-actions">
-            <label className="btn btn-secondary" htmlFor="photo">
+            <label className={preview ? 'btn btn-secondary' : 'btn btn-primary'} htmlFor="photo">
               {preview ? 'Change photo' : 'Choose a photo'}
             </label>
             <input id="photo" className="visually-hidden" type="file" accept="image/*" onChange={(e) => pick(e.target.files?.[0])} />
@@ -435,7 +435,7 @@ function PhotoStep({ userId, data, onDone, onBack }: StepProps) {
         </Field>
       </div>
       <SaveError error={error} />
-      <ActionBar busy={busy || preparing} onBack={onBack} label={photo || p.photo_path ? 'Continue' : 'Skip photo for now'} />
+      <ActionBar busy={busy || preparing} onBack={onBack} label={photo || p.photo_path ? 'Continue' : 'Skip photo for now'} quiet={!photo && !p.photo_path} />
     </form>
   )
 }

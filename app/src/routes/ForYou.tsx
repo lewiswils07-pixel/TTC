@@ -22,7 +22,6 @@ import { peek, remember } from '../lib/cache'
 import {
   clearNotNow,
   forgetNotNow,
-  groupByTrip,
   loadFeed,
   nearYou,
   NOT_NOW_DAYS,
@@ -31,7 +30,6 @@ import {
   skipMember,
   skippedCount,
   sameTime,
-  tripTo,
   unskipAll,
   unskipMember,
   whatYouShare,
@@ -155,21 +153,21 @@ export function ForYou() {
       .then(setPeople, (e) => setError(messageOf(e)))
   }
 
-  const { trips } = groupByTrip(people ?? [])
+  // Trips are named by your own trip, so someone in nearby Cascais shows under your Lisbon, and every trip of yours has a chip (Ellie, 13 Oct).
+  const placeOf = (t: FeedPerson['trips'][number]) => myTrips.find((m) => m.id === t.mine)?.city.name ?? t.city
+  const going = (city: string) => (people ?? []).filter((p) => p.trips.some((t) => placeOf(t) === city))
+  const places = [...new Set([...myTrips.map((t) => t.city.name), ...(people ?? []).flatMap((p) => p.trips.map(placeOf))])]
+  const trips = places.map((city) => ({ city, people: going(city) })).filter((g) => g.people.length || myTrips.some((t) => t.city.name === g.city))
   const myHome = data.profile.home_city?.name ?? null
   // Show the people straight away when a trip is tapped (testers, 13 Oct: the card was off screen).
   function pickTrip(city: string | null) {
     setOnly(city)
     if (city) requestAnimationFrame(() => deckRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
-  const deck = (only ? trips.find((g) => g.city === only)?.people : people) ?? []
+  const deck = (only ? going(only) : people) ?? []
   const person = deck[0]
-  const cityOf = (p: FeedPerson) => only ?? (sameTime(p) ?? p.trips[0])?.city
-  /** Your own trip's place for the trip they're shown under. */
-  const myCityFor = (p: FeedPerson) => {
-    const t = tripTo(p, cityOf(p) ?? '')
-    return myTrips.find((m) => m.id === t?.mine)?.city.name
-  }
+  /** The trip they're shown under: the tapped one, or their best one with you. */
+  const tripFor = (p: FeedPerson) => (only ? p.trips.find((t) => placeOf(t) === only) : (sameTime(p) ?? p.trips[0]))
 
   return (
     <Layout tab="connections">
@@ -234,7 +232,8 @@ export function ForYou() {
                         <span className="going-trip-text">
                           <strong>{g.city}</strong>
                           <span>
-                            {g.people.length} going · {mine ? shortDates(mine.start_date, mine.end_date) : monthName(tripTo(g.people[0], g.city)!.start)}
+                            {g.people.length ? `${g.people.length} going` : 'No one yet'} ·{' '}
+                            {mine ? shortDates(mine.start_date, mine.end_date) : monthName(g.people[0].trips.find((t) => placeOf(t) === g.city)!.start)}
                           </span>
                         </span>
                       </button>
@@ -245,7 +244,7 @@ export function ForYou() {
             </section>
           )}
 
-          {showGuide && <FirstDayGuide hasTrip={myTrips.length > 0} read={!!firstDay.read} sent={!!firstDay.sent || requests.left < requests.limit} onHide={() => tick({ hidden: true })} />}
+          {showGuide && !(myTrips.length > 0 && firstDay.read && (firstDay.sent || requests.left < requests.limit)) && <FirstDayGuide hasTrip={myTrips.length > 0} read={!!firstDay.read} sent={!!firstDay.sent || requests.left < requests.limit} onHide={() => tick({ hidden: true })} />}
 
           {myTrips.length === 0 && !showGuide && (
             <Link className="going-add-trip" to="/trips/new">
@@ -269,8 +268,11 @@ export function ForYou() {
                 <PersonCard
                   key={person.profile_id}
                   person={person}
-                  city={cityOf(person)}
-                  myCity={myCityFor(person)}
+                  trip={tripFor(person)}
+                  myCity={(() => {
+                    const t = tripFor(person)
+                    return t && placeOf(t)
+                  })()}
                   myHome={myHome}
                   hasPhoto={!!data.profile.photo_path}
                   requests={requests}
@@ -343,7 +345,7 @@ export function ForYou() {
  *  Read more opens the rest in place; the flip shows their card answers; ⋯ holds block and report (testers, 13 Oct). */
 function PersonCard({
   person,
-  city,
+  trip,
   myCity,
   myHome,
   requests,
@@ -355,9 +357,9 @@ function PersonCard({
 }: {
   person: FeedPerson
   hasPhoto: boolean
-  /** The trip you're both going on, if any. */
-  city?: string
-  /** Your own trip's place, when theirs is somewhere near it. */
+  /** Their trip near one of yours, if any. */
+  trip?: FeedPerson['trips'][number]
+  /** Your own trip's place for that trip (theirs may be somewhere near it). */
   myCity?: string
   myHome: string | null
   requests: Requests
@@ -372,7 +374,6 @@ function PersonCard({
   const [flipped, setFlipped] = useState(false)
   const [back, setBack] = useState<CardAnswer[] | 'error' | null>(null)
   const photo = usePhotoUrl(person.photo_path)
-  const trip = city ? tripTo(person, city) : undefined
   const share = whatYouShare(person, trip, undefined, myCity)
   const home = homeLabel(person)
   const id = `person-${person.profile_id}`
@@ -400,11 +401,11 @@ function PersonCard({
       <div className={flipped ? 'feed-flip going-flip is-flipped' : 'feed-flip going-flip'}>
         <div className="feed-flip-inner">
           <div className="feed-face going-front" inert={flipped}>
-            <div className="going-photo">
+            <div className={photo ? 'going-photo' : 'going-photo is-empty'} style={photo ? undefined : { ['--hue' as string]: hueOf(person.display_name) }}>
               {photo ? (
                 <img src={photo} alt="" />
               ) : (
-                <span className="feed-initial" aria-hidden="true">
+                <span className="going-initial" aria-hidden="true">
                   {person.display_name.slice(0, 1).toUpperCase()}
                 </span>
               )}
@@ -545,4 +546,11 @@ function PersonMore({ person, id }: { person: FeedPerson; id: string }) {
       )}
     </div>
   )
+}
+
+/** A steady colour per name for people without a photo (testers, 13 Oct: every empty card was the same maroon block). */
+function hueOf(name: string) {
+  let h = 0
+  for (const c of name) h = (h * 31 + c.charCodeAt(0)) % 360
+  return h
 }

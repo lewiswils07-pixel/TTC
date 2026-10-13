@@ -108,7 +108,7 @@ export function GroupDetail() {
   const chat = joined && group.conversation_id ? `/messages/${group.conversation_id}` : null
 
   return (
-    <Layout>
+    <Layout tab="chat">
       {confirmDialog}
       <Link className="back-link" to={chat ?? '/groups'}>
         <BackIcon />
