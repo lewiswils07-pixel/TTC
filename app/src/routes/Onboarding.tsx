@@ -334,7 +334,7 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
       </div>
       <section className="card form-card" aria-labelledby="meet-heading">
         <h2 id="meet-heading" className="card-title">
-          Who you’d like to meet
+          Who you’d like to travel with
         </h2>
         <InterestedIn
           value={genders}

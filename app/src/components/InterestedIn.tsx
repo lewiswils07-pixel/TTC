@@ -2,8 +2,8 @@ import { useId } from 'react'
 import { INTERESTED_IN, type Gender } from '../lib/options'
 import { FieldError } from './Field'
 
-/** "I’m interested in" as Hinge does it: one row each, plus Everyone (Lewis, 11 Oct). */
-export function InterestedIn({ value, onChange, error, legend = 'I’m interested in' }: { value: readonly Gender[]; onChange: (next: Gender[]) => void; error?: string | null; legend?: string }) {
+/** "I’d like to travel with" (was "I’m interested in", testers 13 Oct: too dating-like): one row each, plus Everyone (Lewis, 11 Oct). */
+export function InterestedIn({ value, onChange, error, legend = 'I’d like to travel with' }: { value: readonly Gender[]; onChange: (next: Gender[]) => void; error?: string | null; legend?: string }) {
   const id = useId()
   const all = INTERESTED_IN.map((o) => o.value as Gender)
   const everyone = all.every((g) => value.includes(g))

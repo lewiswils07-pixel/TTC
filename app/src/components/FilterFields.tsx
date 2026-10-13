@@ -35,9 +35,9 @@ export function FilterFields({ value: f, onChange, plus }: { value: Filters; onC
       <h3 className="filter-group">Member preferences</h3>
       {row(
         'genders',
-        'I’m interested in',
+        'I’d like to travel with',
         interestedInText(f.genders),
-        <InterestedIn legend="I’m interested in" value={f.genders} onChange={(genders) => set({ genders })} error={errors.genders} />,
+        <InterestedIn legend="I’d like to travel with" value={f.genders} onChange={(genders) => set({ genders })} error={errors.genders} />,
         errors.genders,
       )}
       {row(

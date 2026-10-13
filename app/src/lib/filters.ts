@@ -40,7 +40,7 @@ export async function saveMeetPreferences(userId: string, prefs: Pick<Filters, '
   if (error) throw friendlyError(error)
 }
 
-/** What the "I’m interested in" row says when closed. */
+/** What the "I’d like to travel with" row says when closed. */
 export function interestedInText(genders: readonly string[]): string {
   if (INTERESTED_IN.every((o) => genders.includes(o.value))) return 'Everyone'
   return (

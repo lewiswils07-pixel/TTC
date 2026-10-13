@@ -701,6 +701,21 @@ html:has(.has-tabs) { scroll-padding: calc(var(--safe-top) + 76px) 0 calc(var(--
 }
 .feed-toast .btn-link { color: var(--brand-gold); }
 .feed-empty h2 { margin: 0; }
+/* Branded moments (testers, 13 Oct): the next person slides in, a sent request gets a gold tick, and empty screens carry the S. */
+.going-person { animation: card-in 0.32s var(--ease-out); }
+@keyframes card-in { from { opacity: 0; transform: translateY(14px) scale(0.985); } }
+.feed-toast { animation: card-in 0.24s var(--ease-out); }
+.feed-toast > span:first-child { display: inline-flex; align-items: center; gap: var(--space-3); }
+.feed-toast > span:first-child::before {
+  content: '✓'; flex: none; display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--brand-gold); color: var(--brand-disc); font-weight: 800; font-size: 0.875rem;
+}
+.card.empty::before {
+  content: 'S'; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  background: var(--brand-disc); color: var(--brand-gold); font-weight: 800; font-size: 1.5rem; line-height: 1;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--brand-gold) 55%, transparent);
+}
+@media (prefers-reduced-motion: reduce) { .going-person, .feed-toast { animation: none; } }
 .feed-tips { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: var(--space-2); }
 
 /* Profile tab: settings links */

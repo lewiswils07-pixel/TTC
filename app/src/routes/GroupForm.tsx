@@ -137,7 +137,7 @@ function GroupEditor({ people }: { people: Connection[] }) {
         <h1 ref={heading} tabIndex={-1}>
           Start a group
         </h1>
-        <p className="lede">Invite as many people you’re connected with as you like. Everyone you invite chooses whether to join.</p>
+        <p className="lede">A group can have up to {rules.groups.maxPeople} people, you included. Invite people you’re connected with, and each of them chooses whether to join.</p>
 
         <div className="card form-card">
           <Segmented
@@ -210,7 +210,7 @@ function GroupEditor({ people }: { people: Connection[] }) {
           <fieldset className="field" data-field="invite" aria-describedby={shown('invite') ? 'invite-error' : 'invite-hint'}>
             <legend>Who to invite</legend>
             <p className="hint" id="invite-hint">
-              {people.length ? `${invite.length} chosen.` : 'Only people you’re connected with can be invited.'}
+              {people.length ? `${invite.length} chosen, up to ${rules.groups.maxPeople - 1}.` : 'Only people you’re connected with can be invited.'}
             </p>
             {people.length === 0 ? (
               <Link to="/connections">Find people to travel with</Link>
