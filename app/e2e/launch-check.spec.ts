@@ -3,7 +3,7 @@
 // fits a small phone (320 px wide) and a laptop without sideways scrolling.
 import { createRequire } from 'node:module'
 import { expect, test, type Page } from '@playwright/test'
-import { admin, closeGuide, idOf, isoIn, newPhone, pickPlace, signIn, fillCard, choose } from './helpers'
+import { admin, closeGuide, idOf, isoIn, newPhone, pickPlace, signIn, finishSignUp, choose } from './helpers'
 
 const require = createRequire(import.meta.url)
 const AXE = require.resolve('axe-core/axe.min.js')
@@ -82,12 +82,12 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await choose(page, 'Gender', 'Woman')
   await pickPlace(page, 'Leed', 'Leeds, United Kingdom')
   await page.getByRole('button', { name: /continue/i }).click()
-  await expect(page.getByText(/Step 2 of 4/)).toBeVisible()
+  await expect(page.getByText(/Step 2 of 3/)).toBeVisible()
   issues.push(...(await problems(page, '/onboarding step 2')))
   await page.locator('#photo').setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: Buffer.from(TINY_PNG, 'base64') })
   await expect(page.getByRole('img', { name: 'Your profile photo' })).toBeVisible()
   await page.getByRole('button', { name: /continue|skip/i }).click()
-  await expect(page.getByText(/Step 3 of 4/)).toBeVisible()
+  await expect(page.getByText(/Step 3 of 3/)).toBeVisible()
   issues.push(...(await problems(page, '/onboarding step 3')))
   for (const name of ['Museums', 'Wine', 'Walking', 'Photography', 'Theatre', 'Local cuisine', 'Gardens', 'Architecture']) {
     await page.getByRole('checkbox', { name, exact: true }).evaluate((el: HTMLElement) => el.click())
@@ -98,13 +98,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await expect(page.getByRole('alert').filter({ hasText: 'You’ve already picked 8' })).toBeVisible()
   await expect(page.getByRole('checkbox', { name: 'Art galleries', exact: true })).not.toBeChecked()
   issues.push(...(await problems(page, '/onboarding step 3 (at the limit)')))
-  await page.getByRole('button', { name: 'Continue' }).click()
-  await expect(page.getByText(/Step 4 of 4/)).toBeVisible()
-  issues.push(...(await problems(page, '/onboarding step 4')))
-  await page.getByRole('button', { name: 'Choose a question' }).first().click()
-  issues.push(...(await problems(page, '/onboarding step 4 (question list open)')))
-  await page.keyboard.press('Escape')
-  await fillCard(page)
+  await finishSignUp(page)
   await expect(page.getByRole('heading', { name: 'Welcome to the Collective' })).toBeVisible()
   issues.push(...(await problems(page, '/welcome')))
 

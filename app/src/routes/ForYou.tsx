@@ -7,6 +7,7 @@ import { ProfileExtras } from '../components/ProfileExtras'
 import { SafetyBox } from '../components/SafetyBox'
 import { SkeletonRows } from '../components/Skeleton'
 import { Tour } from '../components/Tour'
+import { FirstDayGuide } from '../components/FirstDayGuide'
 import { FilterButton } from '../components/FilterBar'
 import { PopularGroups } from '../components/PopularGroups'
 import { ConnectBox, SharedInterests, useRequests, type Requests } from '../components/Suggestions'
@@ -34,6 +35,7 @@ import {
   whatYouShare,
   type FeedPerson,
 } from '../lib/feed'
+import { isNewMember, loadFirstDay, saveFirstDay } from '../lib/firstDay'
 import { groupsICanStart } from '../lib/groups'
 import { noteFirstMatch } from '../lib/kpis'
 import { requestsLeftText } from '../lib/plan'
@@ -70,6 +72,8 @@ export function ForYou() {
   const heading = useRef<HTMLHeadingElement>(null)
   const [params, setParams] = useSearchParams()
   const touring = params.get('tour') === '1'
+  const [firstDay, setFirstDay] = useState(() => loadFirstDay(me))
+  const tick = (change: Parameters<typeof saveFirstDay>[1]) => setFirstDay(saveFirstDay(me, change))
 
   useEffect(() => {
     heading.current?.focus()
@@ -108,6 +112,8 @@ export function ForYou() {
     setPeople((list) => list && list.filter((x) => x.profile_id !== p.profile_id))
     setStatus({ text, undo })
   }
+
+  const showGuide = isNewMember(data.profile.onboarded_at) && !firstDay.hidden
 
   function notNow(p: FeedPerson) {
     saveNotNow(me, p.profile_id)
@@ -184,6 +190,9 @@ export function ForYou() {
         <p className="notice notice-error" role="alert">
           {error}
         </p>
+      )}
+      {showGuide && people && requests && (
+        <FirstDayGuide hasTrip={myTrips.length > 0} read={!!firstDay.read} sent={!!firstDay.sent || requests.left < requests.limit} onHide={() => tick({ hidden: true })} />
       )}
       {!error && (!people || !requests) && <SkeletonRows rows={3} label="Finding who’s going…" />}
 
@@ -267,14 +276,16 @@ export function ForYou() {
                   hasPhoto={!!data.profile.photo_path}
                   requests={requests}
                   onNotNow={() => notNow(person)}
-                  onSent={(connected) =>
+                  onRead={() => !firstDay.read && tick({ read: true })}
+                  onSent={(connected) => {
+                    tick({ sent: true })
                     gone(
                       person,
                       connected
                         ? `${person.display_name} had already asked to connect with you, so you’re now connected. Say hello in Chat.`
                         : `Request sent to ${person.display_name}. We’ll let you know when they reply.`,
                     )
-                  }
+                  }}
                   onBlocked={(message) => gone(person, message)}
                 />
               </div>
@@ -334,6 +345,7 @@ function PersonCard({
   myHome,
   requests,
   onNotNow,
+  onRead,
   onSent,
   onBlocked,
   hasPhoto,
@@ -345,6 +357,8 @@ function PersonCard({
   myHome: string | null
   requests: Requests
   onNotNow: () => void
+  /** They opened the card or turned it over (for the first-day guide). */
+  onRead: () => void
   onSent: (connected: boolean) => void
   onBlocked: (message: string) => void
 }) {
@@ -363,6 +377,7 @@ function PersonCard({
   // The back of the card: the three questions they chose to answer (Lewis, 12 Oct: keep the flip).
   function flip() {
     setFlipped((f) => !f)
+    onRead()
     if (back === null || back === 'error') {
       loadCard(person.profile_id).then(
         (c) => setBack(c.card_answers),
@@ -376,7 +391,16 @@ function PersonCard({
       <div className={flipped ? 'feed-flip going-flip is-flipped' : 'feed-flip going-flip'}>
         <div className="feed-flip-inner">
           <div className="feed-face going-front" inert={flipped}>
-            <button type="button" className="going-who" aria-expanded={open} aria-controls={`${id}-more`} onClick={() => setOpen((o) => !o)}>
+            <button
+              type="button"
+              className="going-who"
+              aria-expanded={open}
+              aria-controls={`${id}-more`}
+              onClick={() => {
+                setOpen((o) => !o)
+                onRead()
+              }}
+            >
               <Avatar name={person.display_name} path={person.photo_path} size={open ? 'lg' : 'md'} />
               <span className="going-name">
                 <strong id={id}>

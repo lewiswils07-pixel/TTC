@@ -378,25 +378,34 @@ function PlusPanel() {
   )
 }
 
-/** A bar showing how complete the profile is, with the next thing to add. Hidden once it's complete. */
+/** "Finish your profile": a bar and the full list, ticked as each part is done. Sign-up asks only
+ *  the basics, so the rest lives here (testers, 13 Oct). Hidden once it's complete. */
 function Strength({ profile, interestCount, hasTrip, card }: { profile: Profile; interestCount: number; hasTrip: boolean; card: Card | null }) {
   const { percent, parts } = profileStrength(profile, interestCount, hasTrip, card)
-  const next = parts.filter((p) => !p.done)
-  if (!next.length) return null
+  const left = parts.filter((p) => !p.done).length
+  if (!left) return null
   return (
     <section className="card strength" aria-labelledby="strength-heading">
       <div className="strength-head">
-        <h2 id="strength-heading">Profile strength</h2>
+        <h2 id="strength-heading">Finish your profile</h2>
         <span className="strength-value">{percent}%</span>
       </div>
       <div className="strength-bar" role="progressbar" aria-labelledby="strength-heading" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
         <div style={{ width: `${percent}%` }} />
       </div>
-      <p className="hint">Complete profiles get more suggestions, and more people accept their requests. Next:</p>
-      <ul className="strength-next">
-        {next.slice(0, 2).map((p) => (
-          <li key={p.label}>
-            <Link to={p.to}>{p.label}</Link>
+      <p className="hint">Complete profiles get more suggestions, and more people say yes. {left === 1 ? 'One thing left.' : `${left} things left.`}</p>
+      <ul className="check-list">
+        {parts.map((p) => (
+          <li key={p.label} className={p.done ? 'is-done' : undefined}>
+            <span className="check-mark" aria-hidden="true" />
+            {p.done ? (
+              <span>
+                {p.label}
+                <span className="visually-hidden"> (done)</span>
+              </span>
+            ) : (
+              <Link to={p.to}>{p.label}</Link>
+            )}
           </li>
         ))}
       </ul>

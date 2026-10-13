@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { CityTips } from '../components/CityTips'
 import { DateOverlap } from '../components/DateOverlap'
+import { ShareTrip } from '../components/ShareTrip'
 import { TripPlanner } from '../components/TripPlanner'
 import { picksFor } from '../data/picks'
 import { cityLabel } from '../lib/cities'
@@ -75,9 +76,12 @@ export function TripMatches() {
           {tripDates(trip.start_date, trip.end_date)}
           {trip.visibility === 'hidden' && ' · Hidden from suggestions'}
         </p>
-        <Link className="btn btn-secondary btn-small" to={`/trips/${trip.id}/edit`}>
-          Edit trip
-        </Link>
+        <div className="action-row trip-actions">
+          <ShareTrip city={trip.city.name} start={trip.start_date} />
+          <Link className="btn btn-secondary btn-small" to={`/trips/${trip.id}/edit`}>
+            Edit trip
+          </Link>
+        </div>
       </div>
 
       <div className="hub-tabs trip-tabs" role="tablist" aria-label="Your trip">

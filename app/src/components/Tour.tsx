@@ -28,7 +28,7 @@ const STEPS: { icon: string; title: string; text: string }[] = [
   },
 ]
 
-/** A short tour of the app, shown after sign-up and from Profile. */
+/** A short tour of the app, from Profile and Settings. After sign-up, the first-day guide on Who’s going does this job. */
 export function Tour({ onClose }: { onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null)
   const [i, setI] = useState(0)
