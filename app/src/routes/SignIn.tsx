@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router'
-import { Layout, Loading } from '../components/Layout'
-import { TextField } from '../components/Field'
+import { Layout, Loading, Monogram } from '../components/Layout'
+import { BackIcon } from '../components/Icons'
+import { Check, Lock } from 'lucide-react'
+import { FieldError, TextField } from '../components/Field'
 import { PasswordField } from '../components/PasswordField'
 import { CODE_LENGTH, hasPassword, MIN_PASSWORD, needsPasswordChoice, ReauthNeeded, sendCode, setPassword, signInWithPassword, skipPassword, verifyCode } from '../lib/auth'
 import { messageOf } from '../lib/errors'
@@ -41,7 +43,8 @@ export function SignIn() {
   const location = useLocation()
   const from = (location.state as { from?: string } | null)?.from ?? '/connections'
 
-  const [mode, setMode] = useState<Mode>(() => (signedInBefore() ? 'signin' : 'join'))
+  // The welcome screen's Join and Sign in buttons choose the start; otherwise returning members see Sign in first.
+  const [mode, setMode] = useState<Mode>(() => (location.search.includes('join') ? 'join' : location.search.includes('signin') || signedInBefore() ? 'signin' : 'join'))
   const [stage, setStage] = useState<Stage>('start')
   // Signed in but never chose a password (or said Not now), e.g. after a refresh on that screen: ask now.
   const choosing = stage === 'password' || (!!session && needsPasswordChoice(session.user))
@@ -78,6 +81,13 @@ export function SignIn() {
   if (loading) return <Loading />
   // Already signed in: carry on, unless they're choosing a password straight after their code.
   if (session && !choosing && !busy) return <Navigate to={from} replace />
+
+  function switchMode(m: Mode) {
+    setMode(m)
+    setReason('join')
+    setError(null)
+    reset()
+  }
 
   function go(next: Stage) {
     setStage(next)
@@ -193,62 +203,53 @@ export function SignIn() {
     />
   )
 
+  const top = (label: string, onBack: () => void) => (
+    <div className="step-top">
+      <button type="button" className="icon-btn" onClick={onBack} aria-label="Back">
+        <BackIcon />
+      </button>
+      <p className="step-label">{label}</p>
+      <Monogram size={34} />
+    </div>
+  )
+  const joining = mode === 'join' && reason === 'join'
+
   return (
-    <Layout>
+    <Layout bare>
       <div className="auth">
-        {stage === 'start' && (
-          <form className="card form-card" onSubmit={submitStart} noValidate>
-            <div className="subnav" role="group" aria-label="Join or sign in">
-              {(['join', 'signin'] as const).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  className={`subnav-item btn-plain${mode === m ? ' is-current' : ''}`}
-                  aria-pressed={mode === m}
-                  onClick={() => {
-                    setMode(m)
-                    setError(null)
-                    reset()
-                  }}
-                >
-                  {m === 'join' ? 'Join' : 'Sign in'}
-                </button>
-              ))}
-            </div>
+        {stage === 'start' && !choosing && (
+          <form className="auth-form" onSubmit={submitStart} noValidate>
+            {top(mode === 'join' ? `Join · 1 of 3` : 'Sign in', () => navigate('/'))}
             <h1 ref={heading} tabIndex={-1}>
-              {mode === 'join' ? 'Join the Collective' : 'Welcome back'}
+              {mode === 'join' ? 'What’s your email?' : 'Welcome back'}
             </h1>
-            {mode === 'join' ? (
-              <p className="lede">Enter your email and we’ll send you a {CODE_LENGTH}-digit code to check it’s you. Then you’ll choose a password.</p>
-            ) : (
-              <p className="lede">Sign in with your email and password. You’ll stay signed in on this device until you sign out.</p>
-            )}
+            <p className="lede">{mode === 'join' ? `We’ll send you a ${CODE_LENGTH}-digit code to check it’s you.` : 'Sign in to see who’s going your way.'}</p>
             {emailField}
-            {mode === 'signin' && (
-              <PasswordField
-                name="password"
-                label="Password"
-                autoComplete="current-password"
-                value={password}
-                error={shown('password') ?? error}
-                onChange={(e) => {
-                  setPasswordValue(e.target.value)
-                  setError(null)
-                }}
-              />
+            {mode === 'join' && (
+              <p className="auth-private">
+                <Lock size={18} strokeWidth={1.8} aria-hidden="true" />
+                Never shown to other members.
+              </p>
             )}
-            <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
-              {busy ? (mode === 'join' ? 'Sending…' : 'Signing in…') : mode === 'join' ? 'Send my code' : 'Sign in'}
-            </button>
             {mode === 'signin' && (
               <>
-                <p className="auth-or">or</p>
-                <div className="auth-links">
-                  <button type="button" className="btn-link" disabled={busy} onClick={() => requestCode('forgot')}>
-                    Forgotten your password?
-                  </button>
+                <PasswordField
+                  name="password"
+                  label="Password"
+                  autoComplete="current-password"
+                  value={password}
+                  error={shown('password') ?? error}
+                  onChange={(e) => {
+                    setPasswordValue(e.target.value)
+                    setError(null)
+                  }}
+                />
+                <div className="auth-links auth-links-end">
                   <button type="button" className="btn-link" disabled={busy} onClick={() => requestCode('code')}>
                     Email me a code instead
+                  </button>
+                  <button type="button" className="btn-link" disabled={busy} onClick={() => requestCode('forgot')}>
+                    Forgotten password?
                   </button>
                 </div>
               </>
@@ -258,67 +259,101 @@ export function SignIn() {
                 <strong>{brand.name} is for travel friendships.</strong> No romantic approaches, ever. Joining means you agree to keep it that way.
               </p>
             )}
-            <p className="hint center legal-line">
-              By continuing you agree to our <Link to="/terms">terms</Link>, <Link to="/privacy">privacy notice</Link> and{' '}
-              <Link to="/community-rules">community rules</Link>.
-            </p>
+            <div className="auth-foot">
+              <button className="btn btn-primary btn-block btn-lg" type="submit" disabled={busy}>
+                {busy ? (mode === 'join' ? 'Sending…' : 'Signing in…') : mode === 'join' ? 'Send my code' : 'Sign in'}
+              </button>
+              <p className="auth-switch">
+                {mode === 'join' ? 'Already a member?' : 'New here?'}{' '}
+                <button type="button" className="btn-link" onClick={() => switchMode(mode === 'join' ? 'signin' : 'join')}>
+                  {mode === 'join' ? 'Sign in' : 'Join, it’s free'}
+                </button>
+              </p>
+              <p className="hint center legal-line">
+                By continuing you agree to our <Link to="/terms">terms</Link>, <Link to="/privacy">privacy notice</Link> and{' '}
+                <Link to="/community-rules">community rules</Link>.
+              </p>
+            </div>
           </form>
         )}
 
-        {stage === 'code' && (
-          <form className="card form-card" onSubmit={submitCode} noValidate>
+        {stage === 'code' && !choosing && (
+          <form className="auth-form" onSubmit={submitCode} noValidate>
+            {top(joining ? 'Join · 2 of 3' : 'Sign in', () => go('start'))}
             <h1 ref={heading} tabIndex={-1}>
               Check your email
             </h1>
             <p className="lede">
-              We’ve sent a {CODE_LENGTH}-digit code to <strong>{email.trim()}</strong>. It can take a minute to arrive, and it’s worth checking your spam
-              folder.
+              We’ve sent a {CODE_LENGTH}-digit code to <strong>{email.trim()}</strong>
             </p>
-            <TextField
-              name="code"
-              label="Your code"
-              className="input input-code"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              pattern="[0-9]*"
-              maxLength={CODE_LENGTH + 2}
-              value={code}
-              error={shown('code') ?? error}
-              onChange={(e) => {
-                const v = e.target.value
-                setCode(v)
-                setError(null)
-                const digits = v.replace(/\D/g, '')
-                if (digits.length === CODE_LENGTH && !/[^\d\s]/.test(v)) void verify(digits)
-                else if (digits.length > CODE_LENGTH || /[^\d\s]/.test(v)) touch('code')
-              }}
-              onBlur={() => code && touch('code')}
-            />
-            <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
-              {busy ? 'Checking…' : 'Continue'}
-            </button>
+            <div className="field code-field">
+              <label htmlFor="code">Your code</label>
+              <div className="code-boxes">
+                <input
+                  id="code"
+                  name="code"
+                  className="code-input"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  pattern="[0-9]*"
+                  maxLength={CODE_LENGTH + 2}
+                  value={code}
+                  aria-invalid={shown('code') ?? error ? true : undefined}
+                  aria-describedby="code-hint code-error"
+                  onChange={(e) => {
+                    const v = e.target.value
+                    setCode(v)
+                    setError(null)
+                    const digits = v.replace(/\D/g, '')
+                    if (digits.length === CODE_LENGTH && !/[^\d\s]/.test(v)) void verify(digits)
+                    else if (digits.length > CODE_LENGTH || /[^\d\s]/.test(v)) touch('code')
+                  }}
+                  onBlur={() => code && touch('code')}
+                />
+                {Array.from({ length: CODE_LENGTH }, (_, i) => {
+                  const digits = code.replace(/\D/g, '')
+                  return (
+                    <span key={i} className={i === Math.min(digits.length, CODE_LENGTH - 1) ? 'code-box is-next' : 'code-box'} aria-hidden="true">
+                      {digits[i] ?? ''}
+                    </span>
+                  )
+                })}
+              </div>
+              <p className="hint" id="code-hint">
+                It can take a minute to arrive. Check your junk folder too.
+              </p>
+              <span id="code-error">
+                <FieldError error={shown('code') ?? error} />
+              </span>
+            </div>
             <div className="auth-links">
               <button type="button" className="btn-link" disabled={busy || wait > 0} onClick={() => requestCode(reason)}>
-                {wait > 0 ? `Send a new code in ${wait} seconds` : 'Send a new code'}
+                {wait > 0 ? `Send a new code in ${wait}s` : 'Send a new code'}
               </button>
+              <span className="auth-links-sep" aria-hidden="true" />
               <button type="button" className="btn-link" onClick={() => go('start')}>
-                Use a different email
+                Change email
+              </button>
+            </div>
+            <div className="auth-foot">
+              <button className="btn btn-primary btn-block btn-lg" type="submit" disabled={busy}>
+                {busy ? 'Checking…' : 'Continue'}
               </button>
             </div>
           </form>
         )}
 
         {choosing && (
-          <form className="card form-card" onSubmit={savePassword} noValidate>
+          <form className="auth-form" onSubmit={savePassword} noValidate>
+            {top(joining ? 'Join · 3 of 3' : reason === 'forgot' ? 'New password' : 'Your password', notNow)}
             <h1 ref={heading} tabIndex={-1}>
               {reason === 'forgot' ? 'Choose a new password' : 'Choose a password'}
             </h1>
-            <p className="lede">Next time, sign in with your email and this password. You’ll stay signed in on this device until you sign out.</p>
+            <p className="lede">You’ll only need it if you sign in on a new phone.</p>
             <input type="email" name="username" autoComplete="username" value={email.trim()} readOnly hidden />
             <PasswordField
               name="newPassword"
               label="Password"
-              hint={`At least ${MIN_PASSWORD} characters. A short phrase is easy to remember and hard to guess.`}
               autoComplete="new-password"
               value={newPassword}
               error={shown('newPassword') ?? error}
@@ -329,6 +364,11 @@ export function SignIn() {
               }}
               onBlur={() => newPassword && touch('newPassword')}
             />
+            <p className={newPassword.length >= MIN_PASSWORD ? 'pw-rule is-met' : 'pw-rule'} aria-live="polite">
+              <Check size={20} strokeWidth={2.4} aria-hidden="true" />
+              At least {MIN_PASSWORD} characters
+              <span className="visually-hidden">{newPassword.length >= MIN_PASSWORD ? ' (done)' : ''}</span>
+            </p>
             {reauth !== null && (
               <TextField
                 name="reauth"
@@ -347,11 +387,12 @@ export function SignIn() {
                 onBlur={() => reauth && touch('reauth')}
               />
             )}
-            <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
-              {busy ? 'Saving…' : 'Save password'}
-            </button>
-            <div className="auth-links">
-              <button type="button" className="btn-link" disabled={busy} onClick={notNow}>
+            <div className="auth-foot">
+              <p className="hint center">Once you’re in, you stay signed in.</p>
+              <button className="btn btn-primary btn-block btn-lg" type="submit" disabled={busy}>
+                {busy ? 'Saving…' : reason === 'forgot' ? 'Save password' : 'Create my account'}
+              </button>
+              <button type="button" className="btn-link auth-quiet" disabled={busy} onClick={notNow}>
                 Not now, I’ll use emailed codes
               </button>
             </div>

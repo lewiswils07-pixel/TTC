@@ -57,7 +57,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
 
   // Signed out
   await visit(page, '/', /./, issues)
-  await visit(page, '/sign-in', 'Join the Collective', issues)
+  await visit(page, '/sign-in', 'What’s your email?', issues)
   await visit(page, '/meeting-safely', 'Meeting up safely', issues)
   await visit(page, '/help', /Help/, issues)
   for (const [path, title] of [
@@ -81,14 +81,12 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await page.getByLabel('Year').fill('1962')
   await page.getByRole('radio', { name: 'Woman', exact: true }).check({ force: true })
   await pickPlace(page, 'Leed', 'Leeds, West Yorkshire')
+  await page.locator('#photo').setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: Buffer.from(TINY_PNG, 'base64') })
+  await expect(page.getByRole('img', { name: 'Your profile photo' })).toBeVisible()
+  await page.getByLabel(/A few words about you/).fill('Retired teacher who loves a coastal walk.')
   await page.getByRole('button', { name: /continue/i }).click()
   await expect(page.getByText(/Step 2 of 3/)).toBeVisible()
   issues.push(...(await problems(page, '/onboarding step 2')))
-  await page.locator('#photo').setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: Buffer.from(TINY_PNG, 'base64') })
-  await expect(page.getByRole('img', { name: 'Your profile photo' })).toBeVisible()
-  await page.getByRole('button', { name: /continue|skip/i }).click()
-  await expect(page.getByText(/Step 3 of 3/)).toBeVisible()
-  issues.push(...(await problems(page, '/onboarding step 3')))
   for (const name of ['Museums', 'Wine', 'Walking', 'Photography', 'Theatre', 'Local cuisine', 'Gardens', 'Architecture']) {
     await page.getByRole('checkbox', { name, exact: true }).evaluate((el: HTMLElement) => el.click())
   }
@@ -97,9 +95,16 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await page.getByRole('checkbox', { name: 'Art galleries', exact: true }).evaluate((el: HTMLElement) => el.click())
   await expect(page.getByRole('alert').filter({ hasText: 'You’ve already picked 8' })).toBeVisible()
   await expect(page.getByRole('checkbox', { name: 'Art galleries', exact: true })).not.toBeChecked()
-  issues.push(...(await problems(page, '/onboarding step 3 (at the limit)')))
+  issues.push(...(await problems(page, '/onboarding step 2 (at the limit)')))
+  await page.getByRole('checkbox', { name: 'Comfort', exact: true }).evaluate((el: HTMLElement) => el.click())
+  await page.getByRole('button', { name: /continue/i }).click()
+  await expect(page.getByText(/Step 3 of 3/)).toBeVisible()
+  issues.push(...(await problems(page, '/onboarding step 3')))
+  await pickPlace(page, 'Lisb', /Lisbon/)
+  await expect(page.getByRole('button', { name: /Remove Lisbon/ })).toBeVisible()
+  await page.getByLabel('Describe your perfect holiday').fill('An early walk, a long lunch somewhere local, and a nap.')
   await finishSignUp(page)
-  await expect(page.getByRole('heading', { name: 'Welcome to the Collective' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /^You’re in/ })).toBeVisible()
   issues.push(...(await problems(page, '/welcome')))
 
   // Someone she's connected with, and someone waiting for an answer
@@ -140,10 +145,13 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
     .first()
     .getByRole('button', { name: /^Read more/ })
     .click()
-  await expect(page.locator('.going-details').first()).toBeVisible()
-  issues.push(...(await problems(page, '/connections (read more)')))
-  // Their card answers sit in Read more now (Claude Design, 15 Oct).
+  // Read more is their full card on its own page, with the answers in their words (Claude Design, 15 Oct).
+  await expect(page.locator('.person-page')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'In their words' })).toBeVisible()
+  await page.waitForLoadState('networkidle')
+  issues.push(...(await problems(page, '/connections?person (read more)')))
+  await page.getByRole('button', { name: 'Back to Who’s going' }).click()
+  await expect(page.locator('.going-person').first()).toBeVisible()
   await visit(page, '/requests', 'Chat', issues)
   await visit(page, '/messages', 'Chat', issues)
   // A connection's full profile, from Other connections on Chats.
@@ -238,8 +246,9 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await expect(page.getByRole('heading', { name: /Sodalis\+/ }).first()).toBeVisible()
   await visit(page, '/filters', 'Filters', issues)
   await visit(page, '/account', 'Your account and data', issues)
-  await visit(page, '/onboarding?step=4', 'The back of your card', issues)
-  await visit(page, '/onboarding?step=5', 'How you travel', issues)
+  await visit(page, '/onboarding?step=1', 'About you', issues)
+  await visit(page, '/onboarding?step=2', 'How do you like to travel?', issues)
+  await visit(page, '/onboarding?step=3', 'Where would you love to go?', issues)
   await visit(page, '/admin', /./, issues)
   await visit(page, '/company', /./, issues)
 

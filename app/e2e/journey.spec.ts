@@ -21,20 +21,18 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.getByLabel('Year').fill('1970')
     await a.getByRole('radio', { name: 'Man', exact: true }).check({ force: true })
     await pickPlace(a, 'Leed', 'Leeds, West Yorkshire')
-    await a.getByRole('button', { name: /continue/i }).click()
-    await expect(a.getByText(/Step 2 of 3/)).toBeVisible()
     // A photo is needed to ask to connect (a 1×1 PNG is enough here).
     await a.locator('#photo').setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: Buffer.from(TINY_PNG, 'base64') })
     await expect(a.getByRole('img', { name: 'Your profile photo' })).toBeVisible()
-    await a.getByRole('button', { name: /continue|skip/i }).click()
-    await expect(a.getByText(/Step 3 of 3/)).toBeVisible()
+    await a.getByRole('button', { name: /continue/i }).click()
+    await expect(a.getByText(/Step 2 of 3/)).toBeVisible()
     for (const name of ['Museums', 'Wine', 'Walking', 'Photography', 'Theatre', 'Local cuisine', 'Gardens', 'Architecture']) {
       await a.getByRole('checkbox', { name, exact: true }).evaluate((el: HTMLElement) => el.click())
     }
     await finishSignUp(a)
-    await expect(a.getByRole('heading', { name: 'Welcome to the Collective' })).toBeVisible()
-    await expect(a.getByRole('heading', { name: /is on us for/ })).toBeVisible()
-    await a.getByRole('link', { name: 'Start meeting people' }).click()
+    await expect(a.getByRole('heading', { name: /^You’re in/ })).toBeVisible()
+    await expect(a.getByText(/is on us for/)).toBeVisible()
+    await a.getByRole('link', { name: 'See who’s going' }).click()
     // Once, the privacy choices.
     await expect(a.getByRole('heading', { name: 'We value your privacy' })).toBeVisible()
     await a.getByRole('button', { name: 'Accept all' }).click()

@@ -46,7 +46,7 @@ export async function signIn(page: Page, email: string, password?: string): Prom
   await expect(page.getByRole('heading', { name: 'Choose a password' })).toBeVisible()
   if (password) {
     await page.getByLabel('Password', { exact: true }).fill(password)
-    await page.getByRole('button', { name: 'Save password' }).click()
+    await page.getByRole('button', { name: /Create my account|Save password/ }).click()
   } else {
     await page.getByRole('button', { name: /Not now/ }).click()
   }
@@ -91,10 +91,11 @@ export async function pickPlace(page: Page, typed: string, option: string | RegE
   await choice.click()
 }
 
-/** Sign-up step 3: finishes sign-up once the interests are picked. The back of the card and "How you travel" come later, from Profile. */
+/** Sign-up step 2 is picked (interests, travel style): moves on to step 3, the wish list, and finishes sign-up. */
 export async function finishSignUp(page: Page): Promise<void> {
+  if (!(await page.getByText(/Step 3 of 3/).isVisible())) await page.getByRole('button', { name: /continue/i }).click()
   await expect(page.getByText(/Step 3 of 3/)).toBeVisible()
-  await page.getByRole('button', { name: 'Finish sign-up' }).click()
+  await page.getByRole('button', { name: 'Finish', exact: true }).click()
 }
 
 /** Opens one of our dropdowns and picks an option from its list. */
