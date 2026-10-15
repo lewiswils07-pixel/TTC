@@ -26,6 +26,7 @@ import {
   GENDERS,
   MAX_PREF_AGE,
   MIN_AGE,
+  ageFromDate,
   PHOTO_BOOK_MAX,
   INTERESTS_TO_PICK,
   MONTHS,
@@ -196,7 +197,13 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
   // Who they'd like to meet, asked at sign-up too (Lewis, 11 Oct, like Hinge).
   const prefs = data.preferences
   const [genders, setGenders] = useDraft<Gender[]>('basics.genders', prefs.genders)
-  const [ages, setAges] = useDraft<[number, number]>('basics.ages', [prefs.age_min, Math.min(prefs.age_max, MAX_PREF_AGE)])
+  const [chosenAges, setAges] = useDraft<[number, number]>('basics.ages', [prefs.age_min, Math.min(prefs.age_max, MAX_PREF_AGE)])
+  // Until they pick, suggest people around their own age (round 6 testers: 18 to 99+ mixed students with retirees).
+  const [agesSet, setAgesSet] = useDraft('basics.agesSet', prefs.age_min !== MIN_AGE || prefs.age_max < MAX_PREF_AGE)
+  const dob = birthDate(dobDay, dobMonth, dobYear)
+  const myAge = dob ? ageFromDate(dob) : null
+  const suggested = !agesSet && myAge !== null && myAge >= MIN_AGE
+  const ages: [number, number] = suggested ? [Math.max(MIN_AGE, myAge - 10), Math.min(MAX_PREF_AGE, myAge + 10)] : chosenAges
   const [distance, setDistance] = useDraft<number | null>('basics.distance', prefs.max_distance_km)
 
   const errors = {
@@ -334,6 +341,7 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
         <h2 id="meet-heading" className="card-title">
           Who you’d like to travel with
         </h2>
+        <p className="hint">Sodalis is for friendship, not dating. This just helps you find travel companions you’ll feel at ease with.</p>
         <InterestedIn
           value={genders}
           onChange={(v) => {
@@ -342,7 +350,17 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
           }}
           error={shown('genders')}
         />
-        <AgeRange legend="Age range" min={MIN_AGE} max={MAX_PREF_AGE} value={ages} onChange={setAges} />
+        <AgeRange
+          legend="Age range"
+          min={MIN_AGE}
+          max={MAX_PREF_AGE}
+          value={ages}
+          onChange={(v) => {
+            setAges(v)
+            setAgesSet(true)
+          }}
+        />
+        {suggested && <p className="hint">We’ve suggested people around your age. Widen it if you like.</p>}
         <FieldError error={shown('ages')} />
         <DistanceSlider km={distance} onChange={setDistance} />
         <p className="hint">You can change these any time in Filters.</p>

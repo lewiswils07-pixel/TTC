@@ -23,11 +23,11 @@ export function PopularPlaces() {
               className="popular-place"
               to="/trips/new"
               state={{ city: { id: p.city_id, name: p.city, country_code: p.country_code } }}
-              aria-label={`${p.city}, ${p.members} members going. Plan a trip there`}
+              aria-label={`${p.city}, ${p.members} members planning a trip. Plan a trip there`}
             >
               <CityPhoto city={p.city} width={300} className="popular-photo" />
               <strong>{p.city}</strong>
-              <span>{p.members} going</span>
+              <span>{p.members} planning</span>
             </Link>
           </li>
         ))}
