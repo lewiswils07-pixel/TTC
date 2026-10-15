@@ -10,7 +10,7 @@ test('a member downloads their data, then deletes their account', async ({ brows
   await choose(page, /^Day/, '3')
   await choose(page, /^Month/, 'March')
   await page.getByLabel('Year').fill('1958')
-  await choose(page, 'Gender', 'Woman')
+  await page.getByRole('radio', { name: 'Woman', exact: true }).check({ force: true })
   await pickPlace(page, 'Leed', 'Leeds, West Yorkshire')
   await page.getByRole('button', { name: /continue/i }).click()
   await page.getByRole('button', { name: /continue|skip/i }).click()

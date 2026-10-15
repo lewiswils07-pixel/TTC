@@ -19,7 +19,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await choose(a, /^Day/, '14')
     await choose(a, /^Month/, 'November')
     await a.getByLabel('Year').fill('1970')
-    await choose(a, 'Gender', 'Man')
+    await a.getByRole('radio', { name: 'Man', exact: true }).check({ force: true })
     await pickPlace(a, 'Leed', 'Leeds, West Yorkshire')
     await a.getByRole('button', { name: /continue/i }).click()
     await expect(a.getByText(/Step 2 of 3/)).toBeVisible()
@@ -58,8 +58,8 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.goto('/connections')
     await a.locator('.going-trip-row').filter({ hasText: 'Paris' }).click()
     const row = a.locator('.going-person').first()
-    await expect(row.locator('.going-share')).toContainText('Paris')
-    other = (await row.locator('.going-name strong').innerText()).split(',')[0]
+    await expect(row.locator('.going-banner')).toContainText('Paris')
+    other = (await row.locator('.going-who h3').innerText()).split(',')[0]
     await row.getByRole('button', { name: `Connect with ${other}` }).click()
     await a.getByLabel(/Your note to/).fill('Hello! Would you like to see the Musée d’Orsay together?')
     await a.getByRole('button', { name: 'Send request' }).click()
