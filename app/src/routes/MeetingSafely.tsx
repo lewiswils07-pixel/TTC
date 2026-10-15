@@ -30,7 +30,7 @@ function TellSomeone() {
     )
   }, [])
   return (
-    <section className="card tell-someone" aria-labelledby="tell-title">
+    <section className="card tell-someone" id="tell-someone" aria-labelledby="tell-title">
       <h2 id="tell-title">Tell someone you trust</h2>
       <p className="hint">Pick who you’re meeting. You’ll make a private link with where and when to send a friend, and tap “I’m back safe” when you’re home.</p>
       {people === null ? null : people.length === 0 ? (

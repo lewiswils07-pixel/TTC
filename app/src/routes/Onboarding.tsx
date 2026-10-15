@@ -1,13 +1,11 @@
-import { CloseIcon } from '../components/Icons'
+import { BackIcon, CloseIcon } from '../components/Icons'
+import { SlidersHorizontal, UsersRound } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
-import { AgeRange } from '../components/AgeRange'
 import { CityPicker } from '../components/CityPicker'
-import { DistanceSlider } from '../components/DistanceSlider'
-import { InterestedIn } from '../components/InterestedIn'
 import { Field, FieldError, TextField } from '../components/Field'
 import { InterestPicker } from '../components/InterestPicker'
-import { Layout, Loading } from '../components/Layout'
+import { Layout, Loading, Monogram } from '../components/Layout'
 import { ActionBar, SaveError } from '../components/Form'
 import { QuestionPicker } from '../components/QuestionPicker'
 import { Dropdown } from '../components/Dropdown'
@@ -45,7 +43,7 @@ import { finishOnboarding, listInterests, myDiet, saveAboutMe, saveBasics, saveD
 import { useSession } from '../lib/session-context'
 import { useChecks } from '../lib/useChecks'
 import { useMyProfile } from '../lib/useMyProfile'
-import { birthDate, checkAgeRange, checkBirthDate, checkChosen, checkInterests, checkName } from '../lib/validation'
+import { birthDate, checkBirthDate, checkChosen, checkInterests, checkName } from '../lib/validation'
 
 const STEPS = [
   { title: 'About you', intro: 'Other members see your first name, age and home town. Your date of birth and email always stay private.' },
@@ -116,7 +114,7 @@ export function Onboarding() {
 
   return (
     <Layout>
-      <StepFrame step={step} key={step} signingUp={firstTime} signUpSteps={signUpSteps}>
+      <StepFrame step={step} key={step} signingUp={firstTime} signUpSteps={signUpSteps} onBack={back ?? (firstTime ? undefined : () => navigate('/profile'))}>
         {step === STEP.basics && <BasicsStep userId={userId} data={data} onDone={next} />}
         {step === STEP.photo && <PhotoStep userId={userId} data={data} onDone={next} onBack={back} />}
         {step === STEP.interests && <InterestsStep data={data} interests={interests} onDone={next} onBack={back} />}
@@ -127,23 +125,43 @@ export function Onboarding() {
   )
 }
 
-function StepFrame({ step, signingUp, signUpSteps, children }: { step: number; signingUp: boolean; signUpSteps: number; children: ReactNode }) {
+function StepFrame({ step, signingUp, signUpSteps, onBack, children }: { step: number; signingUp: boolean; signUpSteps: number; onBack?: () => void; children: ReactNode }) {
   const heading = useRef<HTMLHeadingElement>(null)
   useEffect(() => heading.current?.focus(), [])
   const { title, intro } = STEPS[step - 1]
   const extra = step > signUpSteps
+  // The first screen of sign-up welcomes them and says plainly what the Collective is for (Claude Design, 15 Oct).
+  const welcome = signingUp && step === STEP.basics
   return (
     <div className="step">
+      <div className="step-top">
+        {onBack ? (
+          <button type="button" className="icon-btn" onClick={onBack} aria-label="Back">
+            <BackIcon />
+          </button>
+        ) : (
+          <span className="step-top-space" />
+        )}
+        <p className="step-label">{extra ? 'Add more to your profile' : signingUp ? `Step ${step} of ${signUpSteps} · ${title}` : 'Edit your profile'}</p>
+        <Monogram size={34} />
+      </div>
       {signingUp && !extra && (
-        <div className="progress" aria-hidden="true">
-          <div className="progress-bar" style={{ width: `${(step / signUpSteps) * 100}%` }} />
+        <div className="step-progress" aria-hidden="true">
+          {Array.from({ length: signUpSteps }, (_, i) => (
+            <span key={i} className={i < step ? 'is-done' : undefined} />
+          ))}
         </div>
       )}
-      <p className="eyebrow">{extra ? 'Add more to your profile' : signingUp ? `Step ${step} of ${signUpSteps}` : 'Edit your profile'}</p>
+      {welcome && (
+        <p className="friend-pill">
+          <UsersRound size={16} strokeWidth={2} aria-hidden="true" />
+          Friendship and travel · not dating
+        </p>
+      )}
       <h1 ref={heading} tabIndex={-1}>
-        {title}
+        {welcome ? 'Welcome to the Collective' : title}
       </h1>
-      {intro && <p className="lede">{intro}</p>}
+      {welcome ? <p className="lede">Meet people going where you’re going, and find good company for the trip. Let’s start with the basics.</p> : intro && <p className="lede">{intro}</p>}
       {children}
     </div>
   )
@@ -196,23 +214,22 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
 
   // Who they'd like to meet, asked at sign-up too (Lewis, 11 Oct, like Hinge).
   const prefs = data.preferences
-  const [genders, setGenders] = useDraft<Gender[]>('basics.genders', prefs.genders)
-  const [chosenAges, setAges] = useDraft<[number, number]>('basics.ages', [prefs.age_min, Math.min(prefs.age_max, MAX_PREF_AGE)])
-  // Until they pick, suggest people around their own age (round 6 testers: 18 to 99+ mixed students with retirees).
-  const [agesSet, setAgesSet] = useDraft('basics.agesSet', prefs.age_min !== MIN_AGE || prefs.age_max < MAX_PREF_AGE)
+  // Who they see is chosen in Filters now (Claude Design, 15 Oct); until then, people around their own age
+  // (round 6 testers: 18 to 99+ mixed students with retirees).
+  const genders = prefs.genders
+  const chosenAges: [number, number] = [prefs.age_min, Math.min(prefs.age_max, MAX_PREF_AGE)]
+  const agesSet = prefs.age_min !== MIN_AGE || prefs.age_max < MAX_PREF_AGE
   const dob = birthDate(dobDay, dobMonth, dobYear)
   const myAge = dob ? ageFromDate(dob) : null
   const suggested = !agesSet && myAge !== null && myAge >= MIN_AGE
   const ages: [number, number] = suggested ? [Math.max(MIN_AGE, myAge - 10), Math.min(MAX_PREF_AGE, myAge + 10)] : chosenAges
-  const [distance, setDistance] = useDraft<number | null>('basics.distance', prefs.max_distance_km)
+  const distance = prefs.max_distance_km
 
   const errors = {
     name: checkName(name),
     birthDate: checkBirthDate(dobDay, dobMonth, dobYear),
     gender: checkChosen('your gender')(gender),
     city: city ? null : 'Please choose your home city from the list.',
-    genders: genders.length ? null : 'Choose at least one option.',
-    ages: checkAgeRange(ages),
   }
   const { shown, touch, validateAll } = useChecks(errors)
   // Once the year is in, check the date as soon as a day or month list closes.
@@ -292,23 +309,34 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
           </div>
           <FieldError error={shown('birthDate')} />
         </fieldset>
-        <Field name="gender" label="Gender" error={shown('gender')}>
-          {({ id, describedBy, invalid }) => (
-            <Dropdown
-              id={id}
-              placeholder="Choose your gender"
-              value={gender[0] ?? ''}
-              groups={[{ options: GENDERS.map((g) => ({ value: g.value, label: g.label })) }]}
-              describedBy={describedBy}
-              invalid={invalid}
-              onChange={(v) => {
-                setGender([v as Gender])
-                touch('gender')
-              }}
-              onClose={() => touch('gender')}
-            />
-          )}
-        </Field>
+        <fieldset className="field" data-field="gender">
+          <legend>Gender</legend>
+          <div className="radio-cards">
+            {GENDERS.map((g) => (
+              <label key={g.value} className="radio-card">
+                <input
+                  type="radio"
+                  name="gender"
+                  value={g.value}
+                  checked={gender[0] === g.value}
+                  aria-invalid={shown('gender') ? true : undefined}
+                  onChange={() => {
+                    setGender([g.value as Gender])
+                    touch('gender')
+                  }}
+                />
+                <span>{g.label}</span>
+              </label>
+            ))}
+          </div>
+          <FieldError error={shown('gender')} />
+        </fieldset>
+        <p className="tip-box">
+          <SlidersHorizontal size={20} strokeWidth={1.8} aria-hidden="true" />
+          <span>
+            Choose who you see (gender, age and distance) any time in <strong>Filters</strong>.
+          </span>
+        </p>
         <div data-field="city" className="home-city">
           <CityPicker
             label="Home city"
@@ -337,34 +365,6 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
           <FieldError error={locateError} />
         </div>
       </div>
-      <section className="card form-card" aria-labelledby="meet-heading">
-        <h2 id="meet-heading" className="card-title">
-          Who you’d like to travel with
-        </h2>
-        <p className="hint">Sodalis is for friendship, not dating. This just helps you find travel companions you’ll feel at ease with.</p>
-        <InterestedIn
-          value={genders}
-          onChange={(v) => {
-            setGenders(v)
-            touch('genders')
-          }}
-          error={shown('genders')}
-        />
-        <AgeRange
-          legend="Age range"
-          min={MIN_AGE}
-          max={MAX_PREF_AGE}
-          value={ages}
-          onChange={(v) => {
-            setAges(v)
-            setAgesSet(true)
-          }}
-        />
-        {suggested && <p className="hint">We’ve suggested people around your age. Widen it if you like.</p>}
-        <FieldError error={shown('ages')} />
-        <DistanceSlider km={distance} onChange={setDistance} />
-        <p className="hint">You can change these any time in Filters.</p>
-      </section>
       <SaveError error={error} />
       <ActionBar busy={busy} />
     </form>

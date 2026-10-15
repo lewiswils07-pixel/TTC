@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { Ban, Camera, Check, Coffee, Eye, Flag, Gem, Lock, Pencil, Settings, Share, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react'
 import { keep, peek, remember } from '../lib/cache'
 import { Link, Navigate, useSearchParams } from 'react-router'
-import { Layout, Loading } from '../components/Layout'
+import { Layout, Loading, Monogram } from '../components/Layout'
 import { dismissNotice, iAmAdmin, myNotices, type Notice } from '../lib/admin'
 import { answerMeet, meetPrompts, type MeetPrompt } from '../lib/meet'
 import { Avatar } from '../components/Avatar'
-import { cityLabel } from '../lib/cities'
-import { BUDGETS, MAX_PREF_AGE, PACES, ageFromDate, ageLabel, labelFor } from '../lib/options'
+import { BUDGETS, GROUP_SIZES, MAX_PREF_AGE, MOVING, PACES, ROOM_SHARING, TRAVEL_OFTEN, TRAVEL_STYLES, ageFromDate, ageLabel, labelFor } from '../lib/options'
 import type { Card } from '../lib/card'
 import { profileStrength } from '../lib/strength'
 import { answerNps, npsDue } from '../lib/kpis'
@@ -25,53 +25,35 @@ import { HubRow } from '../components/HubRow'
 import { EmergencyNumbers } from '../components/EmergencyNumbers'
 import { interestedInText } from '../lib/filters'
 import { HolidayChips } from '../components/ProfileExtras'
-import { NextIcon } from '../components/Icons'
+import { BackIcon, NextIcon } from '../components/Icons'
 
 type HubTab = 'me' | 'safety' | 'plus'
-const HUB_TABS: { key: HubTab; label: string }[] = [
-  { key: 'me', label: 'My profile' },
-  { key: 'safety', label: 'Safety' },
-  { key: 'plus', label: brand.plusName },
-]
 
 const ICONS = {
-  filters: 'M3 6h11.2a3 3 0 0 1 5.6 0H21v2h-1.2a3 3 0 0 1-5.6 0H3V6Zm14 1a1 1 0 1 0 0 .01V7ZM3 16h1.2a3 3 0 0 1 5.6 0H21v2H9.8a3 3 0 0 1-5.6 0H3v-2Zm4 1a1 1 0 1 0 0 .01V17Z',
-  gear: 'M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1l.4 2.6h4l.4-2.6c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5-2.3-1.6ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z',
-  pencil: 'M4 17.3V20h2.7l8-8-2.7-2.7-8 8Zm12.7-7.4a.7.7 0 0 0 0-1l-1.6-1.6a.7.7 0 0 0-1 0l-1.3 1.3 2.7 2.7 1.2-1.4Z',
-  hand: 'M18 7a1.5 1.5 0 0 0-1.5 1.5V12h-1V4.5a1.5 1.5 0 0 0-3 0V12h-1V3.5a1.5 1.5 0 0 0-3 0V12h-1V6.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h.5a7 7 0 0 0 6.6-4.7l1.4-4.3V8.5A1.5 1.5 0 0 0 18 7Z',
   people: 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7.5 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM1 20c0-3.3 3.6-6 8-6s8 2.7 8 6v1H1v-1Zm17.5 1v-1c0-2-.9-3.8-2.4-5.1 3.6.2 6.9 2.2 6.9 5.1v1h-4.5Z',
+  filters: 'M3 6h11.2a3 3 0 0 1 5.6 0H21v2h-1.2a3 3 0 0 1-5.6 0H3V6Zm14 1a1 1 0 1 0 0 .01V7ZM3 16h1.2a3 3 0 0 1 5.6 0H21v2H9.8a3 3 0 0 1-5.6 0H3v-2Zm4 1a1 1 0 1 0 0 .01V17Z',
+  hand: 'M18 7a1.5 1.5 0 0 0-1.5 1.5V12h-1V4.5a1.5 1.5 0 0 0-3 0V12h-1V3.5a1.5 1.5 0 0 0-3 0V12h-1V6.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h.5a7 7 0 0 0 6.6-4.7l1.4-4.3V8.5A1.5 1.5 0 0 0 18 7Z',
   share: 'M18 16a3 3 0 0 0-2.4 1.2l-6.7-3.4a3 3 0 0 0 0-1.6l6.7-3.4A3 3 0 1 0 15 7l-6.7 3.4a3 3 0 1 0 0 3.2L15 17a3 3 0 1 0 3-1Z',
-  rules: 'M5 3h11l3 3v15H5V3Zm3 6v2h8V9H8Zm0 4v2h8v-2H8Zm0 4v2h5v-2H8Z',
   phone:
     'M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2Z',
   shield: 'M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm-1.2 13.6-3.4-3.4 1.4-1.4 2 2 4.6-4.6 1.4 1.4-6 6Z',
   report: 'M5 21V4h9l.4 2H20v10h-7l-.4-2H7v7H5Z',
-  photo: 'M4 5h16v14H4V5Zm2 2v8.6l3.5-3.6 2.5 2.5 3.5-4.5L18 13.5V7H6Zm2.5 3a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z',
   tour: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm3.5 6.5-2 5-5 2 2-5 5-2Z',
   star: 'M12 2.5 14.9 8.6l6.6.8-4.9 4.6 1.3 6.5L12 17.2l-5.9 3.3 1.3-6.5L2.5 9.4l6.6-.8L12 2.5Z',
 }
 
+/** The Profile tab as one page: you, what's left to add, how you travel, then account and safety (Claude Design, 15 Oct).
+ *  Safety and Sodalis+ open as their own pages from here (?tab=safety, ?tab=plus). */
 export function Profile() {
   const { session } = useSession()
   const { data, error, reload } = useMyProfile(session!.user.id)
-  const [params, setParams] = useSearchParams()
-  const tab: HubTab = HUB_TABS.some((t) => t.key === params.get('tab')) ? (params.get('tab') as HubTab) : 'me'
+  const [params] = useSearchParams()
+  const tab: HubTab = params.get('tab') === 'safety' || params.get('tab') === 'plus' ? (params.get('tab') as HubTab) : 'me'
   const photo = usePhotoUrl(data?.profile.photo_path)
-
-  const actions = (
-    <div className="hub-actions">
-      <Link className="icon-btn" to="/filters" aria-label="Filters">
-        <Icon d={ICONS.filters} />
-      </Link>
-      <Link className="icon-btn" to="/settings" aria-label="Settings">
-        <Icon d={ICONS.gear} />
-      </Link>
-    </div>
-  )
 
   if (error) {
     return (
-      <Layout tab="profile" actions={actions}>
+      <Layout tab="profile">
         <p className="error" role="alert">
           {error}
         </p>
@@ -84,55 +66,56 @@ export function Profile() {
   if (!data) return <Loading />
   if (!data.profile.onboarded_at) return <Navigate to="/onboarding" replace />
 
-  const { profile } = data
-  const pick = (key: HubTab) => setParams(key === 'me' ? {} : { tab: key }, { replace: true })
-
-  return (
-    <Layout tab="profile" actions={actions}>
-      <header className="hub-head">
-        <Link className="hub-photo" to={stepLink('photo')} aria-label="Change your photo">
-          {photo ? (
-            <img src={photo} alt="" />
-          ) : (
-            <span className="hub-photo-empty" aria-hidden="true">
-              {(profile.display_name ?? '?').slice(0, 1).toUpperCase()}
-            </span>
-          )}
-          <span className="hub-pencil" aria-hidden="true">
-            <Icon d={ICONS.pencil} size={18} />
-          </span>
+  if (tab !== 'me') {
+    return (
+      <Layout tab="profile">
+        <Link className="back-link" to="/profile">
+          <BackIcon />
+          Your profile
         </Link>
-        <h1 className="hub-name">{profile.display_name}</h1>
-        <p className="hub-meta">
-          {profile.member_number && <span className="hub-number">Founding member No. {profile.member_number}</span>}
-          <span>
-            {profile.birth_date ? ageFromDate(profile.birth_date) : ageLabel(profile.birth_year)} · {profile.home_city ? cityLabel(profile.home_city) : 'Home not set'}
-          </span>
-        </p>
-      </header>
+        <h1>{tab === 'safety' ? 'Safety' : brand.plusName}</h1>
+        {tab === 'safety' ? <SafetyPanel /> : <PlusPanel />}
+      </Layout>
+    )
+  }
 
-      <div className="hub-tabs" role="tablist" aria-label="Profile">
-        {HUB_TABS.map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            role="tab"
-            id={`hub-tab-${t.key}`}
-            aria-selected={tab === t.key}
-            aria-controls="hub-panel"
-            className={tab === t.key ? 'hub-tab is-current' : 'hub-tab'}
-            onClick={() => pick(t.key)}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      <div id="hub-panel" role="tabpanel" aria-labelledby={`hub-tab-${tab}`} className="hub-panel">
-        {tab === 'me' && <MyProfilePanel data={data} hasPhoto={!!profile.photo_path} />}
-        {tab === 'safety' && <SafetyPanel />}
-        {tab === 'plus' && <PlusPanel />}
-      </div>
+  const { profile } = data
+  return (
+    <Layout tab="profile">
+      <h1>Your profile</h1>
+      <Notices />
+      <section className="card me-card" aria-label="You">
+        <div className="me-row">
+          <Link className="me-photo" to={stepLink('photo')} aria-label="Change your photo">
+            {photo ? (
+              <img src={photo} alt="" />
+            ) : (
+              <span className="me-photo-empty" aria-hidden="true">
+                <UserRound size={56} strokeWidth={1.4} />
+              </span>
+            )}
+            <span className="me-camera" aria-hidden="true">
+              <Camera size={18} strokeWidth={2} />
+            </span>
+          </Link>
+          <div className="me-who">
+            <h2>{profile.display_name}</h2>
+            <p>
+              {profile.birth_date ? ageFromDate(profile.birth_date) : ageLabel(profile.birth_year)} · {profile.home_city ? profile.home_city.name : 'Home not set'}
+            </p>
+            {profile.member_number && <p className="me-number">Founding member No. {profile.member_number}</p>}
+            <Link className="me-link" to={stepLink('photo')}>
+              {profile.photo_path ? 'Change photo' : 'Add a photo'}
+            </Link>
+          </div>
+        </div>
+        {profile.bio && <p className="me-bio">{profile.bio}</p>}
+        <Link className="btn btn-secondary btn-block me-preview" to="/profile/preview">
+          <Eye size={20} strokeWidth={1.8} aria-hidden="true" />
+          See your card as others do
+        </Link>
+      </section>
+      <MyProfilePanel data={data} />
     </Layout>
   )
 }
@@ -145,8 +128,41 @@ function Icon({ d, size = 24 }: { d: string; size?: number }) {
   )
 }
 
+/** A card with a serif title and an Edit link on the right. */
+function ProfileSection({ id, title, edit, children }: { id: string; title: string; edit?: string; children: ReactNode }) {
+  return (
+    <section className="card me-section" aria-labelledby={id}>
+      <div className="me-section-head">
+        <h2 id={id} className="card-title">
+          {title}
+        </h2>
+        {edit && (
+          <Link className="me-edit" to={edit} aria-label={`Edit ${title.toLowerCase()}`}>
+            <Pencil size={16} strokeWidth={2} aria-hidden="true" />
+            Edit
+          </Link>
+        )}
+      </div>
+      {children}
+    </section>
+  )
+}
+
+/** One row in a list card: an icon, the words and a chevron. */
+function RowLink({ to, icon, children, danger = false }: { to: string; icon: ReactNode; children: ReactNode; danger?: boolean }) {
+  return (
+    <li>
+      <Link className={danger ? 'row-link is-danger' : 'row-link'} to={to}>
+        {icon}
+        <span>{children}</span>
+        <NextIcon />
+      </Link>
+    </li>
+  )
+}
+
 /** Their profile as others see it, plus anything waiting for them. */
-function MyProfilePanel({ data, hasPhoto }: { data: MyProfile; hasPhoto: boolean }) {
+function MyProfilePanel({ data }: { data: MyProfile }) {
   const [interests, setInterests] = useState<Interest[]>(() => peek('interests') ?? [])
   const [hasTrip, setHasTrip] = useState<boolean | null>(() => {
     const trips = peek<unknown[] | null>('trips')
@@ -165,75 +181,106 @@ function MyProfilePanel({ data, hasPhoto }: { data: MyProfile; hasPhoto: boolean
   }, [])
 
   const { profile, interestIds, preferences } = data
-  const travel = [labelFor(PACES, profile.pace), labelFor(BUDGETS, profile.budget)].filter((l) => l !== 'Not set')
   const myInterests = interests.filter((i) => interestIds.includes(i.id)).map((i) => i.label)
+  const style = [
+    { label: 'Budget', value: labelFor(BUDGETS, profile.budget) },
+    { label: 'Planning', value: labelFor(TRAVEL_STYLES, profile.travel_style) },
+    { label: 'Pace', value: labelFor(PACES, profile.pace) },
+    { label: 'Moving around', value: labelFor(MOVING, profile.moving) },
+    { label: 'How often', value: labelFor(TRAVEL_OFTEN, profile.travel_often) },
+    { label: 'Group size', value: labelFor(GROUP_SIZES, profile.group_size) },
+    { label: 'Room sharing', value: labelFor(ROOM_SHARING, profile.room_sharing) },
+  ].filter((r) => r.value !== 'Not set')
+  const icon = { size: 20, strokeWidth: 1.8, 'aria-hidden': true } as const
 
   return (
     <>
-      <Notices />
       {hasTrip !== null && <Strength profile={profile} interestCount={interestIds.length} hasTrip={hasTrip} card={data.card} />}
-      <section className="card profile-card" aria-labelledby="my-profile">
-        <h2 id="my-profile" className="card-title">
-          About you
-        </h2>
-        {profile.bio && <p className="profile-bio">{profile.bio}</p>}
-        <dl className="facts">
-          <div>
-            <dt>Interests</dt>
-            <dd>
-              {myInterests.length ? (
-                <ul className="chip-list">
-                  {myInterests.map((label) => (
-                    <li key={label} className="tag">
-                      {label}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                'Not set'
-              )}
-            </dd>
-          </div>
-          {travel.length > 0 && (
-            <div>
-              <dt>How I travel</dt>
-              <dd>{travel.join(' · ')}</dd>
-            </div>
-          )}
-          {data.more && Object.keys(data.more.holiday_prefs).length > 0 && (
-            <div>
-              <dt>Holiday preferences</dt>
-              <dd>
-                <HolidayChips prefs={data.more.holiday_prefs} />
-              </dd>
-            </div>
-          )}
-          <div>
-            <dt>Travel companions</dt>
-            <dd>
-              {interestedInText(preferences.genders) === 'Everyone' ? 'Anyone' : interestedInText(preferences.genders)}, aged {preferences.age_min} to{' '}
-              {preferences.age_max >= MAX_PREF_AGE ? `${MAX_PREF_AGE}+` : preferences.age_max}
-            </dd>
-          </div>
-        </dl>
-        <Link className="btn btn-secondary btn-block" to={stepLink('basics')}>
-          Edit my profile
-        </Link>
-      </section>
-      <ul className="hub-list">
-        {!hasPhoto && (
-          <li>
-            <HubRow to={stepLink('photo')} icon={ICONS.photo} title="Add a photo" text="People are far more likely to accept when they can see you." />
-          </li>
-        )}
-        <li>
-          <HubRow to="/profile/preview" icon={ICONS.photo} title="See your card as others do" text="Exactly what other members see in their suggestions" />
-        </li>
-        <li>
-          <HubRow to="/connections?tour=1" icon={ICONS.tour} title="How the Collective works" text="A quick tour of what you can do" />
-        </li>
-      </ul>
       <MeetPrompts />
+      <ProfileSection id="me-interests" title="Interests" edit={stepLink('interests')}>
+        {myInterests.length ? (
+          <ul className="chip-list">
+            {myInterests.map((label) => (
+              <li key={label} className="tag">
+                {label}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="hint">Not added yet.</p>
+        )}
+      </ProfileSection>
+      <ProfileSection id="me-travel" title="How I travel" edit={stepLink('travel')}>
+        {style.length ? (
+          <dl className="style-rows">
+            {style.map((r) => (
+              <div key={r.label}>
+                <dt>{r.label}</dt>
+                <dd>{r.value}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : (
+          <p className="hint">Say how you like to travel, so the right people find you.</p>
+        )}
+      </ProfileSection>
+      {data.more && Object.keys(data.more.holiday_prefs).length > 0 && (
+        <ProfileSection id="me-holiday" title="Holiday preferences" edit={stepLink('travel')}>
+          <HolidayChips prefs={data.more.holiday_prefs} />
+        </ProfileSection>
+      )}
+      <ProfileSection id="me-companions" title="Travel companions" edit="/filters">
+        <p className="me-companions">
+          {interestedInText(preferences.genders) === 'Everyone' ? 'Anyone' : interestedInText(preferences.genders)}, aged {preferences.age_min} to{' '}
+          {preferences.age_max >= MAX_PREF_AGE ? `${MAX_PREF_AGE}+` : preferences.age_max}
+        </p>
+        <p className="hint">Who you see on Who’s going. Change it any time in Filters.</p>
+      </ProfileSection>
+      <Link className="plus-row" to="/profile?tab=plus">
+        <span className="plus-row-icon" aria-hidden="true">
+          <Gem size={20} strokeWidth={1.8} />
+        </span>
+        <span className="plus-row-text">
+          <strong>{brand.plusName}</strong>
+          <span>Filter by travel style, and more</span>
+        </span>
+        <NextIcon />
+      </Link>
+      <h2 className="list-label">Your account</h2>
+      <ul className="row-list">
+        <RowLink to="/filters" icon={<SlidersHorizontal {...icon} />}>
+          Filters
+        </RowLink>
+        <RowLink to="/settings" icon={<Settings {...icon} />}>
+          Settings
+        </RowLink>
+        <RowLink to="/settings/privacy" icon={<Lock {...icon} />}>
+          Privacy choices
+        </RowLink>
+        <RowLink to="/requests#blocked" icon={<Ban {...icon} />}>
+          Blocked members
+        </RowLink>
+      </ul>
+      <h2 className="list-label">Safety guides</h2>
+      <ul className="row-list">
+        <RowLink to="/meeting-safely" icon={<Coffee {...icon} />}>
+          Meeting up safely
+        </RowLink>
+        <RowLink to="/meeting-safely#tell-someone" icon={<Share {...icon} />}>
+          Tell someone you trust
+        </RowLink>
+        <RowLink to="/community-rules" icon={<ShieldCheck {...icon} />}>
+          Community rules
+        </RowLink>
+        <RowLink to="/profile?tab=safety" icon={<Flag {...icon} />} danger>
+          Report someone
+        </RowLink>
+      </ul>
+      <ul className="row-list me-tour">
+        <RowLink to="/connections?tour=1" icon={<Monogram size={28} />}>
+          How the Collective works
+        </RowLink>
+      </ul>
       <RecommendCard />
       <AdminLink />
     </>
@@ -378,32 +425,44 @@ function PlusPanel() {
  *  the basics, so the rest lives here (testers, 13 Oct). Hidden once it's complete. */
 function Strength({ profile, interestCount, hasTrip, card }: { profile: Profile; interestCount: number; hasTrip: boolean; card: Card | null }) {
   const { percent, parts } = profileStrength(profile, interestCount, hasTrip, card)
-  const left = parts.filter((p) => !p.done).length
-  if (!left) return null
+  const todo = parts.filter((p) => !p.done)
+  const done = parts.filter((p) => p.done)
+  if (!todo.length) return null
   return (
     <section className="card strength" aria-labelledby="strength-heading">
-      <div className="strength-head">
-        <h2 id="strength-heading">Finish your profile</h2>
-        <span className="strength-value">{percent}%</span>
+      <div className="me-section-head">
+        <h2 id="strength-heading" className="card-title">
+          Finish your profile
+        </h2>
+        <span className="strength-value">
+          {done.length} of {parts.length} done
+        </span>
       </div>
+      <p className="hint">A fuller profile helps members feel they already know you.</p>
       <div className="strength-bar" role="progressbar" aria-labelledby="strength-heading" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
         <div style={{ width: `${percent}%` }} />
       </div>
-      <p className="hint">Complete profiles get more suggestions, and more people say yes. {left === 1 ? 'One thing left.' : `${left} things left.`}</p>
-      <ul className="check-list">
-        {parts.map((p) => (
-          <li key={p.label} className={p.done ? 'is-done' : undefined}>
-            <span className="check-mark" aria-hidden="true" />
-            {p.done ? (
-              <span>
-                {p.label}
-                <span className="visually-hidden"> (done)</span>
-              </span>
-            ) : (
-              <Link to={p.to}>{p.label}</Link>
-            )}
+      <ul className="strength-list">
+        {todo.map((p) => (
+          <li key={p.label}>
+            <Link to={p.to}>
+              <span className="strength-ring" aria-hidden="true" />
+              <span>{p.label}</span>
+              <NextIcon />
+            </Link>
           </li>
         ))}
+        {done.length > 0 && (
+          <li className="is-done">
+            <span className="strength-tick" aria-hidden="true">
+              <Check size={16} strokeWidth={3} />
+            </span>
+            <span>
+              <span className="visually-hidden">Done: </span>
+              {done.map((p) => p.label).join(', ')}
+            </span>
+          </li>
+        )}
       </ul>
     </section>
   )

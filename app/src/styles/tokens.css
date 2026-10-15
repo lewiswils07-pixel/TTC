@@ -8,9 +8,26 @@
   font-style: normal;
   font-display: swap;
 }
+/* Headings (Claude Design, 15 Oct). */
+@font-face {
+  font-family: 'Newsreader';
+  src: url('../assets/fonts/newsreader-latin.woff2') format('woff2');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --font: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  /* Soft fills from the design: burgundy and gold washes, and the warm placeholder for photos. */
+  --accent-tint: #f5e4e1;
+  --gold-tint: #f7ebc8;
+  --photo-a: #eadcc5;
+  --photo-b: #d6bf9c;
+  --photo-fg: #f7efe2;
+  --shadow: 0 1px 2px rgb(36 31 30 / 5%), 0 12px 28px -8px rgb(36 31 30 / 14%);
+  --shadow-btn: 0 8px 18px -6px rgb(108 19 32 / 45%);
   --text: 1.0625rem; /* 17px: the smallest body text in the app */
   --text-sm: 0.9375rem;
   --text-lg: 1.25rem;
@@ -28,7 +45,7 @@
   --radius-lg: 20px;
   --tap: 48px; /* comfortably over the 44px minimum */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --shadow-sm: 0 1px 2px rgb(33 32 30 / 4%), 0 4px 12px rgb(33 32 30 / 6%);
+  --shadow-sm: 0 1px 2px rgb(36 31 30 / 6%), 0 4px 12px -4px rgb(36 31 30 / 10%);
   /* Phone notches and home bars. Capacitor injects --safe-area-inset-* on
      Android; browsers and iOS use env(). */
   --safe-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
