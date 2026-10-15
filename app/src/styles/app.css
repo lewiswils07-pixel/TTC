@@ -1910,6 +1910,27 @@ h2, .section-title { font-size: 1.625rem; line-height: 1.15; }
 .going-group-icon { flex: none; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 14px; background: var(--gold-tint); color: var(--gold-ink); }
 .going-group-text { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.3; }
 .going-group-text span { font-size: var(--text-sm); color: var(--muted); }
+.going-share p { color: var(--ink); }
+.going-share strong { font-weight: 700; }
+.going-more { margin: 10px 6px 4px; }
+/* Someone's full card on its own page (Claude Design, 15 Oct). */
+.person-page { display: flex; flex-direction: column; gap: var(--space-4); }
+.person-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: calc(-1 * var(--space-2)); }
+.person-top .icon-btn { width: 44px; height: 44px; margin-left: -10px; }
+.person-top-title { flex: 1; margin: 0; text-align: center; font-weight: 700; }
+.person-page .going-main { padding: 0; }
+.person-page .going-who h1 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: 2.25rem; line-height: 1.05; overflow-wrap: anywhere; }
+.person-page .going-who h1:focus { outline: none; }
+.person-page .going-photo { width: 130px; height: 160px; border-radius: 18px; }
+.person-section { display: flex; flex-direction: column; gap: var(--space-3); padding: 18px 20px; }
+.person-section h2 { margin: 0; font-size: 1.5rem; }
+.person-section .style-rows > div:first-child { padding-top: 4px; }
+.person-section .plus-teaser { margin: 0; }
+.person-actions { position: sticky; bottom: calc(var(--safe-bottom) + 72px); z-index: 3; margin: 0 calc(var(--space-4) * -1); padding: 14px var(--space-4); border-top: 1px solid var(--line); background: color-mix(in srgb, var(--paper) 94%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.person-actions .action-row { width: 100%; }
+.person-actions .btn { white-space: nowrap; }
+.person-connect { padding-bottom: var(--space-4); }
+@media (min-width: 900px) { .person-actions { bottom: 0; } }
 @media (max-width: 360px) {
   .going-main { gap: 12px; padding-inline: 14px; }
   .going-photo { width: 92px; height: 116px; }

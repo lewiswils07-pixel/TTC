@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useSearchParams } from 'react-router'
 import { Layout, Loading, Monogram } from '../components/Layout'
 import { CardBack } from '../components/CardBack'
-import { ProfileExtras } from '../components/ProfileExtras'
+import { PhotoBookStrip } from '../components/ProfileExtras'
 import { SafetyMenu } from '../components/SafetyBox'
 import { CityPhoto } from '../components/CityPhoto'
-import { AddIcon, NextIcon } from '../components/Icons'
-import { Blend, ChevronDown, Map as MapIcon, MapPin, Plane, SlidersHorizontal, Sparkles, Tag, UserPlus, UsersRound } from 'lucide-react'
+import { AddIcon, BackIcon, NextIcon } from '../components/Icons'
+import { Blend, ChevronRight, Map as MapIcon, MapPin, Plane, Route, SlidersHorizontal, Sparkles, Tag, UserPlus, UsersRound } from 'lucide-react'
 import { SkeletonRows } from '../components/Skeleton'
 import { Tour } from '../components/Tour'
 import { FirstDayGuide } from '../components/FirstDayGuide'
@@ -24,13 +24,14 @@ import { groupsICanStart, myGroups, type Group } from '../lib/groups'
 import { noteFirstMatch } from '../lib/kpis'
 import { requestsLeftText } from '../lib/plan'
 import { fitWords, homeLabel, listLabels, LOTS_IN_COMMON } from '../lib/matching'
-import { ageLabel, BOOKING, GROUP_SIZES, INTERESTS_TO_PICK, labelFor, MOVING, ROOM_SHARING, TRAVEL_OFTEN } from '../lib/options'
+import { ageLabel, BOOKING, GROUP_SIZES, HOLIDAY_QUESTIONS, INTERESTS_TO_PICK, labelFor, MOVING, PERSONAL_FIELDS, ROOM_SHARING, TRAVEL_OFTEN } from '../lib/options'
 import { preloadPhotos, usePhotoUrl } from '../lib/photo'
 import { count, roughly } from '../lib/rules'
 import { useSession } from '../lib/session-context'
 import { loadExtras, type MemberExtras } from '../lib/member'
 import { listMyTrips, wishlistOf, type Trip } from '../lib/trips'
 import { useMyProfile } from '../lib/useMyProfile'
+import type { MyProfile } from '../lib/profile'
 
 /** The Who's going tab: your trips and who's going, travel groups, then people one card at a time
  *  with Connect and Not now. Tap a trip to see only people going there (Lewis, 12 Oct). */
@@ -152,6 +153,60 @@ export function ForYou() {
   const person = deck[0]
   /** The trip they're shown under: the tapped one, or their best one with you. */
   const tripFor = (p: FeedPerson) => (only ? p.trips.find((t) => placeOf(t) === only) : (sameTime(p) ?? p.trips[0]))
+  // Read more opens their full card as its own page; the phone's Back button comes back here (Claude Design, 15 Oct).
+  const openId = params.get('person')
+  const opened = openId ? people?.find((p) => p.profile_id === openId) : undefined
+  function openCard(p: FeedPerson) {
+    if (!firstDay.read) tick({ read: true })
+    setParams({ person: p.profile_id }, { state: { opened: true } })
+  }
+  function closeCard() {
+    if ((window.history.state as { usr?: { opened?: boolean } } | null)?.usr?.opened) window.history.back()
+    else setParams({}, { replace: true })
+  }
+  const cardProps = (p: FeedPerson) => {
+    const t = tripFor(p)
+    return {
+      person: p,
+      trip: t,
+      myCity: t && placeOf(t),
+      myHome,
+      mine: data.profile,
+      hasPhoto: !!data.profile.photo_path,
+      requests: requests!,
+      onNotNow: () => notNow(p),
+      onSent: (connected: boolean) => {
+        tick({ sent: true })
+        gone(
+          p,
+          connected ? `${p.display_name} had already asked to connect with you, so you’re now connected. Say hello in Chat.` : `Request sent to ${p.display_name}. We’ll let you know when they reply.`,
+        )
+      },
+      onBlocked: (message: string) => gone(p, message),
+    }
+  }
+
+  if (opened && requests)
+    return (
+      <Layout tab="connections">
+        <PersonPage
+          {...cardProps(opened)}
+          onBack={closeCard}
+          onNotNow={() => {
+            closeCard()
+            notNow(opened)
+          }}
+          onSent={(connected) => {
+            closeCard()
+            cardProps(opened).onSent(connected)
+          }}
+          onBlocked={(message) => {
+            closeCard()
+            gone(opened, message)
+          }}
+        />
+      </Layout>
+    )
 
   return (
     <Layout tab="connections">
@@ -247,30 +302,7 @@ export function ForYou() {
             </div>
             {person && (
               <div className={deck.length > 1 ? 'going-stack has-next' : 'going-stack'}>
-                <PersonCard
-                  key={person.profile_id}
-                  person={person}
-                  trip={tripFor(person)}
-                  myCity={(() => {
-                    const t = tripFor(person)
-                    return t && placeOf(t)
-                  })()}
-                  myHome={myHome}
-                  hasPhoto={!!data.profile.photo_path}
-                  requests={requests}
-                  onNotNow={() => notNow(person)}
-                  onRead={() => !firstDay.read && tick({ read: true })}
-                  onSent={(connected) => {
-                    tick({ sent: true })
-                    gone(
-                      person,
-                      connected
-                        ? `${person.display_name} had already asked to connect with you, so you’re now connected. Say hello in Chat.`
-                        : `Request sent to ${person.display_name}. We’ll let you know when they reply.`,
-                    )
-                  }}
-                  onBlocked={(message) => gone(person, message)}
-                />
+                <PersonCard key={person.profile_id} {...cardProps(person)} onOpen={() => openCard(person)} />
               </div>
             )}
             {deck.length === 0 && only && people.length > 0 && (
@@ -374,20 +406,7 @@ function TravelGroups({ canStart }: { canStart: number }) {
   )
 }
 
-/** One member at a time, like a travel ticket: why they're here at the top, who they are and what you share,
- *  then Read more and Connect or Not now. ⋯ holds block and report (Claude Design, 15 Oct). */
-function PersonCard({
-  person,
-  trip,
-  myCity,
-  myHome,
-  requests,
-  onNotNow,
-  onRead,
-  onSent,
-  onBlocked,
-  hasPhoto,
-}: {
+type CardProps = {
   person: FeedPerson
   hasPhoto: boolean
   /** Their trip near one of yours, if any. */
@@ -395,25 +414,33 @@ function PersonCard({
   /** Your own trip's place for that trip (theirs may be somewhere near it). */
   myCity?: string
   myHome: string | null
+  /** Your own travel style, to show what you share. */
+  mine: MyProfile['profile']
   requests: Requests
   onNotNow: () => void
-  /** They opened the card (for the first-day guide). */
-  onRead: () => void
   onSent: (connected: boolean) => void
   onBlocked: (message: string) => void
-}) {
-  const [open, setOpen] = useState(false)
-  const [connecting, setConnecting] = useState(false)
-  const photo = usePhotoUrl(person.photo_path)
-  const home = homeLabel(person)
+}
+
+/** Travel style answers you both gave, in a few words (Claude Design, 15 Oct). */
+const SHARED_STYLE = [
+  { key: 'moving', options: MOVING },
+  { key: 'travel_often', options: TRAVEL_OFTEN },
+  { key: 'booking', options: BOOKING },
+  { key: 'group_size', options: GROUP_SIZES },
+] as const
+
+/** One member at a time, like a travel ticket: why they're here at the top, who they are and what you share,
+ *  then Read more (their full card on its own page) and Connect or Not now. ⋯ holds block and report (Claude Design, 15 Oct). */
+function PersonCard(props: CardProps & { onOpen: () => void }) {
+  const { person, trip, myCity, mine, onOpen, onBlocked } = props
+  const [extras, setExtras] = useState<MemberExtras | null>(null)
+  useEffect(() => {
+    loadExtras(person.profile_id).then(setExtras)
+  }, [person.profile_id])
   const id = `person-${person.profile_id}`
   const month = trip && monthName(trip.days?.start ?? trip.start)
   const near = !!(trip && myCity && myCity !== trip.city)
-  const suggested = !trip
-    ? `Hi ${person.display_name}, it looks like we enjoy the same kind of travel. Where are you off to next?`
-    : near
-      ? `Hi ${person.display_name}, I’m going to ${myCity} in ${month} and saw you’ll be in ${trip.city}. Would you like to meet up?`
-      : `Hi ${person.display_name}, I’m going to ${trip.city} in ${month} too. Would you like to meet up while we’re there?`
   const banner = trip
     ? {
         title: near ? `Going to ${trip.city} in ${month}` : `Also going to ${trip.city} in ${month}`,
@@ -423,13 +450,22 @@ function PersonCard({
         title: 'Travels the way you do',
         text: person.shared_interests.length ? `${count(person.shared_interests.length, 'interest')} in common` : fitWords(person.score),
       }
+  const style = extras ? SHARED_STYLE.filter((q) => extras[q.key] && extras[q.key] === mine[q.key]).map((q) => labelFor(q.options, extras[q.key]).toLowerCase()) : []
   const shares = [
-    person.shared_interests.length > 0 && { Icon: Tag, label: 'Interests', text: person.shared_interests.join(', ').toLowerCase() },
+    person.shared_interests.length > 0 && {
+      Icon: Tag,
+      label: 'Interests',
+      text: listLabels(
+        person.shared_interests.map((x) => x.toLowerCase()),
+        4,
+      ),
+    },
     person.shared_places.length > 0 && { Icon: MapPin, label: 'Places', text: `you both want to see ${listLabels(person.shared_places, 3)}` },
+    style.length > 0 && { Icon: Route, label: 'Travel style', text: listLabels(style, 3) },
   ].filter((x) => !!x)
 
   return (
-    <article className={open ? 'card going-person is-open' : 'card going-person'} aria-labelledby={id}>
+    <article className="card going-person" aria-labelledby={id}>
       <div className="going-banner">
         <span className="going-banner-icon" aria-hidden="true">
           {trip ? <Plane size={20} strokeWidth={1.8} /> : <Sparkles size={20} strokeWidth={1.8} />}
@@ -441,41 +477,7 @@ function PersonCard({
         <SafetyMenu profileId={person.profile_id} name={person.display_name} onBlocked={onBlocked} />
       </div>
       <div className="going-tear" aria-hidden="true" />
-      <div className="going-main">
-        <div className={photo ? 'going-photo' : 'going-photo is-empty'} style={photo ? undefined : { ['--hue' as string]: hueOf(person.display_name) }}>
-          {photo ? (
-            <img src={photo} alt="" />
-          ) : (
-            <span className="going-initial" aria-hidden="true">
-              {person.display_name.slice(0, 1).toUpperCase()}
-            </span>
-          )}
-        </div>
-        <div className="going-who">
-          <h3 id={id}>{person.display_name}</h3>
-          <p>{[person.birth_year && ageLabel(person.birth_year), home].filter(Boolean).join(' · ')}</p>
-          <div className="going-badges">
-            {person.score >= LOTS_IN_COMMON && (
-              <span className="going-badge is-gold">
-                <Blend size={16} strokeWidth={2} aria-hidden="true" />
-                Lots in common
-              </span>
-            )}
-            {nearYou(person, myHome) && (
-              <span className="going-badge">
-                <MapPin size={16} strokeWidth={2} aria-hidden="true" />
-                Near you
-              </span>
-            )}
-            {person.online && (
-              <span className="going-badge">
-                <span className="going-dot" aria-hidden="true" />
-                Active today
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
+      <PersonHead person={person} myHome={props.myHome} id={id} />
       {shares.length > 0 && (
         <div className="going-share">
           <h4>What you share</h4>
@@ -493,22 +495,73 @@ function PersonCard({
           </ul>
         </div>
       )}
-      {open && <PersonMore person={person} id={`${id}-more`} />}
-      <button
-        type="button"
-        className="going-more"
-        aria-expanded={open}
-        aria-controls={`${id}-more`}
-        onClick={() => {
-          setOpen((o) => !o)
-          onRead()
-        }}
-      >
-        {open ? 'Show less' : 'Read more'}
-        <span className="visually-hidden"> about {person.display_name}</span>
-        <ChevronDown className={open ? 'icon is-up' : 'icon'} size={20} aria-hidden="true" />
+      <button type="button" className="going-more" onClick={onOpen}>
+        Read more about {person.display_name}
+        <ChevronRight size={20} aria-hidden="true" />
       </button>
-      {connecting ? (
+      <PersonActions {...props} />
+    </article>
+  )
+}
+
+/** Their photo, name, age and home, and the badges. */
+function PersonHead({ person, myHome, id, level = 3 }: { person: FeedPerson; myHome: string | null; id: string; level?: 1 | 3 }) {
+  const photo = usePhotoUrl(person.photo_path)
+  const H = level === 1 ? 'h1' : 'h3'
+  return (
+    <div className="going-main">
+      <div className={photo ? 'going-photo' : 'going-photo is-empty'} style={photo ? undefined : { ['--hue' as string]: hueOf(person.display_name) }}>
+        {photo ? (
+          <img src={photo} alt="" />
+        ) : (
+          <span className="going-initial" aria-hidden="true">
+            {person.display_name.slice(0, 1).toUpperCase()}
+          </span>
+        )}
+      </div>
+      <div className="going-who">
+        <H id={id} tabIndex={level === 1 ? -1 : undefined}>
+          {person.display_name}
+        </H>
+        <p>{[person.birth_year && ageLabel(person.birth_year), homeLabel(person)].filter(Boolean).join(' · ')}</p>
+        <div className="going-badges">
+          {person.score >= LOTS_IN_COMMON && (
+            <span className="going-badge is-gold">
+              <Blend size={16} strokeWidth={2} aria-hidden="true" />
+              Lots in common
+            </span>
+          )}
+          {nearYou(person, myHome) && (
+            <span className="going-badge">
+              <MapPin size={16} strokeWidth={2} aria-hidden="true" />
+              Near you
+            </span>
+          )}
+          {person.online && (
+            <span className="going-badge">
+              <span className="going-dot" aria-hidden="true" />
+              Active today
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Not now and Connect, or the note to send with a request. */
+function PersonActions({ person, trip, myCity, requests, hasPhoto, onNotNow, onSent, page = false }: CardProps & { page?: boolean }) {
+  const [connecting, setConnecting] = useState(false)
+  const month = trip && monthName(trip.days?.start ?? trip.start)
+  const near = !!(trip && myCity && myCity !== trip.city)
+  const suggested = !trip
+    ? `Hi ${person.display_name}, it looks like we enjoy the same kind of travel. Where are you off to next?`
+    : near
+      ? `Hi ${person.display_name}, I’m going to ${myCity} in ${month} and saw you’ll be in ${trip.city}. Would you like to meet up?`
+      : `Hi ${person.display_name}, I’m going to ${trip.city} in ${month} too. Would you like to meet up while we’re there?`
+  if (connecting)
+    return (
+      <div className={page ? 'person-connect' : undefined}>
         <ConnectBox
           person={person}
           tripId={trip?.mine ?? person.trip_id ?? undefined}
@@ -519,30 +572,34 @@ function PersonCard({
           onSent={onSent}
           onCancel={() => setConnecting(false)}
         />
-      ) : (
-        <div className="going-actions">
-          <div className="action-row">
-            <button type="button" className="btn btn-secondary" onClick={onNotNow} aria-label={`Not now: ${person.display_name}`}>
-              Not now
-            </button>
-            <button type="button" className="btn btn-primary" disabled={requests.left <= 0} onClick={() => setConnecting(true)} aria-label={`Connect with ${person.display_name}`}>
-              {requests.left > 0 && <UserPlus size={20} strokeWidth={2} aria-hidden="true" />}
-              {requests.left > 0 ? 'Connect' : 'No requests left this week'}
-            </button>
-          </div>
-          <p className="hint">{trip ? `Connect to say hello and plan ${myCity ?? trip.city} together.` : 'Connect to say hello and swap travel plans.'}</p>
-        </div>
-      )}
-    </article>
+      </div>
+    )
+  return (
+    <div className={page ? 'going-actions person-actions' : 'going-actions'}>
+      <div className="action-row">
+        <button type="button" className="btn btn-secondary" onClick={onNotNow} aria-label={`Not now: ${person.display_name}`}>
+          Not now
+        </button>
+        <button type="button" className="btn btn-primary" disabled={requests.left <= 0} onClick={() => setConnecting(true)} aria-label={`Connect with ${person.display_name}`}>
+          {requests.left > 0 && <UserPlus size={20} strokeWidth={2} aria-hidden="true" />}
+          {requests.left > 0 ? 'Connect' : 'No requests left this week'}
+        </button>
+      </div>
+      {!page && <p className="hint">{trip ? `Connect to say hello and plan ${myCity ?? trip.city} together.` : 'Connect to say hello and swap travel plans.'}</p>}
+    </div>
   )
 }
 
-/** More about someone, opened in place: trips you share, where they'd love to go, their card answers and how they travel. */
-function PersonMore({ person, id }: { person: FeedPerson; id: string }) {
+/** Someone's full card on its own page, opened from Read more: trips you share, where they'd love to go,
+ *  their own words, how they travel and their holiday preferences (Claude Design, 15 Oct). */
+function PersonPage(props: CardProps & { onBack: () => void }) {
+  const { person, onBack, onBlocked } = props
   const [places, setPlaces] = useState<string[]>([])
   const [extras, setExtras] = useState<MemberExtras | null>(null)
   const [answers, setAnswers] = useState<CardAnswer[] | 'error' | null>(null)
   useEffect(() => {
+    window.scrollTo(0, 0)
+    document.getElementById('person-name')?.focus()
     wishlistOf(person.profile_id).then(setPlaces)
     loadExtras(person.profile_id).then(setExtras)
     loadCard(person.profile_id).then(
@@ -550,6 +607,7 @@ function PersonMore({ person, id }: { person: FeedPerson; id: string }) {
       () => setAnswers('error'),
     )
   }, [person.profile_id])
+  const name = person.display_name
   const style = extras
     ? [
         { label: 'Moving around', value: extras.moving, options: MOVING },
@@ -559,12 +617,33 @@ function PersonMore({ person, id }: { person: FeedPerson; id: string }) {
         { label: 'Room sharing', value: extras.room_sharing ?? null, options: ROOM_SHARING },
       ].filter((r) => r.value)
     : []
+  const holiday = extras?.holiday_prefs
+    ? HOLIDAY_QUESTIONS.flatMap((q) => {
+        const picked = q.options.filter((o) => extras.holiday_prefs?.[q.key]?.includes(o.value)).map((o) => o.label)
+        return picked.length ? [{ label: q.label, value: picked.join(', ') }] : []
+      })
+    : []
+  const personal = extras ? PERSONAL_FIELDS.flatMap((f) => f.options.filter((o) => o.value === extras[f.key]).map((o) => o.label)) : []
 
   return (
-    <div className="going-details" id={id}>
+    <article className="person-page" aria-labelledby="person-name">
+      <div className="person-top">
+        <button type="button" className="icon-btn" onClick={onBack} aria-label="Back to Who’s going">
+          <BackIcon />
+        </button>
+        <p className="person-top-title">{name}’s card</p>
+        <SafetyMenu profileId={person.profile_id} name={name} onBlocked={onBlocked} />
+      </div>
+      <PersonHead person={person} myHome={props.myHome} id="person-name" level={1} />
+      {person.travelling_with && (
+        <p className="tip-box">
+          <UsersRound size={20} strokeWidth={1.8} aria-hidden="true" />
+          <span>Travels with: {person.travelling_with}</span>
+        </p>
+      )}
       {person.trips.length > 0 && (
-        <section className="going-section">
-          <h4>Trips you have in common</h4>
+        <section className="card person-section" aria-labelledby="person-trips">
+          <h2 id="person-trips">Trips you have in common</h2>
           <ul className="going-common">
             {person.trips.map((t) => (
               <li key={t.city + t.start}>
@@ -581,8 +660,8 @@ function PersonMore({ person, id }: { person: FeedPerson; id: string }) {
         </section>
       )}
       {places.length > 0 && (
-        <section className="going-section">
-          <h4>Places they’d love to go</h4>
+        <section className="card person-section" aria-labelledby="person-places">
+          <h2 id="person-places">Places they’d love to go</h2>
           <ul className="chip-list">
             {places.map((place) => (
               <li key={place} className={person.shared_places.includes(place) ? 'tag tag-place is-shared' : 'tag tag-place'}>
@@ -593,8 +672,8 @@ function PersonMore({ person, id }: { person: FeedPerson; id: string }) {
           </ul>
         </section>
       )}
-      <section className="going-section going-words">
-        <h4>In their words</h4>
+      <section className="card person-section going-words" aria-labelledby="person-words">
+        <h2 id="person-words">In their words</h2>
         {answers === null ? (
           <div className="card-back-empty" role="status">
             <span className="visually-hidden">Loading their answers</span>
@@ -604,12 +683,12 @@ function PersonMore({ person, id }: { person: FeedPerson; id: string }) {
         ) : answers === 'error' ? (
           <p className="card-back-empty">We couldn’t load this just now.</p>
         ) : (
-          <CardBack name={person.display_name} answers={answers} />
+          <CardBack name={name} answers={answers} />
         )}
       </section>
       {style.length > 0 && (
-        <section className="going-section">
-          <h4>Their travel style</h4>
+        <section className="card person-section" aria-labelledby="person-style">
+          <h2 id="person-style">Their travel style</h2>
           <dl className="style-rows">
             {style.map((r) => (
               <div key={r.label}>
@@ -620,9 +699,43 @@ function PersonMore({ person, id }: { person: FeedPerson; id: string }) {
           </dl>
         </section>
       )}
-      <ProfileExtras extras={extras ? { ...extras, room_sharing: null } : null} name={person.display_name} />
-      {person.travelling_with && <p className="feed-detail">Travels with: {person.travelling_with}</p>}
-    </div>
+      {(holiday.length > 0 || extras?.holiday_locked) && (
+        <section className="card person-section" aria-labelledby="person-holiday">
+          <h2 id="person-holiday">Holiday preferences</h2>
+          {holiday.length > 0 && (
+            <dl className="style-rows">
+              {holiday.map((r) => (
+                <div key={r.label}>
+                  <dt>{r.label}</dt>
+                  <dd>{r.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+          {extras?.holiday_locked && (
+            <Link className="plus-teaser" to="/profile?tab=plus">
+              <span className="tag tag-plus">{brand.plusName}</span> See how {name} likes to holiday
+            </Link>
+          )}
+        </section>
+      )}
+      {extras && extras.photo_book.length > 0 && (
+        <section className="card person-section" aria-labelledby="person-photos">
+          <h2 id="person-photos">Photo book</h2>
+          <PhotoBookStrip paths={extras.photo_book} name={name} />
+        </section>
+      )}
+      {personal.length > 0 && (
+        <ul className="chip-list personal-tags" aria-label={`More about ${name}`}>
+          {personal.map((label) => (
+            <li key={label} className="tag">
+              {label}
+            </li>
+          ))}
+        </ul>
+      )}
+      <PersonActions {...props} page />
+    </article>
   )
 }
 

@@ -145,10 +145,13 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
     .first()
     .getByRole('button', { name: /^Read more/ })
     .click()
-  await expect(page.locator('.going-details').first()).toBeVisible()
-  issues.push(...(await problems(page, '/connections (read more)')))
-  // Their card answers sit in Read more now (Claude Design, 15 Oct).
+  // Read more is their full card on its own page, with the answers in their words (Claude Design, 15 Oct).
+  await expect(page.locator('.person-page')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'In their words' })).toBeVisible()
+  await page.waitForLoadState('networkidle')
+  issues.push(...(await problems(page, '/connections?person (read more)')))
+  await page.getByRole('button', { name: 'Back to Who’s going' }).click()
+  await expect(page.locator('.going-person').first()).toBeVisible()
   await visit(page, '/requests', 'Chat', issues)
   await visit(page, '/messages', 'Chat', issues)
   // A connection's full profile, from Other connections on Chats.
