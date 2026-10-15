@@ -232,7 +232,7 @@ export function ForYou() {
                         <span className="going-trip-text">
                           <strong>{g.city}</strong>
                           <span>
-                            {g.people.length ? `${g.people.length} going` : 'No one yet'} ·{' '}
+                            {g.people.length ? `${g.people.length} to meet` : 'No one new yet'} ·{' '}
                             {mine ? shortDates(mine.start_date, mine.end_date) : monthName(g.people[0].trips.find((t) => placeOf(t) === g.city)!.start)}
                           </span>
                         </span>
@@ -244,7 +244,9 @@ export function ForYou() {
             </section>
           )}
 
-          {showGuide && !(myTrips.length > 0 && firstDay.read && (firstDay.sent || requests.left < requests.limit)) && <FirstDayGuide hasTrip={myTrips.length > 0} read={!!firstDay.read} sent={!!firstDay.sent || requests.left < requests.limit} onHide={() => tick({ hidden: true })} />}
+          {showGuide && !(myTrips.length > 0 && firstDay.read && (firstDay.sent || requests.left < requests.limit)) && (
+            <FirstDayGuide hasTrip={myTrips.length > 0} read={!!firstDay.read} sent={!!firstDay.sent || requests.left < requests.limit} onHide={() => tick({ hidden: true })} />
+          )}
 
           {myTrips.length === 0 && !showGuide && (
             <Link className="going-add-trip" to="/trips/new">
@@ -261,7 +263,7 @@ export function ForYou() {
               <h2 className="section-title" id="people-title">
                 {only ? `Going to ${only}` : 'People like you'}
               </h2>
-              {deck.length > 0 && <span className="going-count">1 of {deck.length}</span>}
+              {deck.length > 0 && <span className="going-count">{deck.length === 1 ? 'Last one for now' : `${deck.length} to meet`}</span>}
             </div>
             {person && (
               <div className={deck.length > 1 ? 'going-stack has-next' : 'going-stack'}>

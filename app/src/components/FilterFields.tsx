@@ -32,18 +32,6 @@ export function FilterFields({ value: f, onChange, plus }: { value: Filters; onC
     row(key, label, listText(f[key], options), <ChipChoice name={key} legend={label} options={options} selected={f[key]} onChange={(chosen) => set({ [key]: chosen })} multiple />)
   return (
     <div className="filter-rows">
-      <div className="filter-group filter-group-plus">
-        <h3>How they travel</h3>
-        <span className="tag tag-plus">{brand.plusName}</span>
-      </div>
-      {!plus && (
-        <p className="hint">
-          These come with {brand.plusName}. You can set them now, and they’ll start working when you have {brand.plusName}.
-        </p>
-      )}
-      {STYLE_QUESTIONS.map((q) => plusRow(q.filter, q.label, q.options))}
-      <h3 className="filter-group">Holiday preferences</h3>
-      {HOLIDAY_QUESTIONS.map((q) => plusRow(q.filter, q.label, q.options))}
       <h3 className="filter-group">The basics</h3>
       {row(
         'genders',
@@ -72,6 +60,18 @@ export function FilterFields({ value: f, onChange, plus }: { value: Filters; onC
           {f.max_distance_km !== null && <Flexible label="Show people a bit further away too" checked={f.distance_flexible} onChange={(distance_flexible) => set({ distance_flexible })} />}
         </>,
       )}
+      <div className="filter-group filter-group-plus">
+        <h3>How they travel</h3>
+        <span className="tag tag-plus">{brand.plusName}</span>
+      </div>
+      {!plus && (
+        <p className="hint">
+          These come with {brand.plusName}. You can set them now, and they’ll start working when you have {brand.plusName}.
+        </p>
+      )}
+      {STYLE_QUESTIONS.map((q) => plusRow(q.filter, q.label, q.options))}
+      <h3 className="filter-group">Holiday preferences</h3>
+      {HOLIDAY_QUESTIONS.map((q) => plusRow(q.filter, q.label, q.options))}
     </div>
   )
 }
