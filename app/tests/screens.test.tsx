@@ -39,8 +39,8 @@ describe('home screen', () => {
   it('welcomes signed-out visitors by the brand name', async () => {
     const { container } = renderAt('/')
     expect(await screen.findByRole('heading', { level: 1, name: brand.tagline })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: brand.name })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Join or sign in' })).toHaveAttribute('href', '/sign-in')
+    expect(screen.getByRole('link', { name: 'Join' })).toHaveAttribute('href', '/sign-in?join')
+    expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/sign-in?signin')
     expect(await axeViolations(container)).toEqual([])
   })
 })
@@ -118,6 +118,6 @@ describe('sign in with a password', () => {
 describe('protected screens', () => {
   it('send signed-out visitors to sign in', async () => {
     renderAt('/dashboard')
-    expect(await screen.findByRole('heading', { name: 'Join the Collective' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /What’s your email|Welcome back/ })).toBeInTheDocument()
   })
 })

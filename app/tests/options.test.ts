@@ -66,7 +66,7 @@ describe('profile helpers', () => {
   it('resumes onboarding at the first unfinished step', () => {
     expect(firstUnfinishedStep(make({}))).toBe(1)
     expect(firstUnfinishedStep(make(basics))).toBe(2)
-    expect(firstUnfinishedStep(make({ ...basics, bio: 'Hi' }))).toBe(3)
+    expect(firstUnfinishedStep(make({ ...basics, bio: 'Hi' }))).toBe(2)
     expect(firstUnfinishedStep(make(basics, [1, 2, 3, 4, 5, 6, 7, 8]))).toBe(3)
   })
 })

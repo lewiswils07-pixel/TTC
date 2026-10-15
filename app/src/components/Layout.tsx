@@ -28,14 +28,15 @@ function useWide(): boolean {
   )
 }
 
-export function Layout({ children, actions, wide = false, tab }: { children: ReactNode; actions?: ReactNode; wide?: boolean; tab?: Tab }) {
+/** `bare` drops the logo bar, for screens that carry their own (welcome, join and sign in). */
+export function Layout({ children, actions, wide = false, tab, bare = false }: { children: ReactNode; actions?: ReactNode; wide?: boolean; tab?: Tab; bare?: boolean }) {
   const { session } = useSession()
   const path = useLocation().pathname
   const isWide = useWide()
   // On a laptop the tabs stay along the top on every member screen, inner pages included.
   const topTab = isWide && session ? (tab ?? tabFor(path)) : undefined
   // On a phone, members don't need the logo on every screen: the page gets the room instead.
-  const showBrand = isWide || !session
+  const showBrand = !bare && (isWide || !session)
   return (
     <div className={['shell', tab && !isWide && 'has-tabs', !showBrand && !actions && 'no-topbar'].filter(Boolean).join(' ')}>
       <a className="skip-link" href="#main">

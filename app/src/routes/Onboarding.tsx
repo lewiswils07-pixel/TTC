@@ -1,5 +1,5 @@
 import { BackIcon, CloseIcon } from '../components/Icons'
-import { SlidersHorizontal, UsersRound } from 'lucide-react'
+import { Camera, Check, Plus, SlidersHorizontal, UsersRound } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { CityPicker } from '../components/CityPicker'
@@ -12,7 +12,8 @@ import { Dropdown } from '../components/Dropdown'
 import { ChipChoice } from '../components/ChipChoice'
 import { brand } from '../lib/brand'
 import { ANSWER_MAX_CHARS, ANSWER_MAX_WORDS, ANSWERS_TO_PICK, checkAnswer, questionText, saveCard, wordCount, type CardAnswer } from '../lib/card'
-import { cityLabel, type City } from '../lib/cities'
+import { cityLabel, searchCities, type City } from '../lib/cities'
+import { addToWishlist, listWishlist, popularDestinations, removeFromWishlist, type PopularPlace, type WishlistItem } from '../lib/trips'
 import { clearDrafts, useDraft } from '../lib/draft'
 import { messageOf } from '../lib/errors'
 import { clearMyLocation, locateMe } from '../lib/location'
@@ -46,23 +47,12 @@ import { useMyProfile } from '../lib/useMyProfile'
 import { birthDate, checkBirthDate, checkChosen, checkInterests, checkName } from '../lib/validation'
 
 const STEPS = [
-  { title: 'About you', intro: 'Other members see your first name, age and home town. Your date of birth and email always stay private.' },
-  { title: 'Your photo', intro: null },
-  { title: 'Your interests', intro: `Pick the ${INTERESTS_TO_PICK} you love most, and meet people who love them too.` },
-  {
-    title: 'The back of your card',
-    intro: `Optional. Pick up to ${ANSWERS_TO_PICK} questions and answer each in a sentence or two. People see them when they turn your card over.`,
-  },
-  {
-    title: 'How you travel',
-    intro: 'All optional, and there are no wrong answers. Add as much as you like to meet people who travel the way you do.',
-  },
-] as const satisfies readonly { title: string; intro: string | null }[]
-/** Sign-up is the first 3 steps: about you, photo and interests (testers,
- *  13 Oct: keep it short). The back of the card and "How you travel" come
- *  after, from the "Finish your profile" list on Profile. */
-const SIGN_UP_STEPS = STEP.interests
-const CARD_STEP = STEP.card
+  { title: 'About you', heading: 'About you', intro: 'Other members see your first name, age and home town. Your date of birth and email always stay private.' },
+  { title: 'How you travel', heading: 'How do you like to travel?', intro: 'This helps you find people who’d enjoy the same trip. Change it any time.' },
+  { title: 'Your wish list', heading: 'Where would you love to go?', intro: 'Add a few places. Members who dream of the same ones will see you share them.' },
+] as const satisfies readonly { title: string; heading: string; intro: string }[]
+/** Sign-up is 3 screens, as in Lewis's Claude Design (15 Oct). The same screens edit the profile afterwards, with the extras
+ *  (photo book, holiday preferences, more card answers) added in. */
 const TOTAL = STEPS.length
 
 export function Onboarding() {
@@ -91,14 +81,12 @@ export function Onboarding() {
   }
   if (!data || !interests) return <Loading />
 
-  const signUpSteps = SIGN_UP_STEPS
   const requested = Number(params.get('step'))
-  let step = requested >= 1 && requested <= TOTAL ? requested : firstUnfinishedStep(data)
-  if (step === CARD_STEP && !data.card) step = CARD_STEP + 1
+  const step = requested >= 1 && requested <= TOTAL ? requested : firstUnfinishedStep(data)
   const goTo = (n: number) => setParams({ step: String(n) })
   const firstTime = !data.profile.onboarded_at
   const next = async () => {
-    if (firstTime && step >= signUpSteps) {
+    if (firstTime && step >= TOTAL) {
       await finishOnboarding()
       await reload()
       return navigate('/welcome', { replace: true })
@@ -107,29 +95,26 @@ export function Onboarding() {
     // Opened from elsewhere (like Connect asking for a photo): go back there.
     const returnTo = params.get('return')
     if (returnTo?.startsWith('/') && !returnTo.startsWith('//')) return navigate(returnTo, { replace: true })
-    if (step < TOTAL) goTo(step + 1 === CARD_STEP && !data.card ? step + 2 : step + 1)
+    if (firstTime) goTo(step + 1)
     else navigate('/profile', { replace: true })
   }
-  const back = step > 1 ? () => goTo(step - 1 === CARD_STEP && !data.card ? step - 2 : step - 1) : undefined
+  const back = firstTime ? (step > 1 ? () => goTo(step - 1) : undefined) : () => navigate('/profile')
 
   return (
     <Layout>
-      <StepFrame step={step} key={step} signingUp={firstTime} signUpSteps={signUpSteps} onBack={back ?? (firstTime ? undefined : () => navigate('/profile'))}>
+      <StepFrame step={step} key={step} signingUp={firstTime} onBack={back}>
         {step === STEP.basics && <BasicsStep userId={userId} data={data} onDone={next} />}
-        {step === STEP.photo && <PhotoStep userId={userId} data={data} onDone={next} onBack={back} />}
-        {step === STEP.interests && <InterestsStep data={data} interests={interests} onDone={next} onBack={back} />}
-        {step === STEP.card && <CardStep userId={userId} data={data} onDone={next} onBack={back} />}
-        {step === STEP.travel && <PreferencesStep userId={userId} data={data} onDone={next} onBack={back} />}
+        {step === STEP.travel && <TravelStep userId={userId} data={data} interests={interests} onDone={next} />}
+        {step === STEP.wishlist && <WishStep userId={userId} data={data} onDone={next} />}
       </StepFrame>
     </Layout>
   )
 }
 
-function StepFrame({ step, signingUp, signUpSteps, onBack, children }: { step: number; signingUp: boolean; signUpSteps: number; onBack?: () => void; children: ReactNode }) {
+function StepFrame({ step, signingUp, onBack, children }: { step: number; signingUp: boolean; onBack?: () => void; children: ReactNode }) {
   const heading = useRef<HTMLHeadingElement>(null)
   useEffect(() => heading.current?.focus(), [])
-  const { title, intro } = STEPS[step - 1]
-  const extra = step > signUpSteps
+  const { title, heading: h1, intro } = STEPS[step - 1]
   // The first screen of sign-up welcomes them and says plainly what the Collective is for (Claude Design, 15 Oct).
   const welcome = signingUp && step === STEP.basics
   return (
@@ -142,12 +127,12 @@ function StepFrame({ step, signingUp, signUpSteps, onBack, children }: { step: n
         ) : (
           <span className="step-top-space" />
         )}
-        <p className="step-label">{extra ? 'Add more to your profile' : signingUp ? `Step ${step} of ${signUpSteps} · ${title}` : 'Edit your profile'}</p>
+        <p className="step-label">{signingUp ? `Step ${step} of ${TOTAL} · ${title}` : 'Edit your profile'}</p>
         <Monogram size={34} />
       </div>
-      {signingUp && !extra && (
+      {signingUp && (
         <div className="step-progress" aria-hidden="true">
-          {Array.from({ length: signUpSteps }, (_, i) => (
+          {Array.from({ length: TOTAL }, (_, i) => (
             <span key={i} className={i < step ? 'is-done' : undefined} />
           ))}
         </div>
@@ -159,9 +144,9 @@ function StepFrame({ step, signingUp, signUpSteps, onBack, children }: { step: n
         </p>
       )}
       <h1 ref={heading} tabIndex={-1}>
-        {welcome ? 'Welcome to the Collective' : title}
+        {welcome ? 'Welcome to the Collective' : h1}
       </h1>
-      {welcome ? <p className="lede">Meet people going where you’re going, and find good company for the trip. Let’s start with the basics.</p> : intro && <p className="lede">{intro}</p>}
+      <p className="lede">{welcome ? 'Meet people going where you’re going, and find good company for the trip. Let’s start with the basics.' : intro}</p>
       {children}
     </div>
   )
@@ -224,6 +209,9 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
   const suggested = !agesSet && myAge !== null && myAge >= MIN_AGE
   const ages: [number, number] = suggested ? [Math.max(MIN_AGE, myAge - 10), Math.min(MAX_PREF_AGE, myAge + 10)] : chosenAges
   const distance = prefs.max_distance_km
+  // The photo and a few words sit on this first screen too (Claude Design, 15 Oct). Both optional.
+  const photo = usePhotoPick(p.photo_path)
+  const [bio, setBio] = useDraft('basics.bio', p.bio ?? '')
 
   const errors = {
     name: checkName(name),
@@ -242,6 +230,8 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
     if (!located && city!.id !== p.home_city?.id) await clearMyLocation(userId)
     await saveBasics(userId, { display_name: name.trim(), birth_date: birthDate(dobDay, dobMonth, dobYear), gender: gender[0], home_city_id: city!.id })
     await saveMeetPreferences(userId, { genders, age_min: ages[0], age_max: ages[1], max_distance_km: distance })
+    if (photo.blob) await uploadPhoto(userId, photo.blob, p.photo_path)
+    await saveAboutMe(userId, { bio: bio.trim() || null })
     clearDrafts('basics.')
   }, onDone)
 
@@ -364,97 +354,105 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
           )}
           <FieldError error={locateError} />
         </div>
+        <PhotoField pick={photo} />
+        {p.onboarded_at && data.more && <PhotoBookEditor userId={userId} start={data.more.photo_book} />}
+        <div className="field" data-field="bio">
+          <label htmlFor="bio">
+            A few words about you <span className="label-quiet">(optional)</span>
+          </label>
+          <textarea
+            id="bio"
+            className="textarea"
+            maxLength={rules.profile.bioMax}
+            placeholder="For example, retired teacher who loves a coastal walk with a long lunch at the end."
+            aria-describedby="bio-count"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+          />
+          <p className="char-count" id="bio-count">
+            {bio.length} / {rules.profile.bioMax}
+          </p>
+        </div>
       </div>
       <SaveError error={error} />
-      <ActionBar busy={busy} />
+      <ActionBar busy={busy || photo.preparing} label={p.onboarded_at ? 'Save' : undefined} />
     </form>
   )
 }
 
-function PhotoStep({ userId, data, onDone, onBack }: StepProps) {
-  const p = data.profile
+/** A chosen photo, made ready (resized) before it's saved. */
+function usePhotoPick(savedPath: string | null) {
   const [preview, setPreview] = useState<string | null>(null)
-  const [photo, setPhoto] = useState<Blob | null>(null)
-  const [bio, setBio] = useDraft('photo.bio', p.bio ?? '')
+  const [blob, setBlob] = useState<Blob | null>(null)
   const [preparing, setPreparing] = useState(false)
-  const [photoError, setPhotoError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (p.photo_path) photoUrl(p.photo_path).then(setPreview)
-  }, [p.photo_path])
+    if (savedPath) photoUrl(savedPath).then(setPreview)
+  }, [savedPath])
 
   useEffect(() => {
-    if (!photo) return
-    const url = URL.createObjectURL(photo)
+    if (!blob) return
+    const url = URL.createObjectURL(blob)
     setPreview(url)
     return () => URL.revokeObjectURL(url)
-  }, [photo])
-
-  const { busy, error, submit } = useStepSubmit(async () => {
-    if (photo) await uploadPhoto(userId, photo, p.photo_path)
-    await saveAboutMe(userId, { bio: bio.trim() || null })
-    clearDrafts('photo.')
-  }, onDone)
+  }, [blob])
 
   async function pick(file: File | undefined) {
     if (!file) return
     setPreparing(true)
-    setPhotoError(null)
+    setError(null)
     try {
-      setPhoto(await preparePhoto(file))
+      setBlob(await preparePhoto(file))
     } catch (err) {
-      setPhotoError(messageOf(err))
+      setError(messageOf(err))
     } finally {
       setPreparing(false)
     }
   }
+  return { preview, blob, preparing, error, pick }
+}
 
+const PHOTO_TIPS = ['Just you', 'Face clearly visible', 'Recent', 'Good light']
+
+function PhotoField({ pick }: { pick: ReturnType<typeof usePhotoPick> }) {
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault()
-        void submit()
-      }}
-      noValidate
-    >
-      <div className="card form-card">
-        <div className="photo-picker" data-field="photo">
-          {preview ? (
-            <img className="avatar avatar-lg" src={preview} alt="Your profile photo" />
+    <fieldset className="field photo-field" data-field="photo">
+      <legend>{pick.preview ? 'Your photo' : 'Add a photo'}</legend>
+      <div className="photo-row">
+        <label className={pick.preview ? 'photo-drop has-photo' : 'photo-drop'} htmlFor="photo">
+          {pick.preview ? (
+            <img src={pick.preview} alt="Your profile photo" />
           ) : (
-            <div className="avatar avatar-lg avatar-empty" aria-hidden="true">
-              {(p.display_name ?? '?').slice(0, 1).toUpperCase()}
-            </div>
+            <span className="photo-drop-icon" aria-hidden="true">
+              <Camera size={22} strokeWidth={2} />
+            </span>
           )}
-          <div className="photo-actions">
-            <label className={preview ? 'btn btn-secondary' : 'btn btn-primary'} htmlFor="photo">
-              {preview ? 'Change photo' : 'Choose a photo'}
+          <span className={pick.preview ? 'visually-hidden' : undefined}>{pick.preview ? 'Change photo' : 'Add photo'}</span>
+        </label>
+        <input id="photo" className="visually-hidden" type="file" accept="image/*" onChange={(e) => pick.pick(e.target.files?.[0])} />
+        <div className="photo-good">
+          <strong>For a great first impression:</strong>
+          <ul>
+            {PHOTO_TIPS.map((t) => (
+              <li key={t}>
+                <Check size={16} strokeWidth={2.4} aria-hidden="true" />
+                {t}
+              </li>
+            ))}
+          </ul>
+          {pick.preview && (
+            <label className="btn-link" htmlFor="photo">
+              Change photo
             </label>
-            <input id="photo" className="visually-hidden" type="file" accept="image/*" onChange={(e) => pick(e.target.files?.[0])} />
-            <p className="hint" role="status" aria-live="polite">
-              {preparing ? 'Getting your photo ready…' : ''}
-            </p>
-            <FieldError error={photoError} />
-          </div>
+          )}
         </div>
-        <ul className="photo-tips" aria-label="What makes a good photo">
-          <li>Just you, with your face clearly visible</li>
-          <li>Recent, and in good light</li>
-          <li>No sunglasses, hats or group shots</li>
-        </ul>
-        <p className="hint">You’ll need a photo to connect with people.</p>
-        {data.more && <PhotoBookEditor userId={userId} start={data.more.photo_book} />}
-        <Field
-          name="bio"
-          label="A few words about you (optional)"
-          hint={`Where you’ve been, where you’d love to go, or what makes a good travel companion. ${rules.profile.bioMax - bio.length} characters left.`}
-        >
-          {({ id, describedBy }) => <textarea id={id} className="textarea" maxLength={rules.profile.bioMax} aria-describedby={describedBy} value={bio} onChange={(e) => setBio(e.target.value)} />}
-        </Field>
       </div>
-      <SaveError error={error} />
-      <ActionBar busy={busy || preparing} onBack={onBack} label={photo || p.photo_path ? 'Continue' : 'Skip photo for now'} quiet={!photo && !p.photo_path} />
-    </form>
+      <p className="hint" role="status" aria-live="polite">
+        {pick.preparing ? 'Getting your photo ready…' : 'You’ll need a photo to connect with people.'}
+      </p>
+      <FieldError error={pick.error} />
+    </fieldset>
   )
 }
 
@@ -528,40 +526,15 @@ function BookThumb({ path }: { path: string }) {
   return src ? <img src={src} alt="" decoding="async" /> : <span className="skeleton" aria-hidden="true" />
 }
 
-function InterestsStep({ data, interests, onDone, onBack }: Omit<StepProps, 'userId'> & { interests: Interest[] }) {
+type StyleAnswers = Record<(typeof STYLE_QUESTIONS)[number]['key'], string[]>
+
+/** Interests and travel style on one screen (Claude Design, 15 Oct). After sign-up it also edits holiday preferences and the rest. */
+function TravelStep({ userId, data, interests, onDone }: StepProps & { interests: Interest[] }) {
+  const p = data.profile
+  const editing = !!p.onboarded_at
   const [selected, setSelected] = useState<number[]>(data.interestIds)
   const errors = { interests: checkInterests(selected) }
   const { shown, validateAll } = useChecks(errors)
-  const { busy, error, submit } = useStepSubmit(() => saveInterests(selected), onDone)
-
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault()
-        if (validateAll()) void submit()
-      }}
-      noValidate
-    >
-      <InterestPicker interests={interests} selected={selected} onChange={setSelected} max={INTERESTS_TO_PICK} error={shown('interests')} />
-      <SaveError error={error} />
-      <ActionBar
-        busy={busy}
-        onBack={onBack}
-        label={data.profile.onboarded_at ? undefined : 'Finish sign-up'}
-        note={
-          <span aria-live="polite">
-            <strong>{selected.length}</strong> of {INTERESTS_TO_PICK} picked
-          </span>
-        }
-      />
-    </form>
-  )
-}
-
-type StyleAnswers = Record<(typeof STYLE_QUESTIONS)[number]['key'], string[]>
-
-function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
-  const p = data.profile
   const prefs = data.preferences
   const more = data.more
   // Your travel style (Lewis, 11 Oct): one answer to each, all optional.
@@ -583,6 +556,7 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
   // All optional, holiday questions too (Lewis, 13 Oct: testers were stopped by "Please choose at least one").
 
   const { busy, error, submit } = useStepSubmit(async () => {
+    await saveInterests(selected)
     const one = (key: keyof StyleAnswers) => (style[key][0] ?? null) as never
     await saveStyleAndPreferences(
       userId,
@@ -599,31 +573,39 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
       },
       prefs,
     )
-    if (more) await saveMore(userId, { ...personal, shown_fields: personal.shown_fields.filter((f) => personal[f]), holiday_prefs: holiday })
-    if (diet) await saveDiet(userId, diet)
+    if (editing && more) await saveMore(userId, { ...personal, shown_fields: personal.shown_fields.filter((f) => personal[f]), holiday_prefs: holiday })
+    if (editing && diet) await saveDiet(userId, diet)
   }, onDone)
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault()
-        void submit()
+        if (validateAll()) void submit()
       }}
       noValidate
     >
-      <section className="card form-card" aria-labelledby="style-heading">
-        <h2 id="style-heading" className="card-title">
-          Your travel style
+      <section className="step-section" aria-labelledby="interests-heading">
+        <h2 id="interests-heading" className="step-section-title">
+          Interests
         </h2>
-        <p className="hint">These help us find people who travel the way you do.</p>
-        {STYLE_QUESTIONS.map((q) => (
-          <ChipChoice<string> key={q.key} name={q.key} legend={q.label} options={q.options} selected={style[q.key]} onChange={(v) => setStyle((x) => ({ ...x, [q.key]: v }))} />
-        ))}
-        {/* Survey: sharing a twin room saves the single supplement. Shown on your card. */}
-        <ChipChoice<string> name="room_sharing" legend="Sharing a twin room" options={ROOM_SHARING} selected={room} onChange={setRoom} />
+        <p className="hint">Pick the {INTERESTS_TO_PICK} you love most, and meet people who love them too.</p>
+        <InterestPicker interests={interests} selected={selected} onChange={setSelected} max={INTERESTS_TO_PICK} error={shown('interests')} />
       </section>
 
-      {more && (
+      {/* All optional, and there are no wrong answers. */}
+      <section className="step-section" aria-labelledby="style-heading">
+        <h2 id="style-heading" className="step-section-title">
+          Your travel style
+        </h2>
+        {STYLE_QUESTIONS.map((q) => (
+          <ChipChoice<string> key={q.key} name={q.key} legend={q.label} options={q.options} selected={style[q.key]} onChange={(v) => setStyle((x) => ({ ...x, [q.key]: v }))} grid />
+        ))}
+        {/* Survey: sharing a twin room saves the single supplement. Shown on your card. */}
+        <ChipChoice<string> name="room_sharing" legend="Happy to share a twin room?" options={ROOM_SHARING} selected={room} onChange={setRoom} grid />
+      </section>
+
+      {editing && more && (
         <section className="card form-card" aria-labelledby="holiday-heading">
           <div className="section-head">
             <h2 id="holiday-heading" className="card-title">
@@ -646,77 +628,286 @@ function PreferencesStep({ userId, data, onDone, onBack }: StepProps) {
         </section>
       )}
 
-      <section className="card form-card" aria-labelledby="personal-heading">
-        <h2 id="personal-heading" className="card-title">
-          About you
-        </h2>
-        <fieldset className="field" data-field="diet">
-          <legend>Food (optional)</legend>
-          <div className="chips chips-compact chips-light">
-            {DIETS.map((d) => {
-              const checked = !!diet?.includes(d.value)
-              return (
-                <label className="chip" key={d.value}>
-                  <input
-                    type="checkbox"
-                    name="diet"
-                    value={d.value}
-                    checked={checked}
-                    onChange={() => setDiet((list) => (checked ? (list ?? []).filter((x) => x !== d.value) : [...(list ?? []), d.value]))}
-                  />
-                  <span>{d.label}</span>
-                </label>
-              )
-            })}
-          </div>
-        </fieldset>
-        <TextField
-          name="travelling-with"
-          label="Travelling with someone? (optional)"
-          hint="For example, “usually with my sister Jo”. Shown on your card."
-          maxLength={rules.profile.travellingWithMax}
-          value={travellingWith}
-          onChange={(e) => setTravellingWith(e.target.value)}
-        />
-        {more && (
-          <>
-            <p className="hint">These three stay hidden unless you choose to show them on your profile.</p>
-            {PERSONAL_FIELDS.map((f) => (
-              <div className="personal-field" key={f.key}>
-                <Field name={f.key} label={f.label}>
-                  {({ id, describedBy }) => (
-                    <Dropdown
-                      id={id}
-                      placeholder="Prefer not to say"
-                      value={personal[f.key] ?? ''}
-                      describedBy={describedBy}
-                      groups={[{ options: [...(personal[f.key] ? [{ value: '', label: 'Prefer not to say' }] : []), ...f.options.map((o) => ({ value: o.value, label: o.label }))] }]}
-                      onChange={(v) => setPersonal((x) => ({ ...x, [f.key]: v || null, shown_fields: v ? x.shown_fields : x.shown_fields.filter((k) => k !== f.key) }))}
-                    />
-                  )}
-                </Field>
-                {personal[f.key] && (
-                  <label className="switch-row switch-row-end">
+      {editing && (
+        <section className="card form-card" aria-labelledby="personal-heading">
+          <h2 id="personal-heading" className="card-title">
+            About you
+          </h2>
+          <fieldset className="field" data-field="diet">
+            <legend>Food (optional)</legend>
+            <div className="chips chips-compact chips-light">
+              {DIETS.map((d) => {
+                const checked = !!diet?.includes(d.value)
+                return (
+                  <label className="chip" key={d.value}>
                     <input
                       type="checkbox"
-                      role="switch"
-                      checked={personal.shown_fields.includes(f.key)}
-                      onChange={(e) => setPersonal((x) => ({ ...x, shown_fields: e.target.checked ? [...x.shown_fields, f.key] : x.shown_fields.filter((k) => k !== f.key) }))}
+                      name="diet"
+                      value={d.value}
+                      checked={checked}
+                      onChange={() => setDiet((list) => (checked ? (list ?? []).filter((x) => x !== d.value) : [...(list ?? []), d.value]))}
                     />
-                    <span>
-                      <strong>{personal.shown_fields.includes(f.key) ? 'Shown on your profile' : 'Hidden'}</strong>
-                    </span>
+                    <span>{d.label}</span>
                   </label>
-                )}
-              </div>
-            ))}
-          </>
-        )}
-      </section>
+                )
+              })}
+            </div>
+          </fieldset>
+          <TextField
+            name="travelling-with"
+            label="Travelling with someone? (optional)"
+            hint="For example, “usually with my sister Jo”. Shown on your card."
+            maxLength={rules.profile.travellingWithMax}
+            value={travellingWith}
+            onChange={(e) => setTravellingWith(e.target.value)}
+          />
+          {more && (
+            <>
+              <p className="hint">These three stay hidden unless you choose to show them on your profile.</p>
+              {PERSONAL_FIELDS.map((f) => (
+                <div className="personal-field" key={f.key}>
+                  <Field name={f.key} label={f.label}>
+                    {({ id, describedBy }) => (
+                      <Dropdown
+                        id={id}
+                        placeholder="Prefer not to say"
+                        value={personal[f.key] ?? ''}
+                        describedBy={describedBy}
+                        groups={[{ options: [...(personal[f.key] ? [{ value: '', label: 'Prefer not to say' }] : []), ...f.options.map((o) => ({ value: o.value, label: o.label }))] }]}
+                        onChange={(v) => setPersonal((x) => ({ ...x, [f.key]: v || null, shown_fields: v ? x.shown_fields : x.shown_fields.filter((k) => k !== f.key) }))}
+                      />
+                    )}
+                  </Field>
+                  {personal[f.key] && (
+                    <label className="switch-row switch-row-end">
+                      <input
+                        type="checkbox"
+                        role="switch"
+                        checked={personal.shown_fields.includes(f.key)}
+                        onChange={(e) => setPersonal((x) => ({ ...x, shown_fields: e.target.checked ? [...x.shown_fields, f.key] : x.shown_fields.filter((k) => k !== f.key) }))}
+                      />
+                      <span>
+                        <strong>{personal.shown_fields.includes(f.key) ? 'Shown on your profile' : 'Hidden'}</strong>
+                      </span>
+                    </label>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
+        </section>
+      )}
 
-      <p className="hint section-hint">Choose who you see (gender, age and distance) any time in Filters.</p>
       <SaveError error={error} />
-      <ActionBar busy={busy} onBack={onBack} label="Save" />
+      <ActionBar
+        busy={busy}
+        label={editing ? 'Save' : undefined}
+        note={
+          <span aria-live="polite">
+            <strong>{selected.length}</strong> of {INTERESTS_TO_PICK} interests picked
+          </span>
+        }
+      />
+    </form>
+  )
+}
+
+/** Places they'd love to go, then a line in their own words (Claude Design, 15 Oct). After sign-up it edits all the card answers. */
+function WishStep({ userId, data, onDone }: StepProps) {
+  const editing = !!data.profile.onboarded_at
+  return (
+    <>
+      <WishlistPicker />
+      {!data.card ? <FinishOnly editing={editing} onDone={onDone} /> : editing ? <CardStep userId={userId} data={data} onDone={onDone} /> : <OneAnswer userId={userId} data={data} onDone={onDone} />}
+    </>
+  )
+}
+
+/** On a database without the back of the card yet: just the button. */
+function FinishOnly({ editing, onDone }: { editing: boolean; onDone: () => Promise<void> }) {
+  const { busy, error, submit } = useStepSubmit(async () => {}, onDone)
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault()
+        void submit()
+      }}
+    >
+      <SaveError error={error} />
+      <ActionBar busy={busy} label={editing ? 'Done' : 'Finish'} />
+    </form>
+  )
+}
+
+/** Suggested places, when no one has trips planned yet to suggest from. */
+const PLACE_IDEAS = ['Seville', 'Vienna', 'Lisbon', 'Kyoto']
+
+/** Places I'd love to go: search, saved chips with ×, and a few ideas to add. Each change saves straight away. */
+function WishlistPicker() {
+  const [items, setItems] = useState<WishlistItem[] | null | undefined>(undefined)
+  const [popular, setPopular] = useState<PopularPlace[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  // Changing the key resets the picker after each add.
+  const [pickerKey, setPickerKey] = useState(0)
+
+  const load = () => listWishlist().then(setItems, (e) => setError(messageOf(e)))
+  useEffect(() => {
+    void load()
+    popularDestinations().then(setPopular)
+  }, [])
+
+  async function run(action: () => Promise<void>) {
+    setBusy(true)
+    setError(null)
+    try {
+      await action()
+      await load()
+    } catch (e) {
+      setError(messageOf(e))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function add(city: City | null) {
+    if (!city) return
+    setPickerKey((k) => k + 1)
+    if (items?.some((i) => i.city_id === city.id)) return setError(`${city.name} is already on your list.`)
+    await run(() => addToWishlist(city.id))
+  }
+
+  async function addIdea(name: string) {
+    await run(async () => {
+      const city = (await searchCities(name)).find((c) => c.name === name)
+      if (city) await addToWishlist(city.id)
+    })
+  }
+
+  if (items === null) return null
+  const saved = items ?? []
+  const savedNames = new Set(saved.map((i) => i.city.name))
+  const full = saved.length >= rules.wishlist.max
+  const ideas = (popular.length ? popular.map((x) => x.city) : PLACE_IDEAS).filter((n) => !savedNames.has(n)).slice(0, 4)
+
+  return (
+    <section className="step-section wish" aria-label="Places you’d love to go">
+      {!full && <CityPicker key={pickerKey} label="Places you’d love to go" value={null} onChange={add} />}
+      {saved.length > 0 && (
+        <ul className="chip-list wish-chips" aria-label="Saved places">
+          {saved.map((item) => (
+            <li key={item.city_id}>
+              <button type="button" className="chip-remove" aria-label={`Remove ${cityLabel(item.city)}`} disabled={busy} onClick={() => run(() => removeFromWishlist(item.city_id))}>
+                {item.city.name} <CloseIcon />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {full && <p className="hint">Your list is full. Remove a place to add another.</p>}
+      {!full && ideas.length > 0 && (
+        <>
+          <p className="wish-ideas-label">Ideas to add</p>
+          <ul className="chip-list wish-ideas">
+            {ideas.map((name) => (
+              <li key={name}>
+                <button type="button" className="chip-idea" disabled={busy} onClick={() => void addIdea(name)}>
+                  <Plus size={16} strokeWidth={2.2} aria-hidden="true" />
+                  {name}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      <FieldError error={error} />
+    </section>
+  )
+}
+
+/** The question they start with; "Change question" picks another. */
+const FIRST_QUESTION = 'perfect_holiday'
+
+/** One card answer at sign-up, optional. More can be added from Profile. */
+function OneAnswer({ userId, data, onDone }: StepProps) {
+  const existing = data.card?.card_answers ?? []
+  const [answer, setAnswer] = useDraft<CardAnswer>('card.one', existing[0] ?? { q: FIRST_QUESTION, a: '' })
+  const [changing, setChanging] = useState(false)
+  const errors = { a: answer.a.trim() ? checkAnswer(answer) : null }
+  const { shown, touch, validateAll } = useChecks(errors)
+  const { busy, error, submit } = useStepSubmit(async () => {
+    await saveCard(userId, [answer, ...existing.slice(1)])
+    clearDrafts('card.')
+  }, onDone)
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (validateAll()) void submit()
+      }}
+      noValidate
+    >
+      <section className="step-section" aria-labelledby="own-words">
+        <h2 id="own-words" className="step-section-title">
+          In your own words
+        </h2>
+        <p className="hint">Optional · shown on your card</p>
+        <div className="card own-words">
+          {changing ? (
+            <Field name="q" label="Choose a question">
+              {({ id, describedBy }) => (
+                <QuestionPicker
+                  id={id}
+                  value={answer.q}
+                  taken={new Set()}
+                  describedBy={describedBy}
+                  onChange={(q) => {
+                    setAnswer({ ...answer, q: q || FIRST_QUESTION })
+                    setChanging(false)
+                  }}
+                />
+              )}
+            </Field>
+          ) : (
+            <div className="own-words-head">
+              <p className="own-words-q" id="own-words-q">
+                {questionText(answer.q)}
+              </p>
+              <button type="button" className="btn-link" onClick={() => setChanging(true)}>
+                Change question
+              </button>
+            </div>
+          )}
+          <textarea
+            className="input textarea card-answer"
+            rows={3}
+            maxLength={ANSWER_MAX_CHARS}
+            aria-labelledby="own-words-q"
+            aria-describedby="own-words-count"
+            aria-invalid={shown('a') ? true : undefined}
+            value={answer.a}
+            onChange={(e) => {
+              setAnswer({ ...answer, a: e.target.value })
+              if (wordCount(e.target.value) > ANSWER_MAX_WORDS) touch('a')
+            }}
+            onBlur={() => touch('a')}
+          />
+          <p className="char-count" id="own-words-count">
+            {answer.a.length} / {ANSWER_MAX_CHARS}
+          </p>
+          <FieldError error={shown('a')} />
+        </div>
+      </section>
+      <SaveError error={error} />
+      <div className="action-bar action-bar-stack">
+        <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={busy}>
+          {busy ? 'Saving…' : 'Finish'}
+        </button>
+        <button type="button" className="btn btn-quiet btn-block" disabled={busy} onClick={() => void onDone()}>
+          Skip for now
+        </button>
+      </div>
     </form>
   )
 }
@@ -730,7 +921,7 @@ const EMPTY_ANSWERS: CardAnswer[] = [
   { q: '', a: '' },
 ]
 
-function CardStep({ userId, data, onDone, onBack }: StepProps) {
+function CardStep({ userId, data, onDone }: StepProps) {
   const [answers, saveAnswers] = useDraft<CardAnswer[]>(
     'card.answers',
     EMPTY_ANSWERS.map((empty, i) => (data.card?.card_answers ?? [])[i] ?? empty),
@@ -817,12 +1008,7 @@ function CardStep({ userId, data, onDone, onBack }: StepProps) {
         )
       })}
       <SaveError error={error} />
-      <ActionBar
-        busy={busy}
-        onBack={data.profile.onboarded_at ? onBack : undefined}
-        onSkip={data.profile.onboarded_at || answers.some((x) => x.q) ? undefined : () => void onDone()}
-        label={data.profile.onboarded_at ? 'Save' : 'Finish sign-up'}
-      />
+      <ActionBar busy={busy} label="Save" />
     </form>
   )
 }

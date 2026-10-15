@@ -1,17 +1,25 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
+import { UsersRound } from 'lucide-react'
 import { Layout, Monogram } from '../components/Layout'
+import { AddIcon } from '../components/Icons'
 import { brand } from '../lib/brand'
 import { longDate } from '../lib/dates'
 import { count, rules } from '../lib/rules'
 import { supabase } from '../lib/supabase'
+import { useSession } from '../lib/session-context'
+import { useMyProfile } from '../lib/useMyProfile'
 
 type Welcome = { plus_until: string | null }
 
-/** Shown once, straight after a member finishes sign-up. */
+/** Shown once, straight after a member finishes sign-up: their member card and a first step (Claude Design, 15 Oct). */
 export function WelcomeScreen() {
+  const { session } = useSession()
+  const { data } = useMyProfile(session!.user.id)
   const [welcome, setWelcome] = useState<Welcome | null>(null)
   const heading = useRef<HTMLHeadingElement>(null)
+  const name = data?.profile.display_name ?? ''
+  const [since] = useState(() => new Date().toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }))
 
   useEffect(() => {
     heading.current?.focus()
@@ -22,24 +30,51 @@ export function WelcomeScreen() {
   }, [])
 
   return (
-    <Layout>
+    <Layout bare>
       <section className="welcome">
-        <Monogram size={88} />
-        <h1 ref={heading} tabIndex={-1}>
-          Welcome to the Collective
-        </h1>
-        <div className="card welcome-gift">
-          <h2>
-            {brand.plusName} is on us for {count(rules.founding.plusMonths, 'month')}
-          </h2>
-          <p>Connect with as many people as you like{welcome?.plus_until ? `, until ${longDate(welcome.plus_until.slice(0, 10))}` : ''}. No card needed.</p>
+        <div className="member-card" aria-hidden="true">
+          <span className="member-card-brand">
+            <Monogram size={44} />
+            <span>
+              <strong>{brand.shortName}</strong>
+              <span>{brand.name.replace(brand.shortName, '').trim()}</span>
+            </span>
+          </span>
+          <span className="member-card-foot">
+            <span>
+              <small>Member</small>
+              <strong>{name}</strong>
+            </span>
+            <span>Since {since}</span>
+          </span>
         </div>
-        <Link className="btn btn-primary btn-block btn-lg" to="/connections">
-          Start meeting people
-        </Link>
-        <Link className="btn btn-secondary btn-block" to="/trips/new">
-          Add a trip (optional)
-        </Link>
+        <h1 ref={heading} tabIndex={-1}>
+          You’re in{name ? `, ${name}` : ''}
+        </h1>
+        <p className="lede">Welcome to the Collective. Add your first trip to see who’s going your way.</p>
+        <div className="card welcome-rules">
+          <span className="welcome-rules-icon" aria-hidden="true">
+            <UsersRound size={22} strokeWidth={1.8} />
+          </span>
+          <div>
+            <strong>Here for friendship and travel</strong>
+            <p>Be kind, meet somewhere public first, and keep it friendly.</p>
+            <Link to="/community-rules">Read the community rules</Link>
+          </div>
+        </div>
+        <p className="welcome-gift">
+          {brand.plusName} is on us for {count(rules.founding.plusMonths, 'month')}
+          {welcome?.plus_until ? `, until ${longDate(welcome.plus_until.slice(0, 10))}` : ''}. No card needed.
+        </p>
+        <div className="welcome-actions">
+          <Link className="btn btn-primary btn-block btn-lg" to="/trips/new">
+            <AddIcon />
+            Add your first trip
+          </Link>
+          <Link className="btn btn-secondary btn-block btn-lg" to="/connections">
+            See who’s going
+          </Link>
+        </div>
       </section>
     </Layout>
   )

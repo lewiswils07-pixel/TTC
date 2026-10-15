@@ -13,12 +13,11 @@ test('a member downloads their data, then deletes their account', async ({ brows
   await page.getByRole('radio', { name: 'Woman', exact: true }).check({ force: true })
   await pickPlace(page, 'Leed', 'Leeds, West Yorkshire')
   await page.getByRole('button', { name: /continue/i }).click()
-  await page.getByRole('button', { name: /continue|skip/i }).click()
   for (const name of ['Museums', 'Wine', 'Walking', 'Photography', 'Theatre', 'Local cuisine', 'Gardens', 'Architecture']) {
     await page.getByRole('checkbox', { name, exact: true }).evaluate((el: HTMLElement) => el.click())
   }
   await finishSignUp(page)
-  await expect(page.getByRole('heading', { name: 'Welcome to the Collective' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /^You’re in/ })).toBeVisible()
 
   await page.goto('/profile')
   await page.getByRole('link', { name: 'Settings' }).click()
