@@ -11,7 +11,7 @@ const TIPS: { title: string; text: string }[] = [
   { title: 'Meet somewhere busy, in daylight', text: 'A café, a museum or a hotel lobby is ideal. Never meet first at a private home or where you’re staying.' },
   {
     title: 'Tell someone you trust',
-    text: 'Share who you’re meeting, where and when. In your chat, tap “Tell someone you trust” to send them a private link, then tap “I’m back safe” when you’re home.',
+    text: 'Share who you’re meeting, where and when. In your chat, tap ⋯ then “Share where you’re meeting” to send them a private link, then tap “I’m back safe” when you’re home.',
   },
   { title: 'Keep your own plans', text: 'Arrange your own transport and keep your own booking until you know each other well. You don’t need to share where you’re staying.' },
   { title: 'Never send money', text: 'Don’t send or lend money, buy gift cards, or share bank details with someone you haven’t met, whatever the story. Report anyone who asks.' },

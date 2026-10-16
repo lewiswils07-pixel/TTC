@@ -107,13 +107,13 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
 
   await test.step('share the meet-up with someone they trust, then check in', async () => {
     await a.getByRole('button', { name: 'More options' }).click()
-    await a.getByRole('link', { name: 'Tell someone you trust' }).click()
-    await a.getByRole('button', { name: 'Make the link' }).click()
+    await a.getByRole('link', { name: 'Share where you’re meeting' }).click()
+    await a.getByRole('button', { name: 'Share the details' }).click()
     await expect(a.getByText('Please say where you’re meeting', { exact: false })).toBeVisible()
-    await a.getByLabel('Where are you meeting?').fill('Café de Flore, Paris')
-    await a.getByLabel('When?').fill(`${isoIn(26)}T11:00`)
-    await a.getByLabel('Anything else? (optional)').fill('I’ll text you by 3pm')
-    await a.getByRole('button', { name: 'Make the link' }).click()
+    await a.getByLabel('Where', { exact: true }).fill('Café de Flore, Paris')
+    await a.getByLabel('When', { exact: true }).fill(`${isoIn(26)}T11:00`)
+    await a.getByLabel('Anything else (optional)').fill('I’ll text you by 3pm')
+    await a.getByRole('button', { name: 'Share the details' }).click()
     await expect(a.getByText('Your link is ready', { exact: false })).toBeVisible()
 
     const { data: share } = await admin.from('meetup_shares').select('token').eq('owner_id', lewis).single()

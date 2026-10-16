@@ -24,7 +24,7 @@ const STEPS: { icon: string; title: string; text: string }[] = [
   {
     icon: '♡',
     title: 'Meet up safely',
-    text: 'Before you meet, “Tell someone you trust” sends a friend the details. You can block or report anyone from their card or the chat menu.',
+    text: 'Before you meet, “Share where you’re meeting” in the chat menu sends a friend the details. You can block or report anyone from their card or the chat menu.',
   },
 ]
 

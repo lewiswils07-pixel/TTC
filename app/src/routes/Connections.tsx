@@ -15,6 +15,10 @@ import { myConnections, respondToRequest, withdrawRequest, type Connection } fro
 import { ageLabel } from '../lib/options'
 import { myBlocks, unblockMember, type BlockedMember } from '../lib/safety'
 import { NextIcon } from '../components/Icons'
+import { Info, Plane } from 'lucide-react'
+import { monthName } from '../lib/dates'
+import { brand } from '../lib/brand'
+import { loadRequests, PLUS_SHOW_LEFT_BELOW } from '../lib/plan'
 
 /**
  * Connections on the Chat tab. "other" sits under Chats: people you're connected
@@ -96,34 +100,56 @@ export function ConnectionsSections({
 
       {show === 'requests' && (
         <section aria-labelledby="requests-title">
-          <h2 className="section-title" id="requests-title">
+          <h2 className="visually-hidden" id="requests-title">
             Requests for you
           </h2>
-          {received.length === 0 && items && <p className="hint section-hint">No new requests. When someone asks to connect, you’ll see them here.</p>}
-          <ul className="person-list">
+          <p className="lede requests-lede">{received.length > 0 ? 'Members who’d like to connect with you.' : items ? 'No new requests. When someone asks to connect, you’ll see them here.' : ''}</p>
+          <ul className="request-list">
             {received.map((c) => (
-              <PersonCard key={c.id} item={c} onBlocked={blockedOne}>
-                <div className="action-row">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    disabled={busy === c.id}
-                    onClick={() => act(c.id, () => respondToRequest(c.id, false), `You said no thanks to ${c.display_name}.`)}
-                  >
-                    No thanks
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    disabled={busy === c.id}
-                    onClick={() => act(c.id, () => respondToRequest(c.id, true), `You’re now connected with ${c.display_name}.`)}
-                  >
-                    Accept
-                  </button>
+              <li key={c.id} className="card request-card">
+                {c.trip_city && (
+                  <p className="request-banner">
+                    <Plane size={20} strokeWidth={1.8} aria-hidden="true" />
+                    Also going to {c.trip_city}
+                    {c.trip_start ? ` in ${monthName(c.trip_start)}` : ''}
+                  </p>
+                )}
+                <div className="request-body">
+                  <div className="request-who">
+                    <Avatar name={c.display_name} path={c.photo_path} size="lg" square />
+                    <div>
+                      <h3>
+                        {c.display_name}
+                        {c.birth_year ? `, ${ageLabel(c.birth_year)}` : ''}
+                      </h3>
+                      {homeLabel(c) && <p>{homeLabel(c)}</p>}
+                    </div>
+                    <SafetyMenu profileId={c.profile_id} name={c.display_name} onBlocked={blockedOne} />
+                  </div>
+                  {c.note && <blockquote className="request-note">“{c.note}”</blockquote>}
+                  <div className="action-row">
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      disabled={busy === c.id}
+                      onClick={() => act(c.id, () => respondToRequest(c.id, false), `You said no thanks to ${c.display_name}.`)}
+                    >
+                      Not now
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      disabled={busy === c.id}
+                      onClick={() => act(c.id, () => respondToRequest(c.id, true), `You’re now connected with ${c.display_name}.`)}
+                    >
+                      Accept
+                    </button>
+                  </div>
                 </div>
-              </PersonCard>
+              </li>
             ))}
           </ul>
+          <RequestsLeft />
         </section>
       )}
 
@@ -137,19 +163,26 @@ export function ConnectionsSections({
           <p className="hint section-hint">
             You’re connected but haven’t chatted yet. Before you meet, read our tips for <Link to="/meeting-safely">meeting up safely</Link>.
           </p>
-          <ul className="person-list">
+          <ul className="chat-list">
             {quiet.map((c) => {
               const chat = chatFor.get(c.profile_id)
               return (
-                <PersonCard key={c.id} item={c} onBlocked={blockedOne} profileLink>
+                <li key={c.id} className="chat-row quiet-row">
+                  <Link className="quiet-who" to={`/connections/people/${c.profile_id}`} aria-label={`View ${c.display_name}’s profile`}>
+                    <Avatar name={c.display_name} path={c.photo_path} square />
+                    <span className="chat-row-text">
+                      <strong>{c.display_name}</strong>
+                      <span className="chat-row-last">{[c.birth_year && ageLabel(c.birth_year), homeLabel(c)].filter(Boolean).join(' · ')}</span>
+                    </span>
+                  </Link>
                   {chat ? (
-                    <Link className="btn btn-primary btn-block" to={`/messages/${chat.id}`}>
-                      Say hello to {c.display_name}
+                    <Link className="btn btn-primary btn-small" to={`/messages/${chat.id}`} aria-label={`Say hello to ${c.display_name}`}>
+                      Say hello
                     </Link>
                   ) : (
-                    <p className="hint">Your chat is being set up. Check back in a moment.</p>
+                    <span className="hint">Setting up…</span>
                   )}
-                </PersonCard>
+                </li>
               )
             })}
           </ul>
@@ -255,6 +288,35 @@ function PersonCard({
       {children}
       <SafetyMenu profileId={item.profile_id} name={item.display_name} onBlocked={onBlocked} />
     </li>
+  )
+}
+
+/** How many requests you can still send this week, under your requests (Claude Design, 16 Oct). Quiet for Sodalis+ until near the weekly guard. */
+function RequestsLeft() {
+  const [left, setLeft] = useState<{ left: number; plus: boolean; show: boolean } | null>(null)
+  useEffect(() => {
+    loadRequests().then(
+      (r) => setLeft({ left: r.left, plus: r.plus, show: !r.plus || r.left <= PLUS_SHOW_LEFT_BELOW }),
+      () => undefined,
+    )
+  }, [])
+  if (!left?.show) return null
+  return (
+    <p className="requests-left">
+      <Info size={20} strokeWidth={1.8} aria-hidden="true" />
+      <span>
+        You can send {left.left} more connection {left.left === 1 ? 'request' : 'requests'} this week.
+        {!left.plus && (
+          <>
+            {' '}
+            <Link to="/profile?tab=plus" className="plus-word">
+              {brand.plusName}
+            </Link>{' '}
+            members have no limit.
+          </>
+        )}
+      </span>
+    </p>
   )
 }
 
