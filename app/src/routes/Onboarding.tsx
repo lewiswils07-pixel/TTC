@@ -211,6 +211,7 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
   const distance = prefs.max_distance_km
   // The photo and a few words sit on this first screen too (Claude Design, 15 Oct). Both optional.
   const photo = usePhotoPick(p.photo_path)
+  const [headline, setHeadline] = useDraft('basics.headline', p.headline ?? '')
   const [bio, setBio] = useDraft('basics.bio', p.bio ?? '')
 
   const errors = {
@@ -231,7 +232,7 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
     await saveBasics(userId, { display_name: name.trim(), birth_date: birthDate(dobDay, dobMonth, dobYear), gender: gender[0], home_city_id: city!.id })
     await saveMeetPreferences(userId, { genders, age_min: ages[0], age_max: ages[1], max_distance_km: distance })
     if (photo.blob) await uploadPhoto(userId, photo.blob, p.photo_path)
-    await saveAboutMe(userId, { bio: bio.trim() || null })
+    await saveAboutMe(userId, { headline: headline.trim() || null, bio: bio.trim() || null })
     clearDrafts('basics.')
   }, onDone)
 
@@ -356,6 +357,23 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
         </div>
         <PhotoField pick={photo} />
         {p.onboarded_at && data.more && <PhotoBookEditor userId={userId} start={data.more.photo_book} />}
+        <div className="field" data-field="headline">
+          <label htmlFor="headline">
+            You in one line <span className="label-quiet">(optional)</span>
+          </label>
+          <input
+            id="headline"
+            className="input"
+            maxLength={rules.profile.headlineMax}
+            placeholder="For example, happiest with a map and a good coffee."
+            aria-describedby="headline-hint"
+            value={headline}
+            onChange={(e) => setHeadline(e.target.value)}
+          />
+          <p className="hint" id="headline-hint">
+            Shown under your name on your card
+          </p>
+        </div>
         <div className="field" data-field="bio">
           <label htmlFor="bio">
             A few words about you <span className="label-quiet">(optional)</span>
@@ -836,7 +854,7 @@ function OneAnswer({ userId, data, onDone }: StepProps) {
   const errors = { a: answer.a.trim() ? checkAnswer(answer) : null }
   const { shown, touch, validateAll } = useChecks(errors)
   const { busy, error, submit } = useStepSubmit(async () => {
-    await saveCard(userId, [answer, ...existing.slice(1)])
+    await saveCard(userId, [answer, ...existing.slice(1, ANSWERS_TO_PICK)])
     clearDrafts('card.')
   }, onDone)
 
@@ -915,11 +933,7 @@ function OneAnswer({ userId, data, onDone }: StepProps) {
 /** The word limit shows (in red) once an answer gets this long. */
 const WORDS_WARNING = ANSWER_MAX_WORDS - 5
 
-const EMPTY_ANSWERS: CardAnswer[] = [
-  { q: '', a: '' },
-  { q: '', a: '' },
-  { q: '', a: '' },
-]
+const EMPTY_ANSWERS: CardAnswer[] = Array.from({ length: ANSWERS_TO_PICK }, () => ({ q: '', a: '' }))
 
 function CardStep({ userId, data, onDone }: StepProps) {
   const [answers, saveAnswers] = useDraft<CardAnswer[]>(

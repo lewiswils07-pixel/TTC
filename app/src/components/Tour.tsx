@@ -9,7 +9,7 @@ const STEPS: { icon: string; title: string; text: string }[] = [
   {
     icon: '↻',
     title: 'Read more about someone',
-    text: 'Tap Read more to open someone’s card: their trips, how they holiday and three questions they chose to answer. Once you’re connected, you can see their full profile.',
+    text: 'Tap Read more to open someone’s card: their trips, how they holiday and two questions they chose to answer. Once you’re connected, you can see their full profile.',
   },
   {
     icon: '✈',

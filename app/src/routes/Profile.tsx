@@ -112,6 +112,7 @@ export function Profile() {
             </Link>
           </div>
         </div>
+        {profile.headline && <p className="me-headline">“{profile.headline}”</p>}
         {profile.bio && <p className="me-bio">{profile.bio}</p>}
         <Link className="btn btn-secondary btn-block me-preview" to="/profile/preview">
           <Eye size={20} strokeWidth={1.8} aria-hidden="true" />
