@@ -3,7 +3,10 @@ import { peek, remember } from '../lib/cache'
 import { SkeletonRows } from './Skeleton'
 import { Link } from 'react-router'
 import { cityLabel, type City } from '../lib/cities'
-import { tripDates } from '../lib/dates'
+import { startsIn, tripDates } from '../lib/dates'
+import { loadFeed, type FeedPerson } from '../lib/feed'
+import { BriefcaseBusiness, Lock } from 'lucide-react'
+import { Avatar } from './Avatar'
 import { messageOf } from '../lib/errors'
 import { rules } from '../lib/rules'
 import { addToWishlist, listMyTrips, listWishlist, removeFromWishlist, type Trip, type WishlistItem } from '../lib/trips'
@@ -13,26 +16,20 @@ import { CloseIcon, NextIcon } from './Icons'
 
 const MAX_WISHLIST = rules.wishlist.max
 
-/** The member's upcoming trips, each linking to its edit screen. */
+/** The member's upcoming trips as big cards: the place, the dates, how soon, and who's going (Claude Design, 15 Oct). */
 export function MyTrips() {
   const [trips, setTrips] = useState<Trip[] | null | undefined>(() => peek('trips'))
+  const [feed, setFeed] = useState<FeedPerson[] | null>(() => peek<FeedPerson[]>('feed') ?? null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     remember('trips', listMyTrips()).then(setTrips, (e) => setError(messageOf(e)))
+    remember('feed', loadFeed()).then(setFeed, () => setFeed([]))
   }, [])
 
   if (trips === null) return null
   return (
-    <section className="card section-card" aria-labelledby="my-trips">
-      <div className="section-head">
-        <h2 id="my-trips">My trips</h2>
-        {trips && trips.length > 0 && (
-          <Link className="btn btn-secondary btn-small" to="/trips/new">
-            Add a trip
-          </Link>
-        )}
-      </div>
+    <section className="trip-cards" aria-label="Your trips">
       {error && (
         <p className="error" role="alert">
           {error}
@@ -40,30 +37,56 @@ export function MyTrips() {
       )}
       {trips === undefined && !error && <SkeletonRows rows={2} label="Loading your trips…" />}
       {trips && trips.length === 0 && (
-        <div className="empty">
-          <p>Add where you’re going and when. We’ll use it to find members travelling at the same time.</p>
+        <div className="card going-empty">
+          <span className="going-empty-art" aria-hidden="true">
+            <BriefcaseBusiness size={40} strokeWidth={1.6} />
+          </span>
+          <h2>Where are you off to next?</h2>
+          <p>Add where you’re going and when. We’ll find members travelling at the same time.</p>
           <Link className="btn btn-primary btn-block" to="/trips/new">
             Add your first trip
           </Link>
         </div>
       )}
       {trips && trips.length > 0 && (
-        <ul className="trip-list">
-          {trips.map((trip) => (
-            <li key={trip.id}>
-              <Link className="trip-row" to={`/trips/${trip.id}`} aria-label={`${cityLabel(trip.city)}, ${tripDates(trip.start_date, trip.end_date)}. See who’s going`}>
-                <CityPhoto city={trip.city.name} width={120} className="trip-thumb" />
-                <span className="trip-text">
-                  <strong>{cityLabel(trip.city)}</strong>
-                  <span className="trip-meta">{tripDates(trip.start_date, trip.end_date)}</span>
-                  {trip.visibility === 'hidden' && <span className="tag tag-muted">Hidden</span>}
-                </span>
-                <span className="trip-chevron" aria-hidden="true">
-                  <NextIcon />
-                </span>
-              </Link>
-            </li>
-          ))}
+        <ul className="trip-card-list">
+          {trips.map((trip) => {
+            const going = (feed ?? []).filter((p) => p.trips.some((t) => t.mine === trip.id))
+            return (
+              <li key={trip.id}>
+                <Link className="card trip-card" to={`/trips/${trip.id}`}>
+                  <span className="trip-card-top">
+                    <CityPhoto city={trip.city.name} width={720} code className="trip-card-photo" />
+                    <span className="trip-card-when">{startsIn(trip.start_date, trip.end_date)}</span>
+                  </span>
+                  <span className="trip-card-body">
+                    <strong className="trip-card-city">{cityLabel(trip.city)}</strong>
+                    <span className="trip-card-dates">{tripDates(trip.start_date, trip.end_date)}</span>
+                    <span className="trip-card-foot">
+                      {trip.visibility === 'hidden' ? (
+                        <>
+                          <Lock size={18} strokeWidth={1.8} aria-hidden="true" />
+                          <span>Only you can see this trip</span>
+                        </>
+                      ) : going.length > 0 ? (
+                        <>
+                          <span className="face-stack" aria-hidden="true">
+                            {going.slice(0, 3).map((p) => (
+                              <Avatar key={p.profile_id} name={p.display_name} path={p.photo_path} size="sm" />
+                            ))}
+                          </span>
+                          <strong>{going.length === 1 ? '1 member going' : `${going.length} members going`}</strong>
+                        </>
+                      ) : (
+                        <span>See who’s going</span>
+                      )}
+                      <NextIcon />
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            )
+          })}
         </ul>
       )}
     </section>

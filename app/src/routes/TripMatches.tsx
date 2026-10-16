@@ -9,13 +9,16 @@ import { ShareTrip } from '../components/ShareTrip'
 import { TripPlanner } from '../components/TripPlanner'
 import { picksFor } from '../data/picks'
 import { cityLabel } from '../lib/cities'
-import { isoDate, tripDates } from '../lib/dates'
+import { isoDate, shortDates, tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { homeLabel, tripCompanions, type TripCompanion } from '../lib/matching'
 import { ageLabel } from '../lib/options'
 import { Avatar } from '../components/Avatar'
 import { getTrip, type Trip } from '../lib/trips'
 import { BackIcon } from '../components/Icons'
+import { Pencil } from 'lucide-react'
+import { remember } from '../lib/cache'
+import { loadFeed } from '../lib/feed'
 
 type Tab = 'people' | 'plan' | 'tips'
 const TABS: { key: Tab; label: string }[] = [
@@ -34,6 +37,7 @@ export function TripMatches() {
   const [error, setError] = useState<string | null>(null)
   const heading = useRef<HTMLHeadingElement>(null)
   const [today] = useState(() => isoDate(new Date()))
+  const [going, setGoing] = useState(0)
 
   useEffect(() => {
     // Only people you're connected or in touch with (Lewis, 11 Oct): everyone
@@ -44,6 +48,10 @@ export function TripMatches() {
         setCompanions(c)
       },
       (e) => setError(messageOf(e)),
+    )
+    remember('feed', loadFeed()).then(
+      (list) => setGoing(list.filter((p) => p.trips.some((t) => t.mine === tripId)).length),
+      () => {},
     )
   }, [tripId])
 
@@ -67,30 +75,38 @@ export function TripMatches() {
   const picks = picksFor(trip.city_id)
   return (
     <Layout tab="trips">
-      <Link className="back-link" to="/trips">
-        <BackIcon />
-        My trips
-      </Link>
+      {/* A burgundy banner with the place's letters behind (Claude Design, 15 Oct). */}
       <div className="trip-hero">
         <CityPhoto city={trip.city.name} width={720} credit className="trip-hero-photo" />
+        <span className="trip-hero-code" aria-hidden="true">
+          {trip.city.name.slice(0, 3).toUpperCase()}
+        </span>
+        <div className="trip-hero-bar">
+          <Link className="trip-hero-btn trip-hero-back" to="/trips" aria-label="Back to your trips">
+            <BackIcon />
+          </Link>
+          <Link className="trip-hero-btn" to={`/trips/${trip.id}/edit`}>
+            <Pencil size={18} strokeWidth={2} aria-hidden="true" />
+            Edit trip
+          </Link>
+        </div>
         <div className="trip-hero-text">
           <p className="eyebrow">Your trip</p>
           <h1 ref={heading} tabIndex={-1}>
             {cityLabel(trip.city)}
           </h1>
+          <p className="trip-hero-pills">
+            <span className="trip-pill">{tripDates(trip.start_date, trip.end_date)}</span>
+            {trip.visibility === 'hidden' ? (
+              <span className="trip-pill trip-pill-dark">Only you can see this trip</span>
+            ) : (
+              going > 0 && <span className="trip-pill trip-pill-dark">{going === 1 ? '1 member going' : `${going} members going`}</span>
+            )}
+          </p>
         </div>
       </div>
-      <div className="trip-summary">
-        <p className="lede">
-          {tripDates(trip.start_date, trip.end_date)}
-          {trip.visibility === 'hidden' && ' · Hidden from suggestions'}
-        </p>
-        <div className="action-row trip-actions">
-          <ShareTrip city={trip.city.name} start={trip.start_date} />
-          <Link className="btn btn-secondary btn-small" to={`/trips/${trip.id}/edit`}>
-            Edit trip
-          </Link>
-        </div>
+      <div className="trip-share">
+        <ShareTrip city={trip.city.name} start={trip.start_date} />
       </div>
 
       <div className="hub-tabs trip-tabs" role="tablist" aria-label="Your trip">
@@ -174,16 +190,14 @@ function CompanionRow({ person }: { person: TripCompanion }) {
   const home = homeLabel(person)
   return (
     <li className="card person-card companion-row">
-      <Avatar name={person.display_name} path={person.photo_path} />
+      <Avatar name={person.display_name} path={person.photo_path} size="lg" />
       <div className="companion-who">
-        <h3>{person.display_name}</h3>
-        <p className="profile-meta">
-          {person.birth_year ? `Age ${ageLabel(person.birth_year)}` : null}
-          {home && ` · ${home}`}
-        </p>
-        <p className="profile-meta">
-          {COMPANION_STATUS[person.status]} · There {tripDates(person.trip_start, person.trip_end)}
-        </p>
+        <h3>
+          {person.display_name}
+          {person.birth_year ? `, ${ageLabel(person.birth_year)}` : ''}
+        </h3>
+        <p className="profile-meta">{[home, shortDates(person.trip_start, person.trip_end)].filter(Boolean).join(' · ')}</p>
+        <p className="companion-status">{COMPANION_STATUS[person.status]}</p>
       </div>
       {person.status === 'they_asked' ? (
         <Link className="btn btn-primary btn-small" to="/requests">
