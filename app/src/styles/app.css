@@ -1039,13 +1039,6 @@ html:has(.has-tabs) { scroll-padding: calc(var(--safe-top) + 76px) 0 calc(var(--
 
 /* a connection's full profile */
 .member-page { display: flex; flex-direction: column; gap: var(--space-4); }
-.member-hero {
-  position: relative; width: min(100%, 420px); aspect-ratio: 4 / 5; margin-inline: auto; border-radius: var(--radius); overflow: hidden;
-  background: linear-gradient(160deg, var(--brand-disc), color-mix(in srgb, var(--brand-disc) 60%, #000));
-}
-.member-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.member-hero h1 { margin: 0; font-size: 1.75rem; line-height: 1.15; color: #fff; }
-.member-hero h1:focus { outline: none; }
 .member-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3); }
 .member-actions:empty { display: none; }
 .member-card-back { background: linear-gradient(160deg, var(--brand-disc), color-mix(in srgb, var(--brand-disc) 60%, #000)); color: #fff; border-color: color-mix(in srgb, var(--brand-gold) 50%, transparent); }
@@ -2246,3 +2239,135 @@ p.welcome-gift { width: 100%; margin: 0; padding: 12px 16px; border-radius: 14px
 .trips-row-text .tag-plus { margin: 0; }
 #trip-panel .person-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: var(--space-4); background: none; border: 0; box-shadow: none; overflow: visible; }
 #trip-panel .person-list > .card { border: 1px solid var(--line); border-radius: 18px; background: var(--card); box-shadow: var(--shadow-sm); }
+
+/* ------------------------------------------------ Chat and meeting up (Claude Design, 16 Oct) */
+.avatar-square { border-radius: 16px; border: 0; }
+.avatar-square.avatar-sm { border-radius: 12px; }
+.avatar-square.avatar-lg { width: 88px; height: 100px; border-radius: 16px; }
+.avatar-square.avatar-empty { position: relative; overflow: hidden; background: linear-gradient(165deg, var(--photo-a), var(--photo-b)); color: #fff; font-family: var(--serif); font-weight: 500; }
+.avatar-group { display: grid; place-items: center; background: var(--gold-tint); color: var(--gold-ink); }
+
+/* The chat list: one card, a row per chat. */
+.chat-list { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; box-shadow: var(--shadow-sm); }
+.chat-list > li + li { border-top: 1px solid var(--line); }
+.chat-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; color: var(--ink); text-decoration: none; }
+a.chat-row:hover { background: color-mix(in srgb, var(--paper-tint) 45%, var(--card)); }
+.chat-row-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.chat-row-top { display: flex; align-items: baseline; gap: var(--space-2); }
+.chat-row-top strong { flex: 1; min-width: 0; font-size: 1.0625rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-row-time { flex: none; color: var(--muted); font-size: 0.875rem; }
+.chat-row.is-unread .chat-row-time { color: var(--accent); font-weight: 700; }
+.chat-row-last { display: flex; align-items: center; gap: var(--space-2); color: var(--ink-soft); }
+.chat-row-last > span:first-child { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-row.is-unread .chat-row-last { color: var(--ink); font-weight: 700; }
+.unread-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.quiet-who { flex: 1; min-width: 0; display: flex; align-items: center; gap: 14px; color: inherit; text-decoration: none; }
+.quiet-who:hover strong { text-decoration: underline; }
+.quiet-row .btn-small { flex: none; }
+.groups-start { margin-top: var(--space-4); }
+
+/* Requests */
+.requests-lede { margin: 0 0 var(--space-4); }
+.request-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-4); }
+.request-card { padding: 0; overflow: hidden; }
+.request-banner { display: flex; align-items: center; gap: 10px; margin: 0; padding: 12px 18px; background: var(--accent-tint); color: var(--ink); font-weight: 700; }
+.request-banner svg { color: var(--accent); flex: none; }
+.request-body { display: flex; flex-direction: column; gap: var(--space-4); padding: 18px; }
+.request-who { display: flex; align-items: flex-start; gap: var(--space-4); }
+.request-who > div { flex: 1; min-width: 0; }
+.request-who h3 { margin: 4px 0 2px; font-family: var(--serif); font-weight: 500; font-size: 1.75rem; line-height: 1.1; overflow-wrap: anywhere; }
+.request-who p { margin: 0; color: var(--ink-soft); }
+.request-who .safety-more { position: static; flex: none; margin: -6px -8px 0 0; }
+.request-note { margin: 0; padding: 14px 18px; border: 0; border-radius: 14px; background: var(--paper-tint); font-family: var(--serif); font-size: 1.1875rem; line-height: 1.45; font-style: normal; }
+.request-card .action-row { width: 100%; }
+.request-card .action-row .btn { flex: 1; }
+.requests-left { display: flex; align-items: flex-start; gap: 10px; margin: var(--space-5) 0 0; color: var(--ink-soft); }
+.requests-left svg { flex: none; margin-top: 2px; color: var(--muted); }
+.plus-word { color: var(--gold-ink); font-weight: 700; text-decoration: none; }
+
+/* One chat */
+.chat-head { margin: 0 calc(var(--space-4) * -1); padding: var(--space-2) var(--space-3) var(--space-3); gap: var(--space-2); }
+.chat-who { gap: 12px; }
+.chat-who-text { display: flex; flex-direction: column; min-width: 0; }
+.chat-who-text h1 { font-family: inherit; font-size: 1.125rem; font-weight: 700; line-height: 1.25; }
+.chat-who-sub { color: var(--ink-soft); font-size: 0.9375rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-who .avatar-sm { width: 44px; height: 44px; }
+.chat-more { flex: none; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--ink); cursor: pointer; }
+.chat-more:hover { background: var(--paper-tint); }
+.chat-body { gap: var(--space-3); }
+.meet-guide { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 16px; border-radius: 20px; background: var(--gold-tint); border: 1.5px solid color-mix(in srgb, var(--brand-gold) 70%, transparent); }
+.meet-guide-head { display: flex; align-items: center; gap: 12px; }
+.meet-guide-head h2 { flex: 1; margin: 0; font-family: var(--serif); font-weight: 500; font-size: 1.5rem; }
+.meet-guide-icon { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--ink); color: var(--brand-gold); }
+.meet-guide-head .icon-btn { width: 40px; height: 40px; display: grid; place-items: center; color: var(--ink-soft); border-radius: 50%; }
+.meet-guide ul { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.meet-guide li { padding: 12px 14px; border-radius: 14px; background: var(--card); font-weight: 600; line-height: 1.3; }
+.meet-guide li::before { content: none; }
+.meet-guide-link { align-self: flex-start; color: var(--gold-ink); font-weight: 700; text-decoration: none; min-height: 32px; display: inline-flex; align-items: center; }
+.meet-guide-link:hover { text-decoration: underline; }
+.message-list { gap: 6px; }
+.message-day { align-self: center; margin: var(--space-3) 0 var(--space-1); }
+.message-day span { display: inline-block; padding: 4px 12px; border-radius: 999px; background: var(--paper-tint); color: var(--ink-soft); font-size: 0.875rem; font-weight: 600; }
+.message { max-width: 80%; padding: 10px 16px; border-radius: 20px; font-size: 1.0625rem; line-height: 1.45; }
+.message-mine { border-bottom-right-radius: 6px; }
+.message-theirs { border-bottom-left-radius: 6px; }
+.message-time { margin-top: 2px; font-size: 0.8125rem; }
+.message-theirs .message-time { text-align: left; color: var(--muted); opacity: 1; }
+.message.is-last { margin-bottom: 6px; }
+.together-banner { margin: 0; padding: 12px 14px; border: 1.5px dashed var(--line); background: color-mix(in srgb, var(--paper-tint) 40%, transparent); border-radius: 16px; }
+.together-photo { width: 48px; height: 48px; flex: none; border-radius: 10px; }
+.together-start { justify-content: space-between; }
+.composer { margin: 0 calc(var(--space-4) * -1); padding-inline: var(--space-4); background: var(--card); }
+.composer-row { align-items: center; gap: 10px; }
+.composer-input { min-height: 48px; padding: 12px 18px; border-radius: 24px; }
+.composer-more { flex: none; display: grid; place-items: center; width: 48px; height: 48px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--card); color: var(--ink); cursor: pointer; }
+.composer-more:hover { background: var(--paper-tint); }
+.composer-send:disabled { opacity: 0.45; }
+
+/* The ⋯ sheet */
+.sheet-menu { display: flex; flex-direction: column; gap: var(--space-3); }
+.sheet-list { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+.sheet-list > li + li { border-top: 1px solid var(--line); }
+.sheet-list a, .sheet-list button { display: flex; align-items: center; gap: 16px; width: 100%; min-height: 56px; padding: 0 18px; border: 0; background: none; color: var(--ink); font: inherit; font-size: 1.0625rem; font-weight: 600; text-align: left; text-decoration: none; cursor: pointer; }
+.sheet-list a:hover, .sheet-list button:hover { background: color-mix(in srgb, var(--paper-tint) 50%, var(--card)); }
+.sheet-list svg { flex: none; color: var(--ink-soft); }
+.sheet-list-danger a, .sheet-list-danger button, .sheet-list-danger svg { color: var(--accent); }
+.safety-sheet .sheet-box { background: var(--paper); }
+.safety-sheet .confirm-title { font-family: var(--serif); font-weight: 500; font-size: 1.75rem; margin-bottom: var(--space-4); }
+
+/* Plan a trip together */
+.together-with { display: flex; margin-top: 0; align-items: center; gap: 12px; margin: 0 0 var(--space-5); color: var(--ink-soft); font-size: 1.0625rem; }
+.together-with strong { color: var(--ink); }
+.together-with .avatar-sm { width: 48px; height: 48px; }
+.together-choices { gap: 10px; margin-bottom: var(--space-2); }
+.together-choice { display: flex; align-items: center; gap: 14px; padding: 8px 16px 8px 8px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); cursor: pointer; }
+.together-choice.is-checked { border: 2px solid var(--accent); background: var(--accent-tint); padding: 7px 15px 7px 7px; }
+.together-choice input { order: 3; flex: none; width: 24px; height: 24px; margin: 0; accent-color: var(--accent); }
+.together-choice-photo { width: 56px; height: 56px; flex: none; border-radius: 12px; }
+.together-choice > .together-choice-new { flex: none; display: grid; place-items: center; width: 56px; height: 56px; border: 2px dashed var(--accent); border-radius: 12px; color: var(--accent); }
+.together-choice-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.together-choice-text strong { font-size: 1.0625rem; }
+.together-note { margin-top: var(--space-5); }
+
+/* Share where you're meeting */
+.share-form { display: flex; flex-direction: column; gap: var(--space-5); }
+.share-form .field { margin: 0; }
+.optional { color: var(--muted); font-weight: 500; }
+.share-trust { display: flex; flex-direction: column; gap: var(--space-2); padding: 18px; }
+.share-trust-head { display: flex; align-items: center; gap: 12px; margin: 0; }
+.share-trust-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--gold-tint); color: var(--gold-ink); }
+.share-trust .hint { margin: 0; }
+.share-form .action-bar { margin-top: 0; }
+
+/* Someone else's profile */
+.member-intro { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.member-photo { width: 150px; height: 180px; border-radius: 22px; margin-bottom: var(--space-3); box-shadow: var(--shadow-sm); }
+.member-intro h1 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: 2.5rem; line-height: 1.1; }
+.member-intro h1:focus { outline: none; }
+.member-intro p { margin: 0 0 var(--space-2); color: var(--ink-soft); }
+.member-page .person-top .back-link { margin: 0; }
+.member-page .chip-list .tag-plain::before { content: none; }
+.member-actions { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.member-actions .btn { gap: 10px; }
+.member-plan { min-height: 40px; }
+.member-extras:empty { display: none; }

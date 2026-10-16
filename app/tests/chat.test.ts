@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { messageTime } from '../src/lib/chat'
+import { dayLabel, listTime, messageTime } from '../src/lib/chat'
 import { friendlyMessage } from '../src/lib/errors'
 
 describe('messageTime', () => {
@@ -22,5 +22,20 @@ describe('chat errors', () => {
   it('explains an empty or long message', () => {
     expect(friendlyMessage({ message: 'Write a message first' })).toBe('Write a message first.')
     expect(friendlyMessage({ message: 'new row violates check constraint "messages_body_check"' })).toMatch(/2,000/)
+  })
+})
+
+describe('listTime and dayLabel', () => {
+  const now = new Date('2026-10-08T18:00:00')
+  it('shows the time today, then Yesterday, a weekday, then a date', () => {
+    expect(listTime('2026-10-08T10:42:00', now)).toBe('10:42')
+    expect(listTime('2026-10-07T10:42:00', now)).toBe('Yesterday')
+    expect(listTime('2026-10-05T10:42:00', now)).toBe('Mon')
+    expect(listTime('2026-08-03T10:42:00', now)).toBe('3 Aug')
+  })
+  it('names the day between messages', () => {
+    expect(dayLabel('2026-10-08T09:00:00', now)).toBe('Today')
+    expect(dayLabel('2026-10-07T09:00:00', now)).toBe('Yesterday')
+    expect(dayLabel('2026-10-05T09:00:00', now)).toBe('Mon 5 Oct')
   })
 })

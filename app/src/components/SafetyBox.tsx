@@ -18,6 +18,7 @@ export function SafetyBox({
   messageId,
   onCancel,
   startOpen,
+  startMode,
 }: {
   profileId: string
   name: string
@@ -26,8 +27,10 @@ export function SafetyBox({
   onCancel?: () => void
   /** Opened from a ⋯ menu: starts on the Report / Block choice. */
   startOpen?: boolean
+  /** Opened from a "Block" or "Report" row: starts on that step. */
+  startMode?: 'block' | 'report'
 }) {
-  const [mode, setMode] = useState<Mode>(messageId ? 'report' : startOpen ? 'menu' : 'closed')
+  const [mode, setMode] = useState<Mode>(messageId ? 'report' : (startMode ?? (startOpen ? 'menu' : 'closed')))
   const [reason, setReason] = useState<ReportReason | null>(messageId ? 'asking_for_money' : null)
   const [details, setDetails] = useState('')
   const [tried, setTried] = useState(false)
@@ -204,7 +207,8 @@ export function SafetyMenu({ profileId, name, onBlocked }: { profileId: string; 
   )
 }
 
-function SafetySheet({ name, body, onClose }: { name: string; body: ReactNode; onClose: () => void }) {
+/** A sheet from the bottom of the screen, titled with a name. */
+export function SafetySheet({ name, body, onClose }: { name: string; body: ReactNode; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null)
   const title = useId()
   useEffect(() => {

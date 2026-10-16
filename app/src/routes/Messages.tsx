@@ -5,7 +5,7 @@ import { Layout } from '../components/Layout'
 import { SkeletonRows } from '../components/Skeleton'
 import { ChatNav } from '../components/SubNav'
 import { peek, remember } from '../lib/cache'
-import { messageTime, myConversations, type Conversation } from '../lib/chat'
+import { listTime, myConversations, type Conversation } from '../lib/chat'
 import { messageOf } from '../lib/errors'
 import { ConnectionsSections } from './Connections'
 
@@ -51,24 +51,25 @@ export function Messages() {
         </div>
       )}
       {active && active.length > 0 && (
-        <ul className="conversation-list">
+        <ul className="chat-list">
           {active.map((c) => (
             <li key={c.id}>
-              <Link className="card conversation-row" to={`/messages/${c.id}`}>
-                <Avatar name={c.display_name} path={c.photo_path} />
-                <span className="conversation-text">
-                  <span className="conversation-top">
+              <Link className={`chat-row${c.unread ? ' is-unread' : ''}`} to={`/messages/${c.id}`}>
+                <Avatar name={c.display_name} path={c.photo_path} square />
+                <span className="chat-row-text">
+                  <span className="chat-row-top">
                     <strong>{c.display_name}</strong>
-                    <span className="conversation-time">{messageTime(c.last_at)}</span>
+                    <span className="chat-row-time">{listTime(c.last_at)}</span>
                   </span>
-                  <span className={`conversation-last${c.unread ? ' is-unread' : ''}`}>{c.last_body ? `${c.last_mine ? 'You: ' : ''}${c.last_body}` : 'Say hello'}</span>
+                  <span className="chat-row-last">
+                    <span>{c.last_body ? `${c.last_mine ? 'You: ' : ''}${c.last_body}` : 'Say hello'}</span>
+                    {c.unread > 0 && (
+                      <span className="unread-dot">
+                        <span className="visually-hidden">{c.unread} unread</span>
+                      </span>
+                    )}
+                  </span>
                 </span>
-                {c.unread > 0 && (
-                  <span className="badge">
-                    {c.unread}
-                    <span className="visually-hidden"> unread</span>
-                  </span>
-                )}
               </Link>
             </li>
           ))}

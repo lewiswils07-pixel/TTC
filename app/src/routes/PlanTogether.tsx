@@ -7,14 +7,18 @@ import { Layout } from '../components/Layout'
 import { SkeletonRows } from '../components/Skeleton'
 import { myConversations } from '../lib/chat'
 import { cityLabel, type City } from '../lib/cities'
-import { addDays, isoDate, tripDates } from '../lib/dates'
+import { addDays, isoDate, shortDates, tripDates } from '../lib/dates'
 import { messageOf } from '../lib/errors'
 import { rules } from '../lib/rules'
 import { planTripTogether } from '../lib/together'
 import { listMyTrips, type Trip } from '../lib/trips'
 import { useChecks } from '../lib/useChecks'
 import { MAX_TRIP_DAYS, checkTripDates } from '../lib/validation'
-import { BackIcon } from '../components/Icons'
+import { AddIcon } from '../components/Icons'
+import { Avatar } from '../components/Avatar'
+import { CityPhoto } from '../components/CityPhoto'
+import { BriefcaseBusiness } from 'lucide-react'
+import { ageLabel } from '../lib/options'
 
 /** Invite a connection to plan a trip together: one of your trips, or somewhere new. */
 export function PlanTogether() {
@@ -22,7 +26,7 @@ export function PlanTogether() {
   const navigate = useNavigate()
   const heading = useRef<HTMLHeadingElement>(null)
   const [today] = useState(() => isoDate(new Date()))
-  const [who, setWho] = useState<{ name: string; chat: number } | null | undefined>(undefined)
+  const [who, setWho] = useState<{ name: string; chat: number; photo: string | null; age: string | null } | null | undefined>(undefined)
   const [trips, setTrips] = useState<Trip[] | null>(null)
   const [choice, setChoice] = useState<number | 'new' | null>(null)
   const [city, setCity] = useState<City | null>(null)
@@ -35,7 +39,7 @@ export function PlanTogether() {
     Promise.all([myConversations(), listMyTrips()]).then(
       ([all, mine]) => {
         const chat = all?.find((c) => c.kind === 'direct' && c.profile_id === profileId && c.can_message)
-        setWho(chat ? { name: chat.display_name, chat: chat.id } : null)
+        setWho(chat ? { name: chat.display_name, chat: chat.id, photo: chat.photo_path, age: chat.birth_year ? ageLabel(chat.birth_year) : null } : null)
         setTrips(mine ?? [])
         setChoice(mine?.length ? mine[0].id : 'new')
         heading.current?.focus()
@@ -80,20 +84,26 @@ export function PlanTogether() {
 
   return (
     <Layout tab="chat">
-      {who && (
-        <Link className="back-link" to={`/messages/${who.chat}`}>
-          <BackIcon />
-          {who.name}
-        </Link>
-      )}
       <form onSubmit={submit} noValidate>
+        <div className="form-top">
+          <Link className="form-top-cancel" to={who ? `/messages/${who.chat}` : '/messages'}>
+            Cancel
+          </Link>
+          <p className="form-top-title">New plan</p>
+          <span className="form-top-space" />
+        </div>
         <h1 ref={heading} tabIndex={-1}>
-          {who ? `Plan a trip with ${who.name}` : 'Plan a trip together'}
+          Plan a trip together
         </h1>
-        <p className="lede">
-          {who ? `${who.name} gets an invite in your chat.` : 'They get an invite in your chat.'} If they say yes, the trip goes in both your Trips, with a shared plan board for ideas. You can invite
-          more people later.
-        </p>
+        {who && (
+          <div className="together-with">
+            <Avatar name={who.name} path={who.photo} size="sm" square />
+            <span>
+              With <strong>{who.name}</strong>
+              {who.age ? `, ${who.age}` : ''}
+            </span>
+          </div>
+        )}
         {error && !trips && (
           <p className="notice notice-error" role="alert">
             {error}
@@ -102,28 +112,32 @@ export function PlanTogether() {
         {!trips || !who ? (
           !error && <SkeletonRows rows={2} label="Loading your trips…" />
         ) : (
-          <div className="card form-card">
+          <>
             <fieldset className="field">
-              <legend>Where to?</legend>
+              <legend>Choose a trip</legend>
               <ul className="together-choices">
                 {trips.map((t) => (
                   <li key={t.id}>
                     <label className={`together-choice${choice === t.id ? ' is-checked' : ''}`}>
-                      <input type="radio" name="trip" checked={choice === t.id} onChange={() => setChoice(t.id)} />
-                      <span>
-                        <strong>{cityLabel(t.city)}</strong>
-                        <span className="hint">{tripDates(t.start_date, t.end_date)}</span>
+                      <CityPhoto city={t.city.name} width={120} code className="together-choice-photo" />
+                      <span className="together-choice-text">
+                        <strong>{t.city.name}</strong>
+                        <span className="hint">Your trip · {shortDates(t.start_date, t.end_date)}</span>
                       </span>
+                      <input type="radio" name="trip" checked={choice === t.id} onChange={() => setChoice(t.id)} aria-label={`${cityLabel(t.city)}, ${tripDates(t.start_date, t.end_date)}`} />
                     </label>
                   </li>
                 ))}
                 <li>
                   <label className={`together-choice${somewhereNew ? ' is-checked' : ''}`}>
-                    <input type="radio" name="trip" checked={somewhereNew} onChange={() => setChoice('new')} />
-                    <span>
-                      <strong>Somewhere new</strong>
-                      <span className="hint">It’s added to your trips too.</span>
+                    <span className="together-choice-new" aria-hidden="true">
+                      <AddIcon />
                     </span>
+                    <span className="together-choice-text">
+                      <strong>Somewhere new</strong>
+                      <span className="hint">Pick a place together</span>
+                    </span>
+                    <input type="radio" name="trip" checked={somewhereNew} onChange={() => setChoice('new')} />
                   </label>
                 </li>
               </ul>
@@ -159,10 +173,16 @@ export function PlanTogether() {
                 />
               </>
             )}
-          </div>
+            <p className="tip-box together-note">
+              <BriefcaseBusiness size={20} strokeWidth={1.8} aria-hidden="true" />
+              <span>
+                {who.name} gets an invite in your chat. If they say yes, it goes in both your trips with a shared plan board{somewhereNew ? ', and it’s added to your trips too' : ''}.
+              </span>
+            </p>
+          </>
         )}
         <SaveError error={trips ? error : null} />
-        <ActionBar busy={busy} onBack={() => navigate(-1)} label="Send invite" />
+        <ActionBar busy={busy} label="Send invite" />
       </form>
     </Layout>
   )

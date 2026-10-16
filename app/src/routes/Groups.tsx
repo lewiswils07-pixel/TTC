@@ -10,12 +10,14 @@ import { peek, remember } from '../lib/cache'
 import { OpenGroups } from '../components/OpenGroups'
 import { PopularGroups } from '../components/PopularGroups'
 import { groupsICanStart, isTripGroup, myGroups, respondToInvite, type Group } from '../lib/groups'
-import { NextIcon } from '../components/Icons'
+import { UsersRound } from 'lucide-react'
+import { listTime, myConversations, type Conversation } from '../lib/chat'
 
 /** My groups and their chats, invites waiting for an answer, and a way to start one. */
 export function Groups() {
   const [groups, setGroups] = useState<Group[] | null | undefined>(() => peek('groups'))
   const [canStart, setCanStart] = useState(() => peek<number>('canStart') ?? 0)
+  const [conversations, setConversations] = useState<Conversation[] | null | undefined>(() => peek('conversations'))
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState<number | null>(null)
   const [done, setDone] = useState<string | null>((useLocation().state as { message?: string } | null)?.message ?? null)
@@ -41,6 +43,7 @@ export function Groups() {
 
   useEffect(() => {
     void load().then(() => heading.current?.focus())
+    remember('conversations', myConversations()).then(setConversations, () => undefined)
   }, [load])
 
   async function answer(g: Group, accept: boolean) {
@@ -60,21 +63,14 @@ export function Groups() {
   if (groups === undefined && !error) return <Loading />
   const invites = groups?.filter((g) => g.my_status === 'invited') ?? []
   const joined = groups?.filter((g) => g.my_status === 'joined') ?? []
+  const chats = new Map((conversations ?? []).map((c) => [c.id, c]))
 
   return (
     <Layout tab="chat">
-      <div className="page-head">
-        <h1 ref={heading} tabIndex={-1}>
-          Chat
-        </h1>
-        {canStart > 0 && (
-          <Link className="btn btn-secondary btn-small" to="/groups/new">
-            Start a group
-          </Link>
-        )}
-      </div>
+      <h1 ref={heading} tabIndex={-1}>
+        Chat
+      </h1>
       <ChatNav current="/groups" />
-      <p className="lede">Chat with people you’re connected with. Make it a trip group to plan together and compare dates.</p>
       {error && (
         <p className="notice notice-error" role="alert">
           {error}
@@ -111,27 +107,51 @@ export function Groups() {
         </>
       )}
 
-      <h2 className="section-title">Your groups</h2>
+      <h2 className="visually-hidden">Your groups</h2>
       {joined.length === 0 ? (
         <div className="card empty">
           <p>You’re not in a group yet.</p>
-          {canStart > 0 ? <p className="hint">Start one and invite people you’re connected with.</p> : <p className="hint">When someone invites you, it will appear here.</p>}
+          <p className="hint">Chat with people you’re connected with. Make it a trip group to plan together and compare dates.</p>
         </div>
       ) : (
-        <ul className="person-list">
-          {joined.map((g) => (
-            <li key={g.id}>
-              <Link className="card link-card group-card" to={g.conversation_id ? `/messages/${g.conversation_id}` : `/groups/${g.id}`}>
-                <span className="trip-text">
-                  <GroupSummary group={g} />
-                </span>
-                <span className="trip-chevron" aria-hidden="true">
-                  <NextIcon />
-                </span>
-              </Link>
-            </li>
-          ))}
+        <ul className="chat-list">
+          {joined.map((g) => {
+            const chat = g.conversation_id ? chats.get(g.conversation_id) : undefined
+            const last = chat?.last_body
+              ? `${chat.last_mine ? 'You' : (chat.last_sender ?? 'Someone')}: ${chat.last_body}`
+              : isTripGroup(g)
+                ? `${g.city} · ${tripDates(g.start_date, g.end_date)}`
+                : `${g.members} ${g.members === 1 ? 'member' : 'members'}`
+            return (
+              <li key={g.id}>
+                <Link className={`chat-row${chat?.unread ? ' is-unread' : ''}`} to={g.conversation_id ? `/messages/${g.conversation_id}` : `/groups/${g.id}`}>
+                  <span className="avatar avatar-md avatar-square avatar-group" aria-hidden="true">
+                    <UsersRound size={24} strokeWidth={1.8} />
+                  </span>
+                  <span className="chat-row-text">
+                    <span className="chat-row-top">
+                      <strong>{g.name}</strong>
+                      {chat?.last_body && <span className="chat-row-time">{listTime(chat.last_at)}</span>}
+                    </span>
+                    <span className="chat-row-last">
+                      <span>{last}</span>
+                      {!!chat?.unread && (
+                        <span className="unread-dot">
+                          <span className="visually-hidden">{chat.unread} unread</span>
+                        </span>
+                      )}
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            )
+          })}
         </ul>
+      )}
+      {canStart > 0 && (
+        <Link className="btn btn-secondary btn-block groups-start" to="/groups/new">
+          Start a group
+        </Link>
       )}
       <OpenGroups />
       <PopularGroups canStart={canStart > 0} />

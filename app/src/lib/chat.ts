@@ -38,12 +38,7 @@ export async function myConversations(): Promise<Conversation[] | null> {
 
 /** Up to PAGE_SIZE messages before `beforeId` (or the latest), oldest first. */
 export async function listMessages(conversationId: number, beforeId?: number): Promise<Message[]> {
-  let query = supabase
-    .from('messages')
-    .select('id, conversation_id, sender_id, body, created_at')
-    .eq('conversation_id', conversationId)
-    .order('id', { ascending: false })
-    .limit(PAGE_SIZE)
+  let query = supabase.from('messages').select('id, conversation_id, sender_id, body, created_at').eq('conversation_id', conversationId).order('id', { ascending: false }).limit(PAGE_SIZE)
   if (beforeId) query = query.lt('id', beforeId)
   const { data, error } = await query
   if (error) throw friendlyError(error)
@@ -94,9 +89,7 @@ export function onNewMessage(conversationId: number, onReady: () => void, onMess
     if (stopped) return
     channel = supabase
       .channel(`messages:${conversationId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, (payload) =>
-        onMessage(payload.new as Message),
-      )
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, (payload) => onMessage(payload.new as Message))
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') onReady()
       })
@@ -121,6 +114,25 @@ export function onNewMessage(conversationId: number, onReady: () => void, onMess
 }
 
 /** "14:05" today, "Mon 14:05" this week, else "3 Oct". */
+/** The chat list's time: "10:42" today, then "Yesterday", a weekday this week, then "3 Oct" (Claude Design, 16 Oct). */
+export function listTime(iso: string, now = new Date()): string {
+  const d = new Date(iso)
+  if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday'
+  if ((now.getTime() - d.getTime()) / 86_400_000 < 6) return d.toLocaleDateString('en-GB', { weekday: 'short' })
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+
+/** The day line between messages: "Today", "Yesterday", then "Mon 12 Oct". */
+export function dayLabel(iso: string, now = new Date()): string {
+  const d = new Date(iso)
+  if (d.toDateString() === now.toDateString()) return 'Today'
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday'
+  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: d.getFullYear() === now.getFullYear() ? undefined : 'numeric' })
+}
+
 export function messageTime(iso: string, now = new Date()): string {
   const d = new Date(iso)
   const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })

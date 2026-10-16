@@ -9,7 +9,7 @@ import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
 import { checkIn, createShare, emailHref, localInputValue, MAX_NOTE, MAX_PLACE, meetTime, myShares, sendLink, stopSharing, textHref, type MeetupShare } from '../lib/share'
 import { useChecks } from '../lib/useChecks'
-import { BackIcon } from '../components/Icons'
+import { Shield } from 'lucide-react'
 
 function checkPlace(place: string): string | null {
   return place.trim().length < 2 ? 'Please say where you’re meeting, such as the name of a café and the town.' : null
@@ -108,14 +108,17 @@ export function ShareMeetup() {
 
   return (
     <Layout tab="chat">
-      <Link className="back-link" to={`/messages/${conversationId}`}>
-        <BackIcon />
-        {chat.display_name}
-      </Link>
+      <div className="form-top">
+        <Link className="form-top-cancel" to={`/messages/${conversationId}`}>
+          Cancel
+        </Link>
+        <p className="form-top-title">Meeting {chat.display_name}</p>
+        <span className="form-top-space" />
+      </div>
       <h1 ref={heading} tabIndex={-1}>
-        Tell someone you trust
+        Share where you’re meeting
       </h1>
-      <p className="lede">Make a private link for a friend or relative. It shows who you’re meeting, where and when, and you can let them know when you’re back safe.</p>
+      <p className="lede">Keep the details in one place, and let someone you trust see them too. They get a private link, and you can tell them when you’re back safe.</p>
       <p className={status ? 'notice notice-success' : 'visually-hidden'} role="status">
         {status}
       </p>
@@ -179,16 +182,15 @@ export function ShareMeetup() {
         </section>
       )}
 
-      <form className="card section-card" onSubmit={create} noValidate aria-labelledby="new-title">
-        <h2 id="new-title">{shares.length ? 'Share another meet-up' : 'Your meet-up'}</h2>
-        <p className="hint section-hint">
-          You’re meeting {chat.kind === 'group' ? `your group, ${chat.display_name}` : chat.display_name}. Their first name, age, home town and member number go on the link, never their photo or
-          contact details.
-        </p>
+      <form className="share-form" onSubmit={create} noValidate aria-labelledby="new-title">
+        <h2 id="new-title" className={shares.length ? 'section-title' : 'visually-hidden'}>
+          {shares.length ? 'Share another meet-up' : 'Your meet-up'}
+        </h2>
         <TextField
           name="place"
-          label="Where are you meeting?"
-          hint="For example, “the café opposite Leeds station”."
+          label="Where"
+          hint="A busy café or public place is best for a first meet."
+          placeholder="For example, the café opposite Leeds station"
           maxLength={MAX_PLACE}
           value={place}
           error={shown('place')}
@@ -200,7 +202,7 @@ export function ShareMeetup() {
         />
         <TextField
           name="when"
-          label="When?"
+          label="When"
           type="datetime-local"
           min={earliest}
           value={when}
@@ -212,16 +214,28 @@ export function ShareMeetup() {
           }}
         />
         <div className="field" data-field="note">
-          <label htmlFor="share-note">Anything else? (optional)</label>
-          <textarea id="share-note" className="textarea textarea-short" maxLength={MAX_NOTE} value={note} onChange={(e) => setNote(e.target.value)} aria-describedby="share-note-hint" />
-          <p className="hint" id="share-note-hint">
-            For example, “I’ll text you by 6pm”.
+          <label htmlFor="share-note">
+            Anything else <span className="optional">(optional)</span>
+          </label>
+          <textarea id="share-note" className="textarea textarea-short" maxLength={MAX_NOTE} value={note} onChange={(e) => setNote(e.target.value)} placeholder="For example, I’ll text you by 6pm." />
+        </div>
+        <div className="card share-trust">
+          <p className="share-trust-head">
+            <span className="share-trust-icon" aria-hidden="true">
+              <Shield size={20} strokeWidth={1.8} />
+            </span>
+            <strong>Someone you trust</strong>
+          </p>
+          <p className="hint">
+            Next, you can send the link by email or text. It shows {chat.kind === 'group' ? `your group, ${chat.display_name}` : chat.display_name}’s first name, age, home town and member number,
+            never their photo or contact details. It stops working two days after you meet.
           </p>
         </div>
-        <button type="submit" className="btn btn-primary btn-block" disabled={busy !== null}>
-          {busy === 'create' ? 'Making your link…' : 'Make the link'}
-        </button>
-        <p className="hint center">The link stops working two days after you meet, or as soon as you stop sharing it.</p>
+        <div className="action-bar">
+          <button type="submit" className="btn btn-primary btn-block" disabled={busy !== null}>
+            {busy === 'create' ? 'Making your link…' : 'Share the details'}
+          </button>
+        </div>
       </form>
     </Layout>
   )
