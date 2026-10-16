@@ -28,7 +28,7 @@ import { ageLabel, BOOKING, GROUP_SIZES, HOLIDAY_QUESTIONS, INTERESTS_TO_PICK, l
 import { preloadPhotos, usePhotoUrl } from '../lib/photo'
 import { count, roughly } from '../lib/rules'
 import { useSession } from '../lib/session-context'
-import { loadExtras, type MemberExtras } from '../lib/member'
+import { loadExtras, sharedStyle, type MemberExtras } from '../lib/member'
 import { listMyTrips, wishlistOf, type Trip } from '../lib/trips'
 import { useMyProfile } from '../lib/useMyProfile'
 import type { MyProfile } from '../lib/profile'
@@ -414,14 +414,6 @@ type CardProps = {
   onBlocked: (message: string) => void
 }
 
-/** Travel style answers you both gave, in a few words (Claude Design, 15 Oct). */
-const SHARED_STYLE = [
-  { key: 'moving', options: MOVING },
-  { key: 'travel_often', options: TRAVEL_OFTEN },
-  { key: 'booking', options: BOOKING },
-  { key: 'group_size', options: GROUP_SIZES },
-] as const
-
 /** One member at a time, like a travel ticket: why they're here at the top, who they are and what you share,
  *  then Read more (their full card on its own page) and Connect or Not now. ⋯ holds block and report (Claude Design, 15 Oct). */
 function PersonCard(props: CardProps & { onOpen: () => void }) {
@@ -442,7 +434,7 @@ function PersonCard(props: CardProps & { onOpen: () => void }) {
         title: 'Travels the way you do',
         text: person.shared_interests.length ? `${count(person.shared_interests.length, 'interest')} in common` : fitWords(person.score),
       }
-  const style = extras ? SHARED_STYLE.filter((q) => extras[q.key] && extras[q.key] === mine[q.key]).map((q) => labelFor(q.options, extras[q.key]).toLowerCase()) : []
+  const style = sharedStyle(extras, mine)
   const shares = [
     person.shared_interests.length > 0 && {
       Icon: Tag,

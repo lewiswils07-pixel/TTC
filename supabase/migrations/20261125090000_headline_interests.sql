@@ -82,3 +82,37 @@ as $$
 $$;
 
 alter table public.profiles add constraint profiles_card_answers_check check (public.valid_card_answers(card_answers));
+
+-- 4 ----------------------------------------------------------------------
+-- What you share with someone who asked to connect (Lewis, 16 Oct): the
+-- interests and wish-list places you both picked. Same rules as their card.
+create function public.what_we_share(p_profile uuid)
+returns table (interests text[], places text[])
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select array(select i.label
+                 from public.profile_interests a
+                 join public.profile_interests b on b.interest_id = a.interest_id and b.profile_id = me.id
+                 join public.interests i on i.id = a.interest_id
+                where a.profile_id = p.id
+                order by i.sort),
+         array(select c.name
+                 from public.wishlist a
+                 join public.wishlist b on b.city_id = a.city_id and b.profile_id = me.id
+                 join public.cities c on c.id = a.city_id
+                where a.profile_id = p.id
+                order by c.name)
+    from public.profiles p
+    join public.profiles me on me.id = auth.uid()
+   where p.id = p_profile
+     and p.id <> me.id
+     and me.status = 'active'
+     and p.status = 'active'
+     and p.onboarded_at is not null
+     and not public.is_blocked(me.id, p.id)
+$$;
+revoke all on function public.what_we_share(uuid) from public, anon;
+grant execute on function public.what_we_share(uuid) to authenticated;

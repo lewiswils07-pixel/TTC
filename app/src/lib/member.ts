@@ -3,7 +3,7 @@
 import { cleanAnswers, loadCard, type CardAnswer } from './card'
 import { myConnections } from './connections'
 import { friendlyError } from './errors'
-import type { Budget, DayRhythm, HolidayPrefs, Pace, RoomSharing, TravelStyle, Walking } from './options'
+import { BOOKING, GROUP_SIZES, labelFor, MOVING, TRAVEL_OFTEN, type Budget, type DayRhythm, type HolidayPrefs, type Pace, type RoomSharing, type TravelStyle, type Walking } from './options'
 import { supabase } from './supabase'
 
 export type MemberProfile = {
@@ -126,3 +126,25 @@ export function loadExtras(profileId: string): Promise<MemberExtras | null> {
 
 /** Forget a member's extras, for example after editing your own. */
 export const forgetExtras = (profileId: string) => extrasCache.delete(profileId)
+
+/** Travel style answers two members can share, shown in a few words (Claude Design, 15 Oct). */
+export const SHARED_STYLE = [
+  { key: 'moving', options: MOVING },
+  { key: 'travel_often', options: TRAVEL_OFTEN },
+  { key: 'booking', options: BOOKING },
+  { key: 'group_size', options: GROUP_SIZES },
+] as const
+type StyleAnswers = Partial<Record<(typeof SHARED_STYLE)[number]['key'], string | null>>
+
+/** The travel style answers you both gave, lower case, for “What you share”. */
+export function sharedStyle(theirs: StyleAnswers | null | undefined, mine: StyleAnswers | null | undefined): string[] {
+  if (!theirs || !mine) return []
+  return SHARED_STYLE.filter((q) => theirs[q.key] && theirs[q.key] === mine[q.key]).map((q) => labelFor(q.options, theirs[q.key] ?? null).toLowerCase())
+}
+
+/** Interests and wish-list places you both picked, for someone who asked to connect. Null before database Part 26. */
+export async function whatWeShare(profileId: string): Promise<{ interests: string[]; places: string[] } | null> {
+  const { data, error } = await supabase.rpc('what_we_share', { p_profile: profileId })
+  const row = (data as { interests: string[]; places: string[] }[] | null)?.[0]
+  return error || !row ? null : { interests: row.interests ?? [], places: row.places ?? [] }
+}

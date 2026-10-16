@@ -1,6 +1,6 @@
 -- pgTAP: the one-line about me on a member's card (Part 26).
 begin;
-select plan(4);
+select plan(6);
 
 create function pg_temp.sign_in_as(member uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', member, 'role', 'authenticated')::text, true);
@@ -25,6 +25,15 @@ select is((select headline from public.member_extras(pg_temp.m(1))), 'Happiest w
 reset role;
 
 select is((select count(*)::int from public.interests where slug in ('football', 'surfing', 'backpacking', 'brunch')), 4, 'the younger interests are there');
+
+insert into public.profile_interests (profile_id, interest_id)
+select m, i.id from (values (pg_temp.m(1)), (pg_temp.m(2))) v(m), public.interests i where i.slug in ('football', 'brunch');
+insert into public.profile_interests (profile_id, interest_id) select pg_temp.m(1), id from public.interests where slug = 'surfing';
+select pg_temp.sign_in_as(pg_temp.m(2));
+select is((select interests from public.what_we_share(pg_temp.m(1))), array['Football', 'Brunch'], 'what you share lists only interests you both picked');
+select public.block_member(pg_temp.m(1));
+select is((select count(*)::int from public.what_we_share(pg_temp.m(1))), 0, 'not after a block');
+reset role;
 
 select * from finish();
 rollback;
