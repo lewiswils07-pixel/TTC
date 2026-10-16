@@ -15,7 +15,8 @@ import { myConnections, respondToRequest, withdrawRequest, type Connection } fro
 import { ageLabel } from '../lib/options'
 import { myBlocks, unblockMember, type BlockedMember } from '../lib/safety'
 import { NextIcon } from '../components/Icons'
-import { Info, Plane } from 'lucide-react'
+import { Info, Plane, UserPlus } from 'lucide-react'
+import { EmptyState } from '../components/EmptyState'
 import { monthName } from '../lib/dates'
 import { brand } from '../lib/brand'
 import { loadRequests, PLUS_SHOW_LEFT_BELOW } from '../lib/plan'
@@ -103,7 +104,17 @@ export function ConnectionsSections({
           <h2 className="visually-hidden" id="requests-title">
             Requests for you
           </h2>
-          <p className="lede requests-lede">{received.length > 0 ? 'Members who’d like to connect with you.' : items ? 'No new requests. When someone asks to connect, you’ll see them here.' : ''}</p>
+          {received.length > 0 && <p className="lede requests-lede">Members who’d like to connect with you.</p>}
+          {received.length === 0 && items && (
+            <EmptyState icon={<UserPlus size={18} strokeWidth={2} />} title="No requests right now" text="When a member asks to connect, you’ll see it here. Adding a trip helps people find you.">
+              <Link className="btn btn-primary btn-block" to="/trips/new">
+                Add a trip
+              </Link>
+              <Link className="btn btn-secondary btn-block" to="/messages">
+                Back to your chats
+              </Link>
+            </EmptyState>
+          )}
           <ul className="request-list">
             {received.map((c) => (
               <li key={c.id} className="card request-card">

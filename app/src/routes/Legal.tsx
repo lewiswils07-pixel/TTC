@@ -2,34 +2,21 @@
 // first drafts for the beta (Lewis's sign-up review, item 1), to be checked
 // before public launch.
 import { useEffect, useRef, type ReactNode } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
+import { PageTop } from '../components/PageBack'
 import { Layout } from '../components/Layout'
 import { brand } from '../lib/brand'
 import { count, rules } from '../lib/rules'
-import { BackIcon } from '../components/Icons'
 
 const UPDATED = '5 October 2026'
 
-function LegalPage({ title, children }: { title: string; children: ReactNode }) {
+function LegalPage({ title, tag = 'Legal', children }: { title: string; tag?: string; children: ReactNode }) {
   const heading = useRef<HTMLHeadingElement>(null)
-  const navigate = useNavigate()
   useEffect(() => heading.current?.focus(), [])
-  const canGoBack = typeof window !== 'undefined' && window.history.length > 1
   return (
     <Layout>
-      {canGoBack ? (
-        <button type="button" className="back-link btn-plain" onClick={() => navigate(-1)}>
-          <BackIcon />
-          Back
-        </button>
-      ) : (
-        <Link className="back-link" to="/">
-          <BackIcon />
-          Home
-        </Link>
-      )}
+      <PageTop tag={tag} fallback="/" />
       <article className="legal">
-        <p className="eyebrow gold-rule">{brand.name}</p>
         <h1 ref={heading} tabIndex={-1}>
           {title}
         </h1>
@@ -114,12 +101,12 @@ export function Privacy() {
 
 export function CommunityRules() {
   return (
-    <LegalPage title="Community rules">
+    <LegalPage title="Community rules" tag="Community">
       <p>
         {brand.name} works because members trust each other. Breaking these rules can lead to a warning, a pause or removal. Use <strong>Block or report</strong> on any profile or message, and a real
         person will review it.
       </p>
-      <ol className="rules">
+      <ol className="rules numbered-list">
         <li>
           <strong>Friendship, not dating.</strong> {brand.name} is for finding people to travel with. Don’t use it to look for romance.
         </li>
