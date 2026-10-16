@@ -270,8 +270,7 @@ export function SignIn() {
                 </button>
               </p>
               <p className="hint center legal-line">
-                By continuing you agree to our <Link to="/terms">terms</Link>, <Link to="/privacy">privacy notice</Link> and{' '}
-                <Link to="/community-rules">community rules</Link>.
+                By continuing you agree to our <Link to="/terms">terms</Link>, <Link to="/privacy">privacy notice</Link> and <Link to="/community-rules">community rules</Link>.
               </p>
             </div>
           </form>
@@ -298,7 +297,7 @@ export function SignIn() {
                   pattern="[0-9]*"
                   maxLength={CODE_LENGTH + 2}
                   value={code}
-                  aria-invalid={shown('code') ?? error ? true : undefined}
+                  aria-invalid={(shown('code') ?? error) ? true : undefined}
                   aria-describedby="code-hint code-error"
                   onChange={(e) => {
                     const v = e.target.value

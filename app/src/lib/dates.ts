@@ -60,3 +60,13 @@ export function dateReadback(start: string, end: string): string | null {
   const days = daysBetween(start, end) + 1
   return start === end ? `${shortDay(start)}, 1 day` : `${shortDay(start)} to ${shortDay(end)}, ${days} days`
 }
+
+/** How soon a trip starts, for its card: "In 3 days", "In 2 weeks", "In 7 months", or "On now" once it has started (Claude Design, 15 Oct). */
+export function startsIn(start: string, end: string, today = isoDate(new Date())): string {
+  if (start <= today) return end >= today ? 'On now' : 'Been'
+  const days = daysBetween(today, start)
+  if (days === 1) return 'Tomorrow'
+  if (days < 14) return `In ${days} days`
+  if (days < 61) return `In ${Math.round(days / 7)} weeks`
+  return `In ${Math.round(days / 30.4)} months`
+}

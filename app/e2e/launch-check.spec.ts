@@ -206,7 +206,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await page.getByRole('button', { name: 'Share tip' }).click()
   await expect(page.getByText('Your tip', { exact: true })).toBeVisible()
   issues.push(...(await problems(page, '/trips/:id?tab=tips')))
-  // Someone going to Lisbon at the same time shows in the "Trips in common" tile.
+  // Someone going to Lisbon at the same time shows on Going when you are.
   await admin
     .from('profiles')
     .update({ photo_path: `${demo(3)}/demo.jpg`, last_active_at: new Date().toISOString() })
@@ -214,8 +214,8 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await admin.from('trips').insert({ owner_id: demo(3), city_id: 2267057, start_date: isoIn(31), end_date: isoIn(33) })
   await visit(page, '/connections', 'Who’s going', issues)
   await page.goto('/connections/same-time')
-  await expect(page.getByRole('heading', { level: 1, name: 'Trips in common' })).toBeVisible()
-  await expect(page.getByRole('region', { name: 'Lisbon' }).locator('.plus-person').first()).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Going when you are' })).toBeVisible()
+  await expect(page.locator('.same-person').first()).toBeVisible()
   issues.push(...(await problems(page, '/connections/same-time')))
   await visit(page, '/messages', 'Chat', issues)
   await page.goto(`/messages/${chat!.id}`)

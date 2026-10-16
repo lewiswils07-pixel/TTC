@@ -2,8 +2,9 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { CityPicker } from '../components/CityPicker'
 import { DateRangePicker } from '../components/DateRangePicker'
-import { Field } from '../components/Field'
-import { ActionBar, SaveError } from '../components/Form'
+import { FieldError } from '../components/Field'
+import { Eye, EyeOff } from 'lucide-react'
+import { SaveError } from '../components/Form'
 import { useConfirm } from '../lib/useConfirm'
 import { Layout, Loading } from '../components/Layout'
 import type { City } from '../lib/cities'
@@ -121,18 +122,22 @@ function TripEditor({ trip }: { trip: Trip | null }) {
   return (
     <Layout>
       {confirmDialog}
-      <form onSubmit={submit} noValidate>
-        <p className="eyebrow">{trip ? 'Edit trip' : 'New trip'}</p>
+      <form onSubmit={submit} noValidate className="trip-form">
+        <div className="form-top">
+          <Link className="form-top-cancel" to={trip ? `/trips/${trip.id}` : '/trips'}>
+            Cancel
+          </Link>
+          <p className="form-top-title">{trip ? 'Edit trip' : 'Add a trip'}</p>
+          <span className="form-top-space" />
+        </div>
         <h1 ref={heading} tabIndex={-1}>
           {trip ? `Your trip to ${trip.city.name}` : 'Where are you going?'}
         </h1>
-        <p className="lede">We’ll suggest members heading to the same place at the same time.</p>
 
         <div className="card form-card">
           <div data-field="city">
             <CityPicker
               label="Destination"
-              hint="Start typing a town or city, then pick it from the list."
               value={city}
               onChange={(c) => {
                 setCity(c)
@@ -156,45 +161,48 @@ function TripEditor({ trip }: { trip: Trip | null }) {
               if (e) touch('end')
             }}
           />
-          <details className="more-options" open={!!trip?.note || (trip ? trip.visibility === 'hidden' : false)}>
-            <summary>Add a note or keep it private</summary>
-            <div className="more-options-body">
-              <Field
-                name="note"
-                label="Anything to add? (optional)"
-                hint={`For example, “Hoping to see the tiles museum and eat lots of pastéis”. ${MAX_NOTE - note.length} characters left.`}
-                error={shown('note')}
-              >
-                {({ id, describedBy, invalid }) => (
-                  <textarea
-                    id={id}
-                    className="textarea textarea-short"
-                    maxLength={MAX_NOTE}
-                    aria-describedby={describedBy}
-                    aria-invalid={invalid || undefined}
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    onBlur={() => touch('note')}
-                  />
-                )}
-              </Field>
-              <label className="switch-row">
-                <input type="checkbox" role="switch" checked={visible} onChange={(e) => setVisible(e.target.checked)} />
-                <span>
-                  <strong>Let other members see this trip</strong>
-                  <span className="hint">Turn this off to keep it just for you. You can turn it back on any time.</span>
-                </span>
-              </label>
-            </div>
-          </details>
+          <div className="field" data-field="note">
+            <label htmlFor="trip-note">
+              A note for other members <span className="label-quiet">(optional)</span>
+            </label>
+            <textarea
+              id="trip-note"
+              className="textarea textarea-short"
+              maxLength={MAX_NOTE}
+              placeholder="For example, first time in Portugal. Keen on a fado night and a day out to Sintra."
+              aria-describedby="trip-note-count"
+              aria-invalid={shown('note') ? true : undefined}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              onBlur={() => touch('note')}
+            />
+            <p className="char-count" id="trip-note-count">
+              {note.length} / {MAX_NOTE}
+            </p>
+            <FieldError error={shown('note')} />
+          </div>
+          <label className="switch-card">
+            <span className="switch-card-icon" aria-hidden="true">
+              {visible ? <Eye size={22} strokeWidth={1.8} /> : <EyeOff size={22} strokeWidth={1.8} />}
+            </span>
+            <span className="switch-card-text">
+              <strong>Let other members see this trip</strong>
+              <span>{visible ? 'So people going at the same time can say hello.' : 'Only you can see it. Turn it back on any time.'}</span>
+            </span>
+            <input type="checkbox" role="switch" checked={visible} onChange={(e) => setVisible(e.target.checked)} />
+          </label>
+        </div>
+        <SaveError error={error} />
+        <div className="action-bar action-bar-stack">
+          <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={busy}>
+            {busy ? 'Saving…' : 'Save trip'}
+          </button>
           {trip && (
-            <button type="button" className="btn-link btn-danger-link" onClick={remove} disabled={busy}>
+            <button type="button" className="btn btn-quiet btn-block btn-danger-link" onClick={remove} disabled={busy}>
               Delete this trip
             </button>
           )}
         </div>
-        <SaveError error={error} />
-        <ActionBar busy={busy} onBack={() => navigate(trip ? `/trips/${trip.id}` : '/trips')} label={trip ? 'Save changes' : 'Add trip'} />
       </form>
     </Layout>
   )

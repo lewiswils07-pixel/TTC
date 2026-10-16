@@ -49,9 +49,8 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.getByRole('link', { name: 'Add your first trip' }).click()
     await pickPlace(a, 'Pari', /Paris, France/)
     await pickDates(a, isoIn(20), isoIn(50))
-    await a.getByRole('radio', { name: '1 week either way' }).evaluate((el: HTMLElement) => el.click())
-    await a.getByRole('button', { name: 'Add trip' }).click()
-    await expect(a.getByRole('heading', { name: /going too/ })).toBeVisible()
+    await a.getByRole('button', { name: 'Save trip' }).click()
+    await expect(a.getByRole('heading', { level: 1, name: /Paris/ })).toBeVisible()
     // Who's going now shows the Paris trip; tapping it shows people going one at a time, with what you share.
     await a.goto('/connections')
     await a.locator('.going-trip-row').filter({ hasText: 'Paris' }).click()
