@@ -245,7 +245,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await visit(page, '/profile?tab=plus', /./, issues)
   await expect(page.getByRole('heading', { name: /Sodalis\+/ }).first()).toBeVisible()
   await visit(page, '/filters', 'Filters', issues)
-  await visit(page, '/account', 'Your account and data', issues)
+  await visit(page, '/account', 'Account', issues)
   await visit(page, '/onboarding?step=1', 'About you', issues)
   await visit(page, '/onboarding?step=2', 'How do you like to travel?', issues)
   await visit(page, '/onboarding?step=3', 'Where would you love to go?', issues)

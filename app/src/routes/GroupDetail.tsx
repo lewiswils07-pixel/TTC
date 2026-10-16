@@ -1,10 +1,12 @@
-import { BackIcon, NextIcon } from '../components/Icons'
+import { BackIcon } from '../components/Icons'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { useConfirm } from '../lib/useConfirm'
 import { Layout, Loading } from '../components/Layout'
 import { SafetyMenu } from '../components/SafetyBox'
+import { CityPhoto } from '../components/CityPhoto'
+import { UserPlus } from 'lucide-react'
 import { myConnections, type Connection } from '../lib/connections'
 import { addDays, isoDate, tripDates } from '../lib/dates'
 import { CityPicker } from '../components/CityPicker'
@@ -23,7 +25,6 @@ import {
   myGroups,
   respondToInvite,
   setGroupTrip,
-  settingsLabel,
   type Group,
   type GroupPerson,
   type GroupSettings,
@@ -110,20 +111,36 @@ export function GroupDetail() {
   return (
     <Layout tab="chat">
       {confirmDialog}
-      <Link className="back-link" to={chat ?? '/groups'}>
-        <BackIcon />
-        {chat ? 'Chat' : 'Groups'}
-      </Link>
-      <p className="eyebrow">{trip ? 'Trip group' : 'Group'}</p>
-      <h1 ref={heading} tabIndex={-1}>
-        {group.name}
-      </h1>
-      {trip && (
-        <p className="lede">
-          {trip.city} · {tripDates(trip.start_date, trip.end_date)}
-        </p>
-      )}
-      {settings && settingsLabel(settings) && <p className="hint group-settings">{settingsLabel(settings)}</p>}
+      <div className={trip ? 'trip-hero group-hero' : 'trip-hero group-hero is-chat'}>
+        {trip && <CityPhoto city={trip.city} width={720} className="trip-hero-photo" />}
+        {trip && (
+          <span className="trip-hero-code" aria-hidden="true">
+            {trip.city.slice(0, 3).toUpperCase()}
+          </span>
+        )}
+        <div className="trip-hero-bar">
+          <Link className="trip-hero-btn trip-hero-back" to={chat ?? '/groups'} aria-label={chat ? 'Back to the chat' : 'Back to groups'}>
+            <BackIcon />
+          </Link>
+        </div>
+        <div className="trip-hero-text">
+          <p className="eyebrow">{trip ? 'Travel group' : 'Group chat'}</p>
+          <h1 ref={heading} tabIndex={-1}>
+            {group.name}
+          </h1>
+          <p className="trip-hero-pills">
+            {trip && <span className="trip-pill">{tripDates(trip.start_date, trip.end_date)}</span>}
+            {settings?.women_only && <span className="trip-pill trip-pill-dark">Women only</span>}
+            {settings && (settings.age_min || settings.age_max) && (
+              <span className="trip-pill trip-pill-dark">
+                {settings.age_min && settings.age_max ? `Ages ${settings.age_min}–${settings.age_max}` : settings.age_min ? `Ages ${settings.age_min}+` : `Ages up to ${settings.age_max}`}
+              </span>
+            )}
+            {settings?.open && <span className="trip-pill trip-pill-dark">Open to join</span>}
+          </p>
+        </div>
+      </div>
+
       {error && (
         <p className="notice notice-error" role="alert">
           {error}
@@ -153,9 +170,13 @@ export function GroupDetail() {
         ))}
 
       {joined && chat ? (
-        <Link className="btn btn-primary btn-block group-chat-link" to={chat}>
-          Open the group chat
-        </Link>
+        <section className="card person-section group-chat-card" aria-labelledby="group-chat-title">
+          <h2 id="group-chat-title">Group chat</h2>
+          <p className="hint">{trip ? 'Plan together, share the plan board and compare dates.' : 'Talk together. You can make it a trip group to plan a trip.'}</p>
+          <Link className="btn btn-primary btn-block" to={chat}>
+            Open group chat
+          </Link>
+        </section>
       ) : (
         <div className="card group-invite">
           <p>
@@ -183,29 +204,33 @@ export function GroupDetail() {
         </div>
       )}
 
-      <h2 className="section-title">Who’s in it ({people.filter((p) => p.status === 'joined').length})</h2>
-      <ul className="person-list">
-        {people.map((p) => (
-          <li key={p.profile_id} className="card person-card">
-            <div className="match-head">
-              <Avatar name={p.display_name} path={p.photo_path} size="sm" />
-              <div className="match-who">
-                <h3>{p.profile_id === me ? `${p.display_name} (you)` : p.display_name}</h3>
-                <p className="profile-meta">
-                  {p.birth_year ? `Age ${ageLabel(p.birth_year)}` : null}
-                  {p.role === 'owner' && ' · started the group'}
-                  {p.status === 'invited' && ' · invited'}
-                </p>
-                {p.profile_id !== me && p.status === 'joined' && group.my_status === 'joined' && (
-                  <Link className="match-view" to={`/connections/people/${p.profile_id}`} aria-label={`View ${p.display_name}’s profile`}>
-                    View profile <NextIcon />
+      <section className="card person-section group-members" aria-labelledby="members-title">
+        <div className="group-members-head">
+          <h2 id="members-title">Members</h2>
+          <span className="hint">
+            {people.filter((p) => p.status === 'joined').length} of {MAX_GROUP}
+          </span>
+        </div>
+        <ul className="member-rows">
+          {people.map((p) => (
+            <li key={p.profile_id} className="member-row">
+              <Avatar name={p.display_name} path={p.photo_path} size="md" square />
+              <span className="member-row-text">
+                {p.profile_id !== me && p.status === 'joined' && group.my_status === 'joined' ? (
+                  <Link to={`/connections/people/${p.profile_id}`} aria-label={`View ${p.display_name}’s profile`}>
+                    <strong>
+                      {p.display_name}
+                      {p.birth_year ? `, ${ageLabel(p.birth_year)}` : ''}
+                    </strong>
                   </Link>
+                ) : (
+                  <strong>
+                    {p.profile_id === me ? `You (${p.display_name})` : p.display_name}
+                    {p.profile_id !== me && p.birth_year ? `, ${ageLabel(p.birth_year)}` : ''}
+                  </strong>
                 )}
-              </div>
-            </div>
-            {p.profile_id !== me && (
-              <div className="person-actions">
-                {group.i_own && (
+                {p.status === 'invited' && <span className="hint">Invited</span>}
+                {p.profile_id !== me && group.i_own && (
                   <button
                     type="button"
                     className="btn-link safety-link"
@@ -221,12 +246,13 @@ export function GroupDetail() {
                     {p.status === 'invited' ? 'Withdraw invite' : 'Remove from group'}
                   </button>
                 )}
-                <SafetyMenu profileId={p.profile_id} name={p.display_name} onBlocked={(message) => act(async () => undefined, message)} />
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
+              </span>
+              {p.role === 'owner' && <span className="going-badge is-gold">Organiser</span>}
+              {p.profile_id !== me && <SafetyMenu profileId={p.profile_id} name={p.display_name} onBlocked={(message) => act(async () => undefined, message)} />}
+            </li>
+          ))}
+        </ul>
+      </section>
       {others.length === 0 && <p className="hint section-hint">No one else is here yet.</p>}
 
       {group.i_own && people.length < MAX_GROUP && (
@@ -280,8 +306,9 @@ function InviteMore({
 
   if (!open) {
     return (
-      <button type="button" className="btn btn-secondary btn-block" onClick={() => setOpen(true)}>
-        Invite more people
+      <button type="button" className="btn btn-secondary btn-block group-invite-btn" onClick={() => setOpen(true)}>
+        <UserPlus size={20} strokeWidth={1.8} aria-hidden="true" />
+        Invite people you’re connected with
       </button>
     )
   }

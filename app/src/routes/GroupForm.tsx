@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { Avatar } from '../components/Avatar'
+import { CityPhoto } from '../components/CityPhoto'
 import { CityPicker } from '../components/CityPicker'
 import { AgeRange } from '../components/AgeRange'
 import { DateRangePicker } from '../components/DateRangePicker'
@@ -153,13 +154,19 @@ function GroupEditor({ people }: { people: Connection[] }) {
   return (
     <Layout>
       <form onSubmit={submit} noValidate>
-        <p className="eyebrow">New group</p>
+        <div className="form-top">
+          <Link className="form-top-cancel" to="/groups">
+            Cancel
+          </Link>
+          <p className="form-top-title">New group</p>
+          <span className="form-top-space" />
+        </div>
         <h1 ref={heading} tabIndex={-1}>
           Start a group
         </h1>
         <p className="lede">Plan a trip or just chat, with up to {rules.groups.maxPeople} people.</p>
 
-        <div className="card form-card">
+        <div className="group-form">
           <Segmented
             name="kind"
             legend="What’s it for?"
@@ -174,9 +181,16 @@ function GroupEditor({ people }: { people: Connection[] }) {
           {forTrip && trips.length > 0 && (
             <fieldset className="field">
               <legend>Start from one of your trips</legend>
-              <div className="chips chips-compact">
+              <div className="from-trips">
                 {trips.map((t) => (
-                  <button type="button" key={t.id} className={city?.id === t.city_id && start === t.start_date ? 'pill is-on' : 'pill'} onClick={() => fillFromTrip(t)}>
+                  <button
+                    type="button"
+                    key={t.id}
+                    className={city?.id === t.city_id && start === t.start_date ? 'from-trip is-on' : 'from-trip'}
+                    aria-pressed={city?.id === t.city_id && start === t.start_date}
+                    onClick={() => fillFromTrip(t)}
+                  >
+                    <CityPhoto city={t.city.name} width={80} code className="from-trip-photo" />
                     {t.city.name} · {shortDates(t.start_date, t.end_date)}
                   </button>
                 ))}
@@ -240,16 +254,18 @@ function GroupEditor({ people }: { people: Connection[] }) {
               hint={open ? `Members going to ${city?.name ?? 'the same place'} can find your group and join. You can still invite people.` : 'Only people you invite can join.'}
             />
           )}
-          {isWoman && (
-            <label className="switch-row">
-              <input type="checkbox" role="switch" checked={womenOnly} onChange={(e) => setWomenOnly(e.target.checked)} />
-              <span>
-                <strong>Women only</strong>
-                <span className="hint">Only women can be invited or join.</span>
-              </span>
-            </label>
-          )}
-          <AgeRange legend="Ages who can join (optional)" min={MIN_AGE} max={MAX_PREF_AGE} value={ages} onChange={setAges} />
+          <div className="card group-rules">
+            {isWoman && (
+              <label className="switch-row">
+                <input type="checkbox" role="switch" checked={womenOnly} onChange={(e) => setWomenOnly(e.target.checked)} />
+                <span>
+                  <strong>Women only</strong>
+                  <span className="hint">Only women can be invited or join.</span>
+                </span>
+              </label>
+            )}
+            <AgeRange legend="Ages who can join (optional)" min={MIN_AGE} max={MAX_PREF_AGE} value={ages} onChange={setAges} />
+          </div>
           <fieldset className="field" data-field="invite" aria-describedby={shown('invite') ? 'invite-error' : 'invite-hint'}>
             <legend>{forTrip && open ? 'Who to invite (optional)' : 'Who to invite'}</legend>
             <p className="hint" id="invite-hint">
@@ -278,7 +294,7 @@ function GroupEditor({ people }: { people: Connection[] }) {
           </fieldset>
         </div>
         <SaveError error={error} />
-        <ActionBar busy={busy} onBack={() => navigate('/groups')} label="Start group" />
+        <ActionBar busy={busy} label="Start group" />
       </form>
     </Layout>
   )

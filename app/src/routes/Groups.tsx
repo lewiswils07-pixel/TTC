@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { ChatNav } from '../components/SubNav'
-import { tripDates } from '../lib/dates'
+import { shortDates, tripDates } from '../lib/dates'
+import { CityPhoto } from '../components/CityPhoto'
 import { messageOf } from '../lib/errors'
 import { brand } from '../lib/brand'
 import { rules } from '../lib/rules'
@@ -84,18 +85,25 @@ export function Groups() {
 
       {invites.length > 0 && (
         <>
-          <h2 className="section-title">Invites for you</h2>
-          <ul className="person-list">
+          <h2 className="list-label">Invites for you</h2>
+          <ul className="open-group-list">
             {invites.map((g) => (
-              <li key={g.id} className="card group-card">
-                <GroupSummary group={g} />
-                <p className="hint">{g.owner_name} invited you.</p>
+              <li key={g.id} className="card open-group invite-card">
+                <div className="open-group-head">
+                  <GroupTile group={g} />
+                  <span className="open-group-text">
+                    <strong>{g.name}</strong>
+                    <span>
+                      {g.owner_name} invited you{isTripGroup(g) ? ` · ${shortDates(g.start_date, g.end_date)}` : ''} · {g.members} {g.members === 1 ? 'member' : 'members'}
+                    </span>
+                  </span>
+                </div>
                 <div className="action-row">
                   <button type="button" className="btn btn-secondary" disabled={busy === g.id} onClick={() => answer(g, false)}>
-                    No thanks
+                    Not now
                   </button>
                   <button type="button" className="btn btn-primary" disabled={busy === g.id} onClick={() => answer(g, true)}>
-                    Join
+                    Join group
                   </button>
                 </div>
                 <Link className="safety-link" to={`/groups/${g.id}`}>
@@ -107,7 +115,7 @@ export function Groups() {
         </>
       )}
 
-      <h2 className="visually-hidden">Your groups</h2>
+      <h2 className="list-label">Your groups</h2>
       {joined.length === 0 ? (
         <div className="card empty">
           <p>You’re not in a group yet.</p>
@@ -125,9 +133,7 @@ export function Groups() {
             return (
               <li key={g.id}>
                 <Link className={`chat-row${chat?.unread ? ' is-unread' : ''}`} to={g.conversation_id ? `/messages/${g.conversation_id}` : `/groups/${g.id}`}>
-                  <span className="avatar avatar-md avatar-square avatar-group" aria-hidden="true">
-                    <UsersRound size={24} strokeWidth={1.8} />
-                  </span>
+                  <GroupTile group={g} />
                   <span className="chat-row-text">
                     <span className="chat-row-top">
                       <strong>{g.name}</strong>
@@ -164,15 +170,13 @@ export function Groups() {
   )
 }
 
-function GroupSummary({ group }: { group: Group }) {
-  return (
-    <>
-      <strong className="group-name">{group.name}</strong>
-      <span className="trip-meta">{isTripGroup(group) ? `${group.city} · ${tripDates(group.start_date, group.end_date)}` : 'Group chat'}</span>
-      <span className="trip-meta">
-        {group.members} {group.members === 1 ? 'member' : 'members'}
-        {group.i_own ? ' · you started it' : ''}
-      </span>
-    </>
+/** A trip group's city code on its photo, or a gold people icon for a group chat. */
+function GroupTile({ group }: { group: Group }) {
+  return isTripGroup(group) ? (
+    <CityPhoto city={group.city} width={120} code className="group-tile" />
+  ) : (
+    <span className="avatar avatar-md avatar-square avatar-group group-tile" aria-hidden="true">
+      <UsersRound size={24} strokeWidth={1.8} />
+    </span>
   )
 }

@@ -25,7 +25,7 @@ import { HubRow } from '../components/HubRow'
 import { EmergencyNumbers } from '../components/EmergencyNumbers'
 import { interestedInText } from '../lib/filters'
 import { HolidayChips } from '../components/ProfileExtras'
-import { BackIcon, NextIcon } from '../components/Icons'
+import { BackIcon, CloseIcon, NextIcon } from '../components/Icons'
 
 type HubTab = 'me' | 'safety' | 'plus'
 
@@ -66,6 +66,13 @@ export function Profile() {
   if (!data) return <Loading />
   if (!data.profile.onboarded_at) return <Navigate to="/onboarding" replace />
 
+  if (tab === 'plus') {
+    return (
+      <Layout tab="profile">
+        <PlusPanel />
+      </Layout>
+    )
+  }
   if (tab !== 'me') {
     return (
       <Layout tab="profile">
@@ -367,36 +374,42 @@ function PlusPanel() {
   if (until === 'loading') return <div className="skeleton-block" aria-hidden="true" />
   const has = until !== undefined
   const perks = [
-    { icon: ICONS.people, title: 'Connect with as many people as you like' },
-    { icon: ICONS.tour, title: 'See everyone’s holiday preferences' },
-    { icon: ICONS.filters, title: 'Filter by pace and budget' },
-    { icon: ICONS.star, title: `Start up to ${count(rules.groups.maxOwnedPlus, 'group')} at once` },
+    { title: 'Unlimited connection requests', text: 'Say hello to as many members as you like.' },
+    { title: 'Unlimited trip plans', text: 'Plan as many trips together as you want.' },
+    { title: 'Travel-style filters', text: 'Find people who travel at your pace and budget.' },
+    { title: 'Going when you are', text: 'See the exact days you overlap with other members.' },
+    { title: 'Popular groups', text: `See where members are heading, and start up to ${count(rules.groups.maxOwnedPlus, 'group')} at once.` },
+    { title: 'Search members’ tips', text: 'Search and filter tips for every place.' },
   ]
+  const date = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
   return (
-    <>
-      <section className="card plus-card" aria-labelledby="plus-title">
-        <span className="tag tag-plus">{brand.plusName}</span>
-        <h2 id="plus-title">{has ? `You have ${brand.plusName}` : `Do more with ${brand.plusName}`}</h2>
-        <p className="plus-price">
-          <strong>{plusPrice()}</strong> a month
-        </p>
+    <div className="plus-page">
+      <div className="plus-hero">
+        <Link className="icon-btn plus-close" to="/profile" aria-label="Back to your profile">
+          <CloseIcon size={24} />
+        </Link>
+        <Monogram size={84} />
+        <h1>{brand.plusName}</h1>
+        <p>More ways to find good company for every trip.</p>
+      </div>
+      <section className="card plus-offer" aria-label={`Your ${brand.plusName}`}>
         {has ? (
           <>
-            <p>{until ? `It’s free for you until ${new Date(until).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.` : 'It’s yours with no end date.'}</p>
-            {until && (
-              <p className="hint">
-                When the free months end, you move to the free plan on your own. We never ask for a card for them, so there’s nothing to cancel and you’ll never be charged without saying yes first.
-              </p>
-            )}
+            <span className="plus-eyebrow">You have {brand.plusName}</span>
+            <h2>{until ? `Free until ${date(until)}` : 'Yours, with no end date'}</h2>
+            {until && <p className="hint">When the free months end, you move to the free plan on your own. We never ask for a card, so there’s nothing to cancel.</p>}
             <button type="button" className="btn btn-secondary btn-small" onClick={stop}>
               Stop {brand.plusName} now
             </button>
           </>
         ) : (
-          <p>
-            {stopped ? `You’re on the free plan now. ` : ''}
-            {brand.plusName} is coming soon. When it starts you can stop it any time in one tap.
-          </p>
+          <>
+            <span className="plus-eyebrow">Coming soon</span>
+            <h2>
+              {plusPrice()} <span>a month</span>
+            </h2>
+            <p className="hint">{stopped ? 'You’re on the free plan now. ' : ''}When it starts you can stop it any time in one tap.</p>
+          </>
         )}
         {error && (
           <p className="notice notice-error" role="alert">
@@ -405,19 +418,22 @@ function PlusPanel() {
         )}
       </section>
       {dialog}
-      <ul className="hub-list">
+      <h2 className="list-label">What you get</h2>
+      <ul className="card plus-perks">
         {perks.map((p) => (
-          <li key={p.title} className="hub-row hub-row-static">
-            <span className="hub-icon" aria-hidden="true">
-              <Icon d={p.icon} />
+          <li key={p.title}>
+            <span className="plus-check" aria-hidden="true">
+              <Check size={16} strokeWidth={3} />
             </span>
-            <span className="hub-text">
+            <span>
               <strong>{p.title}</strong>
+              <span>{p.text}</span>
             </span>
           </li>
         ))}
       </ul>
-    </>
+      <p className="hint center plus-foot">No pressure. The Collective is yours to enjoy for free, whatever you decide.</p>
+    </div>
   )
 }
 

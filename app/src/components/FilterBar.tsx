@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { FieldError } from './Field'
 import { FilterFields } from './FilterFields'
+import { CloseIcon } from './Icons'
 import { messageOf } from '../lib/errors'
 import { NO_PLUS_FILTERS, filterErrors, getFilters, saveFilters, type Filters } from '../lib/filters'
 import { MAX_PREF_AGE, MIN_AGE, SHOWN_GENDERS } from '../lib/options'
@@ -128,7 +129,10 @@ function FilterSheet({ start, plus, userId, onClose }: { start: Filters; plus: b
               })
             }
           >
-            Clear all
+            Reset
+          </button>
+          <button type="button" className="icon-btn sheet-close" aria-label="Close filters" onClick={() => onClose(null)}>
+            <CloseIcon size={22} />
           </button>
         </div>
         <div className="sheet-body">
@@ -136,10 +140,7 @@ function FilterSheet({ start, plus, userId, onClose }: { start: Filters; plus: b
         </div>
         <FieldError error={error} />
         <div className="confirm-actions sheet-actions">
-          <button type="button" className="btn btn-secondary" onClick={() => onClose(null)}>
-            Cancel
-          </button>
-          <button type="submit" className="btn btn-primary" disabled={busy}>
+          <button type="submit" className="btn btn-primary btn-block" disabled={busy}>
             {busy ? 'Saving…' : 'Show people'}
           </button>
         </div>

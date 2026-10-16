@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { shortDates } from '../lib/dates'
+import { CityPhoto } from './CityPhoto'
 import { messageOf } from '../lib/errors'
-import { joinOpenGroup, openGroups, settingsLabel, type OpenGroup } from '../lib/groups'
+import { joinOpenGroup, openGroups, type OpenGroup } from '../lib/groups'
 
 /** Travel groups anyone who fits can join (Lewis, 13 Oct). On a trip page, `cityId` shows only groups going there. Hidden when there are none. */
 export function OpenGroups({ cityId, title = 'Groups you can join' }: { cityId?: number; title?: string }) {
@@ -31,34 +32,46 @@ export function OpenGroups({ cityId, title = 'Groups you can join' }: { cityId?:
   if (!groups?.length) return null
   return (
     <section className="open-groups" aria-labelledby="open-groups-title">
-      <h2 className="section-title" id="open-groups-title">
+      <h2 className="list-label" id="open-groups-title">
         {title}
       </h2>
-      <p className="hint">Trip groups open to members like you. Join one and you’re in the group chat straight away.</p>
+      <p className="hint list-hint">Open to members like you. Join and you’re in the group chat straight away.</p>
       {error && (
         <p className="notice notice-error" role="alert">
           {error}
         </p>
       )}
-      <ul className="person-list">
+      <ul className="open-group-list">
         {groups.map((g) => {
-          const who = settingsLabel(g)
+          const tags = [
+            g.women_only ? 'Women only' : null,
+            g.age_min && g.age_max ? `Ages ${g.age_min}–${g.age_max}` : g.age_min ? `Ages ${g.age_min}+` : g.age_max ? `Ages up to ${g.age_max}` : null,
+            g.going_when_you_are ? 'Going when you are' : null,
+          ].filter(Boolean)
           return (
-            <li key={g.id} className="card group-card open-group">
-              <span className="trip-text">
-                <strong>{g.name}</strong>
-                <span className="hint">
-                  {g.city} · {shortDates(g.start_date, g.end_date)}
+            <li key={g.id} className="card open-group">
+              <div className="open-group-head">
+                <CityPhoto city={g.city} width={120} code className="group-tile" />
+                <span className="open-group-text">
+                  <strong>{g.name}</strong>
+                  <span>
+                    {shortDates(g.start_date, g.end_date)} · {g.members} of {g.max_people} places
+                  </span>
+                  <span className="hint">Started by {g.owner_name}</span>
                 </span>
-                <span className="hint">
-                  Started by {g.owner_name} · {g.members} joined
-                  {g.going_when_you_are ? ' · Going when you are' : ''}
+              </div>
+              <div className="open-group-foot">
+                <span className="open-group-tags">
+                  {tags.map((t) => (
+                    <span key={t} className="tag">
+                      {t}
+                    </span>
+                  ))}
                 </span>
-                {who && <span className="tag">{who}</span>}
-              </span>
-              <button type="button" className="btn btn-primary btn-small" disabled={busy === g.id} onClick={() => join(g)} aria-label={`Join ${g.name}`}>
-                {busy === g.id ? 'Joining…' : 'Join'}
-              </button>
+                <button type="button" className="btn btn-outline btn-small" disabled={busy === g.id} onClick={() => join(g)} aria-label={`Join ${g.name}`}>
+                  {busy === g.id ? 'Joining…' : 'Join'}
+                </button>
+              </div>
             </li>
           )
         })}

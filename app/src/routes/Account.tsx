@@ -9,7 +9,10 @@ import { messageOf } from '../lib/errors'
 import { useSession } from '../lib/session-context'
 import { useChecks } from '../lib/useChecks'
 import { checkCode, checkNewPassword } from '../lib/validation'
-import { BackIcon } from '../components/Icons'
+import { NextIcon } from '../components/Icons'
+import { PageBack } from '../components/PageBack'
+import { TriangleAlert } from 'lucide-react'
+import { brand } from '../lib/brand'
 
 const CONFIRM_WORD = 'DELETE'
 
@@ -54,14 +57,19 @@ export function Account() {
 
   return (
     <Layout tab="profile">
-      <Link className="back-link" to="/profile">
-        <BackIcon />
-        Profile
-      </Link>
+      <PageBack to="/settings" label="Back to settings" />
       <h1 ref={heading} tabIndex={-1}>
-        Your account and data
+        Account
       </h1>
-      <p className="lede">Signed in as {session?.user.email}.</p>
+      <h2 className="list-label">Signing in</h2>
+      <ul className="set-list">
+        <li>
+          <span className="set-row">
+            <strong>Email</strong>
+            <span className="set-value">{session?.user.email}</span>
+          </span>
+        </li>
+      </ul>
       {error && (
         <p className="notice notice-error" role="alert">
           {error}
@@ -70,6 +78,18 @@ export function Account() {
 
       <PasswordCard email={session?.user.email ?? ''} had={hasPassword(session?.user)} />
 
+      <h2 className="list-label">Membership</h2>
+      <ul className="set-list">
+        <li>
+          <Link to="/profile?tab=plus">
+            <span>
+              <strong>{brand.plusName}</strong>
+            </span>
+            <NextIcon />
+          </Link>
+        </li>
+      </ul>
+      <h2 className="list-label">Your data</h2>
       <section className="card section-card account-card" aria-labelledby="download-title">
         <h2 id="download-title">Download my data</h2>
         <p>A file with everything we hold about you: your profile, trips, connections, the messages you’ve sent and your settings.</p>
@@ -84,7 +104,10 @@ export function Account() {
       </section>
 
       <section className="card section-card account-card account-danger" aria-labelledby="delete-title">
-        <h2 id="delete-title">Delete my account</h2>
+        <h2 id="delete-title">
+          <TriangleAlert size={22} strokeWidth={2} aria-hidden="true" />
+          Delete my account
+        </h2>
         <p>
           This removes your profile, photos, trips, connections and messages for good. People you’ve chatted with will no longer see your messages. If you started a group, another member takes it
           over. It can’t be undone.

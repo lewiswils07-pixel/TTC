@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { brand } from '../lib/brand'
+import { CityPhoto } from './CityPhoto'
 import { peek, remember } from '../lib/cache'
 import { hasPlus } from '../lib/plan'
 import { popularDestinations, type PopularPlace } from '../lib/trips'
@@ -21,19 +22,20 @@ export function PopularGroups({ canStart }: { canStart: boolean }) {
   if (plus === null || !places?.length) return null
   return (
     <section className="popular-groups" aria-labelledby="popular-groups-title">
-      <h2 className="section-title" id="popular-groups-title">
+      <h2 className="list-label" id="popular-groups-title">
         Popular right now
       </h2>
       {/* The badge always says what it's for (testers, 13 Oct). */}
-      <p className="hint">
-        <span className="tag tag-plus">{brand.plusName}</span> Where members are heading now, so you can start a group for one.{' '}
+      <p className="hint list-hint">
+        <span className="tag tag-plus-dark">{brand.plusName}</span> Where members are heading now, so you can start a group for one.{' '}
         {!plus && <Link to="/profile?tab=plus">Comes with {brand.plusName}</Link>}
       </p>
       {plus && (
-        <ul className="person-list">
+        <ul className="chat-list">
           {(all ? places : places.slice(0, SHOWN)).map((p) => (
-            <li key={p.city_id} className="card group-card popular-group">
-              <span className="trip-text">
+            <li key={p.city_id} className="chat-row popular-group">
+              <CityPhoto city={p.city} width={120} code className="group-tile" />
+              <span className="chat-row-text">
                 <strong>{p.city}</strong>
                 <span className="hint">{p.members} members going</span>
               </span>

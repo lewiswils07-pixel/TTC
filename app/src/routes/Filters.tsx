@@ -8,7 +8,7 @@ import { filterErrors, getFilters, saveFilters, type Filters as FilterValues } f
 import { MAX_PREF_AGE } from '../lib/options'
 import { hasPlus } from '../lib/plan'
 import { useSession } from '../lib/session-context'
-import { BackIcon } from '../components/Icons'
+import { CloseIcon } from '../components/Icons'
 
 /** Who to show in suggestions. The Sodalis+ filters are shown to everyone but only unlock with the plan. */
 export function Filters() {
@@ -69,13 +69,14 @@ export function Filters() {
 
   return (
     <Layout>
-      <Link className="back-link" to="/connections">
-        <BackIcon />
-        Who’s going
-      </Link>
-      <h1 ref={heading} tabIndex={-1}>
-        Filters
-      </h1>
+      <div className="filters-top">
+        <h1 ref={heading} tabIndex={-1}>
+          Filters
+        </h1>
+        <Link className="icon-btn sheet-close" to="/connections" aria-label="Close filters, back to Who’s going">
+          <CloseIcon size={22} />
+        </Link>
+      </div>
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -83,16 +84,11 @@ export function Filters() {
         }}
         noValidate
       >
-        <div className="card form-card">
-          <FilterFields value={values} onChange={setValues} plus={plus} />
-        </div>
+        <FilterFields value={values} onChange={setValues} plus={plus} />
 
         <SaveError error={error} />
-        <div className="action-row">
-          <Link className="btn btn-secondary" to="/connections">
-            Cancel
-          </Link>
-          <button type="submit" className="btn btn-primary" disabled={busy}>
+        <div className="action-bar">
+          <button type="submit" className="btn btn-primary btn-block" disabled={busy}>
             {busy ? 'Saving…' : 'Save filters'}
           </button>
         </div>
