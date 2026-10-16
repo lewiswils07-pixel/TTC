@@ -6,17 +6,20 @@ import { signOut } from '../lib/auth'
 import { messageOf } from '../lib/errors'
 import { myPrivacyChoices, PRIVACY_TOOLS, savePrivacyChoices, type PrivacyChoices } from '../lib/privacy'
 import { useSession } from '../lib/session-context'
-import { HubRow } from '../components/HubRow'
-import { BackIcon } from '../components/Icons'
+import { NextIcon } from '../components/Icons'
+import { PageBack } from '../components/PageBack'
 
-const LINKS: { to: string; title: string; text: string }[] = [
-  { to: '/filters', title: 'Filters', text: 'How people travel, age and distance' },
-  { to: '/settings/privacy', title: 'Privacy choices', text: 'Choose which optional tools we use' },
+const YOU: { to: string; title: string; text?: string }[] = [
   { to: '/account', title: 'Account and data', text: 'Password, download your data, delete your account' },
+  { to: '/settings/privacy', title: 'Privacy choices' },
+  { to: '/filters', title: 'Filters', text: 'Who you see on Who’s going' },
+  { to: '/requests#blocked', title: 'Blocked members' },
+]
+const HELP: { to: string; title: string; text?: string }[] = [
   { to: '/connections?tour=1', title: 'Take the tour again', text: 'A quick look at what you can do' },
   { to: '/help', title: 'Help and contact', text: 'Questions, and how to reach us' },
 ]
-const LEGAL: { to: string; title: string }[] = [
+const LEGAL: { to: string; title: string; text?: string }[] = [
   { to: '/community-rules', title: 'Community rules' },
   { to: '/terms', title: 'Terms' },
   { to: '/privacy', title: 'Privacy policy' },
@@ -28,32 +31,39 @@ export function Settings() {
   useEffect(() => heading.current?.focus(), [])
   return (
     <Layout tab="profile">
-      <Link className="back-link" to="/profile">
-        <BackIcon />
-        Profile
-      </Link>
+      <PageBack to="/profile" label="Back to your profile" />
       <h1 ref={heading} tabIndex={-1}>
         Settings
       </h1>
-      <ul className="hub-list">
-        {LINKS.map((l) => (
-          <li key={l.to}>
-            <HubRow to={l.to} title={l.title} text={l.text} />
-          </li>
-        ))}
-      </ul>
-      <h2 className="section-title">Legal</h2>
-      <ul className="hub-list">
-        {LEGAL.map((l) => (
-          <li key={l.to}>
-            <HubRow to={l.to} title={l.title} />
-          </li>
-        ))}
-      </ul>
+      <SettingsList title="You" items={YOU} />
+      <SettingsList title="Help" items={HELP} />
+      <SettingsList title="Legal" items={LEGAL} />
       <button type="button" className="btn btn-secondary btn-block settings-signout" onClick={() => signOut()}>
         Sign out
       </button>
     </Layout>
+  )
+}
+
+/** A small capitals label over one card of rows, each opening a page. */
+function SettingsList({ title, items }: { title: string; items: { to: string; title: string; text?: string }[] }) {
+  return (
+    <section aria-label={title}>
+      <h2 className="list-label">{title}</h2>
+      <ul className="set-list">
+        {items.map((l) => (
+          <li key={l.to}>
+            <Link to={l.to}>
+              <span>
+                <strong>{l.title}</strong>
+                {l.text && <span>{l.text}</span>}
+              </span>
+              <NextIcon />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }
 
@@ -95,14 +105,12 @@ export function PrivacyChoicesPage() {
 
   return (
     <Layout tab="profile">
-      <Link className="back-link" to="/settings">
-        <BackIcon />
-        Settings
-      </Link>
+      <PageBack to="/settings" label="Back to settings" />
       <h1 ref={heading} tabIndex={-1}>
         Privacy choices
       </h1>
       <p className="lede">Choose which optional tools we use when you use the app. You can change your mind here at any time.</p>
+      <h2 className="list-label">Optional tools</h2>
 
       <section className="card privacy-card">
         <label className="switch-row switch-row-end">
@@ -131,15 +139,12 @@ export function PrivacyChoicesPage() {
             </span>
           </label>
         ))}
-        <p className="hint">None of these tools track you across other apps and websites.</p>
       </section>
+      <p className="hint privacy-foot">None of these tools track you across other apps and websites.</p>
 
       <SaveError error={error} />
-      <div className="action-row">
-        <Link className="btn btn-secondary" to="/settings">
-          Cancel
-        </Link>
-        <button type="button" className="btn btn-primary" disabled={busy} onClick={save}>
+      <div className="action-bar">
+        <button type="button" className="btn btn-primary btn-block" disabled={busy} onClick={save}>
           {busy ? 'Saving…' : 'Save choices'}
         </button>
       </div>

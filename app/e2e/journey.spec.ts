@@ -154,7 +154,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await b.getByRole('button', { name: 'Add to the plan' }).click()
     await expect(b.locator('.idea')).toHaveCount(1)
 
-    await a.getByRole('link', { name: 'Open the group chat' }).click()
+    await a.getByRole('link', { name: 'Open group chat' }).click()
     await a.getByRole('link', { name: 'Plan board' }).click()
     await a.getByRole('button', { name: /Vote for Musée d’Orsay/ }).click()
     await expect(a.getByRole('button', { name: /Vote for Musée d’Orsay.*1 vote/ })).toBeVisible()
