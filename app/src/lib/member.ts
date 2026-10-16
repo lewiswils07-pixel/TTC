@@ -96,6 +96,8 @@ export type MemberExtras = {
   group_size: string | null
   /** From database Part 24. */
   room_sharing?: RoomSharing | null
+  /** “Me in one line”, from database Part 26. */
+  headline?: string | null
 }
 
 const extrasCache = new Map<string, Promise<MemberExtras | null>>()

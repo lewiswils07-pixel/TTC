@@ -47,6 +47,7 @@ update public.profiles p
        birth_year   = 1946 + floor(random() * 40)::int,      -- aged about 40 to 80
        home_city_id = h.id,
        bio          = 'Demo member for local testing.',
+       headline     = (array['Happiest with a map and a good coffee', 'Always planning the next city break', 'Long walks, long lunches, early nights', 'Here for galleries, markets and good company', 'Never met a beach I didn''t like', 'Slow mornings, busy afternoons'])[1 + (d.i % 6)::int],
        travel_style = (array['planner', 'mix', 'spontaneous'])[1 + floor(random() * 3)::int],
        pace         = (array['slow', 'steady', 'packed'])[1 + floor(random() * 3)::int],
        budget       = (array['budget', 'comfort', 'luxury'])[1 + floor(random() * 3)::int],

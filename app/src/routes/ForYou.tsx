@@ -470,6 +470,7 @@ function PersonCard(props: CardProps & { onOpen: () => void }) {
       </div>
       <div className="going-tear" aria-hidden="true" />
       <PersonHead person={person} myHome={props.myHome} id={id} />
+      {extras?.headline && <p className="going-headline">“{extras.headline}”</p>}
       {shares.length > 0 && (
         <div className="going-share">
           <h4>What you share</h4>
@@ -627,6 +628,7 @@ function PersonPage(props: CardProps & { onBack: () => void }) {
         <SafetyMenu profileId={person.profile_id} name={name} onBlocked={onBlocked} />
       </div>
       <PersonHead person={person} myHome={props.myHome} id="person-name" level={1} />
+      {extras?.headline && <p className="going-headline is-page">“{extras.headline}”</p>}
       {person.travelling_with && (
         <p className="tip-box">
           <UsersRound size={20} strokeWidth={1.8} aria-hidden="true" />

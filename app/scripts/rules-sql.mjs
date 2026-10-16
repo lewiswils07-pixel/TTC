@@ -19,6 +19,7 @@ const supabase = join(app, '..', 'supabase')
 const LENGTHS = [
   ['profiles', 'profiles_display_name_check', 'profile.nameMax', (v) => `<= ${v}`],
   ['profiles', 'profiles_bio_check', 'profile.bioMax', (v) => `<= ${v}`],
+  ['profiles', 'profiles_headline_check', 'profile.headlineMax', (v) => `<= ${v}`],
   ['profiles', 'profiles_mobility_note_check', 'profile.mobilityNoteMax', (v) => `<= ${v}`],
   ['profiles', 'profiles_travelling_with_check', 'profile.travellingWithMax', (v) => `<= ${v}`],
   ['profiles', 'profiles_languages_check', 'profile.languagesMax', (v) => `cardinality(languages) <= ${v}`],

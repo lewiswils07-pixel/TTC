@@ -11,6 +11,7 @@ const emptyProfile: Profile = {
   birth_date: null,
   gender: null,
   home_city_id: null,
+  headline: null,
   bio: null,
   photo_path: null,
   travel_style: null,

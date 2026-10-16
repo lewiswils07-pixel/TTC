@@ -112,6 +112,7 @@ export function MemberProfile() {
             {member.birth_year ? `, ${ageLabel(member.birth_year)}` : ''}
           </h1>
           {home && <p>{home}</p>}
+          {extras?.headline && <p className="going-headline is-page">“{extras.headline}”</p>}
           {member.connected_at && (
             <span className="going-badge is-gold">Connected since {new Date(member.connected_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
           )}

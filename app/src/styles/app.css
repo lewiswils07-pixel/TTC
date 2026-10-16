@@ -2557,3 +2557,9 @@ a.chat-row:hover { background: color-mix(in srgb, var(--paper-tint) 45%, var(--c
 .loading-mark .empty-art { animation: loading-breathe 1.8s ease-in-out infinite; }
 @keyframes loading-breathe { 50% { transform: scale(1.05); } }
 @media (prefers-reduced-motion: reduce) { .loading-mark .empty-art { animation: none; } }
+
+/* One line about me (Lewis, 16 Oct) ------------------------------------- */
+.going-headline { margin: var(--space-3) 0 0; font-family: var(--serif); font-style: italic; font-size: 1.0625rem; line-height: 1.4; color: var(--ink); overflow-wrap: anywhere; }
+.going-headline.is-page { margin-top: var(--space-2); text-align: inherit; }
+.me-headline { margin: var(--space-3) 0 0; font-family: var(--serif); font-style: italic; font-size: 1.125rem; color: var(--ink); }
+.going-person .going-headline { margin: -4px 18px 16px; }

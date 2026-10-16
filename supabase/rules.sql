@@ -21,10 +21,11 @@ insert into private.rules (key, value) values
   ('wishlist.max', 10),
   ('age.min', 18),
   ('age.maxPreferred', 99),
-  ('card.answers', 3),
+  ('card.answers', 2),
   ('card.maxWords', 30),
   ('card.maxChars', 200),
   ('profile.nameMax', 40),
+  ('profile.headlineMax', 80),
   ('profile.bioMax', 500),
   ('profile.mobilityNoteMax', 200),
   ('profile.travellingWithMax', 80),
@@ -58,4 +59,4 @@ insert into private.rules (key, value) values
   ('matching.flexibleAgeYears', 5),
   ('plus.pricePencePerMonth', 599)
 on conflict (key) do update set value = excluded.value;
-delete from private.rules where key not in ('signIn.codeLength', 'signIn.passwordMin', 'signIn.passwordMax', 'interests.pick', 'requests.perWeekFree', 'requests.plusSafetyCap', 'requests.plusShowLeftBelow', 'groups.maxOwnedFree', 'groups.maxOwnedPlus', 'groups.maxPeople', 'groups.nameMax', 'trips.maxNights', 'trips.maxDaysAhead', 'trips.maxUpcoming', 'trips.maxFlexDays', 'trips.noteMax', 'trips.popularMinMembers', 'trips.popularShown', 'wishlist.max', 'age.min', 'age.maxPreferred', 'card.answers', 'card.maxWords', 'card.maxChars', 'profile.nameMax', 'profile.bioMax', 'profile.mobilityNoteMax', 'profile.travellingWithMax', 'profile.languagesMax', 'profile.photoBookMax', 'connections.noteMax', 'connections.notNowDays', 'connections.recentlyOnlineHours', 'chat.messageMax', 'planBoard.ideaMax', 'planBoard.linkMax', 'planBoard.maxIdeas', 'planBoard.maxDay', 'safety.reportDetailsMax', 'safety.adminNoteMax', 'meetups.placeMax', 'meetups.noteMax', 'meetups.maxOpen', 'meetups.maxDaysAhead', 'meetups.linkDays', 'reviews.textMax', 'tips.placeMax', 'tips.textMax', 'tips.perCityMax', 'survey.commentMax', 'survey.heardFromAfterMinutes', 'founding.plusMonths', 'matching.maxSuggestions', 'matching.sameTripBonus', 'matching.flexiblePenalty', 'matching.flexibleAgeYears', 'plus.pricePencePerMonth');
+delete from private.rules where key not in ('signIn.codeLength', 'signIn.passwordMin', 'signIn.passwordMax', 'interests.pick', 'requests.perWeekFree', 'requests.plusSafetyCap', 'requests.plusShowLeftBelow', 'groups.maxOwnedFree', 'groups.maxOwnedPlus', 'groups.maxPeople', 'groups.nameMax', 'trips.maxNights', 'trips.maxDaysAhead', 'trips.maxUpcoming', 'trips.maxFlexDays', 'trips.noteMax', 'trips.popularMinMembers', 'trips.popularShown', 'wishlist.max', 'age.min', 'age.maxPreferred', 'card.answers', 'card.maxWords', 'card.maxChars', 'profile.nameMax', 'profile.headlineMax', 'profile.bioMax', 'profile.mobilityNoteMax', 'profile.travellingWithMax', 'profile.languagesMax', 'profile.photoBookMax', 'connections.noteMax', 'connections.notNowDays', 'connections.recentlyOnlineHours', 'chat.messageMax', 'planBoard.ideaMax', 'planBoard.linkMax', 'planBoard.maxIdeas', 'planBoard.maxDay', 'safety.reportDetailsMax', 'safety.adminNoteMax', 'meetups.placeMax', 'meetups.noteMax', 'meetups.maxOpen', 'meetups.maxDaysAhead', 'meetups.linkDays', 'reviews.textMax', 'tips.placeMax', 'tips.textMax', 'tips.perCityMax', 'survey.commentMax', 'survey.heardFromAfterMinutes', 'founding.plusMonths', 'matching.maxSuggestions', 'matching.sameTripBonus', 'matching.flexiblePenalty', 'matching.flexibleAgeYears', 'plus.pricePencePerMonth');

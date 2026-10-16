@@ -20,7 +20,7 @@ describe('the back of the card', () => {
     expect(checkAnswer({ q: 'how_often', a: 'word '.repeat(ANSWER_MAX_WORDS + 1) })).toMatch(/30 words/)
     expect(checkAnswer({ q: 'how_often', a: 'Twice a year' })).toBeNull()
   })
-  it('only keeps known questions, tidied, at most 3', () => {
+  it('only keeps known questions, tidied, at most 2', () => {
     expect(
       cleanAnswers([
         { q: 'how_often', a: '  Twice   a year ' },
@@ -32,7 +32,6 @@ describe('the back of the card', () => {
     ).toEqual([
       { q: 'how_often', a: 'Twice a year' },
       { q: 'dream_trip', a: 'Japan' },
-      { q: 'always_pack', a: 'A book' },
     ])
     expect(hasCard(null)).toBe(false)
     expect(hasCard({ card_answers: [{ q: 'how_often', a: 'x' }] })).toBe(false)

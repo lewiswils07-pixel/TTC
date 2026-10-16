@@ -1,4 +1,4 @@
--- pgTAP: the back of a member's card (answers to 3 chosen questions).
+-- pgTAP: the back of a member's card (answers to 2 chosen questions).
 begin;
 select plan(12);
 
@@ -17,10 +17,10 @@ update public.profiles set display_name = 'M', gender = 'woman', birth_date = da
 
 select pg_temp.sign_in_as(pg_temp.m(1));
 select lives_ok($$update public.profiles set
-  card_answers = '[{"q":"perfect_holiday","a":"A slow week in Lisbon with long lunches, old trams and sunsets over the river."},{"q":"dream_trip","a":"Japan in cherry blossom season"},{"q":"always_pack","a":"A good book"}]'
+  card_answers = '[{"q":"perfect_holiday","a":"A slow week in Lisbon with long lunches, old trams and sunsets over the river."},{"q":"dream_trip","a":"Japan in cherry blossom season"}]'
   where id = auth.uid()$$, 'members can write the back of their card');
 select throws_ok($$update public.profiles set card_answers = jsonb_build_array(jsonb_build_object('q', 'how_often', 'a', repeat('word ', 31))) where id = auth.uid()$$, '23514', null, 'answers are at most 30 words');
-select throws_ok($$update public.profiles set card_answers = '[{"q":"a_b","a":"1"},{"q":"c_d","a":"2"},{"q":"e_f","a":"3"},{"q":"g_h","a":"4"}]' where id = auth.uid()$$, '23514', null, 'at most 3 answers');
+select throws_ok($$update public.profiles set card_answers = '[{"q":"a_b","a":"1"},{"q":"c_d","a":"2"},{"q":"e_f","a":"3"}]' where id = auth.uid()$$, '23514', null, 'at most 2 answers');
 select throws_ok($$update public.profiles set card_answers = '[{"q":"how_often","a":"x"},{"q":"how_often","a":"y"}]' where id = auth.uid()$$, '23514', null, 'each question once');
 select throws_ok($$update public.profiles set card_answers = jsonb_build_array(jsonb_build_object('q', 'how_often', 'a', repeat('x', 201))) where id = auth.uid()$$, '23514', null, 'and 200 characters');
 select throws_ok($$update public.profiles set card_answers = '[{"q":"how_often","a":"   "}]' where id = auth.uid()$$, '23514', null, 'answers can''t be blank');
@@ -29,7 +29,7 @@ reset role;
 
 select pg_temp.sign_in_as(pg_temp.m(2));
 select is((select card_answers -> 0 ->> 'a' from public.member_card(pg_temp.m(1))), 'A slow week in Lisbon with long lunches, old trams and sunsets over the river.', 'other members can read it');
-select is((select jsonb_array_length(card_answers) from public.member_card(pg_temp.m(1))), 3, 'with all 3 answers');
+select is((select jsonb_array_length(card_answers) from public.member_card(pg_temp.m(1))), 2, 'with both answers');
 select is((select count(*)::int from public.profiles where id = pg_temp.m(1)), 0, 'but not the rest of the profile row');
 select public.block_member(pg_temp.m(1));
 select is((select count(*)::int from public.member_card(pg_temp.m(1))), 0, 'not after a block');

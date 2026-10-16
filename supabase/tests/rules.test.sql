@@ -1,7 +1,7 @@
 -- Written by `npm run rules` from app/rules.json. Don't edit by hand.
 -- Fails when the database's rules differ from the app's.
 begin;
-select plan(120);
+select plan(122);
 select is(private.rule('signIn.codeLength'), 6, 'signIn.codeLength is 6, as in rules.json');
 select is(private.rule('signIn.passwordMin'), 8, 'signIn.passwordMin is 8, as in rules.json');
 select is(private.rule('signIn.passwordMax'), 72, 'signIn.passwordMax is 72, as in rules.json');
@@ -23,10 +23,11 @@ select is(private.rule('trips.popularShown'), 8, 'trips.popularShown is 8, as in
 select is(private.rule('wishlist.max'), 10, 'wishlist.max is 10, as in rules.json');
 select is(private.rule('age.min'), 18, 'age.min is 18, as in rules.json');
 select is(private.rule('age.maxPreferred'), 99, 'age.maxPreferred is 99, as in rules.json');
-select is(private.rule('card.answers'), 3, 'card.answers is 3, as in rules.json');
+select is(private.rule('card.answers'), 2, 'card.answers is 2, as in rules.json');
 select is(private.rule('card.maxWords'), 30, 'card.maxWords is 30, as in rules.json');
 select is(private.rule('card.maxChars'), 200, 'card.maxChars is 200, as in rules.json');
 select is(private.rule('profile.nameMax'), 40, 'profile.nameMax is 40, as in rules.json');
+select is(private.rule('profile.headlineMax'), 80, 'profile.headlineMax is 80, as in rules.json');
 select is(private.rule('profile.bioMax'), 500, 'profile.bioMax is 500, as in rules.json');
 select is(private.rule('profile.mobilityNoteMax'), 200, 'profile.mobilityNoteMax is 200, as in rules.json');
 select is(private.rule('profile.travellingWithMax'), 80, 'profile.travellingWithMax is 80, as in rules.json');
@@ -59,9 +60,10 @@ select is(private.rule('matching.sameTripBonus'), 12, 'matching.sameTripBonus is
 select is(private.rule('matching.flexiblePenalty'), 10, 'matching.flexiblePenalty is 10, as in rules.json');
 select is(private.rule('matching.flexibleAgeYears'), 5, 'matching.flexibleAgeYears is 5, as in rules.json');
 select is(private.rule('plus.pricePencePerMonth'), 599, 'plus.pricePencePerMonth is 599, as in rules.json');
-select is((select count(*)::int from private.rules), 57, 'no rules beyond rules.json');
+select is((select count(*)::int from private.rules), 58, 'no rules beyond rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_display_name_check'), '<= 40') > 0, 'profiles_display_name_check uses profile.nameMax (40)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_bio_check'), '<= 500') > 0, 'profiles_bio_check uses profile.bioMax (500)');
+select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_headline_check'), '<= 80') > 0, 'profiles_headline_check uses profile.headlineMax (80)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_mobility_note_check'), '<= 200') > 0, 'profiles_mobility_note_check uses profile.mobilityNoteMax (200)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_travelling_with_check'), '<= 80') > 0, 'profiles_travelling_with_check uses profile.travellingWithMax (80)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_languages_check'), 'cardinality(languages) <= 10') > 0, 'profiles_languages_check uses profile.languagesMax (10)');
@@ -117,7 +119,7 @@ select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conr
 select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_holiday_prefs(jsonb)'::regprocedure), 'when ''stay'' then array[''hotel'', ''apartment'', ''bnb'', ''resort'', ''hostel'', ''camping'']') > 0, 'valid_holiday_prefs lists the stay answers in rules.json');
 select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_holiday_prefs(jsonb)'::regprocedure), 'when ''length'' then array[''weekend'', ''week'', ''fortnight'', ''longer'']') > 0, 'valid_holiday_prefs lists the length answers in rules.json');
 select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_holiday_prefs(jsonb)'::regprocedure), 'when ''season'' then array[''spring'', ''summer'', ''autumn'', ''winter'']') > 0, 'valid_holiday_prefs lists the season answers in rules.json');
-select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_card_answers(jsonb)'::regprocedure), 'jsonb_array_length(answers) <= 3') > 0, 'valid_card_answers uses card.answers (3)');
+select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_card_answers(jsonb)'::regprocedure), 'jsonb_array_length(answers) <= 2') > 0, 'valid_card_answers uses card.answers (2)');
 select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_card_answers(jsonb)'::regprocedure), 'between 1 and 200') > 0, 'valid_card_answers uses card.maxChars (200)');
 select ok(strpos((select prosrc from pg_proc where oid = 'public.valid_card_answers(jsonb)'::regprocedure), '''\s+'')) > 30') > 0, 'valid_card_answers uses card.maxWords (30)');
 select ok(strpos((select prosrc from pg_proc where oid = 'public.meetup_share_ends(public.meetup_shares)'::regprocedure), 'interval ''2 days''') > 0, 'meetup_share_ends uses meetups.linkDays (2)');

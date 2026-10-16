@@ -1,6 +1,6 @@
-// The back of a member's card: answers to 3 questions they pick from the
-// list below. Shown when someone flips their card on For you. Each answer is
-// kept short so all three fit on the card.
+// The back of a member's card: answers to 2 questions they pick from the
+// list below (rules.card.answers; 2 since the one-line about me, Lewis 16 Oct).
+// Shown under Read more on Who's going. Each answer is kept short.
 import { friendlyError } from './errors'
 import { supabase } from './supabase'
 import { rules } from './rules'
@@ -93,7 +93,10 @@ export const cleanAnswers = (answers: CardAnswer[]) =>
 export const hasCard = (c: Card | null) => (c?.card_answers.length ?? 0) >= ANSWERS_TO_PICK
 
 export async function saveCard(userId: string, answers: CardAnswer[]): Promise<void> {
-  const { error } = await supabase.from('profiles').update({ card_answers: cleanAnswers(answers) }).eq('id', userId)
+  const { error } = await supabase
+    .from('profiles')
+    .update({ card_answers: cleanAnswers(answers) })
+    .eq('id', userId)
   if (error) throw friendlyError(error)
 }
 
