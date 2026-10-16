@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { EmptyState } from '../components/EmptyState'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
 import { CityTips } from '../components/CityTips'
@@ -16,7 +17,7 @@ import { ageLabel } from '../lib/options'
 import { Avatar } from '../components/Avatar'
 import { getTrip, type Trip } from '../lib/trips'
 import { BackIcon } from '../components/Icons'
-import { Pencil } from 'lucide-react'
+import { Pencil, UsersRound } from 'lucide-react'
 import { remember } from '../lib/cache'
 import { loadFeed } from '../lib/feed'
 
@@ -163,12 +164,16 @@ export function TripMatches() {
             )}
 
             {companions.length === 0 && (
-              <div className="card empty">
-                <p>Meet members going to {trip.city.name} one at a time on Who’s going. Once you connect, they’ll appear here too.</p>
-                <Link className="btn btn-primary" to={`/connections?trip=${encodeURIComponent(trip.city.name)}`}>
+              <EmptyState
+                icon={<UsersRound size={18} strokeWidth={2} />}
+                title="No one here yet"
+                text={`Meet members going to ${trip.city.name} one at a time on Who’s going. Once you connect, they’ll appear here too.`}
+                level={3}
+              >
+                <Link className="btn btn-primary btn-block" to={`/connections?trip=${encodeURIComponent(trip.city.name)}`}>
                   See who’s going to {trip.city.name}
                 </Link>
-              </div>
+              </EmptyState>
             )}
             <OpenGroups cityId={trip.city_id} title={`Groups going to ${trip.city.name}`} />
           </>

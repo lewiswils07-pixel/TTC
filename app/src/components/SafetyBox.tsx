@@ -142,10 +142,10 @@ export function SafetyBox({
       {mode === 'report' && (
         <>
           <fieldset className="field" aria-describedby={tried && !reason ? `${id}-reason-error` : undefined}>
-            <legend>What’s wrong?</legend>
-            <div className="chips chips-compact">
+            <legend>What’s happened?</legend>
+            <div className="report-reasons">
               {REPORT_REASONS.map((r) => (
-                <label className="chip" key={r.value}>
+                <label className={reason === r.value ? 'report-reason is-on' : 'report-reason'} key={r.value}>
                   <input type="radio" name={`${id}-reason`} checked={reason === r.value} onChange={() => setReason(r.value)} />
                   <span>{r.label}</span>
                 </label>

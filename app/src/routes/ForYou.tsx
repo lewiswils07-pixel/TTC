@@ -4,10 +4,10 @@ import { Layout, Loading, Monogram } from '../components/Layout'
 import { CardBack } from '../components/CardBack'
 import { PhotoBookStrip } from '../components/ProfileExtras'
 import { SafetyMenu } from '../components/SafetyBox'
+import { EmptyArt, ErrorState, LoadingState } from '../components/EmptyState'
 import { CityPhoto } from '../components/CityPhoto'
 import { AddIcon, BackIcon, NextIcon } from '../components/Icons'
 import { Blend, ChevronRight, Map as MapIcon, MapPin, Plane, Route, SlidersHorizontal, Sparkles, Tag, UserPlus, UsersRound } from 'lucide-react'
-import { SkeletonRows } from '../components/Skeleton'
 import { Tour } from '../components/Tour'
 import { FirstDayGuide } from '../components/FirstDayGuide'
 import { FilterButton } from '../components/FilterBar'
@@ -236,12 +236,8 @@ export function ForYou() {
           </p>
         )}
       </div>
-      {error && (
-        <p className="notice notice-error" role="alert">
-          {error}
-        </p>
-      )}
-      {!error && (!people || !requests) && <SkeletonRows rows={3} label="Finding who’s going…" />}
+      {error && <ErrorState text={`We couldn’t load this just now. ${error}`} onRetry={() => window.location.reload()} />}
+      {!error && (!people || !requests) && <LoadingState label="Finding who’s going…" />}
 
       {people && requests && (
         <>
@@ -306,10 +302,8 @@ export function ForYou() {
               </div>
             )}
             {deck.length === 0 && only && people.length > 0 && (
-              <div className="card going-empty">
-                <span className="going-empty-art" aria-hidden="true">
-                  <MapIcon size={40} strokeWidth={1.6} />
-                </span>
+              <div className="empty-state">
+                <EmptyArt icon={<MapIcon size={18} strokeWidth={2} />} />
                 <h3>You’ve seen everyone going to {only}</h3>
                 <p>New members join every week.</p>
                 <button type="button" className="btn btn-primary btn-block" onClick={() => setOnly(null)}>
@@ -318,10 +312,8 @@ export function ForYou() {
               </div>
             )}
             {people.length === 0 && (
-              <div className="card going-empty">
-                <span className="going-empty-art" aria-hidden="true">
-                  <MapIcon size={40} strokeWidth={1.6} />
-                </span>
+              <div className="empty-state">
+                <EmptyArt icon={<MapIcon size={18} strokeWidth={2} />} />
                 <h3>You’ve seen everyone for now</h3>
                 <p>New members join every week. Widen your filters or add another trip to meet more people going your way.</p>
                 <Link className="btn btn-primary btn-block" to="/filters">

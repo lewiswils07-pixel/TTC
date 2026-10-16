@@ -4,6 +4,7 @@ import { Layout, Loading } from '../components/Layout'
 import { ChatNav } from '../components/SubNav'
 import { shortDates, tripDates } from '../lib/dates'
 import { CityPhoto } from '../components/CityPhoto'
+import { EmptyState } from '../components/EmptyState'
 import { messageOf } from '../lib/errors'
 import { brand } from '../lib/brand'
 import { rules } from '../lib/rules'
@@ -117,10 +118,7 @@ export function Groups() {
 
       <h2 className="list-label">Your groups</h2>
       {joined.length === 0 ? (
-        <div className="card empty">
-          <p>You’re not in a group yet.</p>
-          <p className="hint">Chat with people you’re connected with. Make it a trip group to plan together and compare dates.</p>
-        </div>
+        <EmptyState icon={<UsersRound size={18} strokeWidth={2} />} title="No groups yet" text="Join a small group for one of your trips, or start your own and invite people you’re connected with." />
       ) : (
         <ul className="chat-list">
           {joined.map((g) => {

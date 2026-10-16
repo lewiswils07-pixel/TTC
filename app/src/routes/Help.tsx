@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import { EmergencyNumbers } from '../components/EmergencyNumbers'
 import { Layout } from '../components/Layout'
 import { brand } from '../lib/brand'
 import { count, rules } from '../lib/rules'
-import { BackIcon } from '../components/Icons'
+import { PageTop } from '../components/PageBack'
 
 const QUESTIONS: { q: string; a: string; link?: { to: string; label: string } }[] = [
   {
@@ -42,38 +42,18 @@ const QUESTIONS: { q: string; a: string; link?: { to: string; label: string } }[
 
 /** Help and contact: common questions, and an email address that reaches a person. */
 export function Help() {
-  const navigate = useNavigate()
   const heading = useRef<HTMLHeadingElement>(null)
   useEffect(() => heading.current?.focus(), [])
-  const canGoBack = typeof window !== 'undefined' && window.history.length > 1
 
   return (
     <Layout>
-      {canGoBack ? (
-        <button type="button" className="back-link btn-plain" onClick={() => navigate(-1)}>
-          <BackIcon />
-          Back
-        </button>
-      ) : (
-        <Link className="back-link" to="/settings">
-          <BackIcon />
-          Settings
-        </Link>
-      )}
+      <PageTop tag="Help" fallback="/settings" />
       <h1 ref={heading} tabIndex={-1}>
-        Help and contact
+        How can we help?
       </h1>
-      {brand.supportEmail && (
-        <section className="card help-contact" aria-labelledby="contact-title">
-          <h2 id="contact-title">Talk to us</h2>
-          <p>Email us about anything, from a question to something that worried you. A real person reads every message.</p>
-          <a className="btn btn-primary" href={`mailto:${brand.supportEmail}?subject=${encodeURIComponent(`${brand.shortName} help`)}`}>
-            Email {brand.supportEmail}
-          </a>
-        </section>
-      )}
-      <h2 className="section-title">Common questions</h2>
-      <ul className="help-list">
+      <p className="lede">Answers to common questions, or talk to us.</p>
+      <h2 className="list-label">Common questions</h2>
+      <ul className="help-list faq-list">
         {QUESTIONS.map((x) => (
           <li key={x.q} className="card">
             <details>
@@ -84,7 +64,16 @@ export function Help() {
           </li>
         ))}
       </ul>
-      <section className="notice" aria-labelledby="urgent-title">
+      {brand.supportEmail && (
+        <section className="card help-contact" aria-labelledby="contact-title">
+          <h2 id="contact-title">Still need a hand?</h2>
+          <p>Email us about anything, from a question to something that worried you. A real person reads every message.</p>
+          <a className="btn btn-dark btn-block" href={`mailto:${brand.supportEmail}?subject=${encodeURIComponent(`${brand.shortName} help`)}`}>
+            Email {brand.supportEmail}
+          </a>
+        </section>
+      )}
+      <section className="notice emergency-box" aria-labelledby="urgent-title">
         <strong id="urgent-title">If you need help now</strong>
         <EmergencyNumbers />
         <Link to="/meeting-safely">Meeting up safely</Link>

@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
+import { PageTop } from '../components/PageBack'
 import { Avatar } from '../components/Avatar'
 import { Layout } from '../components/Layout'
 import { EmergencyNumbers } from '../components/EmergencyNumbers'
 import { myConversations, type Conversation } from '../lib/chat'
-import { BackIcon, NextIcon } from '../components/Icons'
+import { NextIcon } from '../components/Icons'
 
 const TIPS: { title: string; text: string }[] = [
   { title: 'Get to know each other here first', text: 'Chat in the app, and have a video call before you meet. Someone who won’t talk on camera is a reason to be careful.' },
@@ -32,7 +33,7 @@ function TellSomeone() {
   return (
     <section className="card tell-someone" id="tell-someone" aria-labelledby="tell-title">
       <h2 id="tell-title">Tell someone you trust</h2>
-      <p className="hint">Pick who you’re meeting. You’ll make a private link with where and when to send a friend, and tap “I’m back safe” when you’re home.</p>
+      <p className="hint">Before every meet-up, share where and when with someone you trust. Pick who you’re meeting to make a private link, and tap “I’m back safe” when you’re home.</p>
       {people === null ? null : people.length === 0 ? (
         <p className="hint">Once you’re connected with someone, you can start it here or from your chat with them.</p>
       ) : (
@@ -40,7 +41,7 @@ function TellSomeone() {
           {people.slice(0, 8).map((c) => (
             <li key={c.id}>
               <Link className="tell-row" to={`/messages/${c.id}/share`}>
-                <Avatar name={c.display_name} path={c.photo_path} size="sm" />
+                <Avatar name={c.display_name} path={c.photo_path} size="sm" square />
                 <span>Meeting {c.display_name}</span>
                 <span className="trip-chevron" aria-hidden="true">
                   <NextIcon />
@@ -56,30 +57,17 @@ function TellSomeone() {
 
 /** The meeting-up guide, linked from every chat. */
 export function MeetingSafely() {
-  const navigate = useNavigate()
   const heading = useRef<HTMLHeadingElement>(null)
   useEffect(() => heading.current?.focus(), [])
-  const canGoBack = typeof window !== 'undefined' && window.history.length > 1
 
   return (
     <Layout>
-      {canGoBack ? (
-        <button type="button" className="back-link btn-plain" onClick={() => navigate(-1)}>
-          <BackIcon />
-          Back
-        </button>
-      ) : (
-        <Link className="back-link" to="/profile">
-          <BackIcon />
-          Profile
-        </Link>
-      )}
+      <PageTop tag="Safety guide" fallback="/profile" />
       <h1 ref={heading} tabIndex={-1}>
         Meeting up safely
       </h1>
       <p className="lede">Most members are exactly who they say they are. These habits keep it that way for everyone.</p>
-      <TellSomeone />
-      <ol className="guide-list">
+      <ol className="numbered-list">
         {TIPS.map((t) => (
           <li key={t.title} className="card">
             <h2>{t.title}</h2>
@@ -87,7 +75,8 @@ export function MeetingSafely() {
           </li>
         ))}
       </ol>
-      <div className="notice">
+      <TellSomeone />
+      <div className="notice emergency-box">
         <strong>If you need help now</strong>
         <EmergencyNumbers />
       </div>

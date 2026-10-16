@@ -59,7 +59,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
   await visit(page, '/', /./, issues)
   await visit(page, '/sign-in', 'What’s your email?', issues)
   await visit(page, '/meeting-safely', 'Meeting up safely', issues)
-  await visit(page, '/help', /Help/, issues)
+  await visit(page, '/help', 'How can we help?', issues)
   for (const [path, title] of [
     ['/terms', /Terms/],
     ['/privacy', /Privacy/],

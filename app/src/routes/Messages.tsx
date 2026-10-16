@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { Avatar } from '../components/Avatar'
+import { EmptyState } from '../components/EmptyState'
+import { MessageCircle } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { SkeletonRows } from '../components/Skeleton'
 import { ChatNav } from '../components/SubNav'
@@ -43,12 +45,11 @@ export function Messages() {
       )}
       {items === undefined && !error && <SkeletonRows label="Loading your chats…" />}
       {active && active.length === 0 && (
-        <div className="card empty">
-          <p>When you and another member start talking, your chats appear here.</p>
+        <EmptyState icon={<MessageCircle size={18} strokeWidth={2} />} title="No chats yet" text="When you connect with someone and say hello, your conversation will appear here.">
           <Link className="btn btn-primary btn-block" to="/connections">
-            Find people to travel with
+            See who’s going
           </Link>
-        </div>
+        </EmptyState>
       )}
       {active && active.length > 0 && (
         <ul className="chat-list">

@@ -22,6 +22,7 @@ import { useMyProfile } from '../lib/useMyProfile'
 import { plusPrice, plusUntil, stopMyPlus } from '../lib/plan'
 import { useConfirm } from '../lib/useConfirm'
 import { HubRow } from '../components/HubRow'
+import { ErrorState } from '../components/EmptyState'
 import { EmergencyNumbers } from '../components/EmergencyNumbers'
 import { interestedInText } from '../lib/filters'
 import { HolidayChips } from '../components/ProfileExtras'
@@ -54,12 +55,7 @@ export function Profile() {
   if (error) {
     return (
       <Layout tab="profile">
-        <p className="error" role="alert">
-          {error}
-        </p>
-        <button className="btn btn-primary" onClick={() => reload()}>
-          Try again
-        </button>
+        <ErrorState text={error} onRetry={() => reload()} />
       </Layout>
     )
   }

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { peek, remember } from '../lib/cache'
 import { SkeletonRows } from './Skeleton'
+import { EmptyState } from './EmptyState'
 import { Link } from 'react-router'
 import { cityLabel, type City } from '../lib/cities'
 import { startsIn, tripDates } from '../lib/dates'
@@ -37,16 +38,11 @@ export function MyTrips() {
       )}
       {trips === undefined && !error && <SkeletonRows rows={2} label="Loading your trips…" />}
       {trips && trips.length === 0 && (
-        <div className="card going-empty">
-          <span className="going-empty-art" aria-hidden="true">
-            <BriefcaseBusiness size={40} strokeWidth={1.6} />
-          </span>
-          <h2>Where are you off to next?</h2>
-          <p>Add where you’re going and when. We’ll find members travelling at the same time.</p>
+        <EmptyState icon={<BriefcaseBusiness size={18} strokeWidth={2} />} title="No trips yet" text="Add where you’re going and when, and you’ll see members heading the same way.">
           <Link className="btn btn-primary btn-block" to="/trips/new">
             Add your first trip
           </Link>
-        </div>
+        </EmptyState>
       )}
       {trips && trips.length > 0 && (
         <ul className="trip-card-list">
