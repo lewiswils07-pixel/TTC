@@ -610,6 +610,7 @@ function TravelStep({ userId, data, interests, onDone }: StepProps & { interests
         <h2 id="interests-heading" className="step-section-title">
           Interests
         </h2>
+        <p className="hint">Pick the {INTERESTS_TO_PICK} you love most, and meet people who love them too.</p>
         <InterestPicker interests={interests} selected={selected} onChange={setSelected} max={INTERESTS_TO_PICK} error={shown('interests')} />
       </section>
 
@@ -719,7 +720,16 @@ function TravelStep({ userId, data, interests, onDone }: StepProps & { interests
       )}
 
       <SaveError error={error} />
-      <ActionBar busy={busy} label={editing ? 'Save' : undefined} arrow={!editing} />
+      <ActionBar
+        busy={busy}
+        label={editing ? 'Save' : undefined}
+        arrow={!editing}
+        note={
+          <span aria-live="polite">
+            <strong>{selected.length}</strong> of {INTERESTS_TO_PICK} interests picked
+          </span>
+        }
+      />
     </form>
   )
 }
