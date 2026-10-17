@@ -12,7 +12,7 @@ import { Dropdown } from '../components/Dropdown'
 import { ChipChoice } from '../components/ChipChoice'
 import { brand } from '../lib/brand'
 import { ANSWER_MAX_CHARS, ANSWER_MAX_WORDS, ANSWERS_TO_PICK, checkAnswer, questionText, saveCard, wordCount, type CardAnswer } from '../lib/card'
-import { cityLabel, searchCities, type City } from '../lib/cities'
+import { cityLabel, searchCities, searchPlaces, type City } from '../lib/cities'
 import { addToWishlist, listWishlist, popularDestinations, removeFromWishlist, type PopularPlace, type WishlistItem } from '../lib/trips'
 import { clearDrafts, useDraft } from '../lib/draft'
 import { messageOf } from '../lib/errors'
@@ -796,13 +796,13 @@ function WishlistPicker() {
     if (!city) return
     setPickerKey((k) => k + 1)
     if (items?.some((i) => i.city_id === city.id)) return setError(`${city.name} is already on your list.`)
-    await run(() => addToWishlist(city.id))
+    await run(() => addToWishlist(city))
   }
 
   async function addIdea(name: string) {
     await run(async () => {
       const city = (await searchCities(name)).find((c) => c.name === name)
-      if (city) await addToWishlist(city.id)
+      if (city) await addToWishlist(city)
     })
   }
 
@@ -814,12 +814,12 @@ function WishlistPicker() {
 
   return (
     <section className="step-section wish" aria-label="Places you’d love to go">
-      {!full && <CityPicker key={pickerKey} label="Places you’d love to go" value={null} onChange={add} />}
+      {!full && <CityPicker key={pickerKey} label="Places you’d love to go" hint="A country, town or city" value={null} onChange={add} search={searchPlaces} />}
       {saved.length > 0 && (
         <ul className="chip-list wish-chips" aria-label="Saved places">
           {saved.map((item) => (
             <li key={item.city_id}>
-              <button type="button" className="chip-remove" aria-label={`Remove ${cityLabel(item.city)}`} disabled={busy} onClick={() => run(() => removeFromWishlist(item.city_id))}>
+              <button type="button" className="chip-remove" aria-label={`Remove ${cityLabel(item.city)}`} disabled={busy} onClick={() => run(() => removeFromWishlist(item.city))}>
                 {item.city.name} <CloseIcon />
               </button>
             </li>
