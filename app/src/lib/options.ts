@@ -27,8 +27,8 @@ export const SHOWN_GENDERS = [
 // Your travel style (Lewis, 11 Oct): each list is in order, so close answers
 // count as a partial match. Together they're 30 of the 100 matching points.
 export const TRAVEL_STYLES = [
-  { value: 'planner', label: 'Plan every detail' },
-  { value: 'mix', label: 'Rough plan' },
+  { value: 'planner', label: 'All planned ahead' },
+  { value: 'mix', label: 'A loose plan' },
   { value: 'spontaneous', label: 'Spontaneous' },
 ] as const satisfies readonly Option<string>[]
 
@@ -66,16 +66,16 @@ export const BOOKING = [
 ] as const satisfies readonly Option<string>[]
 
 export const GROUP_SIZES = [
-  { value: 'two', label: 'Two is plenty' },
-  { value: 'small', label: 'A small group' },
-  { value: 'more', label: 'The more the merrier' },
+  { value: 'two', label: 'Just two of us' },
+  { value: 'small', label: 'Small group, 3–4' },
+  { value: 'more', label: 'Bigger group, 5+' },
 ] as const satisfies readonly Option<string>[]
 
 /** Every "Your travel style" question, in the order they're asked. */
 export const STYLE_QUESTIONS = [
   { key: 'pace', label: 'Pace', options: PACES, filter: 'paces' },
   { key: 'budget', label: 'Budget', options: BUDGETS, filter: 'budgets' },
-  { key: 'travel_style', label: 'Planning', options: TRAVEL_STYLES, filter: 'styles' },
+  { key: 'travel_style', label: 'Planning style', options: TRAVEL_STYLES, filter: 'styles' },
   { key: 'moving', label: 'Moving around', options: MOVING, filter: 'movings' },
   { key: 'travel_often', label: 'How often you travel', options: TRAVEL_OFTEN, filter: 'travel_oftens' },
   { key: 'booking', label: 'Booking', options: BOOKING, filter: 'bookings' },
@@ -99,9 +99,9 @@ export const SMOKING = [
 // Everyday habits (matching v2). Also in order: a clash lowers a score a
 // little but never hides anyone.
 export const ROOM_SHARING = [
-  { value: 'share', label: 'Happy to share', hint: 'Sharing a twin room is fine, and saves money.' },
-  { value: 'unsure', label: 'Maybe', hint: 'It depends on the trip and the person.' },
-  { value: 'separate', label: 'Own room', hint: 'I’d always want a room to myself.' },
+  { value: 'share', label: 'Yes, happy to', hint: 'Sharing a twin room is fine, and saves money.' },
+  { value: 'unsure', label: 'Maybe, once we’ve met', hint: 'It depends on the trip and the person.' },
+  { value: 'separate', label: 'No, my own room', hint: 'I’d always want a room to myself.' },
 ] as const satisfies readonly Option<string>[]
 
 export const DAY_RHYTHMS = [

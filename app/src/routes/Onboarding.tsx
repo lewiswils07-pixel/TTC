@@ -547,6 +547,9 @@ function BookThumb({ path }: { path: string }) {
 type StyleAnswers = Record<(typeof STYLE_QUESTIONS)[number]['key'], string[]>
 
 /** Interests and travel style on one screen (Claude Design, 15 Oct). After sign-up it also edits holiday preferences and the rest. */
+/** The design's order: money and planning first, then how the days feel (Claude Design, 17 Oct). */
+const STEP_STYLE_ORDER = ['budget', 'travel_style', 'pace', 'moving', 'travel_often', 'booking', 'group_size'] as const
+
 function TravelStep({ userId, data, interests, onDone }: StepProps & { interests: Interest[] }) {
   const p = data.profile
   const editing = !!p.onboarded_at
@@ -607,7 +610,6 @@ function TravelStep({ userId, data, interests, onDone }: StepProps & { interests
         <h2 id="interests-heading" className="step-section-title">
           Interests
         </h2>
-        <p className="hint">Pick the {INTERESTS_TO_PICK} you love most, and meet people who love them too.</p>
         <InterestPicker interests={interests} selected={selected} onChange={setSelected} max={INTERESTS_TO_PICK} error={shown('interests')} />
       </section>
 
@@ -616,7 +618,7 @@ function TravelStep({ userId, data, interests, onDone }: StepProps & { interests
         <h2 id="style-heading" className="step-section-title">
           Your travel style
         </h2>
-        {STYLE_QUESTIONS.map((q) => (
+        {STEP_STYLE_ORDER.map((key) => STYLE_QUESTIONS.find((q) => q.key === key)!).map((q) => (
           <ChipChoice<string> key={q.key} name={q.key} legend={q.label} options={q.options} selected={style[q.key]} onChange={(v) => setStyle((x) => ({ ...x, [q.key]: v }))} grid />
         ))}
         {/* Survey: sharing a twin room saves the single supplement. Shown on your card. */}
@@ -717,15 +719,7 @@ function TravelStep({ userId, data, interests, onDone }: StepProps & { interests
       )}
 
       <SaveError error={error} />
-      <ActionBar
-        busy={busy}
-        label={editing ? 'Save' : undefined}
-        note={
-          <span aria-live="polite">
-            <strong>{selected.length}</strong> of {INTERESTS_TO_PICK} interests picked
-          </span>
-        }
-      />
+      <ActionBar busy={busy} label={editing ? 'Save' : undefined} arrow={!editing} />
     </form>
   )
 }

@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useState } from 'react'
 import type { Interest } from '../lib/profile'
 import { FieldError } from './Field'
-import { CloseIcon } from './Icons'
+import { Check } from 'lucide-react'
 
 type Props = {
   interests: Interest[]
@@ -35,32 +35,54 @@ const ALSO: Record<string, string[]> = {
   sewing: ['crafts', 'knitting'],
 }
 
-/** Interests shown in each group before “Show more”. */
-const SHOWN = 8
+/** The first chips everyone sees (Claude Design, 17 Oct); the rest are a tap away. Picks always show. */
+const STARTERS = [
+  'food-markets',
+  'walking',
+  'wine',
+  'art-galleries',
+  'live-music',
+  'gardens',
+  'history',
+  'photography',
+  'hiking',
+  'theatre',
+  'beaches',
+  'architecture',
+  'cooking-classes',
+  'wildlife',
+  'museums',
+  'local-cuisine',
+  'football',
+  'festivals',
+  'backpacking',
+]
 
 function matches(i: Interest, q: string): boolean {
   if (fold(i.label).includes(q) || i.slug.includes(q) || (i.category_label && fold(i.category_label).includes(q))) return true
   return Object.entries(ALSO).some(([word, slugs]) => word.startsWith(q) && q.length >= 3 && slugs.includes(i.slug))
 }
 
-/** Interests grouped by category, each showing a few with “Show more”, and a
- *  search box (Lewis, 11 Oct, like Tinder). Each chip shows + until it's picked, then ✓. */
+/** Interests as a cloud of chips with a tick once picked (Claude Design, 17 Oct): a short list first,
+ *  then every interest by group with a search box. */
 export function InterestPicker({ interests, selected, onChange, max, error }: Props) {
   const id = useId()
   const [query, setQuery] = useState('')
-  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [all, setAll] = useState(false)
   const q = fold(query.trim())
-  const visible = q ? interests.filter((i) => matches(i, q)) : interests
-  const types = useMemo(() => {
-    const groups = new Map<string, Interest[]>()
-    for (const i of interests) {
-      const key = i.category_label ?? 'More'
-      groups.set(key, [...(groups.get(key) ?? []), i])
-    }
-    return [...groups.entries()]
+  const starters = useMemo(() => {
+    const list = interests.filter((i) => STARTERS.includes(i.slug)).sort((a, b) => STARTERS.indexOf(a.slug) - STARTERS.indexOf(b.slug))
+    return list.length >= 6 ? list : interests.slice(0, STARTERS.length)
   }, [interests])
+  const groups = useMemo(() => {
+    const map = new Map<string, Interest[]>()
+    for (const i of q ? interests.filter((x) => matches(x, q)) : interests) {
+      const key = i.category_label ?? 'More'
+      map.set(key, [...(map.get(key) ?? []), i])
+    }
+    return [...map.entries()]
+  }, [interests, q])
   const atMax = selected.length >= max
-  const chosen = interests.filter((i) => selected.includes(i.id))
 
   // Tapping a new one once the limit is reached explains why nothing happened, near where they tapped.
   const [nudge, setNudge] = useState(0)
@@ -79,47 +101,21 @@ export function InterestPicker({ interests, selected, onChange, max, error }: Pr
   const chip = (interest: Interest) => {
     const checked = selected.includes(interest.id)
     return (
-      <label className={!checked && atMax ? 'chip chip-plus is-locked' : 'chip chip-plus'} key={interest.id}>
+      <label className={!checked && atMax ? 'pick-chip is-locked' : 'pick-chip'} key={interest.id}>
         <input type="checkbox" checked={checked} aria-disabled={!checked && atMax ? true : undefined} onChange={() => toggle(interest.id)} />
         <span>
-          <i aria-hidden="true">{checked ? '✓' : '+'}</i>
+          {checked && <Check size={18} strokeWidth={2.4} aria-hidden="true" />}
           {interest.label}
         </span>
       </label>
     )
   }
+  const shown = [...starters, ...interests.filter((i) => selected.includes(i.id) && !starters.includes(i))]
 
   return (
     <div className="interests" data-field="interests">
-      <div className="field">
-        <label htmlFor={`${id}-search`}>Search interests</label>
-        <input
-          id={`${id}-search`}
-          className="input input-search"
-          type="search"
-          placeholder="For example, history or walking"
-          autoComplete="off"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-      </div>
-
-      {chosen.length > 0 && (
-        <section className="chosen" aria-label="Your picks">
-          <ul className="chip-list">
-            {chosen.map((i) => (
-              <li key={i.id}>
-                <button type="button" className="chip-remove" onClick={() => toggle(i.id)} aria-label={`Remove ${i.label}`}>
-                  {i.label} <CloseIcon />
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
       <p className={atMax ? 'interest-count is-full' : 'interest-count'} role="status">
-        You’ve selected <strong>{selected.length}</strong> of {max} interests
+        Pick up to {max} · <strong>{selected.length}</strong> picked
       </p>
       <FieldError error={error} />
       {nudge > 0 && (
@@ -128,35 +124,49 @@ export function InterestPicker({ interests, selected, onChange, max, error }: Pr
         </p>
       )}
 
-      {visible.length === 0 ? (
-        <p className="hint">No interests match “{query}”.</p>
-      ) : q ? (
-        <fieldset className="interest-pool">
+      {!all ? (
+        <fieldset className="pick-cloud">
           <legend className="visually-hidden">Interests</legend>
-          <div className="chips chips-compact">{visible.map(chip)}</div>
+          <div className="pick-chips">{shown.map(chip)}</div>
+          <button type="button" className="btn-link interest-more" aria-expanded={false} onClick={() => setAll(true)}>
+            See all {interests.length} interests
+          </button>
         </fieldset>
       ) : (
-        types.map(([type, list]) => {
-          const open = expanded.has(type)
-          // Picks always show, even in a closed group.
-          const shown = open ? list : list.filter((i, n) => n < SHOWN || selected.includes(i.id))
-          return (
-            <fieldset className="interest-pool" key={type}>
-              <legend className="interest-type">{type}</legend>
-              <div className="chips chips-compact">{shown.map(chip)}</div>
-              {list.length > SHOWN && (
-                <button
-                  type="button"
-                  className="btn-link interest-more"
-                  aria-expanded={open}
-                  onClick={() => setExpanded((e) => (open ? new Set([...e].filter((t) => t !== type)) : new Set([...e, type])))}
-                >
-                  {open ? 'Show less' : `Show ${list.length - shown.length} more`}
-                </button>
-              )}
+        <>
+          <div className="field interest-search">
+            <label htmlFor={`${id}-search`} className="visually-hidden">
+              Search interests
+            </label>
+            <input
+              id={`${id}-search`}
+              className="input input-search"
+              type="search"
+              placeholder="Search, for example history or walking"
+              autoComplete="off"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </div>
+          {groups.length === 0 && <p className="hint">No interests match “{query}”.</p>}
+          {groups.map(([group, list]) => (
+            <fieldset className="pick-cloud" key={group}>
+              <legend className="pick-group">{group}</legend>
+              <div className="pick-chips">{list.map(chip)}</div>
             </fieldset>
-          )
-        })
+          ))}
+          <button
+            type="button"
+            className="btn-link interest-more"
+            aria-expanded={true}
+            onClick={() => {
+              setAll(false)
+              setQuery('')
+            }}
+          >
+            Show fewer
+          </button>
+        </>
       )}
     </div>
   )
