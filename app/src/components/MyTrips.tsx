@@ -3,7 +3,7 @@ import { peek, remember } from '../lib/cache'
 import { SkeletonRows } from './Skeleton'
 import { EmptyState } from './EmptyState'
 import { Link } from 'react-router'
-import { cityLabel, type City } from '../lib/cities'
+import { cityLabel, searchPlaces, type City } from '../lib/cities'
 import { startsIn, tripDates } from '../lib/dates'
 import { loadFeed, type FeedPerson } from '../lib/feed'
 import { BriefcaseBusiness, Lock } from 'lucide-react'
@@ -119,7 +119,7 @@ export function Wishlist() {
     if (!city) return
     setPickerKey((k) => k + 1)
     if (items?.some((i) => i.city_id === city.id)) return setError(`${city.name} is already on your list.`)
-    await run(() => addToWishlist(city.id))
+    await run(() => addToWishlist(city))
   }
 
   const full = (items?.length ?? 0) >= MAX_WISHLIST
@@ -135,14 +135,14 @@ export function Wishlist() {
         <ul className="chip-list" aria-label="Saved places">
           {items.map((item) => (
             <li key={item.city_id}>
-              <button type="button" className="chip-remove" aria-label={`Remove ${cityLabel(item.city)}`} disabled={busy} onClick={() => run(() => removeFromWishlist(item.city_id))}>
+              <button type="button" className="chip-remove" aria-label={`Remove ${cityLabel(item.city)}`} disabled={busy} onClick={() => run(() => removeFromWishlist(item.city))}>
                 {cityLabel(item.city)} <CloseIcon />
               </button>
             </li>
           ))}
         </ul>
       )}
-      {items && !full && <CityPicker key={pickerKey} label="Add a place" value={null} onChange={add} />}
+      {items && !full && <CityPicker key={pickerKey} label="Add a country, town or city" value={null} onChange={add} search={searchPlaces} />}
       {full && <p className="hint">Your list is full. Remove a place to add another.</p>}
       {error && (
         <p className="error" role="alert">

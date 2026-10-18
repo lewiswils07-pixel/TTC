@@ -12,7 +12,7 @@ import { Dropdown } from '../components/Dropdown'
 import { ChipChoice } from '../components/ChipChoice'
 import { brand } from '../lib/brand'
 import { ANSWER_MAX_CHARS, ANSWER_MAX_WORDS, ANSWERS_TO_PICK, checkAnswer, questionText, saveCard, wordCount, type CardAnswer } from '../lib/card'
-import { cityLabel, searchCities, type City } from '../lib/cities'
+import { cityLabel, searchCities, searchPlaces, type City } from '../lib/cities'
 import { addToWishlist, listWishlist, popularDestinations, removeFromWishlist, type PopularPlace, type WishlistItem } from '../lib/trips'
 import { clearDrafts, useDraft } from '../lib/draft'
 import { messageOf } from '../lib/errors'
@@ -128,7 +128,7 @@ function StepFrame({ step, signingUp, onBack, children }: { step: number; signin
           <span className="step-top-space" />
         )}
         <p className="step-label">{signingUp ? `Step ${step} of ${TOTAL} · ${title}` : 'Edit your profile'}</p>
-        <Monogram size={34} />
+        <Monogram size={40} />
       </div>
       {signingUp && (
         <div className="step-progress" aria-hidden="true">
@@ -211,6 +211,7 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
   const distance = prefs.max_distance_km
   // The photo and a few words sit on this first screen too (Claude Design, 15 Oct). Both optional.
   const photo = usePhotoPick(p.photo_path)
+  const [headline, setHeadline] = useDraft('basics.headline', p.headline ?? '')
   const [bio, setBio] = useDraft('basics.bio', p.bio ?? '')
 
   const errors = {
@@ -231,7 +232,7 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
     await saveBasics(userId, { display_name: name.trim(), birth_date: birthDate(dobDay, dobMonth, dobYear), gender: gender[0], home_city_id: city!.id })
     await saveMeetPreferences(userId, { genders, age_min: ages[0], age_max: ages[1], max_distance_km: distance })
     if (photo.blob) await uploadPhoto(userId, photo.blob, p.photo_path)
-    await saveAboutMe(userId, { bio: bio.trim() || null })
+    await saveAboutMe(userId, { headline: headline.trim() || null, bio: bio.trim() || null })
     clearDrafts('basics.')
   }, onDone)
 
@@ -356,6 +357,23 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
         </div>
         <PhotoField pick={photo} />
         {p.onboarded_at && data.more && <PhotoBookEditor userId={userId} start={data.more.photo_book} />}
+        <div className="field" data-field="headline">
+          <label htmlFor="headline">
+            You in one line <span className="label-quiet">(optional)</span>
+          </label>
+          <input
+            id="headline"
+            className="input"
+            maxLength={rules.profile.headlineMax}
+            placeholder="For example, happiest with a map and a good coffee."
+            aria-describedby="headline-hint"
+            value={headline}
+            onChange={(e) => setHeadline(e.target.value)}
+          />
+          <p className="hint" id="headline-hint">
+            Shown under your name on your card
+          </p>
+        </div>
         <div className="field" data-field="bio">
           <label htmlFor="bio">
             A few words about you <span className="label-quiet">(optional)</span>
@@ -529,6 +547,9 @@ function BookThumb({ path }: { path: string }) {
 type StyleAnswers = Record<(typeof STYLE_QUESTIONS)[number]['key'], string[]>
 
 /** Interests and travel style on one screen (Claude Design, 15 Oct). After sign-up it also edits holiday preferences and the rest. */
+/** The design's order: money and planning first, then how the days feel (Claude Design, 17 Oct). */
+const STEP_STYLE_ORDER = ['budget', 'travel_style', 'pace', 'moving', 'travel_often', 'booking', 'group_size'] as const
+
 function TravelStep({ userId, data, interests, onDone }: StepProps & { interests: Interest[] }) {
   const p = data.profile
   const editing = !!p.onboarded_at
@@ -598,7 +619,7 @@ function TravelStep({ userId, data, interests, onDone }: StepProps & { interests
         <h2 id="style-heading" className="step-section-title">
           Your travel style
         </h2>
-        {STYLE_QUESTIONS.map((q) => (
+        {STEP_STYLE_ORDER.map((key) => STYLE_QUESTIONS.find((q) => q.key === key)!).map((q) => (
           <ChipChoice<string> key={q.key} name={q.key} legend={q.label} options={q.options} selected={style[q.key]} onChange={(v) => setStyle((x) => ({ ...x, [q.key]: v }))} grid />
         ))}
         {/* Survey: sharing a twin room saves the single supplement. Shown on your card. */}
@@ -702,6 +723,7 @@ function TravelStep({ userId, data, interests, onDone }: StepProps & { interests
       <ActionBar
         busy={busy}
         label={editing ? 'Save' : undefined}
+        arrow={!editing}
         note={
           <span aria-live="polite">
             <strong>{selected.length}</strong> of {INTERESTS_TO_PICK} interests picked
@@ -774,13 +796,13 @@ function WishlistPicker() {
     if (!city) return
     setPickerKey((k) => k + 1)
     if (items?.some((i) => i.city_id === city.id)) return setError(`${city.name} is already on your list.`)
-    await run(() => addToWishlist(city.id))
+    await run(() => addToWishlist(city))
   }
 
   async function addIdea(name: string) {
     await run(async () => {
       const city = (await searchCities(name)).find((c) => c.name === name)
-      if (city) await addToWishlist(city.id)
+      if (city) await addToWishlist(city)
     })
   }
 
@@ -792,12 +814,12 @@ function WishlistPicker() {
 
   return (
     <section className="step-section wish" aria-label="Places you’d love to go">
-      {!full && <CityPicker key={pickerKey} label="Places you’d love to go" value={null} onChange={add} />}
+      {!full && <CityPicker key={pickerKey} label="Places you’d love to go" hint="A country, town or city" value={null} onChange={add} search={searchPlaces} />}
       {saved.length > 0 && (
         <ul className="chip-list wish-chips" aria-label="Saved places">
           {saved.map((item) => (
             <li key={item.city_id}>
-              <button type="button" className="chip-remove" aria-label={`Remove ${cityLabel(item.city)}`} disabled={busy} onClick={() => run(() => removeFromWishlist(item.city_id))}>
+              <button type="button" className="chip-remove" aria-label={`Remove ${cityLabel(item.city)}`} disabled={busy} onClick={() => run(() => removeFromWishlist(item.city))}>
                 {item.city.name} <CloseIcon />
               </button>
             </li>
@@ -836,7 +858,7 @@ function OneAnswer({ userId, data, onDone }: StepProps) {
   const errors = { a: answer.a.trim() ? checkAnswer(answer) : null }
   const { shown, touch, validateAll } = useChecks(errors)
   const { busy, error, submit } = useStepSubmit(async () => {
-    await saveCard(userId, [answer, ...existing.slice(1)])
+    await saveCard(userId, [answer, ...existing.slice(1, ANSWERS_TO_PICK)])
     clearDrafts('card.')
   }, onDone)
 
@@ -915,11 +937,7 @@ function OneAnswer({ userId, data, onDone }: StepProps) {
 /** The word limit shows (in red) once an answer gets this long. */
 const WORDS_WARNING = ANSWER_MAX_WORDS - 5
 
-const EMPTY_ANSWERS: CardAnswer[] = [
-  { q: '', a: '' },
-  { q: '', a: '' },
-  { q: '', a: '' },
-]
+const EMPTY_ANSWERS: CardAnswer[] = Array.from({ length: ANSWERS_TO_PICK }, () => ({ q: '', a: '' }))
 
 function CardStep({ userId, data, onDone }: StepProps) {
   const [answers, saveAnswers] = useDraft<CardAnswer[]>(

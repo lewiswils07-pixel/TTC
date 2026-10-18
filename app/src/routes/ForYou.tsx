@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useSearchParams } from 'react-router'
-import { Layout, Loading, Monogram } from '../components/Layout'
+import { Layout, Loading, Logo } from '../components/Layout'
 import { CardBack } from '../components/CardBack'
 import { PhotoBookStrip } from '../components/ProfileExtras'
 import { SafetyMenu } from '../components/SafetyBox'
@@ -28,7 +28,7 @@ import { ageLabel, BOOKING, GROUP_SIZES, HOLIDAY_QUESTIONS, INTERESTS_TO_PICK, l
 import { preloadPhotos, usePhotoUrl } from '../lib/photo'
 import { count, roughly } from '../lib/rules'
 import { useSession } from '../lib/session-context'
-import { loadExtras, type MemberExtras } from '../lib/member'
+import { loadExtras, sharedStyle, type MemberExtras } from '../lib/member'
 import { listMyTrips, wishlistOf, type Trip } from '../lib/trips'
 import { useMyProfile } from '../lib/useMyProfile'
 import type { MyProfile } from '../lib/profile'
@@ -212,12 +212,8 @@ export function ForYou() {
     <Layout tab="connections">
       {touring && <Tour onClose={() => setParams({}, { replace: true })} />}
       <div className="going-top">
-        <span className="going-brand" aria-hidden="true">
-          <Monogram size={38} />
-          <span>
-            <strong>{brand.shortName}</strong>
-            <span>{brand.name.replace(brand.shortName, '').trim()}</span>
-          </span>
+        <span className="going-brand">
+          <Logo height={46} />
         </span>
         <h1 ref={heading} tabIndex={-1} className="visually-hidden">
           Who’s going
@@ -414,14 +410,6 @@ type CardProps = {
   onBlocked: (message: string) => void
 }
 
-/** Travel style answers you both gave, in a few words (Claude Design, 15 Oct). */
-const SHARED_STYLE = [
-  { key: 'moving', options: MOVING },
-  { key: 'travel_often', options: TRAVEL_OFTEN },
-  { key: 'booking', options: BOOKING },
-  { key: 'group_size', options: GROUP_SIZES },
-] as const
-
 /** One member at a time, like a travel ticket: why they're here at the top, who they are and what you share,
  *  then Read more (their full card on its own page) and Connect or Not now. ⋯ holds block and report (Claude Design, 15 Oct). */
 function PersonCard(props: CardProps & { onOpen: () => void }) {
@@ -442,7 +430,7 @@ function PersonCard(props: CardProps & { onOpen: () => void }) {
         title: 'Travels the way you do',
         text: person.shared_interests.length ? `${count(person.shared_interests.length, 'interest')} in common` : fitWords(person.score),
       }
-  const style = extras ? SHARED_STYLE.filter((q) => extras[q.key] && extras[q.key] === mine[q.key]).map((q) => labelFor(q.options, extras[q.key]).toLowerCase()) : []
+  const style = sharedStyle(extras, mine)
   const shares = [
     person.shared_interests.length > 0 && {
       Icon: Tag,
@@ -470,6 +458,7 @@ function PersonCard(props: CardProps & { onOpen: () => void }) {
       </div>
       <div className="going-tear" aria-hidden="true" />
       <PersonHead person={person} myHome={props.myHome} id={id} />
+      {extras?.headline && <p className="going-headline">“{extras.headline}”</p>}
       {shares.length > 0 && (
         <div className="going-share">
           <h4>What you share</h4>
@@ -627,6 +616,7 @@ function PersonPage(props: CardProps & { onBack: () => void }) {
         <SafetyMenu profileId={person.profile_id} name={name} onBlocked={onBlocked} />
       </div>
       <PersonHead person={person} myHome={props.myHome} id="person-name" level={1} />
+      {extras?.headline && <p className="going-headline is-page">“{extras.headline}”</p>}
       {person.travelling_with && (
         <p className="tip-box">
           <UsersRound size={20} strokeWidth={1.8} aria-hidden="true" />

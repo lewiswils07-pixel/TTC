@@ -18,7 +18,7 @@ update public.profiles set display_name = 'M' || right(id::text, 1), gender = 'w
        photo_path = id::text || '/me.jpg'
  where id::text like 'cececece%';
 update public.profiles set bio = 'Retired teacher, loves trains.',
-       card_answers = '[{"q":"dream_trip","a":"Japan in spring"},{"q":"always_pack","a":"A good book"},{"q":"how_often","a":"Four times a year"}]'
+       card_answers = '[{"q":"dream_trip","a":"Japan in spring"},{"q":"always_pack","a":"A good book"}]'
  where id = pg_temp.m(2);
 insert into public.profile_interests (profile_id, interest_id)
 select pg_temp.m(2), id from public.interests order by sort limit 3;

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { ArrowRight } from 'lucide-react'
 
 /** Sticky bar at the bottom of a form: an optional note, Back, and the main button. */
 export function ActionBar({
@@ -8,6 +9,7 @@ export function ActionBar({
   label = 'Continue',
   note,
   quiet = false,
+  arrow = false,
 }: {
   busy: boolean
   onBack?: () => void
@@ -17,6 +19,8 @@ export function ActionBar({
   note?: ReactNode
   /** The main action is on the page (like "Choose a photo"), so this one steps back to secondary. */
   quiet?: boolean
+  /** An arrow after the label, for moving on through sign-up (Claude Design). */
+  arrow?: boolean
 }) {
   return (
     <div className="action-bar">
@@ -34,6 +38,7 @@ export function ActionBar({
         )}
         <button type="submit" className={quiet ? 'btn btn-secondary' : 'btn btn-primary'} disabled={busy}>
           {busy ? 'Saving…' : label}
+          {arrow && !busy && <ArrowRight size={20} strokeWidth={2.2} aria-hidden="true" />}
         </button>
       </div>
     </div>

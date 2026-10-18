@@ -1,6 +1,6 @@
 // The signed-in member's own trips and wishlist. Row-level security limits
 // every query here to their own rows; the database also checks the dates.
-import type { City } from './cities'
+import { countryPlace, type City } from './cities'
 import { friendlyError } from './errors'
 import { isoDate } from './dates'
 import { supabase } from './supabase'
@@ -61,19 +61,33 @@ export async function deleteTrip(id: number): Promise<void> {
 
 /** Null when this database doesn't have the wishlist yet. */
 export async function listWishlist(): Promise<WishlistItem[] | null> {
-  const { data, error } = await supabase.from('wishlist').select('city_id, city:cities(id, name, country_code)').order('created_at')
-  if (tablesMissing(error)) return null
-  if (error) throw friendlyError(error)
-  return data as unknown as WishlistItem[]
+  const [cities, countries] = await Promise.all([
+    supabase.from('wishlist').select('city_id, created_at, city:cities(id, name, country_code)').order('created_at'),
+    // Countries come with database Part 27; before that the list is just towns and cities.
+    supabase.from('wishlist_countries').select('country_code, created_at, country:countries(name)').order('created_at'),
+  ])
+  if (tablesMissing(cities.error)) return null
+  if (cities.error) throw friendlyError(cities.error)
+  type Row = WishlistItem & { created_at: string }
+  const rows = [
+    ...(cities.data as unknown as Row[]),
+    ...((countries.error ? [] : countries.data) as unknown as { country_code: string; created_at: string; country: { name: string } }[]).map((x) => {
+      const city = countryPlace(x.country_code, x.country.name)
+      return { city_id: city.id, city, created_at: x.created_at }
+    }),
+  ]
+  return rows.sort((a, b) => a.created_at.localeCompare(b.created_at)).map(({ city_id, city }) => ({ city_id, city }))
 }
 
-export async function addToWishlist(cityId: number): Promise<void> {
-  const { error } = await supabase.from('wishlist').insert({ city_id: cityId })
+/** A town, city or country. */
+export async function addToWishlist(place: City): Promise<void> {
+  const { error } = place.kind === 'country' ? await supabase.from('wishlist_countries').insert({ country_code: place.country_code }) : await supabase.from('wishlist').insert({ city_id: place.id })
   if (error) throw friendlyError(error)
 }
 
-export async function removeFromWishlist(cityId: number): Promise<void> {
-  const { error } = await supabase.from('wishlist').delete().eq('city_id', cityId)
+export async function removeFromWishlist(place: City): Promise<void> {
+  const { error } =
+    place.kind === 'country' ? await supabase.from('wishlist_countries').delete().eq('country_code', place.country_code) : await supabase.from('wishlist').delete().eq('city_id', place.id)
   if (error) throw friendlyError(error)
 }
 

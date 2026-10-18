@@ -19,7 +19,10 @@ import { Info, Plane, UserPlus } from 'lucide-react'
 import { EmptyState } from '../components/EmptyState'
 import { monthName } from '../lib/dates'
 import { brand } from '../lib/brand'
-import { loadRequests, PLUS_SHOW_LEFT_BELOW } from '../lib/plan'
+import { hasPlus, loadRequests, PLUS_SHOW_LEFT_BELOW } from '../lib/plan'
+import { RequestShare } from '../components/RequestShare'
+import { useSession } from '../lib/session-context'
+import { useMyProfile } from '../lib/useMyProfile'
 
 /**
  * Connections on the Chat tab. "other" sits under Chats: people you're connected
@@ -39,6 +42,12 @@ export function ConnectionsSections({
 }) {
   const { ask, dialog: confirmDialog } = useConfirm()
   const [items, setItems] = useState<Connection[] | null>(() => peek('connections') ?? null)
+  const { session } = useSession()
+  const mine = useMyProfile(session!.user.id).data?.profile
+  const [plus, setPlus] = useState(false)
+  useEffect(() => {
+    hasPlus().then(setPlus)
+  }, [])
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState<number | string | null>(null)
   const [status, setStatus] = useState('')
@@ -137,6 +146,7 @@ export function ConnectionsSections({
                     </div>
                     <SafetyMenu profileId={c.profile_id} name={c.display_name} onBlocked={blockedOne} />
                   </div>
+                  <RequestShare profileId={c.profile_id} name={c.display_name} mine={mine} plus={plus} />
                   {c.note && <blockquote className="request-note">“{c.note}”</blockquote>}
                   <div className="action-row">
                     <button

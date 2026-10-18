@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { UsersRound } from 'lucide-react'
-import { Layout, Monogram } from '../components/Layout'
+import { Layout, Logo } from '../components/Layout'
 import { AddIcon } from '../components/Icons'
 import { brand } from '../lib/brand'
 import { longDate } from '../lib/dates'
@@ -34,11 +34,7 @@ export function WelcomeScreen() {
       <section className="welcome">
         <div className="member-card" aria-hidden="true">
           <span className="member-card-brand">
-            <Monogram size={44} />
-            <span>
-              <strong>{brand.shortName}</strong>
-              <span>{brand.name.replace(brand.shortName, '').trim()}</span>
-            </span>
+            <Logo height={50} />
           </span>
           <span className="member-card-foot">
             <span>
