@@ -1,3 +1,4 @@
+import { IdTick } from '../components/IdTick'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { CardBack } from '../components/CardBack'
@@ -111,6 +112,7 @@ export function MemberProfile() {
             {member.display_name}
             {member.birth_year ? `, ${ageLabel(member.birth_year)}` : ''}
           </h1>
+          <IdTick id={member.profile_id} />
           {home && <p>{home}</p>}
           {extras?.headline && <p className="going-headline is-page">“{extras.headline}”</p>}
           {member.connected_at && (

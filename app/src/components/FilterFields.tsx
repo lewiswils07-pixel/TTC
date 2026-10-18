@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Lock } from 'lucide-react'
 import { AgeRange } from './AgeRange'
@@ -7,6 +7,7 @@ import { DistanceSlider } from './DistanceSlider'
 import { FieldError } from './Field'
 import { InterestedIn } from './InterestedIn'
 import { brand } from '../lib/brand'
+import { idCheckLive } from '../lib/idCheck'
 import { filterErrors, interestedInText, type Filters, type PlusFilter } from '../lib/filters'
 import { HOLIDAY_QUESTIONS, MAX_PREF_AGE, MIN_AGE, STYLE_QUESTIONS, distanceLabel } from '../lib/options'
 
@@ -16,6 +17,10 @@ const ageText = (min: number, max: number) => `${min} to ${max >= MAX_PREF_AGE ?
 export function FilterFields({ value: f, onChange, plus }: { value: Filters; onChange: (next: Filters) => void; plus: boolean }) {
   const set = (change: Partial<Filters>) => onChange({ ...f, ...change })
   const errors = filterErrors(f)
+  const [idLive, setIdLive] = useState(false)
+  useEffect(() => {
+    idCheckLive().then(setIdLive)
+  }, [])
   const plusChips = (key: PlusFilter, label: string, options: readonly { value: string; label: string }[]) => (
     <ChipChoice key={key} name={key} legend={label} options={options} selected={f[key]} onChange={(chosen) => set({ [key]: chosen })} multiple />
   )
@@ -36,6 +41,7 @@ export function FilterFields({ value: f, onChange, plus }: { value: Filters; onC
       </FilterSection>
       <section className={plus ? 'filter-plus' : 'filter-plus is-locked'} aria-label={`Travel style, with ${brand.plusName}`}>
         <PlusHead title="Travel style" plus={plus} />
+        {idLive && <Flexible label="Only members whose ID is checked" checked={f.verified_only} onChange={(verified_only) => set({ verified_only })} />}
         {STYLE_QUESTIONS.map((q) => plusChips(q.filter, q.label, q.options))}
         <h3 className="filter-plus-sub">Holiday preferences</h3>
         {HOLIDAY_QUESTIONS.map((q) => plusChips(q.filter, q.label, q.options))}

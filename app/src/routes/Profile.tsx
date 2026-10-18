@@ -107,6 +107,16 @@ export function Profile() {
               {profile.birth_date ? ageFromDate(profile.birth_date) : ageLabel(profile.birth_year)} · {profile.home_city ? profile.home_city.name : 'Home not set'}
             </p>
             {profile.member_number && <p className="me-number">Founding member No. {profile.member_number}</p>}
+            {profile.id_verified_at ? (
+              <p className="me-id-checked">
+                <ShieldCheck size={16} strokeWidth={2} aria-hidden="true" />
+                ID checked
+              </p>
+            ) : (
+              <Link className="me-link" to="/verify-id">
+                Check your ID
+              </Link>
+            )}
             <Link className="me-link" to={stepLink('photo')}>
               {profile.photo_path ? 'Change photo' : 'Add a photo'}
             </Link>

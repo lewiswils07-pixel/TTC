@@ -87,7 +87,10 @@ export function Privacy() {
         <li>We never sell your details or show you adverts.</li>
       </ul>
       <h2>Where it’s kept</h2>
-      <p>With the companies that run the app for us: Supabase (database and sign-in), Netlify (the website) and Google (sending sign-in emails). They only use your details to provide that service.</p>
+      <p>
+        With the companies that run the app for us: Supabase (database and sign-in), Cloudflare (the website), Google (sending sign-in emails) and, if you choose to check your ID, Didit, which checks
+        your ID photo and selfie. We only keep whether you passed and when, never the photos. They only use your details to provide that service.
+      </p>
       <h2>How long</h2>
       <p>For as long as you’re a member. If you leave, we delete your profile, except what we must keep about safety reports.</p>
       <h2>Your rights</h2>

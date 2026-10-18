@@ -31,6 +31,7 @@ const emptyProfile: Profile = {
   smoking: null,
   onboarded_at: null,
   member_number: null,
+  id_verified_at: null,
   home_city: null,
 }
 const prefs = { age_min: 18, age_max: 99, genders: [], max_distance_km: null, age_flexible: false, distance_flexible: false }

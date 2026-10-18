@@ -1,3 +1,4 @@
+import { IdTick } from '../components/IdTick'
 import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useSearchParams } from 'react-router'
 import { Layout, Loading, Logo } from '../components/Layout'
@@ -512,6 +513,7 @@ function PersonHead({ person, myHome, id, level = 3 }: { person: FeedPerson; myH
               Lots in common
             </span>
           )}
+          <IdTick id={person.profile_id} />
           {nearYou(person, myHome) && (
             <span className="going-badge">
               <MapPin size={16} strokeWidth={2} aria-hidden="true" />
