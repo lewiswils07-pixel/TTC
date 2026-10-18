@@ -1851,6 +1851,8 @@ h2, .section-title { font-size: 1.625rem; line-height: 1.15; }
 .going-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--space-2); }
 .going-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 8px; background: var(--paper-tint); color: var(--ink-soft); font-size: 0.875rem; font-weight: 700; }
 .going-badge.is-gold { background: var(--gold-tint); color: var(--gold-ink); }
+.going-badge.is-id { background: var(--accent-tint); color: var(--accent); }
+.member-intro .going-badge.is-id { margin-top: 6px; }
 .going-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
 .going-share { padding: 0 18px; }
 .going-share h4, .going-section h4 { margin: 0 0 var(--space-3); font-size: 0.875rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
@@ -2005,6 +2007,7 @@ h2, .section-title { font-size: 1.625rem; line-height: 1.15; }
 .me-who h2 { margin: 0; font-size: 2rem; line-height: 1.05; overflow-wrap: anywhere; }
 .me-who p { margin: 0; color: var(--ink-soft); }
 .me-who .me-number { font-size: var(--text-sm); color: var(--gold-ink); font-weight: 700; }
+.me-who .me-id-checked { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-sm); color: var(--accent); font-weight: 700; }
 .me-link { align-self: flex-start; display: inline-flex; align-items: center; min-height: 40px; color: var(--accent); font-weight: 700; text-decoration: none; }
 .me-bio { margin: var(--space-4) 0 0; font-family: var(--serif); font-size: 1.1875rem; line-height: 1.45; }
 .me-preview { margin-top: var(--space-4); min-height: 48px; background: var(--paper-tint); border-color: var(--line); }
