@@ -128,7 +128,7 @@ function StepFrame({ step, signingUp, onBack, children }: { step: number; signin
           <span className="step-top-space" />
         )}
         <p className="step-label">{signingUp ? `Step ${step} of ${TOTAL} · ${title}` : 'Edit your profile'}</p>
-        <Monogram size={34} />
+        <Monogram size={40} />
       </div>
       {signingUp && (
         <div className="step-progress" aria-hidden="true">

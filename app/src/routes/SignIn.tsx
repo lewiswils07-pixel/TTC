@@ -209,7 +209,7 @@ export function SignIn() {
         <BackIcon />
       </button>
       <p className="step-label">{label}</p>
-      <Monogram size={34} />
+      <Monogram size={40} />
     </div>
   )
   const joining = mode === 'join' && reason === 'join'

@@ -1,5 +1,5 @@
 import { Link, Navigate } from 'react-router'
-import { Layout, Loading, Monogram } from '../components/Layout'
+import { Layout, Loading, Logo } from '../components/Layout'
 import { brand } from '../lib/brand'
 import { useSession } from '../lib/session-context'
 
@@ -17,12 +17,8 @@ export function Home() {
   return (
     <Layout bare>
       <section className="hello">
-        <span className="hello-mark">
-          <Monogram size={84} />
-        </span>
-        <p className="hello-name" aria-hidden="true">
-          <strong>{brand.shortName}</strong>
-          <span>{brand.name.replace(brand.shortName, '').trim()}</span>
+        <p className="hello-name">
+          <Logo height={112} label />
         </p>
         <h1>{brand.tagline}</h1>
         <p className="lede">A members’ club for solo travellers. Good company for the trip: friendship, never dating.</p>

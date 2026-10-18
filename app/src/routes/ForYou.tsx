@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useSearchParams } from 'react-router'
-import { Layout, Loading, Monogram } from '../components/Layout'
+import { Layout, Loading, Logo } from '../components/Layout'
 import { CardBack } from '../components/CardBack'
 import { PhotoBookStrip } from '../components/ProfileExtras'
 import { SafetyMenu } from '../components/SafetyBox'
@@ -212,12 +212,8 @@ export function ForYou() {
     <Layout tab="connections">
       {touring && <Tour onClose={() => setParams({}, { replace: true })} />}
       <div className="going-top">
-        <span className="going-brand" aria-hidden="true">
-          <Monogram size={38} />
-          <span>
-            <strong>{brand.shortName}</strong>
-            <span>{brand.name.replace(brand.shortName, '').trim()}</span>
-          </span>
+        <span className="going-brand">
+          <Logo height={46} />
         </span>
         <h1 ref={heading} tabIndex={-1} className="visually-hidden">
           Who’s going

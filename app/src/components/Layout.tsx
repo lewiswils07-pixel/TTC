@@ -4,13 +4,33 @@ import { useSession } from '../lib/session-context'
 import { brand } from '../lib/brand'
 import { TabBar, type Tab } from './TabBar'
 import { SkeletonRows } from './Skeleton'
+import { MONOGRAM, PRIMARY_LOGO } from '../lib/logo'
 
-/** The club's initial in a burgundy disc with gold lettering. */
+/** The SC monogram (the secondary logo), in the colour of the text around it. */
 export function Monogram({ size = 36 }: { size?: number }) {
   return (
-    <span className="monogram" style={{ width: size, height: size, fontSize: size * 0.56 }} aria-hidden="true">
-      {brand.name.slice(0, 1)}
-    </span>
+    <svg className="monogram" width={size} height={size} viewBox={MONOGRAM.viewBox} aria-hidden="true" focusable="false">
+      <path d={MONOGRAM.d} fill="currentColor" />
+    </svg>
+  )
+}
+
+/** The main logo: SODALIS over a script "Collective". `height` is in pixels. */
+export function Logo({ height = 44, label = false }: { height?: number; label?: boolean }) {
+  const [, , w, h] = PRIMARY_LOGO.viewBox.split(' ').map(Number)
+  return (
+    <svg
+      className="logo"
+      height={height}
+      width={Math.round((height * w) / h)}
+      viewBox={PRIMARY_LOGO.viewBox}
+      role={label ? 'img' : undefined}
+      aria-label={label ? brand.name : undefined}
+      aria-hidden={label ? undefined : true}
+      focusable="false"
+    >
+      <path d={PRIMARY_LOGO.d} fill="currentColor" />
+    </svg>
   )
 }
 
@@ -46,9 +66,8 @@ export function Layout({ children, actions, wide = false, tab, bare = false }: {
         <header className="topbar">
           <div className="topbar-inner">
             {showBrand && (
-              <Link className="brand" to="/">
-                <Monogram size={32} />
-                <span>{brand.name}</span>
+              <Link className="brand" to="/" aria-label={brand.name}>
+                <Logo height={46} />
               </Link>
             )}
             {topTab && <TabBar current={topTab} top />}
