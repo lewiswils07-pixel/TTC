@@ -9,6 +9,7 @@ import { InterestedIn } from './InterestedIn'
 import { brand } from '../lib/brand'
 import { filterErrors, interestedInText, type Filters, type PlusFilter } from '../lib/filters'
 import { HOLIDAY_QUESTIONS, MAX_PREF_AGE, MIN_AGE, STYLE_QUESTIONS, distanceLabel } from '../lib/options'
+import { plusLink } from '../lib/plan'
 
 const ageText = (min: number, max: number) => `${min} to ${max >= MAX_PREF_AGE ? `${MAX_PREF_AGE}+` : max}`
 /** Every filter on one sheet (Claude Design, 16 Oct): the basics with their controls in view,
@@ -42,7 +43,7 @@ export function FilterFields({ value: f, onChange, plus }: { value: Filters; onC
         {!plus && (
           <>
             <p className="hint">You can set these now. They start working when you have {brand.plusName}.</p>
-            <Link className="btn btn-dark btn-block" to="/profile?tab=plus">
+            <Link className="btn btn-dark btn-block" to={plusLink('filters')}>
               Unlock with {brand.plusName}
             </Link>
           </>
