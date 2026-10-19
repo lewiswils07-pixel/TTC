@@ -4,6 +4,8 @@
 -- Run with: npx supabase test db
 begin;
 select plan(13);
+-- These members start with the founding months, so keep the pricing test (Part 29) off.
+update private.rules set value = 0 where key = 'pricingTest.on';
 
 create function pg_temp.sign_in_as(member uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', member, 'role', 'authenticated')::text, true);
