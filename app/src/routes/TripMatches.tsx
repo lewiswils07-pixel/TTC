@@ -166,9 +166,14 @@ export function TripMatches() {
             {companions.length === 0 && (
               <EmptyState
                 icon={<UsersRound size={18} strokeWidth={2} />}
-                title="No one here yet"
-                text={`Meet members going to ${trip.city.name} one at a time on Who’s going. Once you connect, they’ll appear here too.`}
+                title="No connections here yet"
+                text={
+                  going > 0
+                    ? `${going === 1 ? '1 member is' : `${going} members are`} going to ${trip.city.name}. Meet them one at a time on Who’s going. Once you connect, they’ll show here.`
+                    : `Meet members going to ${trip.city.name} one at a time on Who’s going. Once you connect, they’ll show here.`
+                }
                 level={3}
+                compact
               >
                 <Link className="btn btn-primary btn-block" to={`/connections?trip=${encodeURIComponent(trip.city.name)}`}>
                   See who’s going to {trip.city.name}

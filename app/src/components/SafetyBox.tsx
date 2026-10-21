@@ -182,7 +182,7 @@ export function SafetyMenu({ profileId, name, onBlocked }: { profileId: string; 
   const [open, setOpen] = useState(false)
   return (
     <>
-      <button type="button" className="icon-btn safety-more" aria-haspopup="dialog" aria-label={`More: block or report ${name}`} onClick={() => setOpen(true)}>
+      <button type="button" className="icon-btn safety-more" aria-haspopup="dialog" aria-label={`More: block or report ${name}`} title={`Block or report ${name}`} onClick={() => setOpen(true)}>
         <MoreIcon />
       </button>
       {open && (

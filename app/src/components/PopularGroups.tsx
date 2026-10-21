@@ -22,14 +22,14 @@ export function PopularGroups({ canStart }: { canStart: boolean }) {
   if (plus === null || !places?.length) return null
   return (
     <section className="popular-groups" aria-labelledby="popular-groups-title">
-      <h2 className="list-label" id="popular-groups-title">
-        Popular right now
-      </h2>
-      {/* The badge always says what it's for (testers, 13 Oct). */}
-      <p className="hint list-hint">
-        <span className="tag tag-plus-dark">{brand.plusName}</span> Where members are heading now, so you can start a group for one.{' '}
-        {!plus && <Link to={plusLink('groups')}>Comes with {brand.plusName}</Link>}
-      </p>
+      {/* The badge sits by the heading and always says what it's for (testers, 13 and 21 Oct). */}
+      <div className="list-label-row">
+        <h2 className="list-label" id="popular-groups-title">
+          Popular right now
+        </h2>
+        <span className="tag tag-plus-dark">{brand.plusName}</span>
+      </div>
+      <p className="hint list-hint">Where members are heading now, so you can start a group for one. {!plus && <Link to={plusLink('groups')}>Comes with {brand.plusName}</Link>}</p>
       {plus && (
         <ul className="chat-list">
           {(all ? places : places.slice(0, SHOWN)).map((p) => (

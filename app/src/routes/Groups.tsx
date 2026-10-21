@@ -118,7 +118,12 @@ export function Groups() {
 
       <h2 className="list-label">Your groups</h2>
       {joined.length === 0 ? (
-        <EmptyState icon={<UsersRound size={18} strokeWidth={2} />} title="No groups yet" text="Join a small group for one of your trips, or start your own and invite people you’re connected with." />
+        <EmptyState
+          icon={<UsersRound size={18} strokeWidth={2} />}
+          compact
+          title="No groups yet"
+          text="Join a small group for one of your trips, or start your own and invite people you’re connected with."
+        />
       ) : (
         <ul className="chat-list">
           {joined.map((g) => {

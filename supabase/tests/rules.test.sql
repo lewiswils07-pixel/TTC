@@ -1,11 +1,12 @@
 -- Written by `npm run rules` from app/rules.json. Don't edit by hand.
 -- Fails when the database's rules differ from the app's.
 begin;
-select plan(126);
+select plan(127);
 select is(private.rule('signIn.codeLength'), 6, 'signIn.codeLength is 6, as in rules.json');
 select is(private.rule('signIn.passwordMin'), 8, 'signIn.passwordMin is 8, as in rules.json');
 select is(private.rule('signIn.passwordMax'), 72, 'signIn.passwordMax is 72, as in rules.json');
 select is(private.rule('interests.pick'), 8, 'interests.pick is 8, as in rules.json');
+select is(private.rule('interests.min'), 5, 'interests.min is 5, as in rules.json');
 select is(private.rule('requests.perWeekFree'), 5, 'requests.perWeekFree is 5, as in rules.json');
 select is(private.rule('requests.plusSafetyCap'), 50, 'requests.plusSafetyCap is 50, as in rules.json');
 select is(private.rule('requests.plusShowLeftBelow'), 5, 'requests.plusShowLeftBelow is 5, as in rules.json');
@@ -64,7 +65,7 @@ select is(private.rule('pricingTest.on'), 1, 'pricingTest.on is 1, as in rules.j
 select is(private.rule('pricingTest.lowPence'), 399, 'pricingTest.lowPence is 399, as in rules.json');
 select is(private.rule('pricingTest.midPence'), 599, 'pricingTest.midPence is 599, as in rules.json');
 select is(private.rule('pricingTest.highPence'), 899, 'pricingTest.highPence is 899, as in rules.json');
-select is((select count(*)::int from private.rules), 62, 'no rules beyond rules.json');
+select is((select count(*)::int from private.rules), 63, 'no rules beyond rules.json');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_display_name_check'), '<= 40') > 0, 'profiles_display_name_check uses profile.nameMax (40)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_bio_check'), '<= 500') > 0, 'profiles_bio_check uses profile.bioMax (500)');
 select ok(strpos((select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_headline_check'), '<= 80') > 0, 'profiles_headline_check uses profile.headlineMax (80)');
