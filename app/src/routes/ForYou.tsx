@@ -290,7 +290,7 @@ export function ForYou() {
                 <h2 id="people-title">{only ? `Going to ${only}` : trips.length ? 'Going your way' : 'People like you'}</h2>
                 <p>{only ? 'Members there around your dates.' : trips.length ? 'Members on your trips, and others who travel like you.' : 'Members who travel the way you do.'}</p>
               </div>
-              {deck.length > 0 && <span className="going-count">{deck.length === 1 ? 'Last one for now' : `${deck.length} to meet`}</span>}
+              {deck.length > 0 && <span className="going-count">{deck.length === 1 ? 'Last one for now' : `${deck.length} people to meet`}</span>}
             </div>
             {person && (
               <div className={deck.length > 1 ? 'going-stack has-next' : 'going-stack'}>
@@ -566,7 +566,12 @@ function PersonActions({ person, trip, myCity, requests, hasPhoto, onNotNow, onS
           {requests.left > 0 ? 'Connect' : 'No requests left this week'}
         </button>
       </div>
-      {!page && <p className="hint">{trip ? `Connect to say hello and plan ${myCity ?? trip.city} together.` : 'Connect to say hello and swap travel plans.'}</p>}
+      {!page && (
+        <p className="hint">
+          {trip ? `Connect sends a hello, to plan ${myCity ?? trip.city} together.` : 'Connect sends a friendly hello.'} Not now hides {person.display_name} for {NOT_NOW_DAYS} days, and they’re never
+          told.
+        </p>
+      )}
     </div>
   )
 }

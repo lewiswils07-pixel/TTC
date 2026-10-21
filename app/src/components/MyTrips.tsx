@@ -38,7 +38,7 @@ export function MyTrips() {
       )}
       {trips === undefined && !error && <SkeletonRows rows={2} label="Loading your trips…" />}
       {trips && trips.length === 0 && (
-        <EmptyState icon={<BriefcaseBusiness size={18} strokeWidth={2} />} title="No trips yet" text="Add where you’re going and when, and you’ll see members heading the same way.">
+        <EmptyState icon={<BriefcaseBusiness size={18} strokeWidth={2} />} compact title="No trips yet" text="Add where you’re going and when, and you’ll see members heading the same way.">
           <Link className="btn btn-primary btn-block" to="/trips/new">
             Add your first trip
           </Link>

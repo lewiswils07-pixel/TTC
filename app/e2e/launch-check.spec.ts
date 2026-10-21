@@ -91,7 +91,7 @@ test('every screen is accessible and fits a small phone and a laptop', async ({ 
     await page.getByRole('checkbox', { name, exact: true }).evaluate((el: HTMLElement) => el.click())
   }
   // At the limit: a notice, and a nudge when trying to pick a ninth.
-  await expect(page.getByText(/You’ve selected 8 of 8 interests/)).toBeVisible()
+  await expect(page.getByText(/You’ve picked 8 of up to 8/)).toBeVisible()
   await page.getByRole('checkbox', { name: 'Art galleries', exact: true }).evaluate((el: HTMLElement) => el.click())
   await expect(page.getByRole('alert').filter({ hasText: 'You’ve already picked 8' })).toBeVisible()
   await expect(page.getByRole('checkbox', { name: 'Art galleries', exact: true })).not.toBeChecked()

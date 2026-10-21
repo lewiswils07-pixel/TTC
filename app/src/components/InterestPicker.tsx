@@ -119,7 +119,7 @@ export function InterestPicker({ interests, selected, onChange, max, error }: Pr
       )}
 
       <p className={atMax ? 'interest-count is-full' : 'interest-count'} role="status">
-        You’ve selected <strong>{selected.length}</strong> of {max} interests
+        You’ve picked <strong>{selected.length}</strong> of up to {max}
       </p>
       <FieldError error={error} />
       {nudge > 0 && (

@@ -56,8 +56,8 @@ select throws_ok($$update public.profiles set photo_path = '22222222-2222-4222-8
 select throws_ok($$update public.preferences set age_min = 17 where profile_id = '11111111-1111-4111-8111-111111111111'$$, '23514', null, 'preferences cannot include under-18s');
 
 select throws_ok('select public.finish_onboarding()', '23514', 'Profile is not finished', 'onboarding cannot finish without interests');
-select throws_ok('select public.set_my_interests(array[1,2,3,4,5,6,7]::smallint[])', '23514', format('Pick %s interests', private.rule('interests.pick')), 'too few interests are refused');
-select throws_ok('select public.set_my_interests(array[1,2,3,4,5,6,7,8,9]::smallint[])', '23514', format('Pick %s interests', private.rule('interests.pick')), 'too many interests are refused');
+select throws_ok('select public.set_my_interests(array[1,2,3,4]::smallint[])', '23514', format('Pick %s to %s interests', private.rule('interests.min'), private.rule('interests.pick')), 'too few interests are refused');
+select throws_ok('select public.set_my_interests(array[1,2,3,4,5,6,7,8,9]::smallint[])', '23514', format('Pick %s to %s interests', private.rule('interests.min'), private.rule('interests.pick')), 'too many interests are refused');
 select lives_ok('select public.set_my_interests(array[3,4,5,5,6,7,8,9,10]::smallint[])', 'Ann can pick 8 interests');
 select lives_ok('select public.finish_onboarding()', 'Ann can finish onboarding');
 

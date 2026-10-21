@@ -394,6 +394,16 @@ function PlusPanel({ from }: { from: string | null }) {
     { title: 'Popular groups', text: `See where members are heading, and start up to ${count(rules.groups.maxOwnedPlus, 'group')} at once.` },
     { title: 'Search members’ tips', text: 'Search and filter tips for every place.' },
   ]
+  // Free for everyone, so nobody has to guess what a badge means (testers, 21 Oct).
+  const free = [
+    'Add your trips and see who’s going',
+    `${count(rules.requests.perWeekFree, 'connection request')} a week`,
+    'Chat with everyone you connect with',
+    `Join open travel groups, and start ${count(rules.groups.maxOwnedFree, 'group')} of your own`,
+    'Filters for gender, age and distance',
+    'Members’ tips for every place',
+    'All the safety tools',
+  ]
   const date = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
   return (
     <div className="plus-page">
@@ -444,7 +454,16 @@ function PlusPanel({ from }: { from: string | null }) {
         )}
       </section>
       {dialog}
-      <h2 className="list-label">What you get</h2>
+      <h2 className="list-label">Free for everyone</h2>
+      <ul className="card plus-free">
+        {free.map((f) => (
+          <li key={f}>
+            <Check size={16} strokeWidth={3} aria-hidden="true" />
+            {f}
+          </li>
+        ))}
+      </ul>
+      <h2 className="list-label">{brand.plusName} adds</h2>
       <ul className="card plus-perks">
         {perks.map((p) => (
           <li key={p.title}>

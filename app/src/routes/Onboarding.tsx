@@ -27,6 +27,7 @@ import {
   MIN_AGE,
   ageFromDate,
   PHOTO_BOOK_MAX,
+  INTERESTS_MIN,
   INTERESTS_TO_PICK,
   MONTHS,
   HOLIDAY_QUESTIONS,
@@ -325,7 +326,7 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
         <p className="tip-box">
           <SlidersHorizontal size={20} strokeWidth={1.8} aria-hidden="true" />
           <span>
-            Choose who you see (gender, age and distance) any time in <strong>Filters</strong>.
+            Prefer to meet only women, or people near your age? Choose who you see any time in <strong>Filters</strong>.
           </span>
         </p>
         <div data-field="city" className="home-city">
@@ -610,7 +611,9 @@ function TravelStep({ userId, data, interests, onDone }: StepProps & { interests
         <h2 id="interests-heading" className="step-section-title">
           Interests
         </h2>
-        <p className="hint">Pick the {INTERESTS_TO_PICK} you love most, and meet people who love them too.</p>
+        <p className="hint">
+          Pick {INTERESTS_MIN} to {INTERESTS_TO_PICK} you love most, and meet people who love them too.
+        </p>
         <InterestPicker interests={interests} selected={selected} onChange={setSelected} max={INTERESTS_TO_PICK} error={shown('interests')} />
       </section>
 
@@ -726,7 +729,7 @@ function TravelStep({ userId, data, interests, onDone }: StepProps & { interests
         arrow={!editing}
         note={
           <span aria-live="polite">
-            <strong>{selected.length}</strong> of {INTERESTS_TO_PICK} interests picked
+            <strong>{selected.length}</strong> picked · {INTERESTS_MIN} to {INTERESTS_TO_PICK}
           </span>
         }
       />

@@ -1,4 +1,4 @@
-import { INTERESTS_TO_PICK } from './options'
+import { INTERESTS_MIN } from './options'
 import type { MyProfile } from './profile'
 
 /** The profile steps, in order. Links and checks use these names, never the numbers. */
@@ -14,6 +14,6 @@ export const stepLink = (name: StepName, returnTo?: string) => `/onboarding?step
 /** Where to send a member who comes back to a half-finished profile. */
 export function firstUnfinishedStep({ profile, interestIds }: MyProfile): number {
   if (!profile.display_name || !profile.birth_year || !profile.gender || !profile.home_city_id) return STEP.basics
-  if (interestIds.length < INTERESTS_TO_PICK) return STEP.interests
+  if (interestIds.length < INTERESTS_MIN) return STEP.interests
   return STEP.wishlist
 }
