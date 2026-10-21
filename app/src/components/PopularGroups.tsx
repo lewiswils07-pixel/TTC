@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import { brand } from '../lib/brand'
 import { CityPhoto } from './CityPhoto'
 import { peek, remember } from '../lib/cache'
-import { hasPlus } from '../lib/plan'
+import { hasPlus, plusLink } from '../lib/plan'
 import { popularDestinations, type PopularPlace } from '../lib/trips'
 
 const SHOWN = 3
@@ -28,7 +28,7 @@ export function PopularGroups({ canStart }: { canStart: boolean }) {
       {/* The badge always says what it's for (testers, 13 Oct). */}
       <p className="hint list-hint">
         <span className="tag tag-plus-dark">{brand.plusName}</span> Where members are heading now, so you can start a group for one.{' '}
-        {!plus && <Link to="/profile?tab=plus">Comes with {brand.plusName}</Link>}
+        {!plus && <Link to={plusLink('groups')}>Comes with {brand.plusName}</Link>}
       </p>
       {plus && (
         <ul className="chat-list">

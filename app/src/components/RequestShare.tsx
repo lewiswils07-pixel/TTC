@@ -7,6 +7,7 @@ import { listLabels } from '../lib/matching'
 import { loadExtras, sharedStyle, whatWeShare, type MemberExtras } from '../lib/member'
 import type { MyProfile } from '../lib/profile'
 import { brand } from '../lib/brand'
+import { plusLink } from '../lib/plan'
 
 /** On a connection request: their one line, what you share, and their card for Sodalis+ members (Lewis, 16 Oct). */
 export function RequestShare({ profileId, name, mine, plus }: { profileId: string; name: string; mine: MyProfile['profile'] | undefined; plus: boolean }) {
@@ -82,7 +83,7 @@ export function RequestShare({ profileId, name, mine, plus }: { profileId: strin
           )}
         </>
       ) : (
-        <Link className="request-read is-locked" to="/profile?tab=plus">
+        <Link className="request-read is-locked" to={plusLink('request_card')}>
           <Lock size={16} strokeWidth={2} aria-hidden="true" />
           Read their card
           <span className="going-badge is-gold">{brand.plusName}</span>

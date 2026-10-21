@@ -19,7 +19,7 @@ import { usePhotoUrl } from '../lib/photo'
 import { listInterests, type Interest, type MyProfile, type Profile } from '../lib/profile'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
-import { plusPrice, plusUntil, stopMyPlus } from '../lib/plan'
+import { myPriceTest, notePlusInterest, plusLink, plusPrice, plusUntil, pounds, stopMyPlus } from '../lib/plan'
 import { useConfirm } from '../lib/useConfirm'
 import { HubRow } from '../components/HubRow'
 import { ErrorState } from '../components/EmptyState'
@@ -65,7 +65,7 @@ export function Profile() {
   if (tab === 'plus') {
     return (
       <Layout tab="profile">
-        <PlusPanel />
+        <PlusPanel from={params.get('from')} />
       </Layout>
     )
   }
@@ -77,7 +77,7 @@ export function Profile() {
           Your profile
         </Link>
         <h1>{tab === 'safety' ? 'Safety' : brand.plusName}</h1>
-        {tab === 'safety' ? <SafetyPanel /> : <PlusPanel />}
+        {tab === 'safety' ? <SafetyPanel /> : <PlusPanel from={params.get('from')} />}
       </Layout>
     )
   }
@@ -240,7 +240,7 @@ function MyProfilePanel({ data }: { data: MyProfile }) {
         </p>
         <p className="hint">Who you see on Who’s going. Change it any time in Filters.</p>
       </ProfileSection>
-      <Link className="plus-row" to="/profile?tab=plus">
+      <Link className="plus-row" to={plusLink('profile')}>
         <span className="plus-row-icon" aria-hidden="true">
           <Gem size={20} strokeWidth={1.8} />
         </span>
@@ -341,15 +341,31 @@ function SafetyPanel() {
   )
 }
 
-/** What Sodalis+ lets them do, and how long they have it. */
-function PlusPanel() {
+/** What Sodalis+ lets them do, and how long they have it. Members in the pricing test see their
+ *  test price and a Join button; a tap is only counted, nothing is charged (rules.pricingTest). */
+function PlusPanel({ from }: { from: string | null }) {
   const [until, setUntil] = useState<string | null | undefined | 'loading'>('loading')
+  const [test, setTest] = useState<{ price_pence: number; joined: boolean } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [stopped, setStopped] = useState(false)
   const { ask, dialog } = useConfirm()
   useEffect(() => {
     plusUntil().then(setUntil, () => setUntil(undefined))
-  }, [])
+    myPriceTest().then((t) => {
+      setTest(t)
+      if (t) notePlusInterest('view', from).catch(() => undefined)
+    })
+  }, [from])
+
+  async function join() {
+    setError(null)
+    try {
+      await notePlusInterest('join', from)
+      setTest((t) => t && { ...t, joined: true })
+    } catch (e) {
+      setError(messageOf(e))
+    }
+  }
 
   async function stop() {
     const yes = await ask({
@@ -403,9 +419,22 @@ function PlusPanel() {
           <>
             <span className="plus-eyebrow">Coming soon</span>
             <h2>
-              {plusPrice()} <span>a month</span>
+              {test ? pounds(test.price_pence) : plusPrice()} <span>a month</span>
             </h2>
-            <p className="hint">{stopped ? 'You’re on the free plan now. ' : ''}When it starts you can stop it any time in one tap.</p>
+            {test?.joined ? (
+              <p className="notice notice-success" role="status">
+                Thanks, you’re on the list. {brand.plusName} isn’t open yet, so nothing has been charged. We’ll tell you when it starts.
+              </p>
+            ) : (
+              <>
+                <p className="hint">{stopped ? 'You’re on the free plan now. ' : ''}When it starts you can stop it any time in one tap.</p>
+                {test && (
+                  <button type="button" className="btn btn-primary btn-block" onClick={join}>
+                    Join {brand.plusName}
+                  </button>
+                )}
+              </>
+            )}
           </>
         )}
         {error && (

@@ -22,7 +22,7 @@ import { clearNotNow, forgetNotNow, loadFeed, nearYou, NOT_NOW_DAYS, notNowIds, 
 import { isNewMember, loadFirstDay, saveFirstDay } from '../lib/firstDay'
 import { groupsICanStart, myGroups, type Group } from '../lib/groups'
 import { noteFirstMatch } from '../lib/kpis'
-import { requestsLeftText } from '../lib/plan'
+import { plusLink, requestsLeftText } from '../lib/plan'
 import { fitWords, homeLabel, listLabels, LOTS_IN_COMMON } from '../lib/matching'
 import { ageLabel, BOOKING, GROUP_SIZES, HOLIDAY_QUESTIONS, INTERESTS_TO_PICK, labelFor, MOVING, PERSONAL_FIELDS, ROOM_SHARING, TRAVEL_OFTEN } from '../lib/options'
 import { preloadPhotos, usePhotoUrl } from '../lib/photo'
@@ -695,7 +695,7 @@ function PersonPage(props: CardProps & { onBack: () => void }) {
             </dl>
           )}
           {extras?.holiday_locked && (
-            <Link className="plus-teaser" to="/profile?tab=plus">
+            <Link className="plus-teaser" to={plusLink('card')}>
               <span className="tag tag-plus">{brand.plusName}</span> See how {name} likes to holiday
             </Link>
           )}

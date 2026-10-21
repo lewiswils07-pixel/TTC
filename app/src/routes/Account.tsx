@@ -13,6 +13,7 @@ import { NextIcon } from '../components/Icons'
 import { PageBack } from '../components/PageBack'
 import { TriangleAlert } from 'lucide-react'
 import { brand } from '../lib/brand'
+import { plusLink } from '../lib/plan'
 
 const CONFIRM_WORD = 'DELETE'
 
@@ -81,7 +82,7 @@ export function Account() {
       <h2 className="list-label">Membership</h2>
       <ul className="set-list">
         <li>
-          <Link to="/profile?tab=plus">
+          <Link to={plusLink('account')}>
             <span>
               <strong>{brand.plusName}</strong>
             </span>

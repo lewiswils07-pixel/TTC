@@ -4,6 +4,7 @@ import { brand } from '../lib/brand'
 import type { MemberExtras } from '../lib/member'
 import { HOLIDAY_QUESTIONS, PERSONAL_FIELDS, type HolidayPrefs } from '../lib/options'
 import { usePhotoUrl } from '../lib/photo'
+import { plusLink } from '../lib/plan'
 
 /** Holiday preferences as small labelled chips, like Tinder's lifestyle row. */
 export function HolidayChips({ prefs }: { prefs: HolidayPrefs }) {
@@ -53,7 +54,7 @@ export function ProfileExtras({ extras, name, headingLevel = 4 }: { extras: Memb
         </div>
       )}
       {extras.holiday_locked && (
-        <Link className="plus-teaser" to="/profile?tab=plus">
+        <Link className="plus-teaser" to={plusLink('card')}>
           <span className="tag tag-plus">{brand.plusName}</span> See how {name} likes to holiday
         </Link>
       )}

@@ -12,7 +12,7 @@ import { Gem } from 'lucide-react'
 import { messageOf } from '../lib/errors'
 import { loadFeed, sameTime, type FeedPerson } from '../lib/feed'
 import { ageLabel } from '../lib/options'
-import { hasPlus, plusPrice } from '../lib/plan'
+import { hasPlus, plusLink, plusPrice } from '../lib/plan'
 import { BackIcon } from '../components/Icons'
 
 /** Everyone here grouped under the member's trip they share, with the days you're both there. */
@@ -113,7 +113,7 @@ export function SameTime() {
             <p className="plus-offer-price">
               Comes with {brand.plusName}, <strong>{plusPrice()}</strong> a month. You can stop at any time.
             </p>
-            <Link className="btn btn-primary btn-lg" to="/profile?tab=plus">
+            <Link className="btn btn-primary btn-lg" to={plusLink('same_time')}>
               Get {brand.plusName}
             </Link>
             <Link className="btn btn-secondary btn-lg" to="/connections">

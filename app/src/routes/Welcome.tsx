@@ -58,10 +58,12 @@ export function WelcomeScreen() {
             <Link to="/community-rules">Read the community rules</Link>
           </div>
         </div>
-        <p className="welcome-gift">
-          {brand.plusName} is on us for {count(rules.founding.plusMonths, 'month')}
-          {welcome?.plus_until ? `, until ${longDate(welcome.plus_until.slice(0, 10))}` : ''}. No card needed.
-        </p>
+        {/* Members in the pricing test start on the free plan, so only show the gift when they have it. */}
+        {welcome?.plus_until && (
+          <p className="welcome-gift">
+            {brand.plusName} is on us for {count(rules.founding.plusMonths, 'month')}, until {longDate(welcome.plus_until.slice(0, 10))}. No card needed.
+          </p>
+        )}
         <div className="welcome-actions">
           <Link className="btn btn-primary btn-block btn-lg" to="/trips/new">
             <AddIcon />
