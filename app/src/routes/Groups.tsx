@@ -11,6 +11,7 @@ import { rules } from '../lib/rules'
 import { peek, remember } from '../lib/cache'
 import { OpenGroups } from '../components/OpenGroups'
 import { PopularGroups } from '../components/PopularGroups'
+import { SuggestedGroups } from '../components/SuggestedGroups'
 import { groupsICanStart, isTripGroup, myGroups, respondToInvite, type Group } from '../lib/groups'
 import { UsersRound } from 'lucide-react'
 import { listTime, myConversations, type Conversation } from '../lib/chat'
@@ -122,7 +123,7 @@ export function Groups() {
           icon={<UsersRound size={18} strokeWidth={2} />}
           compact
           title="No groups yet"
-          text="Join a small group for one of your trips, or start your own and invite people you’re connected with."
+          text="Join one of the groups for you below, or start your own and invite people you’re connected with."
         />
       ) : (
         <ul className="chat-list">
@@ -162,6 +163,7 @@ export function Groups() {
           Start a group
         </Link>
       )}
+      <SuggestedGroups joined={joined.filter((g) => g.club).length} />
       <OpenGroups />
       <PopularGroups canStart={canStart > 0} />
       {canStart === 0 && joined.some((g) => g.i_own) && (

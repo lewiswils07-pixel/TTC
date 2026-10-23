@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { VerifyCard } from '../components/Verified'
 import { Ban, Camera, Check, Coffee, Eye, Flag, Gem, Lock, Pencil, Settings, Share, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react'
 import { keep, peek, remember } from '../lib/cache'
 import { Link, Navigate, useSearchParams } from 'react-router'
@@ -200,6 +201,7 @@ function MyProfilePanel({ data }: { data: MyProfile }) {
   return (
     <>
       {hasTrip !== null && <Strength profile={profile} interestCount={interestIds.length} hasTrip={hasTrip} card={data.card} />}
+      <VerifyCard userId={profile.id} />
       <MeetPrompts />
       <ProfileSection id="me-interests" title="Interests" edit={stepLink('interests')}>
         {myInterests.length ? (
@@ -246,7 +248,7 @@ function MyProfilePanel({ data }: { data: MyProfile }) {
         </span>
         <span className="plus-row-text">
           <strong>{brand.plusName}</strong>
-          <span>Filter by travel style, and more</span>
+          <span>Every group for you, and more</span>
         </span>
         <NextIcon />
       </Link>
@@ -389,8 +391,8 @@ function PlusPanel({ from }: { from: string | null }) {
   const perks = [
     { title: 'Unlimited connection requests', text: 'Say hello to as many members as you like.' },
     { title: 'Unlimited trip plans', text: 'Plan as many trips together as you want.' },
-    { title: 'Travel-style filters', text: 'Find people who travel at your pace and budget.' },
-    { title: 'Going when you are', text: 'See the exact days you overlap with other members.' },
+    { title: 'Every group for you', text: `Join as many interest and destination groups as you like, not just ${rules.groups.suggestedFree}.` },
+    { title: 'Holiday preference filters', text: 'Find people who like the same kind of stay, length and season.' },
     { title: 'Popular groups', text: `See where members are heading, and start up to ${count(rules.groups.maxOwnedPlus, 'group')} at once.` },
     { title: 'Search members’ tips', text: 'Search and filter tips for every place.' },
   ]
@@ -400,7 +402,9 @@ function PlusPanel({ from }: { from: string | null }) {
     `${count(rules.requests.perWeekFree, 'connection request')} a week`,
     'Chat with everyone you connect with',
     `Join open travel groups, and start ${count(rules.groups.maxOwnedFree, 'group')} of your own`,
-    'Filters for gender, age and distance',
+    `Join ${count(rules.groups.suggestedFree, 'group')} for your interests and trips`,
+    'See the exact days you overlap with other members',
+    'Filters for gender, age, distance, pace and budget',
     'Members’ tips for every place',
     'All the safety tools',
   ]

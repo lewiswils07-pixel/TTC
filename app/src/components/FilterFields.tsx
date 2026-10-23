@@ -12,8 +12,8 @@ import { HOLIDAY_QUESTIONS, MAX_PREF_AGE, MIN_AGE, STYLE_QUESTIONS, distanceLabe
 import { plusLink } from '../lib/plan'
 
 const ageText = (min: number, max: number) => `${min} to ${max >= MAX_PREF_AGE ? `${MAX_PREF_AGE}+` : max}`
-/** Every filter on one sheet (Claude Design, 16 Oct): the basics with their controls in view,
- *  then how they travel and holiday preferences as chips in a gold Sodalis+ card. */
+/** Every filter on one sheet (Claude Design, 16 Oct): the basics with their controls in view, how they travel as chips,
+ *  then holiday preferences in a gold Sodalis+ card. */
 export function FilterFields({ value: f, onChange, plus }: { value: Filters; onChange: (next: Filters) => void; plus: boolean }) {
   const set = (change: Partial<Filters>) => onChange({ ...f, ...change })
   const errors = filterErrors(f)
@@ -35,10 +35,15 @@ export function FilterFields({ value: f, onChange, plus }: { value: Filters; onC
         {f.max_distance_km !== null && <Flexible label="Show people a bit further away too" checked={f.distance_flexible} onChange={(distance_flexible) => set({ distance_flexible })} />}
         <p className="hint">Members on your trips are shown wherever they live.</p>
       </FilterSection>
-      <section className={plus ? 'filter-plus' : 'filter-plus is-locked'} aria-label={`Travel style, with ${brand.plusName}`}>
-        <PlusHead title="Travel style" plus={plus} />
+      {/* Travel style filters are free for everyone (round 8 testers, 23 Oct). */}
+      <section className="filter-section" aria-labelledby="filter-style-title">
+        <div className="filter-section-head">
+          <h3 id="filter-style-title">Travel style</h3>
+        </div>
         {STYLE_QUESTIONS.map((q) => plusChips(q.filter, q.label, q.options))}
-        <h3 className="filter-plus-sub">Holiday preferences</h3>
+      </section>
+      <section className={plus ? 'filter-plus' : 'filter-plus is-locked'} aria-label={`Holiday preferences, with ${brand.plusName}`}>
+        <PlusHead title="Holiday preferences" plus={plus} />
         {HOLIDAY_QUESTIONS.map((q) => plusChips(q.filter, q.label, q.options))}
         {!plus && (
           <>
