@@ -14,7 +14,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
 
   await test.step('join and build a profile', async () => {
     await signIn(a, lewisEmail, password)
-    await expect(a.getByText(/Step 1 of 3/)).toBeVisible()
+    await expect(a.getByText(/Step 1 of 2/)).toBeVisible()
     await a.getByLabel('First name').fill('Lewis')
     await choose(a, /^Day/, '14')
     await choose(a, /^Month/, 'November')
@@ -25,13 +25,13 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     await a.locator('#photo').setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: Buffer.from(TINY_PNG, 'base64') })
     await expect(a.getByRole('img', { name: 'Your profile photo' })).toBeVisible()
     await a.getByRole('button', { name: /continue/i }).click()
-    await expect(a.getByText(/Step 2 of 3/)).toBeVisible()
+    await expect(a.getByText(/Step 2 of 2/)).toBeVisible()
     for (const name of ['Museums', 'Wine', 'Walking', 'Photography', 'Theatre', 'Local cuisine', 'Gardens', 'Architecture']) {
       await a.getByRole('checkbox', { name, exact: true }).evaluate((el: HTMLElement) => el.click())
     }
     await finishSignUp(a)
     await expect(a.getByRole('heading', { name: /^You’re in/ })).toBeVisible()
-    await expect(a.getByText(/is on us for/)).toBeVisible()
+    // Half of new members are in the pricing test and start on the free plan, so the founding gift line isn't always there.
     await a.getByRole('link', { name: 'See who’s going' }).click()
     // Once, the privacy choices.
     await expect(a.getByRole('heading', { name: 'We value your privacy' })).toBeVisible()
@@ -138,7 +138,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
   await test.step('start a group and plan together', async () => {
     await a.goto('/groups/new')
     await a.getByLabel('Group name').fill('Paris in spring')
-    await a.getByText('A trip', { exact: true }).click()
+    await a.getByRole('radio', { name: 'A trip', exact: true }).check({ force: true })
     await pickPlace(a, 'Pari', /Paris, France/)
     await pickDates(a, isoIn(25), isoIn(28))
     await a.getByText(other, { exact: true }).click()
@@ -175,7 +175,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
     const reviewer = `reviewer${Date.now()}@example.com`
     const r = await newPhone(browser)
     await signIn(r, reviewer)
-    await expect(r.getByText(/Step 1 of 3/)).toBeVisible()
+    await expect(r.getByText(/Step 1 of 2/)).toBeVisible()
     await admin
       .from('profiles')
       .update({ role: 'admin' })

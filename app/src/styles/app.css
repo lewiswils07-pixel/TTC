@@ -2579,3 +2579,15 @@ a.chat-row:hover { background: color-mix(in srgb, var(--paper-tint) 45%, var(--c
 .plus-free li { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
 .plus-free li + li { border-top: 1px solid var(--line); }
 .plus-free svg { flex: none; color: var(--success); }
+
+/* Round 8 tester fixes (23 Oct): Verified badge, Verify me card, groups for you. */
+.going-badge.is-verified { background: var(--accent-tint); color: var(--accent); }
+.member-intro .going-badge.is-verified { margin-top: var(--space-1); }
+.verify-card { display: flex; align-items: center; gap: var(--space-3); }
+.verify-card .card-title { margin: 0; }
+.verify-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.verify-text .hint { margin: 0; }
+.verify-icon { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--accent-tint); color: var(--accent); }
+.verify-card.is-done .verify-icon { background: var(--accent); color: var(--card); }
+.suggested-groups .trips-row-plus { margin-top: var(--space-3); }
+.suggested-group .btn { flex: none; }

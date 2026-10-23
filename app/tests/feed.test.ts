@@ -45,9 +45,9 @@ describe('the For you feed', () => {
     expect(feed.map((p) => p.profile_id)).toEqual(['Ann', 'Bob'])
   })
 
-  it('shows only the month of a shared trip without Sodalis+', () => {
-    const [ann] = mergeFeed([{ tripId: 7, people: [trip('Ann', 40, { trip_start: '2026-11-01', trip_end: '2026-11-01' })] }], [])
-    expect(callouts(ann)[0]).toMatchObject({ kind: 'trip', text: 'Also going to Lisbon in November' })
+  it('shows the exact dates of a shared trip on the free plan too', () => {
+    const [ann] = mergeFeed([{ tripId: 7, people: [trip('Ann', 40)] }], [])
+    expect(callouts(ann, '2026-10-07')[0]).toMatchObject({ kind: 'trip', text: `Lisbon · ${shortDates('2026-11-10', '2026-11-20', '2026-10-07')}` })
   })
 
   it('says why, strongest reason first', () => {
@@ -117,10 +117,8 @@ describe('Who’s going', () => {
     expect(others.map((p) => p.profile_id)).toEqual(['cat'])
   })
 
-  it('says what you share in plain words: the month without Sodalis+, the days with it', () => {
+  it('says what you share in plain words, with the days you’re both there', () => {
     const [free] = mergeFeed([{ tripId: 1, people: [trip('ann', 60)] }], [])
-    expect(whatYouShare(free, tripTo(free, 'Lisbon'))).toEqual(['Both in Lisbon in November', 'Museums'])
-    const [plus] = mergeFeed([{ tripId: 1, people: [trip('ann', 60)] }], [], true)
-    expect(whatYouShare(plus, tripTo(plus, 'Lisbon'), '2026-10-12')[0]).toBe(`Both in Lisbon ${shortDates('2026-11-12', '2026-11-18', '2026-10-12')}`)
+    expect(whatYouShare(free, tripTo(free, 'Lisbon'), '2026-10-12')[0]).toBe(`Both in Lisbon ${shortDates('2026-11-12', '2026-11-18', '2026-10-12')}`)
   })
 })

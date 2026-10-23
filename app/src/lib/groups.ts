@@ -18,13 +18,32 @@ export type Group = {
   end_date: string | null
   my_status: 'invited' | 'joined'
   i_own: boolean
-  owner_name: string
+  /** Null for a group the club runs (a suggested group). */
+  owner_name: string | null
   members: number
   conversation_id: number | null
   /** A trip two connections are planning together (it can grow into a group). */
   is_pair?: boolean
   city_id?: number
+  /** A suggested group for an interest or a place, run by the club. */
+  club?: boolean
 }
+
+/** A group suggested from the member's trips, wish list and interests (round 8 testers, 23 Oct). */
+export type SuggestedGroup = {
+  kind: 'place' | 'interest'
+  topic_id: number
+  name: string
+  country_code: string | null
+  /** People in the group now. */
+  members: number
+  /** Members going there, or who picked that interest. */
+  fans: number
+  reason: string
+}
+
+/** Free members see and join this many suggested groups; Sodalis+ members, all of them. */
+export const SUGGESTED_FREE = rules.groups.suggestedFree
 
 export type GroupPerson = {
   profile_id: string
@@ -107,6 +126,21 @@ export async function openGroups(cityId?: number): Promise<OpenGroup[]> {
   if (missing(error?.code)) return []
   if (error) throw friendlyError(error)
   return (data ?? []) as OpenGroup[]
+}
+
+/** Groups suggested for me, best first. Empty before database Part 31. */
+export async function suggestedGroups(): Promise<SuggestedGroup[]> {
+  const { data, error } = await supabase.rpc('suggested_groups')
+  if (missing(error?.code)) return []
+  if (error) throw friendlyError(error)
+  return (data ?? []) as SuggestedGroup[]
+}
+
+/** Joins a suggested group (made the first time anyone joins) and returns its id. */
+export async function joinSuggestedGroup(g: Pick<SuggestedGroup, 'kind' | 'topic_id'>): Promise<number> {
+  const { data, error } = await supabase.rpc('join_suggested_group', { p_kind: g.kind, p_topic: g.topic_id })
+  if (error) throw friendlyError(error)
+  return data as number
 }
 
 export async function joinOpenGroup(groupId: number): Promise<void> {
