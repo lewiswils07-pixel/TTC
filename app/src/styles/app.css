@@ -1773,6 +1773,18 @@ h2, .section-title { font-size: 1.625rem; line-height: 1.15; }
 }
 .tab-label { white-space: nowrap; }
 
+/* The bottom bar sits on its own layer above everything on the page, so iPhones always pass taps to it. */
+.tabbar:not(.tabbar-top) { z-index: 30; transform: translateZ(0); -webkit-transform: translateZ(0); }
+.tabbar .tab { position: relative; z-index: 1; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+/* A soft pill that slides between the tabs. */
+.tabbar ul { position: relative; }
+.tab-slider { position: absolute; top: 10px; left: 6px; width: calc((100% - 12px) / 4); height: 30px; pointer-events: none; transform: translateX(calc(var(--i, 0) * 100%)); transition: transform 0.32s cubic-bezier(0.3, 1.25, 0.5, 1); }
+.tab-slider::before { content: ''; position: absolute; left: 50%; top: 0; width: 60px; height: 30px; margin-left: -30px; border-radius: 15px; background: var(--accent-tint); }
+.tabbar:not(.tabbar-top) .tab.is-current .tab-icon { background: none; }
+@media (prefers-reduced-motion: reduce) {
+  .tab-slider { transition: none; }
+}
+
 /* The Filters button and other small framed buttons. */
 .filter-button { height: 44px; padding: 0 16px; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-sm); font-size: 1rem; font-weight: 600; }
 .hub-icon { border-radius: 12px; width: 44px; height: 44px; background: var(--paper-tint); color: var(--ink-soft); }
