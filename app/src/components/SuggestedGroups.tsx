@@ -66,7 +66,7 @@ export function SuggestedGroups({ joined, onJoined }: { joined: number; onJoined
               <li key={key} className="card open-group suggested-group">
                 <div className="open-group-head">
                   {g.kind === 'place' ? (
-                    <CityPhoto city={g.name.replace(/ travellers$/, '')} width={120} code className="group-tile" />
+                    <CityPhoto city={g.name.replace(/ travellers$/, '')} country={g.country_code} width={120} code className="group-tile" />
                   ) : (
                     <span className="avatar avatar-md avatar-square avatar-group group-tile" aria-hidden="true">
                       <Sparkles size={22} strokeWidth={1.8} />

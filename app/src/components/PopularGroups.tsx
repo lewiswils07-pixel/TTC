@@ -34,7 +34,7 @@ export function PopularGroups({ canStart }: { canStart: boolean }) {
         <ul className="chat-list">
           {(all ? places : places.slice(0, SHOWN)).map((p) => (
             <li key={p.city_id} className="chat-row popular-group">
-              <CityPhoto city={p.city} width={120} code className="group-tile" />
+              <CityPhoto city={p.city} country={p.country_code} width={120} code className="group-tile" />
               <span className="chat-row-text">
                 <strong>{p.city}</strong>
                 <span className="hint">{p.members} members going</span>

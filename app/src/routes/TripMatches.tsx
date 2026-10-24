@@ -78,7 +78,7 @@ export function TripMatches() {
     <Layout tab="trips">
       {/* A burgundy banner with the place's letters behind (Claude Design, 15 Oct). */}
       <div className="trip-hero">
-        <CityPhoto city={trip.city.name} width={720} credit className="trip-hero-photo" />
+        <CityPhoto city={trip.city.name} country={trip.city.country_code} region={trip.city.region} width={720} credit className="trip-hero-photo" />
         <span className="trip-hero-code" aria-hidden="true">
           {trip.city.name.slice(0, 3).toUpperCase()}
         </span>

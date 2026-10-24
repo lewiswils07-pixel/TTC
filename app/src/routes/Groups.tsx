@@ -178,7 +178,7 @@ export function Groups() {
 /** A trip group's city code on its photo, or a gold people icon for a group chat. */
 function GroupTile({ group }: { group: Group }) {
   return isTripGroup(group) ? (
-    <CityPhoto city={group.city} width={120} code className="group-tile" />
+    <CityPhoto city={group.city} country={group.country_code} width={120} code className="group-tile" />
   ) : (
     <span className="avatar avatar-md avatar-square avatar-group group-tile" aria-hidden="true">
       <UsersRound size={24} strokeWidth={1.8} />
