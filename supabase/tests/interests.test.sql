@@ -1,7 +1,7 @@
--- pgTAP: the grouped interests list (91 interests in 9 categories: holidays only, 11 Oct, plus 8 younger ones, 16 Oct).
+-- pgTAP: the grouped interests list (98 interests in 9 categories: holidays only, 11 Oct, plus 8 younger ones, 16 Oct, plus 7 more, 23 Oct).
 begin;
 select plan(4);
-select is((select count(*)::int from public.interests), 91, 'there are 91 interests');
+select is((select count(*)::int from public.interests), 98, 'there are 98 interests');
 select is((select count(distinct category)::int from public.interests), 9, 'they sit in 9 categories');
 select is_empty($$select 1 from public.interests group by lower(label) having count(*) > 1$$, 'no interest is listed twice');
 select results_eq(

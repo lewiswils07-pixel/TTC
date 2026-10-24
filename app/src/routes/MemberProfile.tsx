@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { VerifiedFor } from '../components/Verified'
 import { Link, useNavigate, useParams } from 'react-router'
 import { CardBack } from '../components/CardBack'
 import { Layout, Loading } from '../components/Layout'
@@ -112,6 +113,7 @@ export function MemberProfile() {
             {member.birth_year ? `, ${ageLabel(member.birth_year)}` : ''}
           </h1>
           {home && <p>{home}</p>}
+          <VerifiedFor id={member.profile_id} />
           {extras?.headline && <p className="going-headline is-page">“{extras.headline}”</p>}
           {member.connected_at && (
             <span className="going-badge is-gold">Connected since {new Date(member.connected_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>

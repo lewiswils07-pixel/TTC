@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { VerifiedBadge } from '../components/Verified'
 import { Link, Navigate, useSearchParams } from 'react-router'
 import { Layout, Loading, Logo } from '../components/Layout'
 import { CardBack } from '../components/CardBack'
@@ -333,10 +334,10 @@ export function ForYou() {
               </div>
             )}
             {requests.left <= 3 && <p className="hint going-left">{requestsLeftText(requests)}</p>}
-            {!requests.plus && trips.length > 0 && (
+            {trips.length > 0 && (
               <p className="hint going-plus-line">
                 <Link className="going-plus-link" to="/connections/same-time">
-                  See the exact days you overlap with {brand.plusName}
+                  See the exact days you overlap
                 </Link>
               </p>
             )}
@@ -506,6 +507,7 @@ function PersonHead({ person, myHome, id, level = 3 }: { person: FeedPerson; myH
         </H>
         <p>{[person.birth_year && ageLabel(person.birth_year), homeLabel(person)].filter(Boolean).join(' · ')}</p>
         <div className="going-badges">
+          {person.verified && <VerifiedBadge />}
           {person.score >= LOTS_IN_COMMON && (
             <span className="going-badge is-gold">
               <Blend size={16} strokeWidth={2} aria-hidden="true" />

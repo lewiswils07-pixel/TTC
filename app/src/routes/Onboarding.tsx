@@ -52,9 +52,11 @@ const STEPS = [
   { title: 'How you travel', heading: 'How do you like to travel?', intro: 'This helps you find people who’d enjoy the same trip. Change it any time.' },
   { title: 'Your wish list', heading: 'Where would you love to go?', intro: 'Add a few places. Members who dream of the same ones will see you share them.' },
 ] as const satisfies readonly { title: string; heading: string; intro: string }[]
-/** Sign-up is 3 screens, as in Lewis's Claude Design (15 Oct). The same screens edit the profile afterwards, with the extras
- *  (photo book, holiday preferences, more card answers) added in. */
+/** Sign-up is 2 short screens (round 8 testers, 23 Oct: "let me in first, ask the rest later"). The same screens edit the
+ *  profile afterwards with the extras added in (a few words, the rest of the travel style, holiday preferences), and the wish
+ *  list and card are a third screen, opened from the profile. */
 const TOTAL = STEPS.length
+export const SIGNUP_STEPS = 2
 
 export function Onboarding() {
   const { session } = useSession()
@@ -83,11 +85,12 @@ export function Onboarding() {
   if (!data || !interests) return <Loading />
 
   const requested = Number(params.get('step'))
-  const step = requested >= 1 && requested <= TOTAL ? requested : firstUnfinishedStep(data)
-  const goTo = (n: number) => setParams({ step: String(n) })
   const firstTime = !data.profile.onboarded_at
+  // A new member can't skip ahead to the wish list: sign-up ends after step 2.
+  const step = requested >= 1 && requested <= (firstTime ? SIGNUP_STEPS : TOTAL) ? requested : firstUnfinishedStep(data)
+  const goTo = (n: number) => setParams({ step: String(n) })
   const next = async () => {
-    if (firstTime && step >= TOTAL) {
+    if (firstTime && step >= SIGNUP_STEPS) {
       await finishOnboarding()
       await reload()
       return navigate('/welcome', { replace: true })
@@ -128,12 +131,12 @@ function StepFrame({ step, signingUp, onBack, children }: { step: number; signin
         ) : (
           <span className="step-top-space" />
         )}
-        <p className="step-label">{signingUp ? `Step ${step} of ${TOTAL} · ${title}` : 'Edit your profile'}</p>
+        <p className="step-label">{signingUp ? `Step ${step} of ${SIGNUP_STEPS} · ${title}` : 'Edit your profile'}</p>
         <Monogram size={40} />
       </div>
       {signingUp && (
         <div className="step-progress" aria-hidden="true">
-          {Array.from({ length: TOTAL }, (_, i) => (
+          {Array.from({ length: SIGNUP_STEPS }, (_, i) => (
             <span key={i} className={i < step ? 'is-done' : undefined} />
           ))}
         </div>
@@ -233,7 +236,7 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
     await saveBasics(userId, { display_name: name.trim(), birth_date: birthDate(dobDay, dobMonth, dobYear), gender: gender[0], home_city_id: city!.id })
     await saveMeetPreferences(userId, { genders, age_min: ages[0], age_max: ages[1], max_distance_km: distance })
     if (photo.blob) await uploadPhoto(userId, photo.blob, p.photo_path)
-    await saveAboutMe(userId, { headline: headline.trim() || null, bio: bio.trim() || null })
+    if (p.onboarded_at) await saveAboutMe(userId, { headline: headline.trim() || null, bio: bio.trim() || null })
     clearDrafts('basics.')
   }, onDone)
 
@@ -358,40 +361,44 @@ function BasicsStep({ userId, data, onDone }: StepProps) {
         </div>
         <PhotoField pick={photo} />
         {p.onboarded_at && data.more && <PhotoBookEditor userId={userId} start={data.more.photo_book} />}
-        <div className="field" data-field="headline">
-          <label htmlFor="headline">
-            You in one line <span className="label-quiet">(optional)</span>
-          </label>
-          <input
-            id="headline"
-            className="input"
-            maxLength={rules.profile.headlineMax}
-            placeholder="For example, happiest with a map and a good coffee."
-            aria-describedby="headline-hint"
-            value={headline}
-            onChange={(e) => setHeadline(e.target.value)}
-          />
-          <p className="hint" id="headline-hint">
-            Shown under your name on your card
-          </p>
-        </div>
-        <div className="field" data-field="bio">
-          <label htmlFor="bio">
-            A few words about you <span className="label-quiet">(optional)</span>
-          </label>
-          <textarea
-            id="bio"
-            className="textarea"
-            maxLength={rules.profile.bioMax}
-            placeholder="For example, retired teacher who loves a coastal walk with a long lunch at the end."
-            aria-describedby="bio-count"
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-          />
-          <p className="char-count" id="bio-count">
-            {bio.length} / {rules.profile.bioMax}
-          </p>
-        </div>
+        {p.onboarded_at && (
+          <>
+            <div className="field" data-field="headline">
+              <label htmlFor="headline">
+                You in one line <span className="label-quiet">(optional)</span>
+              </label>
+              <input
+                id="headline"
+                className="input"
+                maxLength={rules.profile.headlineMax}
+                placeholder="For example, happiest with a map and a good coffee."
+                aria-describedby="headline-hint"
+                value={headline}
+                onChange={(e) => setHeadline(e.target.value)}
+              />
+              <p className="hint" id="headline-hint">
+                Shown under your name on your card
+              </p>
+            </div>
+            <div className="field" data-field="bio">
+              <label htmlFor="bio">
+                A few words about you <span className="label-quiet">(optional)</span>
+              </label>
+              <textarea
+                id="bio"
+                className="textarea"
+                maxLength={rules.profile.bioMax}
+                placeholder="For example, happiest exploring a new city on foot, with a long lunch at the end."
+                aria-describedby="bio-count"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+              />
+              <p className="char-count" id="bio-count">
+                {bio.length} / {rules.profile.bioMax}
+              </p>
+            </div>
+          </>
+        )}
       </div>
       <SaveError error={error} />
       <ActionBar busy={busy || photo.preparing} label={p.onboarded_at ? 'Save' : undefined} />
@@ -550,6 +557,8 @@ type StyleAnswers = Record<(typeof STYLE_QUESTIONS)[number]['key'], string[]>
 /** Interests and travel style on one screen (Claude Design, 15 Oct). After sign-up it also edits holiday preferences and the rest. */
 /** The design's order: money and planning first, then how the days feel (Claude Design, 17 Oct). */
 const STEP_STYLE_ORDER = ['budget', 'travel_style', 'pace', 'moving', 'travel_often', 'booking', 'group_size'] as const
+/** Sign-up asks only these two; the rest come later from the profile (round 8 testers, 23 Oct). */
+const SIGNUP_STYLE = ['budget', 'pace'] as const
 
 function TravelStep({ userId, data, interests, onDone }: StepProps & { interests: Interest[] }) {
   const p = data.profile
@@ -622,11 +631,14 @@ function TravelStep({ userId, data, interests, onDone }: StepProps & { interests
         <h2 id="style-heading" className="step-section-title">
           Your travel style
         </h2>
-        {STEP_STYLE_ORDER.map((key) => STYLE_QUESTIONS.find((q) => q.key === key)!).map((q) => (
-          <ChipChoice<string> key={q.key} name={q.key} legend={q.label} options={q.options} selected={style[q.key]} onChange={(v) => setStyle((x) => ({ ...x, [q.key]: v }))} grid />
-        ))}
+        {(editing ? STEP_STYLE_ORDER : SIGNUP_STYLE)
+          .map((key) => STYLE_QUESTIONS.find((q) => q.key === key)!)
+          .map((q) => (
+            <ChipChoice<string> key={q.key} name={q.key} legend={q.label} options={q.options} selected={style[q.key]} onChange={(v) => setStyle((x) => ({ ...x, [q.key]: v }))} grid />
+          ))}
         {/* Survey: sharing a twin room saves the single supplement. Shown on your card. */}
-        <ChipChoice<string> name="room_sharing" legend="Happy to share a twin room?" options={ROOM_SHARING} selected={room} onChange={setRoom} grid />
+        {editing && <ChipChoice<string> name="room_sharing" legend="Happy to share a twin room?" options={ROOM_SHARING} selected={room} onChange={setRoom} grid />}
+        {!editing && <p className="hint">You can add the rest of your travel style later, from your profile.</p>}
       </section>
 
       {editing && more && (
@@ -725,8 +737,8 @@ function TravelStep({ userId, data, interests, onDone }: StepProps & { interests
       <SaveError error={error} />
       <ActionBar
         busy={busy}
-        label={editing ? 'Save' : undefined}
-        arrow={!editing}
+        label={editing ? 'Save' : 'Finish'}
+        arrow={false}
         note={
           <span aria-live="polite">
             <strong>{selected.length}</strong> picked · {INTERESTS_MIN} to {INTERESTS_TO_PICK}

@@ -6,7 +6,6 @@ import { AddIcon, NextIcon } from '../components/Icons'
 import { MyTrips, Wishlist } from '../components/MyTrips'
 import { PlanInspiration } from '../components/PlanInspiration'
 import { PopularPlaces } from '../components/PopularPlaces'
-import { brand } from '../lib/brand'
 
 /** The Trips tab (Claude Design, 15 Oct). Trips are optional: they add "Also going to…" people to Who's going. */
 export function Trips() {
@@ -35,14 +34,12 @@ export function Trips() {
         </span>
         <NextIcon />
       </Link>
-      <Link className="card trips-row trips-row-plus" to="/connections/same-time">
+      <Link className="card trips-row" to="/connections/same-time">
         <span className="trips-row-icon" aria-hidden="true">
           <CalendarDays size={22} strokeWidth={1.8} />
         </span>
         <span className="trips-row-text">
-          <strong>
-            Going when you are <span className="tag tag-plus">{brand.plusName}</span>
-          </strong>
+          <strong>Going when you are</strong>
           <span>See the exact days you overlap</span>
         </span>
         <NextIcon />

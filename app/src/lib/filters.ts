@@ -1,6 +1,6 @@
 // Who the member wants to see in suggestions. Age, gender and distance
-// apply to everyone; the Sodalis+ filters are saved for anyone but only
-// applied by the server while the member has Sodalis+.
+// apply to everyone, and so do travel style filters (round 8, 23 Oct). Holiday
+// preference filters are saved for anyone but only applied while the member has Sodalis+.
 import { friendlyError } from './errors'
 import { INTERESTED_IN, type Gender } from './options'
 import { checkAgeRange } from './validation'
@@ -16,7 +16,7 @@ export type Filters = {
   verified_only: boolean
 } & Record<PlusFilter, string[]>
 
-/** Every Sodalis+ filter: one per travel style question and holiday preference (Lewis, 11 Oct). */
+/** Every chip filter: travel style (free since 23 Oct) and holiday preferences (Sodalis+). */
 export const PLUS_FILTERS = ['paces', 'budgets', 'styles', 'movings', 'travel_oftens', 'bookings', 'group_sizes', 'stays', 'lengths', 'seasons'] as const
 export type PlusFilter = (typeof PLUS_FILTERS)[number]
 export const NO_PLUS_FILTERS = Object.fromEntries(PLUS_FILTERS.map((k) => [k, []])) as unknown as Record<PlusFilter, string[]>
