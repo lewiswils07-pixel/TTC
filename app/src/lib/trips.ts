@@ -27,7 +27,7 @@ export type WishlistItem = { city_id: number; city: City }
 type ApiError = { code?: string } | null
 const tablesMissing = (error: ApiError) => error?.code === 'PGRST205' || error?.code === '42P01'
 
-const TRIP_COLUMNS = 'id, city_id, start_date, end_date, flexible_days, note, visibility, city:cities(id, name, country_code)'
+const TRIP_COLUMNS = 'id, city_id, start_date, end_date, flexible_days, note, visibility, city:cities(id, name, country_code, region)'
 
 /**
  * Upcoming and current trips, soonest first. Trips that have ended are left
@@ -62,7 +62,7 @@ export async function deleteTrip(id: number): Promise<void> {
 /** Null when this database doesn't have the wishlist yet. */
 export async function listWishlist(): Promise<WishlistItem[] | null> {
   const [cities, countries] = await Promise.all([
-    supabase.from('wishlist').select('city_id, created_at, city:cities(id, name, country_code)').order('created_at'),
+    supabase.from('wishlist').select('city_id, created_at, city:cities(id, name, country_code, region)').order('created_at'),
     // Countries come with database Part 27; before that the list is just towns and cities.
     supabase.from('wishlist_countries').select('country_code, created_at, country:countries(name)').order('created_at'),
   ])

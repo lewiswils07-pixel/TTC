@@ -190,7 +190,7 @@ function GroupEditor({ people }: { people: Connection[] }) {
                     aria-pressed={city?.id === t.city_id && start === t.start_date}
                     onClick={() => fillFromTrip(t)}
                   >
-                    <CityPhoto city={t.city.name} width={80} code className="from-trip-photo" />
+                    <CityPhoto city={t.city.name} country={t.city.country_code} region={t.city.region} width={80} code className="from-trip-photo" />
                     {t.city.name} · {shortDates(t.start_date, t.end_date)}
                   </button>
                 ))}

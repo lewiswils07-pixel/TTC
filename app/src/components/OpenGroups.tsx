@@ -51,7 +51,7 @@ export function OpenGroups({ cityId, title = 'Groups you can join' }: { cityId?:
           return (
             <li key={g.id} className="card open-group">
               <div className="open-group-head">
-                <CityPhoto city={g.city} width={120} code className="group-tile" />
+                <CityPhoto city={g.city} country={g.country_code} width={120} code className="group-tile" />
                 <span className="open-group-text">
                   <strong>{g.name}</strong>
                   <span>

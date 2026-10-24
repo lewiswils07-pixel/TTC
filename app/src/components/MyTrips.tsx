@@ -52,7 +52,7 @@ export function MyTrips() {
               <li key={trip.id}>
                 <Link className="card trip-card" to={`/trips/${trip.id}`}>
                   <span className="trip-card-top">
-                    <CityPhoto city={trip.city.name} width={720} code className="trip-card-photo" />
+                    <CityPhoto city={trip.city.name} country={trip.city.country_code} region={trip.city.region} width={720} code className="trip-card-photo" />
                     <span className="trip-card-when">{startsIn(trip.start_date, trip.end_date)}</span>
                   </span>
                   <span className="trip-card-body">

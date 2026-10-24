@@ -119,7 +119,7 @@ export function PlanTogether() {
                 {trips.map((t) => (
                   <li key={t.id}>
                     <label className={`together-choice${choice === t.id ? ' is-checked' : ''}`}>
-                      <CityPhoto city={t.city.name} width={120} code className="together-choice-photo" />
+                      <CityPhoto city={t.city.name} country={t.city.country_code} region={t.city.region} width={120} code className="together-choice-photo" />
                       <span className="together-choice-text">
                         <strong>{t.city.name}</strong>
                         <span className="hint">Your trip · {shortDates(t.start_date, t.end_date)}</span>
