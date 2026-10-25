@@ -2,18 +2,28 @@ import SwiftUI
 
 /// Primary logo "1a": SODALIS in capitals with "Collective" in script.
 /// Drawn from the same outline as the web app's logo (app/src/lib/logo.ts).
+/// Give `scriptColor` to colour "Collective" differently (gold on burgundy).
 struct PrimaryLogo: View {
   var height: CGFloat = 52
   var color: Color = Palette.burgundy
+  var scriptColor: Color? = nil
 
   var body: some View {
-    Image("Logo")
+    ZStack {
+      part("LogoWord", color)
+      part("LogoScript", scriptColor ?? color)
+    }
+    .frame(height: height)
+    .accessibilityElement()
+    .accessibilityLabel(Brand.shared.name)
+  }
+
+  private func part(_ name: String, _ tint: Color) -> some View {
+    Image(name)
       .resizable()
       .renderingMode(.template)
       .scaledToFit()
-      .frame(height: height)
-      .foregroundStyle(color)
-      .accessibilityLabel(Brand.shared.name)
+      .foregroundStyle(tint)
   }
 }
 

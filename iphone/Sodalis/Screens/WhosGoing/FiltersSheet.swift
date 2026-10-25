@@ -21,9 +21,6 @@ struct FiltersSheet: View {
   let count: Int
   let close: () -> Void
 
-  /// Sodalis+ members can use travel style filters.
-  var isPlus = false
-
   var body: some View {
     VStack(spacing: 0) {
       SheetHeader(title: "Filters") {
@@ -101,15 +98,12 @@ struct FiltersSheet: View {
       HStack {
         Text("Travel style").font(.heading(22)).foregroundStyle(Palette.ink)
         Spacer()
-        if !isPlus { PlusTag() }
       }
-      Text("Budget").font(.figtree(17, .semibold)).foregroundStyle(Palette.goldText).padding(.top, 2)
+      Text("Budget").font(.figtree(17, .semibold)).foregroundStyle(Palette.softInk).padding(.top, 2)
       ChipPicker(options: MemberFilters.budgets, selection: $filters.budget)
-      Text("Pace").font(.figtree(17, .semibold)).foregroundStyle(Palette.goldText).padding(.top, 4)
+      Text("Pace").font(.figtree(17, .semibold)).foregroundStyle(Palette.softInk).padding(.top, 4)
       ChipPicker(options: MemberFilters.paces, selection: $filters.pace)
     }
-    .padding(16)
-    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Palette.goldWash))
-    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Palette.goldLine, lineWidth: 1))
+    .card(padding: 16)
   }
 }

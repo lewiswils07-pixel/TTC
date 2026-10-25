@@ -10,37 +10,39 @@ struct SodalisApp: App {
 
   var body: some Scene {
     WindowGroup {
-      Group {
-        if let screen = DemoScreen.fromLaunchArguments, screen.isSignUp {
-          SignUpFlowPreview(screen: screen)
-        } else {
-          RootView()
-        }
-      }
-      .environment(state)
-      .preferredColorScheme(.light)
-      .tint(Palette.burgundy)
+      AppRoot()
+        .environment(state)
+        .preferredColorScheme(.light)
+        .tint(Palette.burgundy)
+        .onAppear { Demo.apply(to: state) }
     }
   }
 }
 
-/// Lets the screenshot script open a given screen: launch with `-screen <name>`.
-enum DemoScreen: String {
-  case whosGoing = "whos-going"
-  case whosGoingScrolled = "whos-going-scrolled"
-  case filters
-  case filtersLarge = "filters-large"
-  case chat
-  case chatMenu = "chat-menu"
-  case signUp = "signup"
-  case signUpScrolled = "signup-scrolled"
-  case signUpDateWheel = "signup-date"
+/// Launch → welcome and sign-up → the four tabs.
+struct AppRoot: View {
+  @Environment(AppState.self) private var state
 
-  static var fromLaunchArguments: DemoScreen? {
-    UserDefaults.standard.string(forKey: "screen").flatMap(DemoScreen.init(rawValue:))
+  var body: some View {
+    ZStack {
+      switch state.phase {
+      case .launch:
+        LaunchScreen()
+          .transition(.opacity)
+          .task {
+            guard Demo.current == nil else { return }
+            try? await Task.sleep(nanoseconds: 1_200_000_000)
+            withAnimation(.easeInOut(duration: 0.4)) { state.phase = .welcome }
+          }
+      case .welcome:
+        OnboardingFlow().transition(.opacity)
+      case .faceIDUnlock:
+        FaceIDUnlockScreen().transition(.opacity)
+      case .main:
+        RootView().transition(.opacity)
+      }
+    }
   }
-
-  var isSignUp: Bool { [.signUp, .signUpScrolled, .signUpDateWheel].contains(self) }
 }
 
 struct RootView: View {
@@ -51,12 +53,12 @@ struct RootView: View {
     GeometryReader { geo in
       let metrics = TabBarMetrics(safeBottom: geo.safeAreaInsets.bottom)
       ZStack(alignment: .bottom) {
-        Group {
-          switch state.tab {
-          case .whosGoing: WhosGoingTab()
-          case .trips: PlaceholderTab(title: "Trips")
-          case .chat: ChatTab()
-          case .profile: PlaceholderTab(title: "Profile")
+        ZStack {
+          ForEach(AppTab.allCases) { tab in
+            TabRoot(tab: tab)
+              .opacity(state.tab == tab ? 1 : 0)
+              .allowsHitTesting(state.tab == tab)
+              .accessibilityHidden(state.tab != tab)
           }
         }
         .environment(\.tabBarMetrics, metrics)
@@ -70,17 +72,68 @@ struct RootView: View {
         if let banner = state.banner {
           BannerView(banner: banner) { state.banner = nil }
             .frame(maxHeight: .infinity, alignment: .top)
-            .padding(.top, 8)
+            .padding(.top, 6)
             .transition(.move(edge: .top).combined(with: .opacity))
         }
       }
       .ignoresSafeArea(.keyboard)
     }
     .background(Palette.paper.ignoresSafeArea())
-    .onAppear {
-      if let screen = DemoScreen.fromLaunchArguments, [.chat, .chatMenu].contains(screen) {
-        state.tab = .chat
+    .sheet(item: $state.sheet) { sheet in
+      SheetView(route: sheet)
+    }
+    .fullScreenCover(item: $state.cover) { cover in
+      CoverView(route: cover)
+    }
+  }
+}
+
+private struct TabRoot: View {
+  let tab: AppTab
+  @Environment(AppState.self) private var state
+
+  var body: some View {
+    NavigationStack(path: state.path(for: tab)) {
+      Group {
+        switch tab {
+        case .whosGoing: WhosGoingScreen()
+        case .trips: TripsScreen()
+        case .chat: ChatListScreen()
+        case .profile: ProfileScreen()
+        }
       }
+      .withRoutes()
+    }
+  }
+}
+
+private struct SheetView: View {
+  let route: SheetRoute
+
+  var body: some View {
+    Group {
+      switch route {
+      case .addTrip(let code): AddTripSheet(editing: code)
+      case .startGroup: StartGroupSheet()
+      case .planTrip(let name): PlanTripSheet(name: name)
+      case .shareMeeting(let name): ShareMeetingSheet(name: name)
+      case .report(let name): ReportSheet(name: name)
+      }
+    }
+    .sodalisSheet(detents: [.large])
+  }
+}
+
+private struct CoverView: View {
+  let route: CoverRoute
+
+  var body: some View {
+    switch route {
+    case .plus: PlusScreen()
+    case .allowPhotos: AllowPhotosScreen()
+    case .allowCamera: AllowCameraScreen()
+    case .allowNotifications: AllowNotificationsScreen()
+    case .crop(let image): CropScreen(image: image)
     }
   }
 }
@@ -93,23 +146,5 @@ extension EnvironmentValues {
   var tabBarMetrics: TabBarMetrics {
     get { self[TabBarMetricsKey.self] }
     set { self[TabBarMetricsKey.self] = newValue }
-  }
-}
-
-struct PlaceholderTab: View {
-  let title: String
-
-  var body: some View {
-    NavigationStack {
-      VStack(spacing: 12) {
-        Monogram(size: 56)
-        Text("\(title) comes in the next batch.")
-          .font(.body17)
-          .foregroundStyle(Palette.muted)
-      }
-      .frame(maxWidth: .infinity, maxHeight: .infinity)
-      .background(Palette.paper)
-      .navigationTitle(title)
-    }
   }
 }

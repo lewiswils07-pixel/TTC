@@ -1,27 +1,8 @@
 import SwiftUI
 
-/// Shows sign-up on its own (no tab bar). In the finished app this follows
-/// "Choose a password"; for now it opens straight to step 1.
-struct SignUpFlowPreview: View {
-  let screen: DemoScreen
-  @State private var path = ["step1"]
-
-  var body: some View {
-    NavigationStack(path: $path) {
-      VStack(spacing: 16) {
-        PrimaryLogo(height: 64)
-        Button("Start sign-up") { path = ["step1"] }.buttonStyle(.primary)
-      }
-      .padding(24)
-      .frame(maxWidth: .infinity, maxHeight: .infinity)
-      .background(Palette.paper)
-      .navigationDestination(for: String.self) { _ in SignUpStep1(demo: screen) }
-    }
-  }
-}
-
 struct SignUpStep1: View {
-  var demo: DemoScreen? = nil
+  @Environment(AppState.self) private var state
+  private let demo = Demo.current
 
   enum Field: Hashable { case name, town, about }
 
@@ -48,7 +29,7 @@ struct SignUpStep1: View {
           townField.padding(.top, 28).id("town")
           photoField.padding(.top, 28)
           aboutField.padding(.top, 28)
-          Button("Already a member? Sign in") {}
+          Button("Already a member? Sign in") { state.onboarding = [.signIn] }
             .buttonStyle(TextButtonStyle(weight: .medium))
             .frame(maxWidth: .infinity)
             .padding(.top, 16)
@@ -60,7 +41,11 @@ struct SignUpStep1: View {
       .background(Palette.paper)
       .safeAreaInset(edge: .bottom, spacing: 0) {
         StickyActionBar {
-          Button("Continue") { focus = nil }.buttonStyle(.primary)
+          Button("Continue") {
+            focus = nil
+            state.onboarding.append(.signUp2)
+          }
+          .buttonStyle(.primary)
         }
       }
       .onAppear {
@@ -79,9 +64,9 @@ struct SignUpStep1: View {
       }
     }
     .innerTopBar(back: "Back") {
-      Text("Step 1 of 3").font(.figtree(19, .semibold)).foregroundStyle(Palette.ink)
+      Text("Step 1 of 3").font(.figtree(17, .semibold)).foregroundStyle(Palette.ink)
     } trailing: {
-      Button("Sign in") {}
+      Button("Sign in") { state.onboarding = [.signIn] }
         .buttonStyle(TextButtonStyle(weight: .regular))
         .font(.figtree(19))
     }

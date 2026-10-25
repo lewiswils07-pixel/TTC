@@ -4,6 +4,8 @@ import SwiftUI
 struct SegmentedPicker<Value: Hashable>: View {
   let options: [(value: Value, title: String)]
   @Binding var selection: Value
+  /// Small burgundy count shown after a title, e.g. Requests ②.
+  var badges: [Value: Int] = [:]
   @Namespace private var pill
 
   var body: some View {
@@ -14,11 +16,20 @@ struct SegmentedPicker<Value: Hashable>: View {
         Button {
           withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { selection = option.value }
         } label: {
-          Text(option.title)
-            .font(.figtree(17, selected ? .medium : .regular))
-            .foregroundStyle(selected ? Palette.ink : Palette.softInk)
-            .lineLimit(1)
-            .minimumScaleFactor(0.8)
+          HStack(spacing: 6) {
+            Text(option.title)
+              .font(.figtree(17, selected ? .medium : .regular))
+              .foregroundStyle(selected ? Palette.ink : Palette.softInk)
+              .lineLimit(1)
+              .minimumScaleFactor(0.8)
+            if let count = badges[option.value], count > 0 {
+              Text("\(count)")
+                .font(.figtree(14, .bold))
+                .foregroundStyle(.white)
+                .frame(minWidth: 22, minHeight: 22)
+                .background(Circle().fill(Palette.burgundy))
+            }
+          }
             .frame(maxWidth: .infinity, minHeight: 44)
             .background {
               if selected {

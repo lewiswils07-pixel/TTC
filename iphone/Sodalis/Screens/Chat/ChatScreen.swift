@@ -3,31 +3,49 @@ import SwiftUI
 /// One chat: safety card, messages, plan-board notes and a composer that
 /// stays just above the keyboard.
 struct ChatScreen: View {
+  let name: String
+  let back: String
   @Environment(AppState.self) private var state
 
-  @State private var messages = SampleData.messages
+  @State private var messages: [ChatMessage]
   @State private var draft = ""
   @State private var showSafety = true
   @State private var showMenu = false
   @FocusState private var composerFocused: Bool
 
-  private let person = SampleData.chatWith
+  init(name: String, back: String) {
+    self.name = name
+    self.back = back
+    _messages = State(initialValue: name == SampleData.chatWith.name ? SampleData.messages : [])
+  }
+
+  private var member: Member { SampleData.member(name) }
+  private var tripLine: String { member.tripDates.isEmpty ? member.town : "Lisbon · \(member.tripDates)" }
 
   var body: some View {
     ScrollViewReader { proxy in
       ScrollView {
         LazyVStack(alignment: .leading, spacing: 12) {
           if showSafety {
-            SafetyCard { withAnimation { showSafety = false } }
+            SafetyCard(readGuide: { state.push(.meetingSafely) }) { withAnimation { showSafety = false } }
               .padding(.bottom, 12)
           }
-          Pill(text: "Today")
-            .frame(maxWidth: .infinity)
-            .padding(.bottom, 4)
-          ForEach(messages) { message in
-            MessageRow(message: message).id(message.id)
+          if messages.isEmpty {
+            Text("Say hello to \(name). You're both going to Lisbon in May.")
+              .font(.figtree(15))
+              .foregroundStyle(Palette.muted)
+              .multilineTextAlignment(.center)
+              .frame(maxWidth: .infinity)
+              .padding(.top, 20)
+          } else {
+            Pill(text: "Today")
+              .frame(maxWidth: .infinity)
+              .padding(.bottom, 4)
+            ForEach(messages) { message in
+              MessageRow(message: message).id(message.id)
+            }
           }
-          Text("10:42")
+          Text(messages.isEmpty ? "" : "10:42")
             .font(.small)
             .foregroundStyle(Palette.muted)
             .padding(.leading, 6)
@@ -45,15 +63,19 @@ struct ChatScreen: View {
         }
       }
     }
-    .innerTopBar(back: "Chat") {
-      HStack(spacing: 10) {
-        Avatar(size: 32)
-        VStack(alignment: .leading, spacing: 0) {
-          Text("\(person.name), \(person.age)").font(.figtree(17, .semibold)).foregroundStyle(Palette.ink)
-          Text("\(person.trip) · \(person.dates)").font(.figtree(14, relativeTo: .caption)).foregroundStyle(Palette.muted)
+    .innerTopBar(back: back) {
+      Button { state.push(.member(name)) } label: {
+        HStack(spacing: 10) {
+          Avatar(size: 32, tones: member.tones.colors)
+          VStack(alignment: .leading, spacing: 0) {
+            Text("\(member.name), \(member.age)").font(.figtree(17, .semibold)).foregroundStyle(Palette.ink)
+            Text(tripLine).font(.figtree(14, relativeTo: .caption)).foregroundStyle(Palette.muted)
+          }
         }
       }
+      .buttonStyle(.plain)
       .accessibilityElement(children: .combine)
+      .accessibilityHint("Opens \(member.possessive) profile")
     } trailing: {
       Button { showMenu = true } label: {
         Image(systemName: "ellipsis")
@@ -63,15 +85,30 @@ struct ChatScreen: View {
       }
       .accessibilityLabel("More options")
     }
-    .hidesTabBar("chat", in: state)
+    .hidesTabBar("chat-\(name)", in: state)
     .sheet(isPresented: $showMenu) {
-      ChatMenuSheet(name: person.name, age: person.age, detail: "\(person.home) · \(person.trip) \(person.dates)") { showMenu = false }
-        .sodalisSheet(detents: [.height(560), .large])
+      ChatMenuSheet(name: member.name, age: member.age, tones: member.tones.colors, detail: "\(member.town) · \(tripLine)") { choice in
+        showMenu = false
+        guard let choice else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { open(choice) }
+      }
+      .sodalisSheet(detents: [.height(560), .large])
     }
     .onAppear {
-      if DemoScreen.fromLaunchArguments == .chatMenu {
+      if Demo.is(.chatMenu) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { showMenu = true }
       }
+    }
+  }
+
+  private func open(_ choice: ChatMenuSheet.Choice) {
+    switch choice {
+    case .profile: state.push(.member(name))
+    case .plan: state.sheet = .planTrip(with: name)
+    case .meeting: state.sheet = .shareMeeting(with: name)
+    case .trusted: state.push(.tellSomeone)
+    case .block: state.show("You've blocked \(name)", detail: "\(member.pronoun.capitalized) can't message you or see your card.") {}
+    case .report: state.sheet = .report(name)
     }
   }
 
@@ -87,7 +124,7 @@ struct ChatScreen: View {
             .frame(width: 44, height: 44)
         }
         .accessibilityLabel("Add to chat")
-        TextField("Message \(person.name)", text: $draft, axis: .vertical)
+        TextField("Message \(name)", text: $draft, axis: .vertical)
           .font(.body17)
           .lineLimit(1...5)
           .focused($composerFocused)
@@ -179,6 +216,7 @@ private struct MessageRow: View {
 
 /// "Before you meet" safety card shown at the top of a new chat.
 private struct SafetyCard: View {
+  let readGuide: () -> Void
   let close: () -> Void
 
   private let tips = ["Video call first", "Meet somewhere busy, in daylight", "Tell someone you trust", "Never send money"]
@@ -210,7 +248,7 @@ private struct SafetyCard: View {
             .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Palette.card))
         }
       }
-      Button("Read the full guide") {}
+      Button("Read the full guide", action: readGuide)
         .font(.figtree(17, .semibold))
         .foregroundStyle(Palette.goldText)
         .frame(minHeight: 44)
@@ -223,33 +261,37 @@ private struct SafetyCard: View {
 
 /// The ⋯ menu as a bottom sheet.
 struct ChatMenuSheet: View {
+  enum Choice { case profile, plan, meeting, trusted, block, report }
+
   let name: String
   let age: Int
+  var tones: [Color] = [Color(hex: 0xE7B8B2), Color(hex: 0xC98B86)]
   let detail: String
-  let close: () -> Void
+  let close: (Choice?) -> Void
 
   private struct Item: Identifiable {
     let title: String
     let icon: String
+    let choice: Choice
     var destructive = false
     var id: String { title }
   }
 
   private var items: [Item] {
     [
-      Item(title: "View profile", icon: "person"),
-      Item(title: "Plan a trip together", icon: "calendar"),
-      Item(title: "Share where you're meeting", icon: "mappin.and.ellipse"),
-      Item(title: "Tell someone you trust", icon: "checkmark.shield"),
-      Item(title: "Block \(name)", icon: "nosign", destructive: true),
-      Item(title: "Report \(name)", icon: "flag", destructive: true),
+      Item(title: "View profile", icon: "person", choice: .profile),
+      Item(title: "Plan a trip together", icon: "calendar", choice: .plan),
+      Item(title: "Share where you're meeting", icon: "mappin.and.ellipse", choice: .meeting),
+      Item(title: "Tell someone you trust", icon: "checkmark.shield", choice: .trusted),
+      Item(title: "Block \(name)", icon: "nosign", choice: .block, destructive: true),
+      Item(title: "Report \(name)", icon: "flag", choice: .report, destructive: true),
     ]
   }
 
   var body: some View {
     VStack(spacing: 16) {
       HStack(spacing: 14) {
-        Avatar(size: 48)
+        Avatar(size: 48, tones: tones)
         VStack(alignment: .leading, spacing: 2) {
           Text("\(name), \(age)").font(.figtree(19, .semibold)).foregroundStyle(Palette.ink)
           Text(detail).font(.body17).foregroundStyle(Palette.muted)
@@ -259,7 +301,7 @@ struct ChatMenuSheet: View {
       .accessibilityElement(children: .combine)
 
       GroupedList(items: items, separatorInset: 50) { item in
-        Button(action: close) {
+        Button { close(item.choice) } label: {
           HStack(spacing: 14) {
             Image(systemName: item.icon)
               .font(.system(size: 19))
@@ -275,7 +317,7 @@ struct ChatMenuSheet: View {
         .buttonStyle(.plain)
       }
 
-      Button("Cancel", action: close).buttonStyle(.secondary)
+      Button("Cancel") { close(nil) }.buttonStyle(.secondary)
     }
     .padding(.horizontal, 16)
     .padding(.top, 28)

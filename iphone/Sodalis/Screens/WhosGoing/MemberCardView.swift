@@ -2,7 +2,10 @@ import SwiftUI
 
 /// One member at a time, with what you share.
 struct MemberCardView: View {
-  let member: MemberCard
+  let card: MemberCard
+  var readMore: () -> Void = {}
+
+  private var member: Member { card.member }
 
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
@@ -22,10 +25,9 @@ struct MemberCardView: View {
         .foregroundStyle(.white)
         .frame(width: 36, height: 36)
         .background(Circle().fill(Palette.burgundy))
-        .accessibilityHidden(true)
       VStack(alignment: .leading, spacing: 1) {
-        Text(member.reason).font(.figtree(18, .semibold)).foregroundStyle(Palette.ink)
-        Text(member.overlap).font(.body17).foregroundStyle(Palette.softInk)
+        Text(card.reason).font(.figtree(18, .semibold)).foregroundStyle(Palette.ink)
+        Text(card.overlap).font(.body17).foregroundStyle(Palette.softInk)
       }
       Spacer(minLength: 4)
       Menu {
@@ -46,7 +48,7 @@ struct MemberCardView: View {
   }
 
   private var photo: some View {
-    PhotoPlaceholder(tones: member.photoTones.colors)
+    PhotoPlaceholder(tones: member.tones.colors)
       .frame(height: 223)
       .overlay(alignment: .topTrailing) {
         HStack(spacing: 5) {
@@ -59,31 +61,11 @@ struct MemberCardView: View {
       }
       .overlay(alignment: .bottomLeading) {
         HStack(spacing: 8) {
-          if member.lotsInCommon {
-            badge("Lots in common", icon: "person.2", fill: Color(hex: 0xF6E7B6), ink: Palette.goldText)
-          }
-          if member.nearYou {
-            badge("Near you", icon: nil, fill: Palette.card, ink: Palette.ink)
-          }
+          if member.lotsInCommon { LotsInCommonBadge() }
+          if member.nearYou { NearYouBadge() }
         }
         .padding(12)
       }
-  }
-
-  private func badge(_ text: String, icon: String?, fill: Color, ink: Color) -> some View {
-    HStack(spacing: 6) {
-      if let icon {
-        Image(systemName: icon).font(.system(size: 14))
-      } else {
-        PinIcon(size: 16)
-      }
-      Text(text)
-    }
-      .font(.figtree(15, .medium, relativeTo: .footnote))
-      .foregroundStyle(ink)
-      .padding(.horizontal, 12)
-      .frame(minHeight: 28)
-      .background(Capsule().fill(fill))
   }
 
   private var details: some View {
@@ -97,13 +79,13 @@ struct MemberCardView: View {
       Text("What you share").sectionCaps().padding(.top, 18)
 
       VStack(alignment: .leading, spacing: 16) {
-        shareRow(label: "Interests", text: member.interests) { Image(systemName: "tag").font(.system(size: 17)) }
-        shareRow(label: "Places", text: member.places) { PinIcon(size: 19) }
-        shareRow(label: "Travel style", text: member.travelStyle) { RouteIcon(size: 18) }
+        ShareRow(label: "Interests", text: card.interests) { Image(systemName: "tag").font(.system(size: 17)) }
+        ShareRow(label: "Places", text: card.places) { PinIcon(size: 19) }
+        ShareRow(label: "Travel style", text: card.travelStyle) { RouteIcon(size: 18) }
       }
       .padding(.top, 14)
 
-      Button {} label: {
+      Button(action: readMore) {
         HStack {
           Text("Read more about \(member.name)")
           Spacer()
@@ -117,10 +99,16 @@ struct MemberCardView: View {
     .padding(.top, 14)
     .padding(.bottom, 8)
   }
+}
 
-  private func shareRow<Icon: View>(label: String, text: String, @ViewBuilder icon: () -> Icon) -> some View {
+struct ShareRow<Icon: View>: View {
+  let label: String
+  let text: String
+  @ViewBuilder var icon: Icon
+
+  var body: some View {
     HStack(alignment: .top, spacing: 12) {
-      icon()
+      icon
         .foregroundStyle(Palette.softInk)
         .frame(width: 36, height: 36)
         .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Palette.tint))
@@ -130,5 +118,30 @@ struct MemberCardView: View {
         .fixedSize(horizontal: false, vertical: true)
         .padding(.top, 6)
     }
+  }
+}
+
+struct LotsInCommonBadge: View {
+  var body: some View {
+    Label("Lots in common", systemImage: "person.2")
+      .font(.figtree(15, .medium, relativeTo: .footnote))
+      .foregroundStyle(Palette.goldText)
+      .padding(.horizontal, 12)
+      .frame(minHeight: 28)
+      .background(Capsule().fill(Color(hex: 0xF6E7B6)))
+  }
+}
+
+struct NearYouBadge: View {
+  var body: some View {
+    HStack(spacing: 6) {
+      PinIcon(size: 16)
+      Text("Near you")
+    }
+    .font(.figtree(15, .medium, relativeTo: .footnote))
+    .foregroundStyle(Palette.ink)
+    .padding(.horizontal, 12)
+    .frame(minHeight: 28)
+    .background(Capsule().fill(Palette.card))
   }
 }

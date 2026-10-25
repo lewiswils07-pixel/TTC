@@ -6,7 +6,9 @@ set -euo pipefail
 APP="$1"
 OUT="$2"
 BUNDLE_ID="com.sodaliscollective.app"
-SCREENS=(whos-going whos-going-scrolled filters filters-large chat chat-menu signup signup-scrolled signup-date)
+SCREENS=(
+  launch welcome join-email join-code join-password sign-in forgot faceid-offer faceid-unlock signup signup-scrolled signup-date signup2 signup2-scrolled signup3 signup3-scrolled youre-in whos-going whos-going-scrolled filters filters-large read-more read-more-scrolled whos-going-empty connect-banner loading error profile profile-scrolled allow-photos crop allow-camera trips trips-scrolled add-trip add-trip-calendar trip-people trip-plan trip-tips going-when going-when-scrolled chat-list chat-groups chat-requests chat chat-menu plan-trip share-meeting meeting-time member-profile travel-groups start-group group plus plus-scrolled settings settings-scrolled privacy account account-scrolled safety tell-someone rules report help empty-trips empty-chats empty-requests empty-groups allow-notifications
+)
 mkdir -p "$OUT"
 
 # Pick a simulator by name pattern from the newest iOS runtime installed.
@@ -37,7 +39,7 @@ shoot() {
   xcrun simctl install "$udid" "$APP"
   for screen in "$@"; do
     xcrun simctl launch --terminate-running-process "$udid" "$BUNDLE_ID" -screen "$screen" >/dev/null
-    sleep 5
+    sleep 4
     xcrun simctl io "$udid" screenshot "$OUT/$label--$screen.png" >/dev/null
     echo "took $label $screen"
   done
@@ -50,7 +52,7 @@ shoot "$MAIN" "$MAIN_NAME" "${SCREENS[@]}"
 
 if read -r SE SE_NAME < <(pick 'iPhone SE.*|iPhone 16e'); then
   echo "Small phone: $SE_NAME"
-  shoot "$SE" "$SE_NAME" whos-going chat signup
+  shoot "$SE" "$SE_NAME" whos-going chat signup chat-list trips settings plus add-trip-calendar
 fi
 
 # Shrink for a lighter download.
