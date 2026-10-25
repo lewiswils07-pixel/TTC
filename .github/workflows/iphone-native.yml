@@ -1,0 +1,72 @@
+# Builds the native iPhone app (iphone/ folder, SwiftUI) on GitHub's Mac
+# machines and takes simulator screenshots, so changes can be checked without
+# a Mac. Screenshots are pushed to the "iphone-screenshots" branch (replaced
+# each run). Mac minutes count 10x against the free allowance, so this only
+# runs when the iPhone app or the shared rules/brand files change.
+name: Native iPhone app
+
+on:
+  push:
+    paths:
+      - 'iphone/**'
+      - 'app/rules.json'
+      - 'app/brand.json'
+      - '.github/workflows/iphone-native.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: iphone-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use the newest Xcode
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+
+      - name: Build for the iPhone simulator
+        run: |
+          set -o pipefail
+          xcodebuild -project iphone/Sodalis.xcodeproj -scheme Sodalis \
+            -configuration Debug -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build CODE_SIGNING_ALLOWED=NO build 2>&1 \
+            | tee build.log | grep -E "error:|warning: .*deprecated|BUILD (SUCCEEDED|FAILED)" || true
+          grep -q "BUILD SUCCEEDED" build.log
+
+      - name: Show build errors
+        if: failure()
+        run: grep -B2 -A6 "error:" build.log | head -200 || tail -100 build.log
+
+      - name: Take screenshots
+        run: iphone/scripts/screenshots.sh build/Build/Products/Debug-iphonesimulator/Sodalis.app shots
+
+      - name: Publish screenshots to the iphone-screenshots branch
+        run: |
+          cd shots
+          git init -q -b iphone-screenshots
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          echo "Screenshots from ${GITHUB_SHA} on ${GITHUB_REF_NAME}" > README.md
+          git add -A
+          git commit -qm "Screenshots for ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" iphone-screenshots
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iphone-build
+          path: |
+            build.log
+            shots
+          retention-days: 7
