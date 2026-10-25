@@ -281,7 +281,7 @@ struct ChatMenuSheet: View {
     [
       Item(title: "View profile", icon: "person", choice: .profile),
       Item(title: "Plan a trip together", icon: "calendar", choice: .plan),
-      Item(title: "Share where you're meeting", icon: "mappin.and.ellipse", choice: .meeting),
+      Item(title: "Share where you're meeting", icon: "mappin", choice: .meeting),
       Item(title: "Tell someone you trust", icon: "checkmark.shield", choice: .trusted),
       Item(title: "Block \(name)", icon: "nosign", choice: .block, destructive: true),
       Item(title: "Report \(name)", icon: "flag", choice: .report, destructive: true),

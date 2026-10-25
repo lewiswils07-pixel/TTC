@@ -7,7 +7,7 @@ private struct ShareMeetingBar: View {
   var body: some View {
     StickyActionBar {
       Button { state.sheet = .shareMeeting(with: SampleData.chatWith.name) } label: {
-        Label("Share where you're meeting", systemImage: "mappin.and.ellipse")
+        Label("Share where you're meeting", systemImage: "mappin")
       }
       .buttonStyle(.primary)
     }

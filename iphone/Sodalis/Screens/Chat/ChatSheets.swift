@@ -178,9 +178,9 @@ struct TimeWheelSheet: View {
 
 extension Date {
   /// "Fri 14 May"
-  var dayMonth: String { formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)) }
+  var dayMonth: String { formatted(Date.FormatStyle(locale: Locale(identifier: "en_GB")).weekday(.abbreviated).day().month(.abbreviated)).replacingOccurrences(of: ",", with: "") }
   /// "4 Oct 2027"
-  var dayMonthYear: String { formatted(.dateTime.day().month(.abbreviated).year()) }
+  var dayMonthYear: String { formatted(Date.FormatStyle(locale: Locale(identifier: "en_GB")).day().month(.abbreviated).year()) }
 
   static func on(_ day: Int, _ month: Int, _ year: Int = 2027) -> Date {
     Calendar.current.date(from: DateComponents(year: year, month: month, day: day)) ?? .now
@@ -298,7 +298,7 @@ struct ShareMeetingSheet: View {
         .font(.figtree(17)).foregroundStyle(Palette.muted).padding(.top, 10)
 
       FieldLabel("Where").padding(.top, 22)
-      InputField(placeholder: "A café, museum or market", text: $place, icon: "mappin.and.ellipse").padding(.top, 8)
+      InputField(placeholder: "A café, museum or market", text: $place, icon: "mappin").padding(.top, 8)
       HelperText("A busy café or public place is best for a first meet.").padding(.top, 8)
 
       FieldLabel("When").padding(.top, 22)

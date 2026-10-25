@@ -7,7 +7,7 @@ struct ChatListScreen: View {
   enum Section: Hashable { case connections, groups, requests }
 
   @State private var section: Section = Demo.is(.chatGroups) ? .groups : Demo.is(.chatRequests, .emptyRequests) ? .requests : .connections
-  @State private var requests = Demo.is(.emptyRequests) ? [] : SampleData.requests
+  @State private var requests = Demo.is(.emptyRequests, .emptyChats) ? [] : SampleData.requests
 
   private var conversations: [Conversation] { Demo.is(.emptyChats) ? [] : SampleData.conversations }
   private var requestsLeft: Int { Rules.shared.int("requests", "perWeekFree", default: 5) - 2 }
