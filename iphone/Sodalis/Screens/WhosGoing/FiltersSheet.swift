@@ -29,7 +29,6 @@ struct FiltersSheet: View {
       SheetHeader(title: "Filters") {
         Button("Reset") { filters = MemberFilters() }
           .buttonStyle(TextButtonStyle(weight: .regular))
-          .font(.figtree(19))
       } trailing: {
         CircleIconButton(systemName: "xmark", label: "Close", action: close)
           .padding(.trailing, -7)
@@ -60,9 +59,9 @@ struct FiltersSheet: View {
   private var agesCard: some View {
     VStack(spacing: 4) {
       HStack {
-        Text("Ages").font(.figtree(19, .medium)).foregroundStyle(Palette.ink)
+        Text("Ages").font(.figtree(17, .medium)).foregroundStyle(Palette.ink)
         Spacer()
-        Text("\(filters.minAge) to \(filters.maxAge)").font(.figtree(19, .medium)).foregroundStyle(Palette.burgundy)
+        Text("\(filters.minAge) to \(filters.maxAge)").font(.figtree(17, .medium)).foregroundStyle(Palette.burgundy)
       }
       RangeSlider(
         lower: $filters.minAge, upper: $filters.maxAge,
@@ -74,7 +73,7 @@ struct FiltersSheet: View {
 
   private var showMe: some View {
     VStack(alignment: .leading, spacing: 12) {
-      Text("Show me").font(.figtree(19, .medium)).foregroundStyle(Palette.ink)
+      Text("Show me").font(.figtree(17, .medium)).foregroundStyle(Palette.ink)
       SegmentedPicker(
         options: [(MemberFilters.ShowMe.women, "Women"), (.men, "Men"), (.everyone, "Everyone")],
         selection: $filters.showMe
@@ -85,9 +84,9 @@ struct FiltersSheet: View {
   private var distanceCard: some View {
     VStack(alignment: .leading, spacing: 4) {
       HStack(alignment: .firstTextBaseline) {
-        Text("Distance from \(town)").font(.figtree(19, .medium)).foregroundStyle(Palette.ink)
+        Text("Distance from \(town)").font(.figtree(17, .medium)).foregroundStyle(Palette.ink)
         Spacer(minLength: 8)
-        Text("Up to \(filters.miles) miles").font(.figtree(19, .medium)).foregroundStyle(Palette.burgundy)
+        Text("Up to \(filters.miles) miles").font(.figtree(17, .medium)).foregroundStyle(Palette.burgundy)
       }
       ValueSlider(value: $filters.miles, bounds: 5...200, step: 5, accessibilityName: "Distance in miles")
       Text("Members on your trips are shown wherever they live.")
@@ -100,7 +99,7 @@ struct FiltersSheet: View {
   private var travelStyle: some View {
     VStack(alignment: .leading, spacing: 10) {
       HStack {
-        Text("Travel style").font(.heading(24)).foregroundStyle(Palette.ink)
+        Text("Travel style").font(.heading(22)).foregroundStyle(Palette.ink)
         Spacer()
         if !isPlus { PlusTag() }
       }

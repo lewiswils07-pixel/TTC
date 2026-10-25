@@ -21,7 +21,7 @@ struct WhosGoingScreen: View {
   @State private var memberIndex = 0
   @State private var scrollOffset: CGFloat = 0
   @State private var showFilters = false
-  @State private var filterDetent: PresentationDetent = .medium
+  @State private var filterDetent: PresentationDetent = .fraction(0.62)
   @State private var filters = MemberFilters()
 
   private var member: MemberCard? {
@@ -38,7 +38,7 @@ struct WhosGoingScreen: View {
             .background(GeometryReader { g in
               Color.clear.preference(key: ScrollOffsetKey.self, value: g.frame(in: .named("scroll")).minY)
             })
-          tripsSection.padding(.top, 28)
+          tripsSection.padding(.top, 22)
           goingYourWay.padding(.top, 30)
           if let member {
             MemberCardView(member: member).padding(.top, 16)
@@ -52,6 +52,7 @@ struct WhosGoingScreen: View {
       }
       .coordinateSpace(name: "scroll")
       .onPreferenceChange(ScrollOffsetKey.self) { scrollOffset = $0 }
+      .trackScrollOffset($scrollOffset)
       .scrollIndicators(.hidden)
       .refreshable { try? await Task.sleep(nanoseconds: 600_000_000) }
       .background(Palette.paper)
@@ -60,7 +61,7 @@ struct WhosGoingScreen: View {
       .toolbar(.hidden, for: .navigationBar)
       .sheet(isPresented: $showFilters) {
         FiltersSheet(filters: $filters, town: "Harrogate", count: 12) { showFilters = false }
-          .sodalisSheet(selection: $filterDetent)
+          .sodalisSheet(detents: [.fraction(0.62), .large], selection: $filterDetent)
       }
       .onAppear { applyDemo(proxy) }
     }
@@ -72,7 +73,7 @@ struct WhosGoingScreen: View {
     VStack(alignment: .leading, spacing: 0) {
       HStack(alignment: .top) {
         PrimaryLogo(height: 46)
-          .padding(.top, 6)
+          .padding(.top, 2)
         Spacer()
         Button { showFilters = true } label: {
           Label("Filters", systemImage: "slider.horizontal.3")
@@ -89,9 +90,7 @@ struct WhosGoingScreen: View {
         .font(.largeTitleSerif)
         .foregroundStyle(Palette.ink)
         .accessibilityAddTraits(.isHeader)
-        .padding(.top, 4)
     }
-    .padding(.top, 4)
   }
 
   @ViewBuilder private var compactBar: some View {
@@ -288,5 +287,21 @@ struct EmptyWhosGoing: View {
     }
     .frame(maxWidth: .infinity)
     .card(padding: 24)
+  }
+}
+
+private extension View {
+  /// On iOS 18 and later, reads the scroll position straight from the scroll view
+  /// (more reliable than the preference used on iOS 17).
+  @ViewBuilder func trackScrollOffset(_ offset: Binding<CGFloat>) -> some View {
+    if #available(iOS 18.0, *) {
+      onScrollGeometryChange(for: CGFloat.self) { geo in
+        -(geo.contentOffset.y + geo.contentInsets.top)
+      } action: { _, new in
+        offset.wrappedValue = new
+      }
+    } else {
+      self
+    }
   }
 }

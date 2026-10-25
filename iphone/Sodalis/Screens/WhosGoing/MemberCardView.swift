@@ -18,8 +18,7 @@ struct MemberCardView: View {
 
   private var reasonBand: some View {
     HStack(spacing: 12) {
-      Image(systemName: "point.topleft.down.to.point.bottomright.curvepath")
-        .font(.system(size: 18, weight: .semibold))
+      RouteIcon(size: 18, lineWidth: 2)
         .foregroundStyle(.white)
         .frame(width: 36, height: 36)
         .background(Circle().fill(Palette.burgundy))
@@ -64,15 +63,22 @@ struct MemberCardView: View {
             badge("Lots in common", icon: "person.2", fill: Color(hex: 0xF6E7B6), ink: Palette.goldText)
           }
           if member.nearYou {
-            badge("Near you", icon: "mappin", fill: Palette.card, ink: Palette.ink)
+            badge("Near you", icon: nil, fill: Palette.card, ink: Palette.ink)
           }
         }
         .padding(12)
       }
   }
 
-  private func badge(_ text: String, icon: String, fill: Color, ink: Color) -> some View {
-    Label(text, systemImage: icon)
+  private func badge(_ text: String, icon: String?, fill: Color, ink: Color) -> some View {
+    HStack(spacing: 6) {
+      if let icon {
+        Image(systemName: icon).font(.system(size: 14))
+      } else {
+        PinIcon(size: 16)
+      }
+      Text(text)
+    }
       .font(.figtree(15, .medium, relativeTo: .footnote))
       .foregroundStyle(ink)
       .padding(.horizontal, 12)
@@ -91,9 +97,9 @@ struct MemberCardView: View {
       Text("What you share").sectionCaps().padding(.top, 18)
 
       VStack(alignment: .leading, spacing: 16) {
-        shareRow(icon: "tag", label: "Interests", text: member.interests)
-        shareRow(icon: "mappin", label: "Places", text: member.places)
-        shareRow(icon: "point.topleft.down.to.point.bottomright.curvepath", label: "Travel style", text: member.travelStyle)
+        shareRow(label: "Interests", text: member.interests) { Image(systemName: "tag").font(.system(size: 17)) }
+        shareRow(label: "Places", text: member.places) { PinIcon(size: 19) }
+        shareRow(label: "Travel style", text: member.travelStyle) { RouteIcon(size: 18) }
       }
       .padding(.top, 14)
 
@@ -112,10 +118,9 @@ struct MemberCardView: View {
     .padding(.bottom, 8)
   }
 
-  private func shareRow(icon: String, label: String, text: String) -> some View {
+  private func shareRow<Icon: View>(label: String, text: String, @ViewBuilder icon: () -> Icon) -> some View {
     HStack(alignment: .top, spacing: 12) {
-      Image(systemName: icon)
-        .font(.system(size: 17))
+      icon()
         .foregroundStyle(Palette.softInk)
         .frame(width: 36, height: 36)
         .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Palette.tint))

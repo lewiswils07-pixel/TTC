@@ -13,9 +13,9 @@ struct BackButton: View {
     Button { dismiss() } label: {
       HStack(spacing: 6) {
         Image(systemName: "chevron.left")
-          .font(.system(size: 20, weight: .semibold))
+          .font(.system(size: 19, weight: .medium))
         Text(title)
-          .font(.figtree(19))
+          .font(.figtree(17))
       }
       .foregroundStyle(Palette.burgundy)
       .frame(minHeight: 44)
@@ -28,29 +28,52 @@ struct BackButton: View {
 extension View {
   /// Standard top bar for an inner page: back button named after the previous
   /// screen, a title in the middle and an optional action on the right.
+  /// Drawn by the app (not the system bar) so it matches the designs exactly;
+  /// swipe back from the left edge still works.
   func innerTopBar<Title: View, Trailing: View>(
     back: String,
     @ViewBuilder title: () -> Title,
     @ViewBuilder trailing: () -> Trailing
   ) -> some View {
-    self
+    let bar = InnerTopBar(back: back, title: title(), trailing: trailing())
+    return self
       .navigationBarBackButtonHidden(true)
-      .navigationBarTitleDisplayMode(.inline)
-      .toolbarBackground(Palette.paper, for: .navigationBar)
-      .toolbarBackground(.visible, for: .navigationBar)
-      .toolbar {
-        ToolbarItem(placement: .topBarLeading) { BackButton(title: back) }
-        ToolbarItem(placement: .principal) { title() }
-        ToolbarItem(placement: .topBarTrailing) { trailing() }
-      }
+      .toolbar(.hidden, for: .navigationBar)
+      .safeAreaInset(edge: .top, spacing: 0) { bar }
   }
 
   func innerTopBar(back: String, title: String) -> some View {
     innerTopBar(back: back) {
-      Text(title).font(.figtree(19, .semibold)).foregroundStyle(Palette.ink)
+      Text(title).font(.figtree(17, .semibold)).foregroundStyle(Palette.ink)
     } trailing: {
       EmptyView()
     }
+  }
+}
+
+private struct InnerTopBar<Title: View, Trailing: View>: View {
+  let back: String
+  let title: Title
+  let trailing: Trailing
+
+  var body: some View {
+    VStack(spacing: 0) {
+      ZStack {
+        title
+          .lineLimit(1)
+          .padding(.horizontal, 96)
+          .accessibilityAddTraits(.isHeader)
+        HStack(spacing: 0) {
+          BackButton(title: back)
+          Spacer(minLength: 8)
+          trailing
+        }
+      }
+      .padding(.horizontal, 12)
+      .frame(minHeight: 52)
+      Rectangle().fill(Palette.line).frame(height: 0.5)
+    }
+    .background(Palette.paper.opacity(0.97).ignoresSafeArea(edges: .top))
   }
 }
 
@@ -75,7 +98,7 @@ struct SheetHeader<Leading: View, Trailing: View>: View {
   var body: some View {
     ZStack {
       Text(title)
-        .font(.figtree(19, .semibold))
+        .font(.figtree(17, .semibold))
         .foregroundStyle(Palette.ink)
         .accessibilityAddTraits(.isHeader)
       HStack {

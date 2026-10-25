@@ -33,7 +33,7 @@ shoot() {
   shift 2
   xcrun simctl boot "$udid" 2>/dev/null || true
   xcrun simctl bootstatus "$udid" -b >/dev/null
-  xcrun simctl status_bar "$udid" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularMode active --cellularBars 4 --wifiBars 3 || true
+  xcrun simctl status_bar "$udid" override --time "9:41" --batteryState discharging --batteryLevel 100 --cellularMode active --cellularBars 4 --wifiBars 3 || true
   xcrun simctl install "$udid" "$APP"
   for screen in "$@"; do
     xcrun simctl launch --terminate-running-process "$udid" "$BUNDLE_ID" -screen "$screen" >/dev/null

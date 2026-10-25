@@ -164,14 +164,14 @@ private struct MessageRow: View {
         .font(.body17)
         .foregroundStyle(outgoing ? .white : Palette.ink)
         .padding(.horizontal, 15)
-        .padding(.vertical, 11)
+        .padding(.vertical, 12)
         .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(outgoing ? Palette.burgundy : Palette.card))
         .overlay {
           if !outgoing {
             RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Palette.line, lineWidth: 0.75)
           }
         }
-        .frame(maxWidth: 300, alignment: outgoing ? .trailing : .leading)
+        .frame(maxWidth: 290, alignment: outgoing ? .trailing : .leading)
       if !outgoing { Spacer(minLength: 48) }
     }
   }
@@ -205,7 +205,7 @@ private struct SafetyCard: View {
           Text(tip)
             .font(.body17)
             .foregroundStyle(Palette.ink)
-            .frame(maxWidth: .infinity, minHeight: 58, alignment: .topLeading)
+            .frame(maxWidth: .infinity, minHeight: 44, alignment: .topLeading)
             .padding(12)
             .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Palette.card))
         }

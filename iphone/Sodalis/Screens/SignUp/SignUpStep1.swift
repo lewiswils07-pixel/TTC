@@ -87,7 +87,7 @@ struct SignUpStep1: View {
     }
     .sheet(isPresented: $showDatePicker) {
       DateOfBirthSheet(date: $birthDate) { showDatePicker = false }
-        .sodalisSheet(detents: [.height(470)])
+        .sodalisSheet(detents: [.height(440)])
     }
   }
 
@@ -211,7 +211,7 @@ struct SignUpStep1: View {
             focus = nil
           } label: {
             HStack(spacing: 14) {
-              Image(systemName: "mappin").foregroundStyle(Palette.softInk)
+              PinIcon(size: 19).foregroundStyle(Palette.softInk)
               highlighted(row.name, row.area)
               Spacer()
             }
