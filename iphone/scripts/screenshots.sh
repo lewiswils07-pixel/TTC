@@ -7,7 +7,7 @@ APP="$1"
 OUT="$2"
 BUNDLE_ID="com.sodaliscollective.app"
 SCREENS=(
-  launch welcome join-email join-code join-password sign-in forgot faceid-offer faceid-unlock signup signup-scrolled signup-date signup2 signup2-scrolled signup3 signup3-scrolled youre-in whos-going whos-going-scrolled filters filters-large read-more read-more-scrolled whos-going-empty connect-banner loading error profile profile-scrolled allow-photos crop allow-camera trips trips-scrolled add-trip add-trip-calendar trip-people trip-plan trip-tips going-when going-when-scrolled chat-list chat-groups chat-requests chat chat-menu plan-trip share-meeting meeting-time member-profile travel-groups start-group group plus plus-scrolled settings settings-scrolled privacy account account-scrolled safety tell-someone rules report help empty-trips empty-chats empty-requests empty-groups allow-notifications
+  launch welcome join-email join-code join-password sign-in forgot faceid-offer faceid-unlock signup signup-scrolled signup-date signup2 signup2-scrolled signup3 signup3-scrolled youre-in whos-going whos-going-scrolled filters filters-large read-more read-more-scrolled whos-going-empty connect-banner loading error profile profile-scrolled edit-profile blocked allow-photos crop allow-camera trips trips-scrolled add-trip add-trip-calendar trip-people trip-plan trip-tips going-when going-when-scrolled chat-list chat-groups chat-requests chat chat-menu plan-trip share-meeting meeting-time member-profile travel-groups start-group group plus plus-scrolled settings settings-scrolled privacy account account-scrolled safety tell-someone rules report help empty-trips empty-chats empty-requests empty-groups allow-notifications
 )
 mkdir -p "$OUT"
 

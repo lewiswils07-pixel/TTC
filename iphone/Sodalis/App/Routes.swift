@@ -16,6 +16,8 @@ enum Route: Hashable {
   case tellSomeone
   case communityRules
   case help
+  case editProfile
+  case blockedMembers
 
   /// Name used on the next page's back button.
   var shortTitle: String {
@@ -33,6 +35,8 @@ enum Route: Hashable {
     case .tellSomeone: "Safety"
     case .communityRules: "Rules"
     case .help: "Help"
+    case .editProfile: "Profile"
+    case .blockedMembers: "Blocked"
     }
   }
 }
@@ -115,6 +119,8 @@ private struct RouteView: View {
     case .tellSomeone: TellSomeoneScreen(back: back)
     case .communityRules: CommunityRulesScreen(back: back)
     case .help: HelpScreen(back: back)
+    case .editProfile: EditProfileScreen(back: back)
+    case .blockedMembers: BlockedMembersScreen(back: back)
     }
   }
 }

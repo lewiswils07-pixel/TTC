@@ -5,8 +5,6 @@ import SwiftUI
 struct ProfileScreen: View {
   @Environment(AppState.self) private var state
 
-  private let interests = ["Food markets", "Coastal walks", "Galleries", "Live music", "Gardens"]
-
   var body: some View {
     LargeTitlePage(title: "Your profile") {
       HeaderIconButton(systemName: "gearshape", label: "Settings") { state.push(.settings) }
@@ -18,11 +16,11 @@ struct ProfileScreen: View {
         HStack {
           Text("Interests").font(.heading(24)).foregroundStyle(Palette.ink)
           Spacer()
-          Button("Edit") {}.buttonStyle(TextButtonStyle(weight: .medium))
+          Button("Edit") { state.push(.editProfile) }.buttonStyle(TextButtonStyle(weight: .medium))
         }
         .padding(.top, 24)
         FlowLayout(spacing: 8, lineSpacing: 8) {
-          ForEach(interests, id: \.self) { interest in
+          ForEach(state.myInterests, id: \.self) { interest in
             Text(interest)
               .font(.figtree(16))
               .foregroundStyle(Palette.ink)
@@ -39,7 +37,7 @@ struct ProfileScreen: View {
           RowDivider(inset: 60)
           Button { state.push(.privacy) } label: { ListRow(icon: "lock", title: "Privacy choices") }
           RowDivider(inset: 60)
-          Button {} label: { ListRow(icon: "nosign", title: "Blocked members") }
+          Button { state.push(.blockedMembers) } label: { ListRow(icon: "nosign", title: "Blocked members") }
         }
         .buttonStyle(.plain)
         .padding(.top, 24)
@@ -76,7 +74,7 @@ struct ProfileScreen: View {
   private var meCard: some View {
     HStack(spacing: 16) {
       Button { state.cover = .allowPhotos } label: {
-        Avatar(size: 76, tones: SampleData.me.tones.colors)
+        MyPhoto(size: 76)
           .overlay(alignment: .bottomTrailing) {
             Image(systemName: "camera.fill")
               .font(.system(size: 11))
@@ -88,12 +86,16 @@ struct ProfileScreen: View {
       }
       .accessibilityLabel("Change your photo")
       VStack(alignment: .leading, spacing: 3) {
-        Text(SampleData.me.name).font(.heading(24)).foregroundStyle(Palette.ink)
+        Text(state.memberName).font(.heading(24)).foregroundStyle(Palette.ink)
         Text("\(SampleData.me.age) · \(SampleData.me.town)").font(.figtree(15)).foregroundStyle(Palette.muted)
         Button("See your card as others do") { state.push(.member(SampleData.me.name)) }
           .buttonStyle(TextButtonStyle(weight: .semibold))
       }
       Spacer(minLength: 0)
+      Button { state.push(.editProfile) } label: {
+        Image(systemName: "pencil").font(.system(size: 17, weight: .medium)).foregroundStyle(Palette.burgundy).frame(width: 44, height: 44)
+      }
+      .accessibilityLabel("Edit your profile")
     }
     .card(padding: 14)
   }
@@ -129,7 +131,7 @@ struct ProfileScreen: View {
   }
 
   private func todo(_ icon: String, _ title: String) -> some View {
-    Button {} label: {
+    Button { state.push(.editProfile) } label: {
       HStack(spacing: 12) {
         IconBadge(systemName: icon, fill: Palette.blush, tint: Palette.burgundy)
         Text(title).font(.figtree(17)).foregroundStyle(Palette.ink)
@@ -241,7 +243,9 @@ struct AllowPhotosScreen: View {
 }
 
 struct AllowCameraScreen: View {
+  @Environment(AppState.self) private var state
   @Environment(\.dismiss) private var dismiss
+  @State private var showCamera = false
 
   var body: some View {
     AllowScreen(
@@ -251,7 +255,65 @@ struct AllowCameraScreen: View {
       points: [("sun.max", "Good light and just you work best"), ("face.smiling", "A recent photo helps members recognise you"), ("lock", "Nothing is recorded in the background")],
       primary: "Open the camera"
     ) {
-      AVCameraAccess.request { dismiss() }
+      AVCameraAccess.request {
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+          showCamera = true
+        } else {
+          // The simulator has no camera, so fall back to Photos.
+          state.cover = .allowPhotos
+        }
+      }
+    }
+    .fullScreenCover(isPresented: $showCamera) {
+      CameraPicker { image in
+        showCamera = false
+        guard let image else { return }
+        state.cover = nil
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { state.cover = .crop(image) }
+      }
+      .ignoresSafeArea()
+    }
+  }
+}
+
+/// The iPhone camera, for taking a new profile photo.
+struct CameraPicker: UIViewControllerRepresentable {
+  let done: (UIImage?) -> Void
+
+  func makeUIViewController(context: Context) -> UIImagePickerController {
+    let picker = UIImagePickerController()
+    picker.sourceType = .camera
+    picker.cameraDevice = .front
+    picker.delegate = context.coordinator
+    return picker
+  }
+
+  func updateUIViewController(_ controller: UIImagePickerController, context: Context) {}
+
+  func makeCoordinator() -> Coordinator { Coordinator(done: done) }
+
+  final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    let done: (UIImage?) -> Void
+    init(done: @escaping (UIImage?) -> Void) { self.done = done }
+
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+      done(info[.originalImage] as? UIImage)
+    }
+
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) { done(nil) }
+  }
+}
+
+/// Your profile photo, or the stand-in until you choose one.
+struct MyPhoto: View {
+  var size: CGFloat
+  @Environment(AppState.self) private var state
+
+  var body: some View {
+    if let photo = state.myPhoto {
+      Image(uiImage: photo).resizable().scaledToFill().frame(width: size, height: size).clipShape(Circle())
+    } else {
+      Avatar(size: size, tones: SampleData.me.tones.colors)
     }
   }
 }
@@ -268,6 +330,7 @@ enum AVCameraAccess {
 /// Move-and-scale crop into a circle.
 struct CropScreen: View {
   let image: UIImage?
+  @Environment(AppState.self) private var state
   @Environment(\.dismiss) private var dismiss
   @State private var scale: CGFloat = 1
   @State private var lastScale: CGFloat = 1
@@ -279,16 +342,7 @@ struct CropScreen: View {
       let diameter = geo.size.width - 40
       ZStack {
         Color.black.ignoresSafeArea()
-        Group {
-          if let image {
-            Image(uiImage: image).resizable().scaledToFill()
-          } else {
-            PhotoPlaceholder(tones: [Color(hex: 0xE8CBA9), Color(hex: 0xC9996C)])
-          }
-        }
-        .frame(width: diameter, height: diameter * 1.3)
-        .scaleEffect(scale)
-        .offset(offset)
+        picture(diameter)
         .gesture(
           SimultaneousGesture(
             MagnificationGesture()
@@ -327,7 +381,7 @@ struct CropScreen: View {
             }
             .accessibilityLabel("Reset")
             Spacer()
-            Button("Choose") { dismiss() }.foregroundStyle(Palette.brightGold).fontWeight(.semibold)
+            Button("Choose") { choose(diameter) }.foregroundStyle(Palette.brightGold).fontWeight(.semibold)
           }
           .font(.figtree(18))
           .frame(minHeight: 44)
@@ -337,5 +391,30 @@ struct CropScreen: View {
         }
       }
     }
+  }
+
+  private func picture(_ diameter: CGFloat) -> some View {
+    Group {
+      if let image {
+        Image(uiImage: image).resizable().scaledToFill()
+      } else {
+        PhotoPlaceholder(tones: [Color(hex: 0xE8CBA9), Color(hex: 0xC9996C)])
+      }
+    }
+    .frame(width: diameter, height: diameter * 1.3)
+    .clipped()
+    .scaleEffect(scale)
+    .offset(offset)
+  }
+
+  /// Saves what's inside the circle as your photo.
+  private func choose(_ diameter: CGFloat) {
+    if image != nil {
+      let renderer = ImageRenderer(content: picture(diameter).frame(width: diameter, height: diameter).clipped())
+      renderer.scale = 3
+      if let cropped = renderer.uiImage { state.myPhoto = cropped }
+    }
+    dismiss()
+    state.show("Photo updated", detail: "Members will see it on your card.")
   }
 }

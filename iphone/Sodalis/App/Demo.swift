@@ -15,7 +15,7 @@ enum DemoScreen: String, CaseIterable {
   case whosGoing = "whos-going", whosGoingScrolled = "whos-going-scrolled", filters, filtersLarge = "filters-large"
   case readMore = "read-more", readMoreScrolled = "read-more-scrolled", whosGoingEmpty = "whos-going-empty"
   case connectBanner = "connect-banner", loading, error
-  case profile, profileScrolled = "profile-scrolled", allowPhotos = "allow-photos", crop, allowCamera = "allow-camera"
+  case profile, profileScrolled = "profile-scrolled", editProfile = "edit-profile", blocked, allowPhotos = "allow-photos", crop, allowCamera = "allow-camera"
   // Trips
   case trips, tripsScrolled = "trips-scrolled", addTrip = "add-trip", addTripCalendar = "add-trip-calendar"
   case tripPeople = "trip-people", tripPlan = "trip-plan", tripTips = "trip-tips"
@@ -70,6 +70,8 @@ enum Demo {
       state.show("Request sent to Margaret", detail: "We'll let you know when she replies.") {}
     case .readMore, .readMoreScrolled: state.open(.member("Margaret"), in: .whosGoing)
     case .profile, .profileScrolled: state.tab = .profile
+    case .editProfile: state.open(.editProfile, in: .profile)
+    case .blocked: state.tab = .profile; state.paths[.profile] = [.settings, .blockedMembers]
     case .allowPhotos: state.tab = .profile; state.cover = .allowPhotos
     case .crop: state.tab = .profile; state.cover = .crop(nil)
     case .allowCamera: state.tab = .profile; state.cover = .allowCamera

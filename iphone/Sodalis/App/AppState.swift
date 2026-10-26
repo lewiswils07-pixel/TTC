@@ -16,6 +16,9 @@ final class AppState {
   var isPlus = false
   var faceIDOn = true
   var memberName = SampleData.me.name
+  /// Your chosen profile photo (kept on the device until the app is connected).
+  var myPhoto: UIImage?
+  var myInterests = ["Food markets", "Coastal walks", "Galleries", "Live music", "Gardens"]
 
   /// Pages that hide the floating tab bar (a chat, someone's profile) add their name here while open.
   var tabBarHiders: Set<String> = []

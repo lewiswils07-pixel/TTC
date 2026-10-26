@@ -45,7 +45,7 @@ struct SettingsScreen: View {
         RowDivider(inset: 60)
         Button { state.push(.privacy) } label: { ListRow(icon: "lock", title: "Privacy choices") }
         RowDivider(inset: 60)
-        Button {} label: { ListRow(icon: "nosign", title: "Blocked members", value: "2") }
+        Button { state.push(.blockedMembers) } label: { ListRow(icon: "nosign", title: "Blocked members", value: "2") }
         RowDivider(inset: 60)
         greyToggle(icon: "faceid", title: "Face ID", subtitle: "Unlock \(Brand.shared.shortName) with your face", isOn: $state.faceIDOn)
       }

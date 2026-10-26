@@ -117,8 +117,8 @@ struct FloatingTabBar: View {
     let shape = RoundedRectangle(cornerRadius: 28, style: .continuous)
     #if compiler(>=6.2)
     if #available(iOS 26.0, *) {
-      shape.fill(Palette.blush.opacity(0.55))
-        .glassEffect(.regular.tint(Palette.blush.opacity(0.6)), in: shape)
+      Color.clear
+        .glassEffect(.regular.tint(Palette.blush.opacity(0.7)).interactive(), in: shape)
     } else {
       shape.fill(Palette.blush.opacity(0.9))
     }
@@ -131,9 +131,10 @@ struct FloatingTabBar: View {
     let shape = RoundedRectangle(cornerRadius: 32, style: .continuous)
     #if compiler(>=6.2)
     if #available(iOS 26.0, *) {
-      shape.fill(.clear)
-        .glassEffect(.regular.tint(Palette.card.opacity(0.35)), in: shape)
-        .shadow(color: Palette.ink.opacity(0.12), radius: 18, y: 8)
+      // Real iOS 26 Liquid Glass: clear, bends and blurs what's behind it.
+      Color.clear
+        .glassEffect(.regular.interactive(), in: shape)
+        .shadow(color: Palette.ink.opacity(0.10), radius: 16, y: 6)
     } else {
       fallbackGlass(shape)
     }
@@ -144,7 +145,7 @@ struct FloatingTabBar: View {
 
   private func fallbackGlass(_ shape: RoundedRectangle) -> some View {
     shape.fill(.ultraThinMaterial)
-      .overlay(shape.fill(Palette.card.opacity(0.45)))
+      .overlay(shape.fill(Palette.card.opacity(0.18)))
       .overlay(
         shape.strokeBorder(
           LinearGradient(colors: [.white.opacity(0.95), .white.opacity(0.2)], startPoint: .top, endPoint: .bottom),
