@@ -1,0 +1,4 @@
+build/
+screenshots-local/
+xcuserdata/
+*.xcuserstate
