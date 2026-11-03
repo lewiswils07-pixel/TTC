@@ -1,6 +1,6 @@
 -- pgTAP: round 8 (23 Oct): suggested groups, new interests, stand-in verification.
 begin;
-select plan(16);
+select plan(14);
 
 create function pg_temp.sign_in_as(member uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', member, 'role', 'authenticated')::text, true);
@@ -41,11 +41,10 @@ select lives_ok($$select public.leave_group((select id from public.my_groups() w
 reset role;
 select isnt_empty($$select 1 from public.groups where club_interest_id = 1$$, 'the group stays');
 
--- Stand-in verification.
+-- Verified badge (the one-tap stand-in was replaced by the ID check, Part 33).
+update public.profiles set id_verified_at = now() where id = pg_temp.m(3);
 select pg_temp.sign_in_as(pg_temp.m(3));
-select is_empty($$select public.verified_members(array[pg_temp.m(3)])$$, 'not verified to start with');
-select isnt(public.verify_me_now(), null, 'tapping Verify me verifies them');
-select is((select count(*)::int from public.verified_members(array[pg_temp.m(3), pg_temp.m(1)])), 1, 'and only them');
+select is((select count(*)::int from public.verified_members(array[pg_temp.m(3), pg_temp.m(1)])), 1, 'verified_members shows only verified members');
 reset role;
 
 select * from finish();

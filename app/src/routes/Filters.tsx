@@ -58,8 +58,7 @@ export function Filters() {
     setBusy(true)
     setError(null)
     try {
-      // ID checks don’t exist yet.
-      await saveFilters(userId, { ...values, verified_only: false })
+      await saveFilters(userId, values)
       navigate('/connections')
     } catch (e) {
       setError(messageOf(e))

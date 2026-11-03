@@ -78,8 +78,7 @@ function FilterSheet({ start, plus, userId, onClose }: { start: Filters; plus: b
     setBusy(true)
     setError(null)
     try {
-      // ID checks don’t exist yet.
-      await saveFilters(userId, { ...f, verified_only: false })
+      await saveFilters(userId, f)
       onClose(f)
     } catch (e) {
       setError(messageOf(e))

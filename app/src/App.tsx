@@ -16,6 +16,7 @@ const Onboarding = lazy(() => import('./routes/Onboarding').then((m) => ({ defau
 const TripMatches = lazy(() => import('./routes/TripMatches').then((m) => ({ default: m.TripMatches })))
 const Requests = lazy(() => import('./routes/Connections').then((m) => ({ default: m.Requests })))
 const TripForm = lazy(() => import('./routes/TripForm').then((m) => ({ default: m.TripForm })))
+const VerifyId = lazy(() => import('./routes/VerifyId').then((m) => ({ default: m.VerifyId })))
 const MemberProfile = lazy(() => import('./routes/MemberProfile').then((m) => ({ default: m.MemberProfile })))
 const SameTime = lazy(() => import('./routes/SameTime').then((m) => ({ default: m.SameTime })))
 const ForYou = lazy(() => import('./routes/ForYou').then((m) => ({ default: m.ForYou })))
@@ -305,6 +306,14 @@ export function AppRoutes() {
           element={
             <RequireSession>
               <PrivacyChoices />
+            </RequireSession>
+          }
+        />
+        <Route
+          path="/verify-id"
+          element={
+            <RequireSession>
+              <VerifyId />
             </RequireSession>
           }
         />
