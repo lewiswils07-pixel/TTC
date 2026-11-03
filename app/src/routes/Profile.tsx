@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { VerifyCard } from '../components/Verified'
 import { Ban, Camera, Check, Coffee, Eye, Flag, Gem, Lock, Pencil, Settings, Share, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react'
 import { keep, peek, remember } from '../lib/cache'
 import { Link, Navigate, useSearchParams } from 'react-router'
@@ -19,7 +20,7 @@ import { usePhotoUrl } from '../lib/photo'
 import { listInterests, type Interest, type MyProfile, type Profile } from '../lib/profile'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
-import { plusPrice, plusUntil, stopMyPlus } from '../lib/plan'
+import { myPriceTest, notePlusInterest, plusLink, plusPrice, plusUntil, pounds, stopMyPlus } from '../lib/plan'
 import { useConfirm } from '../lib/useConfirm'
 import { HubRow } from '../components/HubRow'
 import { ErrorState } from '../components/EmptyState'
@@ -65,7 +66,7 @@ export function Profile() {
   if (tab === 'plus') {
     return (
       <Layout tab="profile">
-        <PlusPanel />
+        <PlusPanel from={params.get('from')} />
       </Layout>
     )
   }
@@ -77,7 +78,7 @@ export function Profile() {
           Your profile
         </Link>
         <h1>{tab === 'safety' ? 'Safety' : brand.plusName}</h1>
-        {tab === 'safety' ? <SafetyPanel /> : <PlusPanel />}
+        {tab === 'safety' ? <SafetyPanel /> : <PlusPanel from={params.get('from')} />}
       </Layout>
     )
   }
@@ -107,16 +108,6 @@ export function Profile() {
               {profile.birth_date ? ageFromDate(profile.birth_date) : ageLabel(profile.birth_year)} · {profile.home_city ? profile.home_city.name : 'Home not set'}
             </p>
             {profile.member_number && <p className="me-number">Founding member No. {profile.member_number}</p>}
-            {profile.id_verified_at ? (
-              <p className="me-id-checked">
-                <ShieldCheck size={16} strokeWidth={2} aria-hidden="true" />
-                ID checked
-              </p>
-            ) : (
-              <Link className="me-link" to="/verify-id">
-                Check your ID
-              </Link>
-            )}
             <Link className="me-link" to={stepLink('photo')}>
               {profile.photo_path ? 'Change photo' : 'Add a photo'}
             </Link>
@@ -210,6 +201,7 @@ function MyProfilePanel({ data }: { data: MyProfile }) {
   return (
     <>
       {hasTrip !== null && <Strength profile={profile} interestCount={interestIds.length} hasTrip={hasTrip} card={data.card} />}
+      <VerifyCard userId={profile.id} />
       <MeetPrompts />
       <ProfileSection id="me-interests" title="Interests" edit={stepLink('interests')}>
         {myInterests.length ? (
@@ -250,13 +242,13 @@ function MyProfilePanel({ data }: { data: MyProfile }) {
         </p>
         <p className="hint">Who you see on Who’s going. Change it any time in Filters.</p>
       </ProfileSection>
-      <Link className="plus-row" to="/profile?tab=plus">
+      <Link className="plus-row" to={plusLink('profile')}>
         <span className="plus-row-icon" aria-hidden="true">
           <Gem size={20} strokeWidth={1.8} />
         </span>
         <span className="plus-row-text">
           <strong>{brand.plusName}</strong>
-          <span>Filter by travel style, and more</span>
+          <span>Every group for you, and more</span>
         </span>
         <NextIcon />
       </Link>
@@ -351,15 +343,31 @@ function SafetyPanel() {
   )
 }
 
-/** What Sodalis+ lets them do, and how long they have it. */
-function PlusPanel() {
+/** What Sodalis+ lets them do, and how long they have it. Members in the pricing test see their
+ *  test price and a Join button; a tap is only counted, nothing is charged (rules.pricingTest). */
+function PlusPanel({ from }: { from: string | null }) {
   const [until, setUntil] = useState<string | null | undefined | 'loading'>('loading')
+  const [test, setTest] = useState<{ price_pence: number; joined: boolean } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [stopped, setStopped] = useState(false)
   const { ask, dialog } = useConfirm()
   useEffect(() => {
     plusUntil().then(setUntil, () => setUntil(undefined))
-  }, [])
+    myPriceTest().then((t) => {
+      setTest(t)
+      if (t) notePlusInterest('view', from).catch(() => undefined)
+    })
+  }, [from])
+
+  async function join() {
+    setError(null)
+    try {
+      await notePlusInterest('join', from)
+      setTest((t) => t && { ...t, joined: true })
+    } catch (e) {
+      setError(messageOf(e))
+    }
+  }
 
   async function stop() {
     const yes = await ask({
@@ -383,10 +391,22 @@ function PlusPanel() {
   const perks = [
     { title: 'Unlimited connection requests', text: 'Say hello to as many members as you like.' },
     { title: 'Unlimited trip plans', text: 'Plan as many trips together as you want.' },
-    { title: 'Travel-style filters', text: 'Find people who travel at your pace and budget.' },
-    { title: 'Going when you are', text: 'See the exact days you overlap with other members.' },
+    { title: 'Every group for you', text: `Join as many interest and destination groups as you like, not just ${rules.groups.suggestedFree}.` },
+    { title: 'Holiday preference filters', text: 'Find people who like the same kind of stay, length and season.' },
     { title: 'Popular groups', text: `See where members are heading, and start up to ${count(rules.groups.maxOwnedPlus, 'group')} at once.` },
     { title: 'Search members’ tips', text: 'Search and filter tips for every place.' },
+  ]
+  // Free for everyone, so nobody has to guess what a badge means (testers, 21 Oct).
+  const free = [
+    'Add your trips and see who’s going',
+    `${count(rules.requests.perWeekFree, 'connection request')} a week`,
+    'Chat with everyone you connect with',
+    `Join open travel groups, and start ${count(rules.groups.maxOwnedFree, 'group')} of your own`,
+    `Join ${count(rules.groups.suggestedFree, 'group')} for your interests and trips`,
+    'See the exact days you overlap with other members',
+    'Filters for gender, age, distance, pace and budget',
+    'Members’ tips for every place',
+    'All the safety tools',
   ]
   const date = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
   return (
@@ -413,9 +433,22 @@ function PlusPanel() {
           <>
             <span className="plus-eyebrow">Coming soon</span>
             <h2>
-              {plusPrice()} <span>a month</span>
+              {test ? pounds(test.price_pence) : plusPrice()} <span>a month</span>
             </h2>
-            <p className="hint">{stopped ? 'You’re on the free plan now. ' : ''}When it starts you can stop it any time in one tap.</p>
+            {test?.joined ? (
+              <p className="notice notice-success" role="status">
+                Thanks, you’re on the list. {brand.plusName} isn’t open yet, so nothing has been charged. We’ll tell you when it starts.
+              </p>
+            ) : (
+              <>
+                <p className="hint">{stopped ? 'You’re on the free plan now. ' : ''}When it starts you can stop it any time in one tap.</p>
+                {test && (
+                  <button type="button" className="btn btn-primary btn-block" onClick={join}>
+                    Join {brand.plusName}
+                  </button>
+                )}
+              </>
+            )}
           </>
         )}
         {error && (
@@ -425,7 +458,16 @@ function PlusPanel() {
         )}
       </section>
       {dialog}
-      <h2 className="list-label">What you get</h2>
+      <h2 className="list-label">Free for everyone</h2>
+      <ul className="card plus-free">
+        {free.map((f) => (
+          <li key={f}>
+            <Check size={16} strokeWidth={3} aria-hidden="true" />
+            {f}
+          </li>
+        ))}
+      </ul>
+      <h2 className="list-label">{brand.plusName} adds</h2>
       <ul className="card plus-perks">
         {perks.map((p) => (
           <li key={p.title}>

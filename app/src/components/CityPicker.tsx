@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { cityLabel, searchCities, type City } from '../lib/cities'
+import { cityLabel, pickerLabel, searchCities, type City } from '../lib/cities'
 import { messageOf } from '../lib/errors'
 import { FieldError } from './Field'
 
@@ -120,7 +120,7 @@ export function CityPicker({ label, hint, value, onChange, search = searchCities
       <ul ref={list} className="options" id={listId} role="listbox" aria-label={label} hidden={!showList}>
         {results.map((city, i) => (
           <li key={city.id} id={`${id}-opt-${i}`} role="option" aria-selected={i === active} onMouseDown={(e) => e.preventDefault()} onClick={() => choose(city)}>
-            {cityLabel(city)}
+            {pickerLabel(city)}
           </li>
         ))}
       </ul>

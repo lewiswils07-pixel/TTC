@@ -1,4 +1,4 @@
--- Part 28 (Lewis, 18 Oct): ID check. Members prove they are who they say
+-- Part 33 (Lewis, 18 Oct and 3 Nov): ID check. Members prove they are who they say
 -- with a photo ID and a selfie, through Didit (didit.me). Didit holds the
 -- pictures; we only keep each check's status and the date a member passed.
 -- The app's server (app/functions/api/id-check) is the only thing that can
@@ -110,19 +110,14 @@ as $$
   where p.id = auth.uid()
 $$;
 
--- Which of these members have passed, for the "ID checked" tick on cards.
-create function public.id_checked(ids uuid[])
-returns setof uuid
-language sql
-stable
-security definer
-set search_path = ''
-as $$
-  select p.id from public.profiles p
-  where p.id = any (ids[1:200]) and p.id_verified_at is not null and p.status = 'active'
-$$;
-
 revoke all on function public.my_id_check() from public, anon;
-revoke all on function public.id_checked(uuid[]) from public, anon;
 grant execute on function public.my_id_check() to authenticated;
-grant execute on function public.id_checked(uuid[]) to authenticated;
+
+-- 4 ----------------------------------------------------------------------
+-- The real check replaces the one-tap "Verify me" stand-in (Part 31). Badges
+-- given by the stand-in are taken back, so Verified always means a passed ID
+-- check. The badge itself (verified_members) stays as it is.
+drop function if exists public.verify_me_now();
+update public.profiles p set id_verified_at = null
+where p.id_verified_at is not null
+  and not exists (select 1 from private.id_checks c where c.profile_id = p.id and c.status = 'Approved');

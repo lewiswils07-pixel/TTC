@@ -10,7 +10,7 @@ describe('picking interests', () => {
   it('counts picks, and explains a tap past the limit', async () => {
     const onChange = vi.fn()
     render(<InterestPicker interests={interests} selected={[1, 2]} onChange={onChange} max={2} />)
-    expect(screen.getByRole('status')).toHaveTextContent('You’ve selected 2 of 2 interests')
+    expect(screen.getByRole('status')).toHaveTextContent('You’ve picked 2 of up to 2')
     await userEvent.click(screen.getByRole('checkbox', { name: 'Walking' }))
     expect(onChange).not.toHaveBeenCalled()
     expect(screen.getByRole('alert')).toHaveTextContent('You’ve already picked 2')
@@ -19,7 +19,7 @@ describe('picking interests', () => {
   })
   it('counts picks below the limit', () => {
     render(<InterestPicker interests={interests} selected={[1]} onChange={() => undefined} max={2} />)
-    expect(screen.getByRole('status')).toHaveTextContent('You’ve selected 1 of 2 interests')
+    expect(screen.getByRole('status')).toHaveTextContent('You’ve picked 1 of up to 2')
   })
   it('shows a few per category, with Show more', async () => {
     const many = Array.from({ length: 10 }, (_, i) => ({ id: i + 1, slug: `i${i}`, label: `Interest ${i + 1}`, category_label: 'Outdoors' }))

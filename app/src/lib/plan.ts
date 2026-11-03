@@ -41,9 +41,27 @@ export async function plusUntil(): Promise<string | null | undefined> {
   return data.expires_at
 }
 
+/** "£5.99": pence as pounds. */
+export const pounds = (pence: number) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(pence / 100)
+
 /** "£5.99": what Sodalis+ costs a month (rules.plus). */
 export function plusPrice(): string {
-  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(rules.plus.pricePencePerMonth / 100)
+  return pounds(rules.plus.pricePencePerMonth)
+}
+
+/** The Sodalis+ page, noting which screen sent the member there (for the pricing test). */
+export const plusLink = (from: string) => `/profile?tab=plus&from=${from}`
+
+/** The member's price in the pricing test, or null when they aren't in it (rules.pricingTest). */
+export async function myPriceTest(): Promise<{ price_pence: number; joined: boolean } | null> {
+  const { data, error } = await supabase.rpc('my_price_test').maybeSingle<{ price_pence: number; joined: boolean }>()
+  return error ? null : data
+}
+
+/** Counts a visit to the Sodalis+ page or a Join tap. Nothing is charged. */
+export async function notePlusInterest(action: 'view' | 'join', from: string | null): Promise<void> {
+  const { error } = await supabase.rpc('note_plus_interest', { p_action: action, p_from: from ?? '' })
+  if (error) throw friendlyError(error)
 }
 
 /** Ends the member's free Sodalis+ months now, in one tap. */

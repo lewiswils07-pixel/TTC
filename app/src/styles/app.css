@@ -1773,6 +1773,18 @@ h2, .section-title { font-size: 1.625rem; line-height: 1.15; }
 }
 .tab-label { white-space: nowrap; }
 
+/* The bottom bar sits on its own layer above everything on the page, so iPhones always pass taps to it. */
+.tabbar:not(.tabbar-top) { z-index: 30; transform: translateZ(0); -webkit-transform: translateZ(0); }
+.tabbar .tab { position: relative; z-index: 1; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+/* A soft pill that slides between the tabs. */
+.tabbar ul { position: relative; }
+.tab-slider { position: absolute; top: 10px; left: 6px; width: calc((100% - 12px) / 4); height: 30px; pointer-events: none; transform: translateX(calc(var(--i, 0) * 100%)); transition: transform 0.32s cubic-bezier(0.3, 1.25, 0.5, 1); }
+.tab-slider::before { content: ''; position: absolute; left: 50%; top: 0; width: 60px; height: 30px; margin-left: -30px; border-radius: 15px; background: var(--accent-tint); }
+.tabbar:not(.tabbar-top) .tab.is-current .tab-icon { background: none; }
+@media (prefers-reduced-motion: reduce) {
+  .tab-slider { transition: none; }
+}
+
 /* The Filters button and other small framed buttons. */
 .filter-button { height: 44px; padding: 0 16px; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-sm); font-size: 1rem; font-weight: 600; }
 .hub-icon { border-radius: 12px; width: 44px; height: 44px; background: var(--paper-tint); color: var(--ink-soft); }
@@ -1851,8 +1863,6 @@ h2, .section-title { font-size: 1.625rem; line-height: 1.15; }
 .going-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--space-2); }
 .going-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 8px; background: var(--paper-tint); color: var(--ink-soft); font-size: 0.875rem; font-weight: 700; }
 .going-badge.is-gold { background: var(--gold-tint); color: var(--gold-ink); }
-.going-badge.is-id { background: var(--accent-tint); color: var(--accent); }
-.member-intro .going-badge.is-id { margin-top: 6px; }
 .going-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
 .going-share { padding: 0 18px; }
 .going-share h4, .going-section h4 { margin: 0 0 var(--space-3); font-size: 0.875rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
@@ -2007,7 +2017,6 @@ h2, .section-title { font-size: 1.625rem; line-height: 1.15; }
 .me-who h2 { margin: 0; font-size: 2rem; line-height: 1.05; overflow-wrap: anywhere; }
 .me-who p { margin: 0; color: var(--ink-soft); }
 .me-who .me-number { font-size: var(--text-sm); color: var(--gold-ink); font-weight: 700; }
-.me-who .me-id-checked { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-sm); color: var(--accent); font-weight: 700; }
 .me-link { align-self: flex-start; display: inline-flex; align-items: center; min-height: 40px; color: var(--accent); font-weight: 700; text-decoration: none; }
 .me-bio { margin: var(--space-4) 0 0; font-family: var(--serif); font-size: 1.1875rem; line-height: 1.45; }
 .me-preview { margin-top: var(--space-4); min-height: 48px; background: var(--paper-tint); border-color: var(--line); }
@@ -2568,3 +2577,29 @@ a.chat-row:hover { background: color-mix(in srgb, var(--paper-tint) 45%, var(--c
 .brand .logo { height: 46px; width: auto; }
 .hello-name .logo { height: 112px; width: auto; }
 .plus-hero .monogram { color: var(--brand-gold); }
+
+/* ---------------------------------------------------------------- Round 7 tester fixes (21 Oct) */
+.radio-cards > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+.action-bar { background: var(--paper); box-shadow: 0 -8px 20px -14px rgb(0 0 0 / 25%); }
+.chip.chip-plus.is-locked span { opacity: 0.72; }
+.empty-state.is-compact { padding: var(--space-4) var(--space-2) var(--space-3); }
+.empty-state.is-compact h2, .empty-state.is-compact h3 { font-size: 1.5rem; margin-top: var(--space-2); }
+.empty-art.is-small .empty-badge { right: -2px; bottom: -2px; width: 32px; height: 32px; }
+.list-label-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin: var(--space-6) 0 var(--space-2); }
+.list-label-row .list-label { margin: 0; }
+.plus-free { list-style: none; margin: 0; padding: 8px 20px; }
+.plus-free li { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.plus-free li + li { border-top: 1px solid var(--line); }
+.plus-free svg { flex: none; color: var(--success); }
+
+/* Round 8 tester fixes (23 Oct): Verified badge, Verify me card, groups for you. */
+.going-badge.is-verified { background: var(--accent-tint); color: var(--accent); }
+.member-intro .going-badge.is-verified { margin-top: var(--space-1); }
+.verify-card { display: flex; align-items: center; gap: var(--space-3); }
+.verify-card .card-title { margin: 0; }
+.verify-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.verify-text .hint { margin: 0; }
+.verify-icon { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--accent-tint); color: var(--accent); }
+.verify-card.is-done .verify-icon { background: var(--accent); color: var(--card); }
+.suggested-groups .trips-row-plus { margin-top: var(--space-3); }
+.suggested-group .btn { flex: none; }

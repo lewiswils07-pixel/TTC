@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { brand } from '../lib/brand'
 import { monthName } from '../lib/dates'
-import { hasPlus } from '../lib/plan'
+import { hasPlus, plusLink } from '../lib/plan'
 import { planInspiration, type Inspiration } from '../lib/trips'
 
 const SHOWN_IDEAS = 4
@@ -30,7 +30,7 @@ export function PlanInspiration() {
       </div>
       {!plus ? (
         <p className="hint">
-          See what other members are planning on their trips, for ideas of your own. <Link to="/profile?tab=plus">Comes with {brand.plusName}</Link>
+          See what other members are planning on their trips, for ideas of your own. <Link to={plusLink('inspiration')}>Comes with {brand.plusName}</Link>
         </p>
       ) : (
         <ul className="inspiration-list">

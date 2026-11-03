@@ -31,7 +31,6 @@ const emptyProfile: Profile = {
   smoking: null,
   onboarded_at: null,
   member_number: null,
-  id_verified_at: null,
   home_city: null,
 }
 const prefs = { age_min: 18, age_max: 99, genders: [], max_distance_km: null, age_flexible: false, distance_flexible: false }
@@ -69,7 +68,9 @@ describe('profile helpers', () => {
     expect(firstUnfinishedStep(make({}))).toBe(1)
     expect(firstUnfinishedStep(make(basics))).toBe(2)
     expect(firstUnfinishedStep(make({ ...basics, bio: 'Hi' }))).toBe(2)
-    expect(firstUnfinishedStep(make(basics, [1, 2, 3, 4, 5, 6, 7, 8]))).toBe(3)
+    // Sign-up is 2 screens: a new member with interests picked still finishes on step 2. The wish list (3) comes later.
+    expect(firstUnfinishedStep(make(basics, [1, 2, 3, 4, 5, 6, 7, 8]))).toBe(2)
+    expect(firstUnfinishedStep(make({ ...basics, onboarded_at: '2026-10-23T10:00:00Z' }, [1, 2, 3, 4, 5, 6, 7, 8]))).toBe(3)
   })
 })
 

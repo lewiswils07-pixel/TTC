@@ -54,7 +54,8 @@ export function VerifyId() {
       ) : words.canStart ? (
         <>
           <ul className="help-list">
-            <li>Have your passport or driving licence with you.</li>
+            <li>Have your passport with you if you can. A driving licence works too.</li>
+            <li>If your phone asks, hold your passport against the back of it so it can read the chip inside. This is the surest check.</li>
             <li>Find good light, without glare on the photo.</li>
             <li>Your ID photos go to our checking partner, Didit, not to other members. We only keep whether you passed.</li>
           </ul>

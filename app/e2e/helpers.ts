@@ -91,10 +91,9 @@ export async function pickPlace(page: Page, typed: string, option: string | RegE
   await choice.click()
 }
 
-/** Sign-up step 2 is picked (interests, travel style): moves on to step 3, the wish list, and finishes sign-up. */
+/** Sign-up step 2 (interests, pace and budget) is picked: finishes sign-up. */
 export async function finishSignUp(page: Page): Promise<void> {
-  if (!(await page.getByText(/Step 3 of 3/).isVisible())) await page.getByRole('button', { name: /continue/i }).click()
-  await expect(page.getByText(/Step 3 of 3/)).toBeVisible()
+  await expect(page.getByText(/Step 2 of 2/)).toBeVisible()
   await page.getByRole('button', { name: 'Finish', exact: true }).click()
 }
 

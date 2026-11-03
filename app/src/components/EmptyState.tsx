@@ -3,21 +3,38 @@ import { Link } from 'react-router'
 import { Monogram } from './Layout'
 
 /** The monogram in a dotted gold ring, with a small badge saying what's missing (Claude Design, 16 Oct). */
-export function EmptyArt({ icon, alert = false }: { icon: ReactNode; alert?: boolean }) {
+export function EmptyArt({ icon, alert = false, compact = false }: { icon: ReactNode; alert?: boolean; compact?: boolean }) {
   return (
-    <span className="empty-art" aria-hidden="true">
-      <Monogram size={96} />
+    <span className={compact ? 'empty-art is-small' : 'empty-art'} aria-hidden="true">
+      <Monogram size={compact ? 56 : 96} />
       <span className={alert ? 'empty-badge is-alert' : 'empty-badge'}>{icon}</span>
     </span>
   )
 }
 
 /** An empty screen: the art, a serif line, a sentence and what to do next. */
-export function EmptyState({ icon, title, text, children, level = 2, alert = false }: { icon: ReactNode; title: string; text: ReactNode; children?: ReactNode; level?: 2 | 3; alert?: boolean }) {
+/** `compact` keeps the art small where useful things sit below it (testers, 21 Oct). */
+export function EmptyState({
+  icon,
+  title,
+  text,
+  children,
+  level = 2,
+  alert = false,
+  compact = false,
+}: {
+  icon: ReactNode
+  title: string
+  text: ReactNode
+  children?: ReactNode
+  level?: 2 | 3
+  alert?: boolean
+  compact?: boolean
+}) {
   const H = level === 2 ? 'h2' : 'h3'
   return (
-    <div className="empty-state">
-      <EmptyArt icon={icon} alert={alert} />
+    <div className={compact ? 'empty-state is-compact' : 'empty-state'}>
+      <EmptyArt icon={icon} alert={alert} compact={compact} />
       <H>{title}</H>
       <p>{text}</p>
       {children}

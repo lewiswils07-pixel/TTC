@@ -19,7 +19,7 @@ import { Info, Plane, UserPlus } from 'lucide-react'
 import { EmptyState } from '../components/EmptyState'
 import { monthName } from '../lib/dates'
 import { brand } from '../lib/brand'
-import { hasPlus, loadRequests, PLUS_SHOW_LEFT_BELOW } from '../lib/plan'
+import { PLUS_SHOW_LEFT_BELOW, hasPlus, loadRequests, plusLink } from '../lib/plan'
 import { RequestShare } from '../components/RequestShare'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
@@ -330,7 +330,7 @@ function RequestsLeft() {
         {!left.plus && (
           <>
             {' '}
-            <Link to="/profile?tab=plus" className="plus-word">
+            <Link to={plusLink('requests')} className="plus-word">
               {brand.plusName}
             </Link>{' '}
             members have no limit.

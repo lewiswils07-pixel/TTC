@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import { brand } from '../lib/brand'
 import { longDate } from '../lib/dates'
 import { messageOf } from '../lib/errors'
-import { hasPlus } from '../lib/plan'
+import { hasPlus, plusLink } from '../lib/plan'
 import { rules } from '../lib/rules'
 import { addTip, checkTip, cityTips, deleteTip, TIP_CATEGORIES, tipLabel, type NewTip, type Tip, type TipCategory } from '../lib/tips'
 import { useConfirm } from '../lib/useConfirm'
@@ -92,7 +92,7 @@ export function CityTips({ cityId, city, opensOn }: { cityId: number; city: stri
         </div>
       ) : (
         <p className="card tip-plus">
-          <span className="tag tag-plus">{brand.plusName}</span> Search tips and pick a kind, like Food or Museums. <Link to="/profile?tab=plus">Comes with {brand.plusName}</Link>
+          <span className="tag tag-plus">{brand.plusName}</span> Search tips and pick a kind, like Food or Museums. <Link to={plusLink('tips')}>Comes with {brand.plusName}</Link>
         </p>
       )}
 

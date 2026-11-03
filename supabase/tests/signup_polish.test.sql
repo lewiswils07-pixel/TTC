@@ -39,6 +39,8 @@ select ok(not public.fits_preferences(39, 'unsaid', jsonb_populate_record(null::
   'but not to members who chose particular genders');
 
 -- ------------------------------------------------------- founding members
+-- The pricing test (Part 29) would put every other member on the free plan; these check the founding offer.
+update private.rules set value = 0 where key = 'pricingTest.on';
 update public.profiles p set display_name = 'P' || right(p.id::text, 1), birth_date = date '1960-05-01', gender = 'woman', home_city_id = 2644688
 where p.id in (pg_temp.m(2), pg_temp.m(3));
 update public.profiles set display_name = 'P1', home_city_id = 2644688 where id = pg_temp.m(1);

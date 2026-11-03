@@ -1,7 +1,7 @@
 // How complete a profile is, and what to add next (sign-up review item 14).
 // Each part makes suggestions work better or helps others say yes.
 import { hasCard, type Card } from './card'
-import { INTERESTS_TO_PICK } from './options'
+import { INTERESTS_MIN } from './options'
 import { stepLink } from './onboarding'
 import type { Profile } from './profile'
 
@@ -12,7 +12,7 @@ export function profileStrength(p: Profile, interestCount: number, hasTrip: bool
   const parts: StrengthPart[] = [
     { label: 'Add a photo', done: !!p.photo_path, to: stepLink('photo') },
     { label: 'Write a few words about you', done: !!p.bio, to: stepLink('photo') },
-    { label: `Pick your top ${INTERESTS_TO_PICK} interests`, done: interestCount === INTERESTS_TO_PICK, to: stepLink('interests') },
+    { label: `Pick at least ${INTERESTS_MIN} interests`, done: interestCount >= INTERESTS_MIN, to: stepLink('interests') },
     ...(card ? [{ label: 'Fill in the back of your card', done: hasCard(card), to: stepLink('card') }] : []),
     { label: 'Say how you travel', done: !!(p.pace && p.budget), to: stepLink('travel') },
     { label: 'Answer the rest of your travel style', done: !!(p.travel_style && p.moving && p.travel_often && p.booking && p.group_size), to: stepLink('travel') },

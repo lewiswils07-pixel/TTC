@@ -1,5 +1,5 @@
-import { IdTick } from '../components/IdTick'
 import { useEffect, useRef, useState } from 'react'
+import { VerifiedBadge } from '../components/Verified'
 import { Link, Navigate, useSearchParams } from 'react-router'
 import { Layout, Loading, Logo } from '../components/Layout'
 import { CardBack } from '../components/CardBack'
@@ -23,7 +23,7 @@ import { clearNotNow, forgetNotNow, loadFeed, nearYou, NOT_NOW_DAYS, notNowIds, 
 import { isNewMember, loadFirstDay, saveFirstDay } from '../lib/firstDay'
 import { groupsICanStart, myGroups, type Group } from '../lib/groups'
 import { noteFirstMatch } from '../lib/kpis'
-import { requestsLeftText } from '../lib/plan'
+import { plusLink, requestsLeftText } from '../lib/plan'
 import { fitWords, homeLabel, listLabels, LOTS_IN_COMMON } from '../lib/matching'
 import { ageLabel, BOOKING, GROUP_SIZES, HOLIDAY_QUESTIONS, INTERESTS_TO_PICK, labelFor, MOVING, PERSONAL_FIELDS, ROOM_SHARING, TRAVEL_OFTEN } from '../lib/options'
 import { preloadPhotos, usePhotoUrl } from '../lib/photo'
@@ -291,7 +291,7 @@ export function ForYou() {
                 <h2 id="people-title">{only ? `Going to ${only}` : trips.length ? 'Going your way' : 'People like you'}</h2>
                 <p>{only ? 'Members there around your dates.' : trips.length ? 'Members on your trips, and others who travel like you.' : 'Members who travel the way you do.'}</p>
               </div>
-              {deck.length > 0 && <span className="going-count">{deck.length === 1 ? 'Last one for now' : `${deck.length} to meet`}</span>}
+              {deck.length > 0 && <span className="going-count">{deck.length === 1 ? 'Last one for now' : `${deck.length} people to meet`}</span>}
             </div>
             {person && (
               <div className={deck.length > 1 ? 'going-stack has-next' : 'going-stack'}>
@@ -334,10 +334,10 @@ export function ForYou() {
               </div>
             )}
             {requests.left <= 3 && <p className="hint going-left">{requestsLeftText(requests)}</p>}
-            {!requests.plus && trips.length > 0 && (
+            {trips.length > 0 && (
               <p className="hint going-plus-line">
                 <Link className="going-plus-link" to="/connections/same-time">
-                  See the exact days you overlap with {brand.plusName}
+                  See the exact days you overlap
                 </Link>
               </p>
             )}
@@ -507,13 +507,13 @@ function PersonHead({ person, myHome, id, level = 3 }: { person: FeedPerson; myH
         </H>
         <p>{[person.birth_year && ageLabel(person.birth_year), homeLabel(person)].filter(Boolean).join(' · ')}</p>
         <div className="going-badges">
+          {person.verified && <VerifiedBadge />}
           {person.score >= LOTS_IN_COMMON && (
             <span className="going-badge is-gold">
               <Blend size={16} strokeWidth={2} aria-hidden="true" />
               Lots in common
             </span>
           )}
-          <IdTick id={person.profile_id} />
           {nearYou(person, myHome) && (
             <span className="going-badge">
               <MapPin size={16} strokeWidth={2} aria-hidden="true" />
@@ -568,7 +568,12 @@ function PersonActions({ person, trip, myCity, requests, hasPhoto, onNotNow, onS
           {requests.left > 0 ? 'Connect' : 'No requests left this week'}
         </button>
       </div>
-      {!page && <p className="hint">{trip ? `Connect to say hello and plan ${myCity ?? trip.city} together.` : 'Connect to say hello and swap travel plans.'}</p>}
+      {!page && (
+        <p className="hint">
+          {trip ? `Connect sends a hello, to plan ${myCity ?? trip.city} together.` : 'Connect sends a friendly hello.'} Not now hides {person.display_name} for {NOT_NOW_DAYS} days, and they’re never
+          told.
+        </p>
+      )}
     </div>
   )
 }
@@ -697,7 +702,7 @@ function PersonPage(props: CardProps & { onBack: () => void }) {
             </dl>
           )}
           {extras?.holiday_locked && (
-            <Link className="plus-teaser" to="/profile?tab=plus">
+            <Link className="plus-teaser" to={plusLink('card')}>
               <span className="tag tag-plus">{brand.plusName}</span> See how {name} likes to holiday
             </Link>
           )}

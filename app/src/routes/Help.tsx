@@ -5,6 +5,7 @@ import { Layout } from '../components/Layout'
 import { brand } from '../lib/brand'
 import { count, rules } from '../lib/rules'
 import { PageTop } from '../components/PageBack'
+import { plusLink } from '../lib/plan'
 
 const QUESTIONS: { q: string; a: string; link?: { to: string; label: string } }[] = [
   {
@@ -23,7 +24,7 @@ const QUESTIONS: { q: string; a: string; link?: { to: string; label: string } }[
   {
     q: `What does ${brand.plusName} cost?`,
     a: `Founding members get it free for ${count(rules.founding.plusMonths, 'month')}, with no card needed. After that you move to the free plan on your own, and you can stop ${brand.plusName} any time in one tap.`,
-    link: { to: '/profile?tab=plus', label: `About ${brand.plusName}` },
+    link: { to: plusLink('help'), label: `About ${brand.plusName}` },
   },
   {
     q: 'I forgot my password',

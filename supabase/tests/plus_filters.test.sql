@@ -42,8 +42,8 @@ delete from public.entitlements where source = 'founding';
 
 select pg_temp.sign_in_as(pg_temp.m(1));
 select is(public.i_have_plus(), false, 'Ann starts on the free plan');
-select results_eq('select display_name from public.suggest_by_interests() order by display_name', $$values ('Bob'::text), ('Cat'), ('Dee')$$,
-  'on the free plan, Sodalis+ filters are ignored');
+select results_eq('select display_name from public.suggest_by_interests() order by display_name', $$values ('Bob'::text)$$,
+  'travel-style filters work on the free plan too (round 8, 23 Oct)');
 select is(public.requests_left_this_week(), 5, 'free members get 5 requests a week');
 select throws_ok($$insert into public.entitlements (profile_id, plan) values (pg_temp.m(1), 'plus')$$, '42501', null, 'members cannot give themselves Sodalis+');
 reset role;

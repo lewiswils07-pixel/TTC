@@ -38,7 +38,7 @@ export function MyTrips() {
       )}
       {trips === undefined && !error && <SkeletonRows rows={2} label="Loading your trips…" />}
       {trips && trips.length === 0 && (
-        <EmptyState icon={<BriefcaseBusiness size={18} strokeWidth={2} />} title="No trips yet" text="Add where you’re going and when, and you’ll see members heading the same way.">
+        <EmptyState icon={<BriefcaseBusiness size={18} strokeWidth={2} />} compact title="No trips yet" text="Add where you’re going and when, and you’ll see members heading the same way.">
           <Link className="btn btn-primary btn-block" to="/trips/new">
             Add your first trip
           </Link>
@@ -52,7 +52,7 @@ export function MyTrips() {
               <li key={trip.id}>
                 <Link className="card trip-card" to={`/trips/${trip.id}`}>
                   <span className="trip-card-top">
-                    <CityPhoto city={trip.city.name} width={720} code className="trip-card-photo" />
+                    <CityPhoto city={trip.city.name} country={trip.city.country_code} region={trip.city.region} width={720} code className="trip-card-photo" />
                     <span className="trip-card-when">{startsIn(trip.start_date, trip.end_date)}</span>
                   </span>
                   <span className="trip-card-body">

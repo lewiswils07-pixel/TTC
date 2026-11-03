@@ -62,8 +62,8 @@ select ok((select score - rank between 9.5 and 10.5 from public.suggest_by_inter
 select is_empty($$select 1 from public.suggest_by_interests() where display_name = 'Dee'$$, 'but not people far outside it');
 
 -- ------------------------------------------------------------ trips, free
-select is((select trip_start from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Bob'), date_trunc('month', current_date + 42)::date,
-  'without Sodalis+ a shared trip shows only its month');
+select is((select trip_start from public.suggest_for_trip((select id from ann_trip)) where display_name = 'Bob'), (current_date + 42)::date,
+  'free members see the exact dates too (round 8, 23 Oct)');
 select is((select count(*)::int from public.plan_inspiration()), 0, 'trip plans for inspiration need Sodalis+');
 reset role;
 

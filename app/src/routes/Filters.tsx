@@ -10,7 +10,7 @@ import { hasPlus } from '../lib/plan'
 import { useSession } from '../lib/session-context'
 import { CloseIcon } from '../components/Icons'
 
-/** Who to show in suggestions. The Sodalis+ filters are shown to everyone but only unlock with the plan. */
+/** Who to show in suggestions. Holiday preference filters are shown to everyone but only unlock with Sodalis+. */
 export function Filters() {
   const { session } = useSession()
   const userId = session!.user.id

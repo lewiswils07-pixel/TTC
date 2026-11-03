@@ -305,6 +305,8 @@ export const MAX_PREF_AGE = rules.age.maxPreferred
 // Everyone picks the same number (Lewis: 7 on 5 Oct, 8 from 6 Oct): a fixed
 // number keeps profiles comparable and makes members choose what matters most.
 export const INTERESTS_TO_PICK = rules.interests.pick
+/** The fewest interests a member can pick (testers found 8 a lot to start with, 21 Oct). */
+export const INTERESTS_MIN = rules.interests.min
 
 export function labelFor<T extends string>(options: readonly Option<T>[], value: T | null | undefined): string {
   return options.find((o) => o.value === value)?.label ?? 'Not set'

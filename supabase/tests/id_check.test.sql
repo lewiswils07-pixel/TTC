@@ -1,8 +1,8 @@
--- pgTAP: ID check (Part 28). Only the server records checks; members see
+-- pgTAP: ID check (Part 33). Only the server records checks; members see
 -- their own status and who else has passed, nothing more.
 -- Run with: npx supabase test db
 begin;
-select plan(12);
+select plan(13);
 
 create function pg_temp.sign_in_as(member uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', member, 'role', 'authenticated')::text, true);
@@ -38,7 +38,8 @@ select throws_ok($$select public.id_check_start(auth.uid(), 'mine')$$, '42501', 
 select throws_ok('select * from private.id_checks', '42501', null, 'members cannot read the checks table');
 
 select pg_temp.sign_in_as(pg_temp.m(2));
-select results_eq(format('select * from public.id_checked(array[%L, %L]::uuid[])', pg_temp.m(1), pg_temp.m(2)), format('values (%L::uuid)', pg_temp.m(1)), 'Bob sees that Ann is ID checked');
+select results_eq(format('select * from public.verified_members(array[%L, %L]::uuid[])', pg_temp.m(1), pg_temp.m(2)), format('values (%L::uuid)', pg_temp.m(1)), 'Bob sees that Ann is verified');
+select throws_ok('select public.verify_me_now()', '42883', null, 'the one-tap stand-in is gone');
 select results_eq('select status, tries_left from public.my_id_check()', $$values (null::text, 3)$$, 'Bob has not started a check');
 
 select * from finish();

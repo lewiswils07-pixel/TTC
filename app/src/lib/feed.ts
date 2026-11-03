@@ -3,6 +3,7 @@
 // people, each with gold callouts saying why they're there (Lewis, 5 Oct).
 import { monthName, shortDates } from './dates'
 import { hasPlus } from './plan'
+import { verifiedIds } from './verify'
 import { listLabels, suggestByInterests, suggestForTrip, type InterestSuggestion, type TripSuggestion } from './matching'
 import { listMyTrips } from './trips'
 import { rules } from './rules'
@@ -22,7 +23,7 @@ export type FeedPerson = {
   /** The member's trip this person matched, for the request (the first one if several). */
   trip_id: number | null
   /** Their trip's dates. `overlap` is true when they're there at the same time as you, not just on nearby dates.
-   *  Without Sodalis+ the server sends only the month (`exact` is false), and `days` (the days you're both there) is null. */
+   *  Exact dates and the days you're both there are free for everyone (round 8, 23 Oct). */
   /** Their trips near yours; `mine` is the id of your trip it matched. */
   trips: { city: string; start: string; end: string; overlap: boolean; exact: boolean; days: { start: string; end: string } | null; mine?: number }[]
   shared_interests: string[]
@@ -30,6 +31,8 @@ export type FeedPerson = {
   distance_km: number | null
   /** Used the app in the last day (rules.connections.recentlyOnlineHours). */
   online: boolean
+  /** Has the Verified badge (round 8, 23 Oct). */
+  verified: boolean
 }
 
 /** Shared interests needed for the “Similar interests” callout (out of the ones each member picks). */
@@ -60,6 +63,7 @@ export function mergeFeed(byTrip: { tripId: number; people: TripSuggestion[] }[]
     shared_places: [],
     distance_km: null,
     online: false,
+    verified: false,
   })
   for (const { tripId, people: list } of byTrip) {
     for (const s of list) {
@@ -68,7 +72,7 @@ export function mergeFeed(byTrip: { tripId: number; people: TripSuggestion[] }[]
       p.score = Math.max(p.score, s.score)
       p.rank = Math.max(p.rank, s.rank)
       const overlap = !!(s.overlap_start && s.overlap_end)
-      p.trips.push({ city: s.trip_city, start: s.trip_start, end: s.trip_end, overlap, exact: plus, days: plus && overlap ? { start: s.overlap_start!, end: s.overlap_end! } : null, mine: tripId })
+      p.trips.push({ city: s.trip_city, start: s.trip_start, end: s.trip_end, overlap, exact: true, days: overlap ? { start: s.overlap_start!, end: s.overlap_end! } : null, mine: tripId })
       p.shared_interests = union(p.shared_interests, s.shared_interests)
       people.set(s.profile_id, p)
     }
@@ -94,8 +98,12 @@ export async function loadFeed(): Promise<FeedPerson[]> {
   const trips = ((await listMyTrips().catch(() => null)) ?? []).slice(0, 5)
   const [byTrip, byInterest, plus] = await Promise.all([Promise.all(trips.map(async (t) => ({ tripId: t.id, people: await suggestForTrip(t.id).catch(() => []) }))), suggestByInterests(), hasPlus()])
   const feed = mergeFeed(byTrip, byInterest, plus)
-  const online = await recentlyOnline(feed.map((p) => p.profile_id))
-  for (const p of feed) p.online = online.has(p.profile_id)
+  const ids = feed.map((p) => p.profile_id)
+  const [online, verified] = await Promise.all([recentlyOnline(ids), verifiedIds(ids)])
+  for (const p of feed) {
+    p.online = online.has(p.profile_id)
+    p.verified = verified.has(p.profile_id)
+  }
   return feed
 }
 
@@ -110,7 +118,7 @@ export async function recentlyOnline(ids: string[]): Promise<Set<string>> {
  *  and dates, coloured by whether it's at the same time as yours. */
 export function callouts(p: FeedPerson, today?: string): Callout[] {
   const lines: Callout[] = p.trips.map((t) =>
-    // Exact dates are Sodalis+ (Lewis, 11 Oct): others see the month.
+    // Exact dates are free (round 8, 23 Oct). A month shows only if the server sends no exact dates.
     !t.exact
       ? { kind: t.overlap ? 'trip' : 'trip-close', text: `Also going to ${t.city} in ${monthName(t.start)}`, hint: t.overlap ? 'around the same time as you' : 'close to your dates' }
       : {
@@ -126,7 +134,7 @@ export function callouts(p: FeedPerson, today?: string): Callout[] {
 }
 
 /** "What you share" with someone, in plain words, strongest first: reasons, not a rating (Lewis, 12 Oct).
- *  `trip` is the trip you're both on; exact days are Sodalis+, others see the month. */
+ *  `trip` is the trip you're both on. */
 export function whatYouShare(p: FeedPerson, trip?: FeedPerson['trips'][number], today?: string, myCity?: string): string[] {
   const lines: string[] = []
   // Their trip is to a place near yours (Maya, 13 Oct: "Both in Cascais" when she was going to Lisbon).
