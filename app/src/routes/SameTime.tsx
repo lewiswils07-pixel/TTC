@@ -73,7 +73,7 @@ export function SameTime() {
       <div className="same-page">
         <div className="same-head">
           <div className="same-top">
-            <Link className="icon-btn" to="/connections" aria-label="Back to Who’s going">
+            <Link className="icon-btn" to="/connections" aria-label="Back to Trips">
               <BackIcon />
             </Link>
           </div>

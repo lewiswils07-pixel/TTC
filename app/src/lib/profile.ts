@@ -3,7 +3,7 @@
 import type { Card } from './card'
 import type { City } from './cities'
 import { friendlyError } from './errors'
-import type { Booking, Budget, DayRhythm, Gender, GroupSize, HolidayPrefs, Moving, Pace, PersonalField, RoomSharing, TravelOften, TravelStyle, Walking } from './options'
+import type { Booking, Budget, DayRhythm, Gender, GroupSize, HolidayPrefs, Moving, Pace, RoomSharing, TravelOften, TravelStyle, Walking } from './options'
 import { supabase } from './supabase'
 
 export type Interest = { id: number; slug: string; label: string; category_label?: string | null }
@@ -50,10 +50,6 @@ export type Preferences = {
 
 /** Profile extras from Lewis's 11 Oct list (database Part 20). */
 export type More = {
-  sexuality: string | null
-  religion: string | null
-  ethnicity: string | null
-  shown_fields: PersonalField[]
   holiday_prefs: HolidayPrefs
   photo_book: string[]
 }
@@ -73,7 +69,7 @@ export async function getMyProfile(userId: string): Promise<MyProfile> {
     supabase.from('preferences').select('age_min, age_max, genders, max_distance_km, age_flexible, distance_flexible').eq('profile_id', userId).single(),
     // Read on its own so the rest of the profile still loads before the card columns exist.
     supabase.from('profiles').select('card_answers').eq('id', userId).single(),
-    supabase.from('profiles').select('sexuality, religion, ethnicity, shown_fields, holiday_prefs, photo_book').eq('id', userId).single(),
+    supabase.from('profiles').select('holiday_prefs, photo_book').eq('id', userId).single(),
   ])
   const error = profile.error ?? interests.error ?? preferences.error
   if (error) throw friendlyError(error)

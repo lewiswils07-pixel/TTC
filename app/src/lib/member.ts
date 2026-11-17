@@ -82,14 +82,11 @@ async function basicProfile(profileId: string): Promise<MemberProfile | null> {
 
 /** The extras on someone's card and profile (Lewis, 11 Oct). Holiday
  *  preferences come only with Sodalis+; `holiday_locked` says there are some
- *  to see. Personal details only when the member chose to show them. */
+ *  to see. */
 export type MemberExtras = {
   photo_book: string[]
   holiday_prefs: HolidayPrefs | null
   holiday_locked: boolean
-  sexuality: string | null
-  religion: string | null
-  ethnicity: string | null
   moving: string | null
   travel_often: string | null
   booking: string | null

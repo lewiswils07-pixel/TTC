@@ -73,7 +73,7 @@ export function Filters() {
         <h1 ref={heading} tabIndex={-1}>
           Filters
         </h1>
-        <Link className="icon-btn sheet-close" to="/connections" aria-label="Close filters, back to Who’s going">
+        <Link className="icon-btn sheet-close" to="/connections" aria-label="Close filters, back to Trips">
           <CloseIcon size={22} />
         </Link>
       </div>

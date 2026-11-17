@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { cityLabel } from '../src/lib/cities'
-import { DISTANCE_MILES, GENDERS, ageFromDate, ageLabel, distanceLabel, distanceStop, labelFor, latestBirthYear, milesToKm } from '../src/lib/options'
+import { DISTANCE_MILES, GENDERS, ageBand, ageFromDate, ageLabel, distanceLabel, distanceStop, labelFor, latestBirthYear, milesToKm } from '../src/lib/options'
 import { firstUnfinishedStep } from '../src/lib/onboarding'
 import type { MyProfile, Profile } from '../src/lib/profile'
 
@@ -90,5 +90,16 @@ describe('distance slider', () => {
   it('saves no limit as any distance', () => {
     expect(distanceLabel(null)).toBe('Any distance')
     expect(distanceStop(null)).toBe(DISTANCE_MILES.length - 1)
+  })
+})
+
+describe('ageBand', () => {
+  const now = new Date('2026-11-17')
+  it('needs at least 3 known ages', () => {
+    expect(ageBand([1996, null, 1990], now)).toBeNull()
+  })
+  it('gives the usual range, leaving out the youngest and oldest fifth', () => {
+    expect(ageBand([2001, 1998, 1995, 1993, 1960], now)).toBe('Mostly 28–33')
+    expect(ageBand([1996, 1996, 1996], now)).toBe('Mostly 30')
   })
 })

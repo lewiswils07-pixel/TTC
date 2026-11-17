@@ -12,7 +12,7 @@ import { PageBack } from '../components/PageBack'
 const YOU: { to: string; title: string; text?: string }[] = [
   { to: '/account', title: 'Account and data', text: 'Password, download your data, delete your account' },
   { to: '/settings/privacy', title: 'Privacy choices' },
-  { to: '/filters', title: 'Filters', text: 'Who you see on Who’s going' },
+  { to: '/filters', title: 'Filters', text: 'Who you see on Trips' },
   { to: '/requests#blocked', title: 'Blocked members' },
 ]
 const HELP: { to: string; title: string; text?: string }[] = [

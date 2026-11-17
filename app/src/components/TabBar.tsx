@@ -1,22 +1,24 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import { NavLink } from 'react-router'
-import { BriefcaseBusiness, Compass, MessageCircle, UserRound, type LucideIcon } from 'lucide-react'
+import { MessageCircle, Plane, UserRound, type LucideIcon } from 'lucide-react'
 import { cachedTabCounts, loadTabCounts, type Tab } from '../lib/tabCounts'
 
 export type { Tab }
 
+// Three tabs (Lewis, 17 Nov: simpler than Rory's emails). Trips is who's going and your own trips together.
 const TABS: { tab: Tab; to: string; label: string; Icon: LucideIcon }[] = [
-  { tab: 'connections', to: '/connections', label: 'Who’s going', Icon: Compass },
-  { tab: 'trips', to: '/trips', label: 'Trips', Icon: BriefcaseBusiness },
-  { tab: 'chat', to: '/messages', label: 'Chat', Icon: MessageCircle },
-  { tab: 'profile', to: '/profile', label: 'Profile', Icon: UserRound },
+  { tab: 'connections', to: '/connections', label: 'Trips', Icon: Plane },
+  { tab: 'chat', to: '/messages', label: 'Chats', Icon: MessageCircle },
+  { tab: 'profile', to: '/profile', label: 'Me', Icon: UserRound },
 ]
 
 /** The tab the slider last sat under. Each screen draws its own bar, so this lets the new bar slide over from the old tab. */
 let lastShown: number | null = null
 
 /** The bar along the bottom of the main screens on a phone, or along the top on a laptop. */
-export function TabBar({ current, top = false }: { current: Tab; top?: boolean }) {
+export function TabBar({ current: shown, top = false }: { current: Tab; top?: boolean }) {
+  // Your own trips pages sit under the Trips tab.
+  const current: Tab = shown === 'trips' ? 'connections' : shown
   const [counts, setCounts] = useState<Partial<Record<Tab, number>>>(cachedTabCounts() ?? {})
   const index = TABS.findIndex((t) => t.tab === current)
   const [slider, setSlider] = useState(lastShown ?? index)

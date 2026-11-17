@@ -173,7 +173,7 @@ export function MemberProfile() {
           <CardBack name={member.display_name} answers={member.card_answers} />
         </section>
 
-        {extras && (extras.photo_book.length > 0 || extras.holiday_prefs || extras.holiday_locked || extras.sexuality || extras.religion || extras.ethnicity) && (
+        {extras && (extras.photo_book.length > 0 || extras.holiday_prefs || extras.holiday_locked) && (
           <section className="card person-section member-extras" aria-label={`More about ${member.display_name}`}>
             <ProfileExtras extras={extras} name={member.display_name} headingLevel={3} />
           </section>

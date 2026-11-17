@@ -15,21 +15,8 @@ import type { City } from '../lib/cities'
 import { rules } from '../lib/rules'
 import { MAX_TRIP_DAYS, checkTripDates } from '../lib/validation'
 import { messageOf } from '../lib/errors'
-import {
-  groupPeople,
-  groupSettings,
-  inviteToGroup,
-  isTripGroup,
-  leaveGroup,
-  MAX_GROUP,
-  myGroups,
-  respondToInvite,
-  setGroupTrip,
-  type Group,
-  type GroupPerson,
-  type GroupSettings,
-} from '../lib/groups'
-import { ageLabel } from '../lib/options'
+import { groupPeople, groupSettings, inviteToGroup, isTripGroup, leaveGroup, MAX_GROUP, myGroups, respondToInvite, setGroupTrip, type Group, type GroupPerson, type GroupSettings } from '../lib/groups'
+import { ageLabel, ageBand } from '../lib/options'
 import { useSession } from '../lib/session-context'
 import { SkeletonRows } from '../components/Skeleton'
 
@@ -107,6 +94,7 @@ export function GroupDetail() {
   const others = people.filter((p) => p.profile_id !== me)
   const trip = isTripGroup(group) ? group : null
   const chat = joined && group.conversation_id ? `/messages/${group.conversation_id}` : null
+  const band = ageBand(people.filter((p) => p.status === 'joined').map((p) => p.birth_year))
 
   return (
     <Layout tab="chat">
@@ -137,6 +125,7 @@ export function GroupDetail() {
               </span>
             )}
             {settings?.open && <span className="trip-pill trip-pill-dark">Open to join</span>}
+            {band && <span className="trip-pill trip-pill-dark">{band}</span>}
           </p>
         </div>
       </div>

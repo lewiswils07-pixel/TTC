@@ -240,7 +240,7 @@ function MyProfilePanel({ data }: { data: MyProfile }) {
           {interestedInText(preferences.genders) === 'Everyone' ? 'Anyone' : interestedInText(preferences.genders)}, aged {preferences.age_min} to{' '}
           {preferences.age_max >= MAX_PREF_AGE ? `${MAX_PREF_AGE}+` : preferences.age_max}
         </p>
-        <p className="hint">Who you see on Who’s going. Change it any time in Filters.</p>
+        <p className="hint">Who you see on Trips. Change it any time in Filters.</p>
       </ProfileSection>
       <Link className="plus-row" to={plusLink('profile')}>
         <span className="plus-row-icon" aria-hidden="true">

@@ -81,9 +81,6 @@ export function CardPreview() {
               // Others see these with Sodalis+.
               holiday_prefs: data.more.holiday_prefs,
               holiday_locked: false,
-              sexuality: data.more.shown_fields.includes('sexuality') ? data.more.sexuality : null,
-              religion: data.more.shown_fields.includes('religion') ? data.more.religion : null,
-              ethnicity: data.more.shown_fields.includes('ethnicity') ? data.more.ethnicity : null,
               moving: profile.moving,
               travel_often: profile.travel_often,
               booking: profile.booking,

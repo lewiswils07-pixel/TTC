@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { brand } from '../lib/brand'
 import type { MemberExtras } from '../lib/member'
-import { HOLIDAY_QUESTIONS, PERSONAL_FIELDS, type HolidayPrefs } from '../lib/options'
+import { HOLIDAY_QUESTIONS, type HolidayPrefs } from '../lib/options'
 import { usePhotoUrl } from '../lib/photo'
 import { plusLink } from '../lib/plan'
 
@@ -27,16 +27,10 @@ export function HolidayChips({ prefs }: { prefs: HolidayPrefs }) {
 /** Twin-room sharing, on cards (survey: to avoid paying the single supplement). "Own room" isn't shown. */
 const ROOM_LINE: Record<string, string> = { share: 'Happy to share a twin room', unsure: 'Might share a twin room' }
 
-/** Twin-room sharing, holiday preferences, photo book and anything personal they chose to show. */
+/** Twin-room sharing, holiday preferences and photo book. */
 export function ProfileExtras({ extras, name, headingLevel = 4 }: { extras: MemberExtras | null; name: string; headingLevel?: 3 | 4 }) {
   if (!extras) return null
   const H = `h${headingLevel}` as 'h3' | 'h4'
-  const personal = [
-    ...PERSONAL_FIELDS.flatMap((f) => {
-      const label = f.options.find((o) => o.value === extras[f.key])?.label
-      return label ? [{ key: f.key, label }] : []
-    }),
-  ]
   const room = ROOM_LINE[extras.room_sharing ?? '']
   return (
     <>
@@ -57,15 +51,6 @@ export function ProfileExtras({ extras, name, headingLevel = 4 }: { extras: Memb
         <Link className="plus-teaser" to={plusLink('card')}>
           <span className="tag tag-plus">{brand.plusName}</span> See how {name} likes to holiday
         </Link>
-      )}
-      {personal.length > 0 && (
-        <ul className="chip-list personal-tags" aria-label={`More about ${name}`}>
-          {personal.map((p) => (
-            <li key={p.key} className="tag">
-              {p.label}
-            </li>
-          ))}
-        </ul>
       )}
     </>
   )

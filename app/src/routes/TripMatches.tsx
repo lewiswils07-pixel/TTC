@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { SafetyPromise } from '../components/SafetyPromise'
 import { EmptyState } from '../components/EmptyState'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { Layout, Loading } from '../components/Layout'
@@ -169,8 +170,8 @@ export function TripMatches() {
                 title="No connections here yet"
                 text={
                   going > 0
-                    ? `${going === 1 ? '1 member is' : `${going} members are`} going to ${trip.city.name}. Meet them one at a time on Who’s going. Once you connect, they’ll show here.`
-                    : `Meet members going to ${trip.city.name} one at a time on Who’s going. Once you connect, they’ll show here.`
+                    ? `${going === 1 ? '1 member is' : `${going} members are`} going to ${trip.city.name}. Meet them one at a time on Trips. Once you connect, they’ll show here.`
+                    : `Meet members going to ${trip.city.name} one at a time on Trips. Once you connect, they’ll show here.`
                 }
                 level={3}
                 compact
@@ -181,6 +182,7 @@ export function TripMatches() {
               </EmptyState>
             )}
             <OpenGroups cityId={trip.city_id} title={`Groups going to ${trip.city.name}`} />
+            <SafetyPromise compact />
           </>
         )}
       </div>

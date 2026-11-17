@@ -10,7 +10,7 @@ import { plusLink } from '../lib/plan'
 const QUESTIONS: { q: string; a: string; link?: { to: string; label: string } }[] = [
   {
     q: 'How do I meet people?',
-    a: 'Add a trip and we’ll show you members going to the same place at the same time. Or browse Who’s going and tap Connect on anyone you’d like to travel with.',
+    a: 'Add a trip and we’ll show you members going to the same place at the same time. Or browse Trips and tap Connect on anyone you’d like to travel with.',
     link: { to: '/trips/new', label: 'Add a trip' },
   },
   {
