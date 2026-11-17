@@ -31,17 +31,15 @@ import {
   INTERESTS_TO_PICK,
   MONTHS,
   HOLIDAY_QUESTIONS,
-  PERSONAL_FIELDS,
   ROOM_SHARING,
   STYLE_QUESTIONS,
   type Gender,
   type HolidayPrefs,
-  type PersonalField,
 } from '../lib/options'
 import { addBookPhoto, photoUrl, preparePhoto, removeBookPhoto, uploadPhoto, usePhotoUrl } from '../lib/photo'
 import { forgetExtras } from '../lib/member'
 import { useConfirm } from '../lib/useConfirm'
-import { finishOnboarding, listInterests, myDiet, saveAboutMe, saveBasics, saveDiet, saveInterests, saveMore, saveStyleAndPreferences, type Interest, type More, type MyProfile } from '../lib/profile'
+import { finishOnboarding, listInterests, myDiet, saveAboutMe, saveBasics, saveDiet, saveInterests, saveMore, saveStyleAndPreferences, type Interest, type MyProfile } from '../lib/profile'
 import { useSession } from '../lib/session-context'
 import { useChecks } from '../lib/useChecks'
 import { useMyProfile } from '../lib/useMyProfile'
@@ -49,7 +47,7 @@ import { birthDate, checkBirthDate, checkChosen, checkInterests, checkName } fro
 
 const STEPS = [
   { title: 'About you', heading: 'About you', intro: 'Other members see your first name, age and home town. Your date of birth and email always stay private.' },
-  { title: 'How you travel', heading: 'How do you like to travel?', intro: 'This helps you find people who’d enjoy the same trip. Change it any time.' },
+  { title: 'Interests', heading: 'What do you love doing?', intro: 'This helps you find people who’d enjoy the same trip. Change it any time.' },
   { title: 'Your wish list', heading: 'Where would you love to go?', intro: 'Add a few places. Members who dream of the same ones will see you share them.' },
 ] as const satisfies readonly { title: string; heading: string; intro: string }[]
 /** Sign-up is 2 short screens (round 8 testers, 23 Oct: "let me in first, ask the rest later"). The same screens edit the
@@ -557,8 +555,6 @@ type StyleAnswers = Record<(typeof STYLE_QUESTIONS)[number]['key'], string[]>
 /** Interests and travel style on one screen (Claude Design, 15 Oct). After sign-up it also edits holiday preferences and the rest. */
 /** The design's order: money and planning first, then how the days feel (Claude Design, 17 Oct). */
 const STEP_STYLE_ORDER = ['budget', 'travel_style', 'pace', 'moving', 'travel_often', 'booking', 'group_size'] as const
-/** Sign-up asks only these two; the rest come later from the profile (round 8 testers, 23 Oct). */
-const SIGNUP_STYLE = ['budget', 'pace'] as const
 
 function TravelStep({ userId, data, interests, onDone }: StepProps & { interests: Interest[] }) {
   const p = data.profile
@@ -573,12 +569,6 @@ function TravelStep({ userId, data, interests, onDone }: StepProps & { interests
   const [travellingWith, setTravellingWith] = useState(p.travelling_with ?? '')
   const [room, setRoom] = useState<string[]>(p.room_sharing ? [p.room_sharing] : [])
   const [holiday, setHoliday] = useState<HolidayPrefs>(() => more?.holiday_prefs ?? {})
-  const [personal, setPersonal] = useState<Pick<More, PersonalField | 'shown_fields'>>(() => ({
-    sexuality: more?.sexuality ?? null,
-    religion: more?.religion ?? null,
-    ethnicity: more?.ethnicity ?? null,
-    shown_fields: more?.shown_fields ?? [],
-  }))
   const [diet, setDiet] = useState<string[] | null>(null)
   useEffect(() => {
     myDiet(userId).then(setDiet, () => setDiet([]))
@@ -604,7 +594,7 @@ function TravelStep({ userId, data, interests, onDone }: StepProps & { interests
       },
       prefs,
     )
-    if (editing && more) await saveMore(userId, { ...personal, shown_fields: personal.shown_fields.filter((f) => personal[f]), holiday_prefs: holiday })
+    if (editing && more) await saveMore(userId, { holiday_prefs: holiday })
     if (editing && diet) await saveDiet(userId, diet)
   }, onDone)
 
@@ -626,20 +616,21 @@ function TravelStep({ userId, data, interests, onDone }: StepProps & { interests
         <InterestPicker interests={interests} selected={selected} onChange={setSelected} max={INTERESTS_TO_PICK} error={shown('interests')} />
       </section>
 
-      {/* All optional, and there are no wrong answers. */}
-      <section className="step-section" aria-labelledby="style-heading">
-        <h2 id="style-heading" className="step-section-title">
-          Your travel style
-        </h2>
-        {(editing ? STEP_STYLE_ORDER : SIGNUP_STYLE)
-          .map((key) => STYLE_QUESTIONS.find((q) => q.key === key)!)
-          .map((q) => (
+      {/* All optional, and there are no wrong answers. Sign-up is only interests (Lewis, 17 Nov: in and done in a minute). */}
+      {editing ? (
+        <section className="step-section" aria-labelledby="style-heading">
+          <h2 id="style-heading" className="step-section-title">
+            Your travel style
+          </h2>
+          {STEP_STYLE_ORDER.map((key) => STYLE_QUESTIONS.find((q) => q.key === key)!).map((q) => (
             <ChipChoice<string> key={q.key} name={q.key} legend={q.label} options={q.options} selected={style[q.key]} onChange={(v) => setStyle((x) => ({ ...x, [q.key]: v }))} grid />
           ))}
-        {/* Survey: sharing a twin room saves the single supplement. Shown on your card. */}
-        {editing && <ChipChoice<string> name="room_sharing" legend="Happy to share a twin room?" options={ROOM_SHARING} selected={room} onChange={setRoom} grid />}
-        {!editing && <p className="hint">You can add the rest of your travel style later, from your profile.</p>}
-      </section>
+          {/* Survey: sharing a twin room saves the single supplement. Shown on your card. */}
+          <ChipChoice<string> name="room_sharing" legend="Happy to share a twin room?" options={ROOM_SHARING} selected={room} onChange={setRoom} grid />
+        </section>
+      ) : (
+        <p className="hint">That’s all for now. Add your travel style and a few words later, from Me.</p>
+      )}
 
       {editing && more && (
         <section className="card form-card" aria-labelledby="holiday-heading">
@@ -697,40 +688,6 @@ function TravelStep({ userId, data, interests, onDone }: StepProps & { interests
             value={travellingWith}
             onChange={(e) => setTravellingWith(e.target.value)}
           />
-          {more && (
-            <>
-              <p className="hint">These three stay hidden unless you choose to show them on your profile.</p>
-              {PERSONAL_FIELDS.map((f) => (
-                <div className="personal-field" key={f.key}>
-                  <Field name={f.key} label={f.label}>
-                    {({ id, describedBy }) => (
-                      <Dropdown
-                        id={id}
-                        placeholder="Prefer not to say"
-                        value={personal[f.key] ?? ''}
-                        describedBy={describedBy}
-                        groups={[{ options: [...(personal[f.key] ? [{ value: '', label: 'Prefer not to say' }] : []), ...f.options.map((o) => ({ value: o.value, label: o.label }))] }]}
-                        onChange={(v) => setPersonal((x) => ({ ...x, [f.key]: v || null, shown_fields: v ? x.shown_fields : x.shown_fields.filter((k) => k !== f.key) }))}
-                      />
-                    )}
-                  </Field>
-                  {personal[f.key] && (
-                    <label className="switch-row switch-row-end">
-                      <input
-                        type="checkbox"
-                        role="switch"
-                        checked={personal.shown_fields.includes(f.key)}
-                        onChange={(e) => setPersonal((x) => ({ ...x, shown_fields: e.target.checked ? [...x.shown_fields, f.key] : x.shown_fields.filter((k) => k !== f.key) }))}
-                      />
-                      <span>
-                        <strong>{personal.shown_fields.includes(f.key) ? 'Shown on your profile' : 'Hidden'}</strong>
-                      </span>
-                    </label>
-                  )}
-                </div>
-              ))}
-            </>
-          )}
         </section>
       )}
 

@@ -1,5 +1,6 @@
 import { Link, Navigate } from 'react-router'
 import { Layout, Loading, Logo } from '../components/Layout'
+import { SafetyPromise } from '../components/SafetyPromise'
 import { brand } from '../lib/brand'
 import { useSession } from '../lib/session-context'
 
@@ -38,6 +39,7 @@ export function Home() {
             ))}
           </ol>
         </section>
+        <SafetyPromise />
         <p className="hint center">Free to join. Once you’re in, you stay signed in.</p>
         <Link className="btn btn-primary btn-block btn-lg" to="/sign-in?join">
           Join

@@ -1,7 +1,7 @@
 import { AddIcon, BackIcon, CloseIcon, MoreIcon } from '../components/Icons'
 import { ArrowUp, Ban, BriefcaseBusiness, ClipboardList, Flag, MapPin, ShieldCheck, UserRound, UsersRound } from 'lucide-react'
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { Avatar } from '../components/Avatar'
 import { refreshTabCounts } from '../lib/tabCounts'
 import { Layout, Loading } from '../components/Layout'
@@ -30,6 +30,7 @@ import { tripsTogether, type TripTogether } from '../lib/together'
 import { guideSeen, markGuideSeen } from '../lib/meet'
 import { useSession } from '../lib/session-context'
 import { ageLabel } from '../lib/options'
+import { useMyProfile } from '../lib/useMyProfile'
 
 /** One conversation: messages oldest to newest, new ones arriving live, and a box to reply. */
 export function Chat() {
@@ -46,6 +47,10 @@ export function Chat() {
   const [groupInfo, setGroupInfo] = useState<Group | null>(null)
   const [datesOpen, setDatesOpen] = useState(false)
   const [together, setTogether] = useState('')
+  // Straight from joining a group (Lewis, 17 Nov): say what happened, and offer a ready-made hello.
+  const arrived = useLocation().state as { hello?: boolean; message?: string } | null
+  const myProfile = useMyProfile(me).data?.profile
+  const [draft, setDraft] = useState<{ text: string } | null>(null)
 
   const [senders, setSenders] = useState<Map<string, string>>(new Map())
   const sendersRef = useRef(senders)
@@ -203,7 +208,12 @@ export function Chat() {
               Show earlier messages
             </button>
           )}
-          {messages.length === 0 && <p className="hint chat-empty">{group ? 'This is your group chat. Say hello!' : 'You’re connected. Say hello!'}</p>}
+          {arrived?.message && (
+            <p className="notice notice-success" role="status">
+              {arrived.message}
+            </p>
+          )}
+          {messages.length === 0 && !group && <p className="hint chat-empty">You’re connected. Say hello!</p>}
           <ol className="message-list" ref={list} aria-live="polite" aria-relevant="additions">
             {messages.map((m, i) => {
               const mine = m.sender_id === me
@@ -246,10 +256,19 @@ export function Chat() {
               )
             })}
           </ol>
+          {group && other.can_message && !messages.some((m) => m.sender_id === me) && (
+            <div className="card chat-hello">
+              <strong>Say hello to the group</strong>
+              <p>Only members of this group can read this chat. Your phone number and email stay private.</p>
+              <button type="button" className="btn btn-secondary btn-small" onClick={() => setDraft({ text: helloText(myProfile?.display_name, myProfile?.home_city?.name, groupInfo?.city) })}>
+                Write a hello for me
+              </button>
+            </div>
+          )}
         </section>
 
         {other.can_message ? (
-          <Composer conversationId={conversationId} name={group ? 'the group' : other.display_name} onSent={add} onMore={() => setMenuOpen(true)} />
+          <Composer conversationId={conversationId} name={group ? 'the group' : other.display_name} onSent={add} onMore={() => setMenuOpen(true)} draft={draft} />
         ) : (
           <p className="notice">This conversation has ended. You can still read it.</p>
         )}
@@ -426,12 +445,27 @@ function GroupDatesView({ group, me }: { group: Group & { city: string; start_da
   )
 }
 
-function Composer({ conversationId, name, onSent, onMore }: { conversationId: number; name: string; onSent: (m: Message[]) => void; onMore: () => void }) {
+/** A first message for a new group: who you are and where from. They can change it before sending. */
+function helloText(name?: string | null, home?: string | null, city?: string | null) {
+  const me = name ? `I’m ${name}${home ? ` from ${home}` : ''}` : 'I’ve just joined'
+  return `Hi everyone, ${me}. ${city ? `Really looking forward to ${city}!` : 'Looking forward to getting to know you all!'}`
+}
+
+function Composer({ conversationId, name, onSent, onMore, draft }: { conversationId: number; name: string; onSent: (m: Message[]) => void; onMore: () => void; draft?: { text: string } | null }) {
   const { session } = useSession()
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const box = useRef<HTMLTextAreaElement>(null)
+  // A suggested message fills the box, ready to edit and send.
+  const [lastDraft, setLastDraft] = useState(draft)
+  if (draft !== lastDraft) {
+    setLastDraft(draft)
+    if (draft) setText(draft.text)
+  }
+  useEffect(() => {
+    if (draft) box.current?.focus()
+  }, [draft])
 
   async function send() {
     const body = text.trim()

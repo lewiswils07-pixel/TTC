@@ -14,7 +14,7 @@ const STEPS: { icon: string; title: string; text: string }[] = [
   {
     icon: '✈',
     title: 'Travel groups',
-    text: 'Start a travel group for a trip from Who’s going and invite your connections.',
+    text: 'Start a travel group for a trip from Trips and invite your connections.',
   },
   {
     icon: '✓',

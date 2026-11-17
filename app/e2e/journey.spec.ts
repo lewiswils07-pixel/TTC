@@ -46,6 +46,7 @@ test('a new member joins, connects, chats, plans with a group, and reports', asy
   let other = ''
   await test.step('add a trip and ask someone going too', async () => {
     await a.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Trips' }).click()
+    await a.goto('/trips')
     await a.getByRole('link', { name: 'Add your first trip' }).click()
     await pickPlace(a, 'Pari', /Paris, France/)
     await pickDates(a, isoIn(20), isoIn(50))

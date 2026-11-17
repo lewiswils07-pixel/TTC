@@ -92,6 +92,12 @@ export async function myGroups(): Promise<Group[] | null> {
   return (data ?? []) as Group[]
 }
 
+/** Where to go after joining a group: straight into its chat (Lewis, 17 Nov), or the group page if the chat isn't found. */
+export async function afterJoining(groupId: number): Promise<string> {
+  const chat = (await myGroups().catch(() => null))?.find((g) => g.id === groupId)?.conversation_id
+  return chat ? `/messages/${chat}` : `/groups/${groupId}`
+}
+
 export async function groupsICanStart(): Promise<number> {
   const { data, error } = await supabase.rpc('groups_i_can_start')
   if (error) throw friendlyError(error)

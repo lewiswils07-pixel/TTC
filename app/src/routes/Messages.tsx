@@ -30,7 +30,7 @@ export function Messages() {
   return (
     <Layout tab="chat">
       <h1 ref={heading} tabIndex={-1}>
-        Chat
+        Chats
       </h1>
       <ChatNav current="/messages" />
       {done && (

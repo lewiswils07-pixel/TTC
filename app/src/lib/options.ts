@@ -171,8 +171,8 @@ export const DIETS = [
 ] as const satisfies readonly Option<string>[]
 export const MAX_LANGUAGES = rules.profile.languagesMax
 
-// More about you (Lewis, 11 Oct): all optional, and hidden unless the member
-// chooses to show them on their profile.
+// No longer asked or shown (Lewis, 17 Nov: simpler, and friendship first). The lists stay only
+// because the database still checks old answers against them until those are cleared (Part 34).
 export const SEXUALITIES = [
   { value: 'straight', label: 'Straight' },
   { value: 'gay', label: 'Gay' },
@@ -212,13 +212,6 @@ export const ETHNICITIES = [
   { value: 'white', label: 'White' },
   { value: 'another', label: 'Another ethnicity' },
 ] as const satisfies readonly Option<string>[]
-
-export type PersonalField = 'sexuality' | 'religion' | 'ethnicity'
-export const PERSONAL_FIELDS: readonly { key: PersonalField; label: string; options: readonly Option<string>[] }[] = [
-  { key: 'sexuality', label: 'Sexual orientation', options: SEXUALITIES },
-  { key: 'religion', label: 'Religion', options: RELIGIONS },
-  { key: 'ethnicity', label: 'Ethnicity', options: ETHNICITIES },
-]
 
 /** Holiday preferences (Lewis, 11 Oct): pick as many as apply, since trips
  *  vary. Not used for matching; seeing other people's is a Sodalis+ feature. */
@@ -322,6 +315,20 @@ export function latestBirthYear(now = new Date()): number {
 export function ageLabel(birthYear: number | null, now = new Date()): string {
   if (!birthYear) return 'Not set'
   return String(now.getFullYear() - birthYear)
+}
+
+/** The usual ages in a group, like "Mostly 25–35" (Lewis, 17 Nov). Leaves out the youngest and oldest
+ *  fifth so one person doesn't stretch it. Null with fewer than 3 known ages. */
+export function ageBand(birthYears: readonly (number | null)[], now = new Date()): string | null {
+  const ages = birthYears
+    .filter((y): y is number => !!y)
+    .map((y) => now.getFullYear() - y)
+    .sort((a, b) => a - b)
+  if (ages.length < 3) return null
+  const cut = Math.floor(ages.length / 5)
+  const low = ages[cut]
+  const high = ages[ages.length - 1 - cut]
+  return low === high ? `Mostly ${low}` : `Mostly ${low}–${high}`
 }
 
 /** Exact age from a YYYY-MM-DD date of birth. */

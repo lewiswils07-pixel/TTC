@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router'
 import { shortDates } from '../lib/dates'
 import { CityPhoto } from './CityPhoto'
 import { messageOf } from '../lib/errors'
-import { joinOpenGroup, openGroups, type OpenGroup } from '../lib/groups'
+import { afterJoining, joinOpenGroup, openGroups, type OpenGroup } from '../lib/groups'
 
 /** Travel groups anyone who fits can join (Lewis, 13 Oct). On a trip page, `cityId` shows only groups going there. Hidden when there are none. */
 export function OpenGroups({ cityId, title = 'Groups you can join' }: { cityId?: number; title?: string }) {
@@ -22,7 +22,7 @@ export function OpenGroups({ cityId, title = 'Groups you can join' }: { cityId?:
     try {
       await joinOpenGroup(g.id)
       // Joining adds the group's dates to your trips unless you already have one there then (Kai, 13 Oct: say so).
-      navigate(`/groups/${g.id}`, { state: { message: `You’ve joined ${g.name}. ${g.city} ${shortDates(g.start_date, g.end_date)} is now in your trips.` } })
+      navigate(await afterJoining(g.id), { state: { hello: true, message: `You’ve joined ${g.name}. ${g.city} ${shortDates(g.start_date, g.end_date)} is now in your trips.` } })
     } catch (e) {
       setError(messageOf(e))
       setBusy(null)

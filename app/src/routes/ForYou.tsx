@@ -25,7 +25,7 @@ import { groupsICanStart, myGroups, type Group } from '../lib/groups'
 import { noteFirstMatch } from '../lib/kpis'
 import { plusLink, requestsLeftText } from '../lib/plan'
 import { fitWords, homeLabel, listLabels, LOTS_IN_COMMON } from '../lib/matching'
-import { ageLabel, BOOKING, GROUP_SIZES, HOLIDAY_QUESTIONS, INTERESTS_TO_PICK, labelFor, MOVING, PERSONAL_FIELDS, ROOM_SHARING, TRAVEL_OFTEN } from '../lib/options'
+import { ageBand, ageLabel, BOOKING, GROUP_SIZES, HOLIDAY_QUESTIONS, INTERESTS_TO_PICK, labelFor, MOVING, ROOM_SHARING, TRAVEL_OFTEN } from '../lib/options'
 import { preloadPhotos, usePhotoUrl } from '../lib/photo'
 import { count, roughly } from '../lib/rules'
 import { useSession } from '../lib/session-context'
@@ -217,7 +217,7 @@ export function ForYou() {
           <Logo height={46} />
         </span>
         <h1 ref={heading} tabIndex={-1} className="visually-hidden">
-          Who’s going
+          Trips and who’s going
         </h1>
         <FilterButton userId={me} onChanged={refresh} />
       </div>
@@ -241,10 +241,17 @@ export function ForYou() {
           <section aria-labelledby="your-trips" className="going-trips-bar">
             <div className="going-head">
               <h2 id="your-trips">Your trips</h2>
-              <Link className="going-head-link" to="/trips/new">
-                <AddIcon />
-                Add a trip
-              </Link>
+              <span className="going-head-links">
+                {myTrips.length > 0 && (
+                  <Link className="going-head-link" to="/trips">
+                    See all
+                  </Link>
+                )}
+                <Link className="going-head-link" to="/trips/new">
+                  <AddIcon />
+                  Add a trip
+                </Link>
+              </span>
             </div>
             {trips.length > 0 ? (
               // Tap a trip to meet only the people going there; tap it again for everyone (Lewis, 12 Oct).
@@ -260,6 +267,7 @@ export function ForYou() {
                           <strong>{g.city}</strong>
                           <span>
                             {mine ? shortDates(mine.start_date, mine.end_date) : monthName(g.people[0].trips.find((t) => placeOf(t) === g.city)!.start)}
+                            {ageBand(g.people.map((p) => p.birth_year)) && ` · ${ageBand(g.people.map((p) => p.birth_year))}`}
                             {g.people.length > 0 && <span className="visually-hidden">, {g.people.length} to meet</span>}
                           </span>
                         </span>
@@ -611,12 +619,11 @@ function PersonPage(props: CardProps & { onBack: () => void }) {
         return picked.length ? [{ label: q.label, value: picked.join(', ') }] : []
       })
     : []
-  const personal = extras ? PERSONAL_FIELDS.flatMap((f) => f.options.filter((o) => o.value === extras[f.key]).map((o) => o.label)) : []
 
   return (
     <article className="person-page" aria-labelledby="person-name">
       <div className="person-top">
-        <button type="button" className="icon-btn" onClick={onBack} aria-label="Back to Who’s going">
+        <button type="button" className="icon-btn" onClick={onBack} aria-label="Back to Trips">
           <BackIcon />
         </button>
         <p className="person-top-title">{name}’s card</p>
@@ -713,15 +720,6 @@ function PersonPage(props: CardProps & { onBack: () => void }) {
           <h2 id="person-photos">Photo book</h2>
           <PhotoBookStrip paths={extras.photo_book} name={name} />
         </section>
-      )}
-      {personal.length > 0 && (
-        <ul className="chip-list personal-tags" aria-label={`More about ${name}`}>
-          {personal.map((label) => (
-            <li key={label} className="tag">
-              {label}
-            </li>
-          ))}
-        </ul>
       )}
       <PersonActions {...props} page />
     </article>

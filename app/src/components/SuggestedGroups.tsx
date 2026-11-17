@@ -5,7 +5,7 @@ import { brand } from '../lib/brand'
 import { CityPhoto } from './CityPhoto'
 import { NextIcon } from './Icons'
 import { messageOf } from '../lib/errors'
-import { joinSuggestedGroup, suggestedGroups, SUGGESTED_FREE, type SuggestedGroup } from '../lib/groups'
+import { afterJoining, joinSuggestedGroup, suggestedGroups, SUGGESTED_FREE, type SuggestedGroup } from '../lib/groups'
 import { hasPlus, plusLink } from '../lib/plan'
 
 const PLUS_SHOWN = 6
@@ -38,7 +38,7 @@ export function SuggestedGroups({ joined, onJoined }: { joined: number; onJoined
     try {
       const id = await joinSuggestedGroup(g)
       onJoined?.()
-      navigate(`/groups/${id}`, { state: { message: `You’ve joined ${g.name}. Say hello in the group chat.` } })
+      navigate(await afterJoining(id), { state: { hello: true, message: `You’ve joined ${g.name}.` } })
     } catch (e) {
       setError(messageOf(e))
       setBusy(null)

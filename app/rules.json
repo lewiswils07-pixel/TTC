@@ -19,7 +19,7 @@
   "survey": { "commentMax": 500, "heardFromAfterMinutes": 30 },
   "founding": { "plusMonths": 3 },
   "matching": { "maxSuggestions": 100, "sameTripBonus": 12, "flexiblePenalty": 10, "flexibleAgeYears": 5 },
-  "plus": { "pricePencePerMonth": 599 },
+  "plus": { "pricePencePerMonth": 399, "pricePencePerYear": 2900 },
   "pricingTest": { "on": 1, "lowPence": 399, "midPence": 599, "highPence": 899 },
   "choices": {
     "gender": ["woman", "man", "nonbinary", "genderfluid", "agender", "another", "unsaid"],

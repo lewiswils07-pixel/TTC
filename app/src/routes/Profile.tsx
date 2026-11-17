@@ -20,7 +20,7 @@ import { usePhotoUrl } from '../lib/photo'
 import { listInterests, type Interest, type MyProfile, type Profile } from '../lib/profile'
 import { useSession } from '../lib/session-context'
 import { useMyProfile } from '../lib/useMyProfile'
-import { myPriceTest, notePlusInterest, plusLink, plusPrice, plusUntil, pounds, stopMyPlus } from '../lib/plan'
+import { myPriceTest, notePlusInterest, plusLink, plusPrice, plusYear, plusUntil, pounds, stopMyPlus } from '../lib/plan'
 import { useConfirm } from '../lib/useConfirm'
 import { HubRow } from '../components/HubRow'
 import { ErrorState } from '../components/EmptyState'
@@ -240,7 +240,7 @@ function MyProfilePanel({ data }: { data: MyProfile }) {
           {interestedInText(preferences.genders) === 'Everyone' ? 'Anyone' : interestedInText(preferences.genders)}, aged {preferences.age_min} to{' '}
           {preferences.age_max >= MAX_PREF_AGE ? `${MAX_PREF_AGE}+` : preferences.age_max}
         </p>
-        <p className="hint">Who you see on Who’s going. Change it any time in Filters.</p>
+        <p className="hint">Who you see on Trips. Change it any time in Filters.</p>
       </ProfileSection>
       <Link className="plus-row" to={plusLink('profile')}>
         <span className="plus-row-icon" aria-hidden="true">
@@ -435,6 +435,12 @@ function PlusPanel({ from }: { from: string | null }) {
             <h2>
               {test ? pounds(test.price_pence) : plusPrice()} <span>a month</span>
             </h2>
+            {/* The price test compares monthly prices only, so its members don't see the yearly one. */}
+            {!test && (
+              <p className="plus-year">
+                or <strong>{plusYear().price} a year</strong> <span className="tag tag-plus">Save {plusYear().save}%</span>
+              </p>
+            )}
             {test?.joined ? (
               <p className="notice notice-success" role="status">
                 Thanks, you’re on the list. {brand.plusName} isn’t open yet, so nothing has been charged. We’ll tell you when it starts.

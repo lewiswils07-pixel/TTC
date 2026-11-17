@@ -2,12 +2,12 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import { CalendarDays, UsersRound } from 'lucide-react'
 import { Layout } from '../components/Layout'
-import { AddIcon, NextIcon } from '../components/Icons'
+import { AddIcon, BackIcon, NextIcon } from '../components/Icons'
 import { MyTrips, Wishlist } from '../components/MyTrips'
 import { PlanInspiration } from '../components/PlanInspiration'
 import { PopularPlaces } from '../components/PopularPlaces'
 
-/** The Trips tab (Claude Design, 15 Oct). Trips are optional: they add "Also going to…" people to Who's going. */
+/** All your trips, opened from the Trips tab (three tabs since 17 Nov). Trips are optional: they add "Also going to…" people to the Trips tab. */
 export function Trips() {
   const heading = useRef<HTMLHeadingElement>(null)
   useEffect(() => heading.current?.focus(), [])
@@ -15,6 +15,9 @@ export function Trips() {
   return (
     <Layout tab="trips">
       <div className="trips-top">
+        <Link className="back-link" to="/connections" aria-label="Back to Trips">
+          <BackIcon />
+        </Link>
         <h1 ref={heading} tabIndex={-1}>
           Your trips
         </h1>
