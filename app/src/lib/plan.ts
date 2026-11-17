@@ -44,9 +44,15 @@ export async function plusUntil(): Promise<string | null | undefined> {
 /** "£5.99": pence as pounds. */
 export const pounds = (pence: number) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(pence / 100)
 
-/** "£5.99": what Sodalis+ costs a month (rules.plus). */
+/** "£3.99": what Sodalis+ costs a month (rules.plus). */
 export function plusPrice(): string {
   return pounds(rules.plus.pricePencePerMonth)
+}
+
+/** "£29.00" a year, and how much less that is than 12 months (Lewis, 17 Nov: next to Rory's £10 a year). */
+export function plusYear(): { price: string; save: number } {
+  const { pricePencePerMonth: month, pricePencePerYear: year } = rules.plus
+  return { price: pounds(year).replace(/\.00$/, ''), save: Math.round((1 - year / (month * 12)) * 100) }
 }
 
 /** The Sodalis+ page, noting which screen sent the member there (for the pricing test). */
