@@ -11,4 +11,6 @@ export const brand = {
   supportEmail: data.supportEmail,
   /** The paid plan's name, for upgrade prompts and locked filters. */
   plusName: data.plusName,
+  /** The company that runs the club, for the Terms and Privacy pages. */
+  company: data.company,
 } as const

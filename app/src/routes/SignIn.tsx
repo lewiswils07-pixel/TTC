@@ -270,7 +270,7 @@ export function SignIn() {
                 </button>
               </p>
               <p className="hint center legal-line">
-                By continuing you agree to our <Link to="/terms">terms</Link>, <Link to="/privacy">privacy notice</Link> and <Link to="/community-rules">community rules</Link>.
+                By continuing you agree to our <Link to="/terms">terms</Link>, <Link to="/privacy">privacy policy</Link> and <Link to="/community-rules">community rules</Link>.
               </p>
             </div>
           </form>
