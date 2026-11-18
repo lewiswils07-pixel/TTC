@@ -8,6 +8,13 @@
   "supportEmail": "lewiswils07@gmail.com",
   "plusName": "Sodalis+",
   "appId": "com.sodaliscollective.app",
+  "company": {
+    "$comment": "Shown on the Terms and Privacy pages. Fill in once the company and ICO registration are done (launch checklist).",
+    "name": "[Company name] Ltd",
+    "number": "[company number]",
+    "address": "[registered office address]",
+    "icoNumber": "[ICO registration number]"
+  },
   "colors": {
     "light": {
       "accent": "#8E1B2B",

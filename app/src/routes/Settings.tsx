@@ -21,7 +21,7 @@ const HELP: { to: string; title: string; text?: string }[] = [
 ]
 const LEGAL: { to: string; title: string; text?: string }[] = [
   { to: '/community-rules', title: 'Community rules' },
-  { to: '/terms', title: 'Terms' },
+  { to: '/terms', title: 'Terms of use' },
   { to: '/privacy', title: 'Privacy policy' },
 ]
 
