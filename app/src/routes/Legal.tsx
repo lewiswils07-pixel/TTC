@@ -97,7 +97,7 @@ export function Terms() {
         the community rules. If we close a paid account for a serious breach we won’t refund the time left; otherwise we will.
       </p>
       <h2>Leaving</h2>
-      <p>You can delete your account at any time from Settings, then Account. We can also close the service, giving at least 30 days’ notice and refunding any time you’ve paid for and not used.</p>
+      <p>You can delete your account at any time from Settings, then Account and data. We can also close the service, giving at least 30 days’ notice and refunding any time you’ve paid for and not used.</p>
       <h2>Our responsibility to you</h2>
       <ul>
         <li>We’ll provide the app with reasonable care and skill, but we can’t promise it will always be available or error-free.</li>
@@ -212,7 +212,7 @@ export function Privacy() {
       <h2>Your rights</h2>
       <p>
         You can ask for a copy of your details, ask us to correct or delete them, ask us to restrict or stop using them, object to how we use them, and ask for a copy you can take elsewhere. Email{' '}
-        {contact} and we’ll reply within one month. You can delete your account yourself in Settings, then Account.
+        {contact} and we’ll reply within one month. You can delete your account yourself in Settings, then Account and data.
       </p>
       <p>
         If you’re unhappy with how we’ve used your details, please tell us first. You can also complain to the Information Commissioner’s Office at <a href="https://ico.org.uk">ico.org.uk</a> or on
